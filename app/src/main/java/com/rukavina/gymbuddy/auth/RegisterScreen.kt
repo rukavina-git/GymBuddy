@@ -245,7 +245,7 @@ fun RegistrationScreen(navController: NavHostController) {
                                     coroutineScope.launch {
                                         snackbarHostState.showSnackbar("Registration successful.")
                                     }
-                                    // @todo Navigate to home screen, or confirm mail?
+                                    navController.navigate(NavigationActions.GoToLogin)
                                 } else {
                                     // Registration failed
                                     Log.d(

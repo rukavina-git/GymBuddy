@@ -113,6 +113,7 @@ fun LoginScreen(navController: NavHostController) {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar("Login successful.")
                             }
+                            navController.navigate(NavigationActions.GoToHome)
                         } else {
                             // Account not found
                             if (error != null && error.contains("no user record")) {

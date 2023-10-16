@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.rukavina.gymbuddy.auth.LoginScreen
 import com.rukavina.gymbuddy.auth.RegistrationScreen
+import com.rukavina.gymbuddy.ui.HomeScreen
 
 @Composable
 fun NavigationGraph(
@@ -20,6 +21,9 @@ fun NavigationGraph(
         }
         composable(NavigationActions.GoToRegistration) {
             RegistrationScreen(navController)
+        }
+        composable(NavigationActions.GoToHome) {
+            HomeScreen(navController)
         }
     }
 }
