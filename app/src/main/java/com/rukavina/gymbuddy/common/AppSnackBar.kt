@@ -3,7 +3,6 @@ package com.rukavina.gymbuddy.common
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -14,8 +13,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AppSnackbar(
     snackbarHostState: SnackbarHostState,
-    modifier: Modifier = Modifier,
-    content: @Composable (SnackbarData) -> Unit
+    modifier: Modifier = Modifier
 ) {
 
     SnackbarHost(
