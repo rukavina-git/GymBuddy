@@ -65,7 +65,7 @@ fun RegistrationScreen(navController: NavHostController) {
     var doPasswordsMatch by remember { mutableStateOf(true) }
     val passwordFocusRequester = remember { FocusRequester() }
 
-    var snackbarHostState by remember { mutableStateOf(SnackbarHostState()) }
+    val snackbarHostState by remember { mutableStateOf(SnackbarHostState()) }
     val coroutineScope = rememberCoroutineScope()
 
     Column(
