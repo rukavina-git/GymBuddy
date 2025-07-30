@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
-    id("org.jetbrains.compose")
+    alias(libs.plugins.compose.compiler)
     id("com.google.gms.google-services")
 }
 
@@ -15,9 +15,8 @@ android {
         applicationId = "com.rukavina.gymbuddy"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
+        versionCode = 2
         versionName = "0.0.1-SNAPSHOT"
-        compileSdkPreview = "UpsideDownCakePrivacySandbox"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -50,7 +49,7 @@ dependencies {
     implementation(libs.daggerHilt)
     kapt(libs.daggerHiltCompiler)
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.auth)
     implementation (libs.navigation.compose)
     implementation (libs.activity.compose)
     implementation(libs.composeUi)
@@ -59,7 +58,7 @@ dependencies {
     implementation(libs.composeLiveData)
     implementation(libs.navigation.compose)
     implementation(libs.composeMaterial)
-    implementation("androidx.compose.material3:material3")
+    implementation(libs.material3)
     implementation (libs.material.icons.extended)
     implementation(libs.fragment.ktx)
     testImplementation(libs.junit)
