@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -30,11 +32,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
     buildFeatures {
         viewBinding = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
@@ -50,8 +55,8 @@ dependencies {
     kapt(libs.daggerHiltCompiler)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
-    implementation (libs.navigation.compose)
-    implementation (libs.activity.compose)
+    implementation(libs.navigation.compose)
+    implementation(libs.activity.compose)
     implementation(libs.composeUi)
     implementation(libs.androidxMaterial)
     implementation(libs.composeMaterial)
@@ -59,7 +64,7 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.composeMaterial)
     implementation(libs.material3)
-    implementation (libs.material.icons.extended)
+    implementation(libs.material.icons.extended)
     implementation(libs.fragment.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.testExtJunit)
