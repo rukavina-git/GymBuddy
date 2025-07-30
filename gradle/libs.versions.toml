@@ -1,24 +1,25 @@
+# suppress inspection "UnusedProperty"
 [versions]
-activityCompose = "1.8.0"
-androidxComposeBom = "2023.10.00"
-appcompat = "1.6.1"
-compileSdk = "34"
-constraintLayout = "2.1.4"
-coreKtx = "1.12.0"
-compose = "1.5.3"
-daggerHilt = "2.44"
-espressoCore = "3.5.1"
-fragmentKtx = "1.6.1"
+activityCompose = "1.10.1"
+androidxComposeBom = "2025.07.00"
+appcompat = "1.7.1"
+compileSdk = "36"
+constraintLayout = "2.2.1"
+coreKtx = "1.16.0"
+compose = "1.8.3"
+daggerHilt = "2.57"
+espressoCore = "3.6.1"
+fragmentKtx = "1.8.8"
 junit = "4.13.2"
-lifecycleKtx = "2.6.2"
-material = "1.10.0"
+lifecycleKtx = "2.9.2"
+material = "1.12.0"
 minSdk = "28"
-navigation = "2.7.4"
-targetSdk = "34"
-testExtJunit = "1.1.5"
-firebaseBom = "32.3.1"
-agp = "8.1.2"
-org-jetbrains-kotlin-android = "1.9.10"
+navigation = "2.9.2"
+targetSdk = "36"
+testExtJunit = "1.2.1"
+firebaseBom = "34.0.0"
+agp = "8.11.1"
+kotlin = "2.2.0"
 
 [libraries]
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -36,6 +37,7 @@ espressoCore = { module = "androidx.test.espresso:espresso-core", version.ref = 
 fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 junit = { module = "junit:junit", version.ref = "junit" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+material3 = { module = "androidx.compose.material3:material3" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 testExtJunit = { module = "androidx.test.ext:junit", version.ref = "testExtJunit" }
 lifecycleKtx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleKtx" }
@@ -44,7 +46,7 @@ navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx",
 navigationKtx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx"}
-firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version = "navigation" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
@@ -55,4 +57,6 @@ ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }
-org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
+com-android-library = { id = "com.android.library", version.ref = "agp" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
