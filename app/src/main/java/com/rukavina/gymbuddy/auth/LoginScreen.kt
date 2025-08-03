@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.common.AppSnackbar
 import com.rukavina.gymbuddy.navigation.NavigationActions
@@ -48,8 +49,10 @@ fun LoginScreen(navController: NavHostController) {
     val authViewModel: AuthViewModel = viewModel()
     var isPasswordVisible by remember { mutableStateOf(false) }
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val isDebug = BuildConfig.DEBUG
+
+    var email by remember { mutableStateOf(if (isDebug) "test001@gmail.com" else "") }
+    var password by remember { mutableStateOf(if (isDebug) "Test.1234567" else "") }
 
     val emailFocusRequester = remember { FocusRequester() }
     val passwordFocusRequester = remember { FocusRequester() }
@@ -113,7 +116,11 @@ fun LoginScreen(navController: NavHostController) {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar("Login successful.")
                             }
-                            navController.navigate(NavigationActions.GoToHome)
+                            navController.navigate(NavigationActions.GoToHome) {
+                                popUpTo(navController.graph.id) {
+                                    inclusive = true
+                                }
+                            }
                         } else {
                             // Account not found
                             if (error != null && error.contains("no user record")) {

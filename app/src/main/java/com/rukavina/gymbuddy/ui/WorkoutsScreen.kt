@@ -10,10 +10,10 @@ import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun WorkoutsScreen() {
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Home") }) }
+        topBar = { TopAppBar(title = { Text("Workouts") }) }
     ) {
-        Text("Home Screen", modifier = Modifier.padding(it))
+        Text("Workouts Screen", modifier = Modifier.padding(it))
     }
 }
