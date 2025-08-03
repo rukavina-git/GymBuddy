@@ -245,7 +245,11 @@ fun RegistrationScreen(navController: NavHostController) {
                                     coroutineScope.launch {
                                         snackbarHostState.showSnackbar("Registration successful.")
                                     }
-                                    navController.navigate(NavigationActions.GoToLogin)
+                                    navController.navigate(NavigationActions.GoToHome) {
+                                        popUpTo(navController.graph.id) {
+                                            inclusive = true
+                                        }
+                                    }
                                 } else {
                                     // Registration failed
                                     Log.d(
