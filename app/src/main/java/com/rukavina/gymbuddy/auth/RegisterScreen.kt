@@ -40,16 +40,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.common.AppSnackbar
-import com.rukavina.gymbuddy.navigation.NavigationActions
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationScreen(navController: NavHostController) {
+fun RegistrationScreen(
+    onRegistrationSuccess: () -> Unit,
+    onNavigateBack: () -> Unit
+) {
     val tag = "RegistrationScreen"
     val authViewModel: AuthViewModel = viewModel()
 
@@ -245,11 +246,7 @@ fun RegistrationScreen(navController: NavHostController) {
                                     coroutineScope.launch {
                                         snackbarHostState.showSnackbar("Registration successful.")
                                     }
-                                    navController.navigate(NavigationActions.GoToHome) {
-                                        popUpTo(navController.graph.id) {
-                                            inclusive = true
-                                        }
-                                    }
+                                    onRegistrationSuccess()
                                 } else {
                                     // Registration failed
                                     Log.d(
@@ -299,7 +296,7 @@ fun RegistrationScreen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(8.dp))
 
         TextButton(
-            onClick = { navController.navigate(NavigationActions.GoToLogin) },
+            onClick = { onNavigateBack() },
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(text = "Already have an account? Log in")
@@ -349,5 +346,8 @@ fun getPasswordStrengthColor(strengthMessage: String): Color {
 @Composable
 fun RegistrationScreenPreview() {
     val navController = rememberNavController()
-    RegistrationScreen(navController)
+    RegistrationScreen(
+        onRegistrationSuccess = {},
+        onNavigateBack = {}
+    )
 }
