@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
     alias(libs.plugins.compose.compiler)
     id("com.google.gms.google-services")
 }
@@ -53,7 +53,7 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.daggerHilt)
-    kapt(libs.daggerHiltCompiler)
+    ksp(libs.daggerHiltCompiler)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.navigation.compose)
@@ -74,8 +74,4 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
-}
-
-kapt {
-    correctErrorTypes = true
 }
