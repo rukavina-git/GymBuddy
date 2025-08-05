@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.common
+package com.rukavina.gymbuddy.ui.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme

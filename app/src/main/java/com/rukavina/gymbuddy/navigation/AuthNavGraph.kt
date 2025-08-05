@@ -4,8 +4,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.rukavina.gymbuddy.auth.LoginScreen
-import com.rukavina.gymbuddy.auth.RegistrationScreen
+import com.rukavina.gymbuddy.ui.auth.LoginScreen
+import com.rukavina.gymbuddy.ui.auth.RegistrationScreen
 
 fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
     navigation(

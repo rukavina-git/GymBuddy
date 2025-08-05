@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.ui
+package com.rukavina.gymbuddy.ui.profile
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

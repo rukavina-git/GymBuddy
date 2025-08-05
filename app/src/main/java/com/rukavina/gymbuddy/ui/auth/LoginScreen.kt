@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.auth
+package com.rukavina.gymbuddy.ui.auth
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.R
-import com.rukavina.gymbuddy.common.AppSnackbar
+import com.rukavina.gymbuddy.ui.components.AppSnackbar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

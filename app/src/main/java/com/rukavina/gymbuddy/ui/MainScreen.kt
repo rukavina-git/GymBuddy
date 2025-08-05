@@ -16,6 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rukavina.gymbuddy.navigation.BottomNavItem
 import com.rukavina.gymbuddy.navigation.NavRoutes
+import com.rukavina.gymbuddy.ui.profile.ProfileScreen
 
 
 @Composable
