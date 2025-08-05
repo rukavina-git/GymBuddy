@@ -1,6 +1,7 @@
-package com.rukavina.gymbuddy.auth
+package com.rukavina.gymbuddy.ui.auth
 
 import android.util.Log
+import android.util.Patterns
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rukavina.gymbuddy.R
-import com.rukavina.gymbuddy.common.AppSnackbar
+import com.rukavina.gymbuddy.ui.components.AppSnackbar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -312,7 +313,7 @@ fun RegistrationScreen(
 // Function to check email validity
 // @todo extract this
 fun isEmailValid(email: String): Boolean {
-    return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    return Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
 fun getPasswordStrengthMessage(password: String): String {
