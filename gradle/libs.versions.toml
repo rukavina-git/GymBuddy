@@ -42,8 +42,6 @@ navigation-compose = { module = "androidx.navigation:navigation-compose", versio
 testExtJunit = { module = "androidx.test.ext:junit", version.ref = "testExtJunit" }
 lifecycleKtx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleKtx" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleKtx" }
-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version = "navigation" }
-navigationKtx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx"}
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }

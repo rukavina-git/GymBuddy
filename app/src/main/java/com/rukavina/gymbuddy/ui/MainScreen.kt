@@ -9,30 +9,40 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rukavina.gymbuddy.navigation.BottomNavItem
+import com.rukavina.gymbuddy.navigation.NavRoutes
+
 
 @Composable
-fun MainScreen() {
-    val navController = rememberNavController()
-
-    val backStackEntry = navController.currentBackStackEntryAsState()
+fun MainScreen(rootNavController: NavHostController) {
+    val bottomNavController = rememberNavController()
+    val backStackEntry = bottomNavController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry.value?.destination
 
     Scaffold(
         bottomBar = {
             NavigationBar {
-                BottomNavItem.items.forEach { item ->
+                val bottomNavItems = listOf(
+                    BottomNavItem.Home,
+                    BottomNavItem.Sessions,
+                    BottomNavItem.Workouts,
+                    BottomNavItem.Statistics,
+                    BottomNavItem.Profile
+                )
+                bottomNavItems.forEach { item ->
                     val selected =
                         currentDestination?.hierarchy?.any { it.route == item.route } == true
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(BottomNavItem.Home.route) { inclusive = false }
+                            bottomNavController.navigate(item.route) {
+                                // Pop up to the main graph start destination to avoid building a big back stack
+                                popUpTo(NavRoutes.Home) { inclusive = false }
                                 launchSingleTop = true
                             }
                         },
@@ -42,17 +52,17 @@ fun MainScreen() {
                 }
             }
         }
-    ) { innerPadding ->
+    ) { paddingValues ->
         NavHost(
-            navController = navController,
-            startDestination = BottomNavItem.Home.route,
-            modifier = Modifier.padding(innerPadding)
+            navController = bottomNavController,
+            startDestination = NavRoutes.Home,
+            modifier = Modifier.padding(paddingValues)
         ) {
-            composable(BottomNavItem.Home.route) { HomeScreen() }
-            composable(BottomNavItem.Sessions.route) { SessionsScreen() }
-            composable(BottomNavItem.Workouts.route) { WorkoutsScreen() }
-            composable(BottomNavItem.Statistics.route) { StatisticsScreen() }
-            composable(BottomNavItem.Profile.route) { ProfileScreen() }
+            composable(NavRoutes.Home) { HomeScreen() }
+            composable(NavRoutes.Sessions) { SessionsScreen() }
+            composable(NavRoutes.Workouts) { WorkoutsScreen() }
+            composable(NavRoutes.Statistics) { StatisticsScreen() }
+            composable(NavRoutes.Profile) { ProfileScreen(rootNavController) }
         }
     }
 }

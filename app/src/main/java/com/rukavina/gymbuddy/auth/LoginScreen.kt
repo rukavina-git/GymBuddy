@@ -34,17 +34,17 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.common.AppSnackbar
-import com.rukavina.gymbuddy.navigation.NavigationActions
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen(
+    onLoginSuccess: () -> Unit,
+    onNavigateToRegister: () -> Unit
+) {
     val tag = "LoginScreen"
     val authViewModel: AuthViewModel = viewModel()
     var isPasswordVisible by remember { mutableStateOf(false) }
@@ -116,11 +116,7 @@ fun LoginScreen(navController: NavHostController) {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar("Login successful.")
                             }
-                            navController.navigate(NavigationActions.GoToHome) {
-                                popUpTo(navController.graph.id) {
-                                    inclusive = true
-                                }
-                            }
+                            onLoginSuccess()
                         } else {
                             // Account not found
                             if (error != null && error.contains("no user record")) {
@@ -156,7 +152,7 @@ fun LoginScreen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(8.dp))
 
         TextButton(
-            onClick = { navController.navigate(NavigationActions.GoToRegistration) },
+            onClick = { onNavigateToRegister() },
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(text = "Don't have an account? Sign up")
@@ -175,6 +171,8 @@ fun LoginScreen(navController: NavHostController) {
 @Preview
 @Composable
 fun LoginScreenPreview() {
-    val navController = rememberNavController()
-    LoginScreen(navController)
+    LoginScreen(
+        onLoginSuccess = {},
+        onNavigateToRegister = {}
+    )
 }
