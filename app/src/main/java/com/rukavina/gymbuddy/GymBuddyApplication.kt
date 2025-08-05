@@ -6,7 +6,6 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class GymBuddyApplication : Application() {
-    // You can perform any global initialization or setup here
     override fun onCreate() {
         super.onCreate()
         Log.d("AppInfo", "Gym Buddy Application starting...")
