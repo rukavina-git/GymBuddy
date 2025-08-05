@@ -40,7 +40,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.common.AppSnackbar
 import kotlinx.coroutines.launch
@@ -345,7 +344,6 @@ fun getPasswordStrengthColor(strengthMessage: String): Color {
 @Preview
 @Composable
 fun RegistrationScreenPreview() {
-    val navController = rememberNavController()
     RegistrationScreen(
         onRegistrationSuccess = {},
         onNavigateBack = {}
