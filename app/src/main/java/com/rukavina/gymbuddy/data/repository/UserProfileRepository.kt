@@ -2,8 +2,11 @@ package com.rukavina.gymbuddy.data.repository
 
 import com.rukavina.gymbuddy.data.local.dao.UserProfileDao
 import com.rukavina.gymbuddy.data.model.UserProfile
+import jakarta.inject.Inject
 
-class UserProfileRepository(private val dao: UserProfileDao) {
+class UserProfileRepository @Inject constructor(
+    private val dao: UserProfileDao
+) {
 
     suspend fun saveProfile(profile: UserProfile) {
         dao.insertUserProfile(profile)
