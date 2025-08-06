@@ -16,11 +16,4 @@ class UserProfileRepository @Inject constructor(
         return dao.getUserProfile(uid)
     }
 
-    suspend fun updateProfile(profile: UserProfile) {
-        dao.updateUserProfile(profile)
-    }
-
-    suspend fun deleteProfile(profile: UserProfile) {
-        dao.deleteUserProfile(profile)
-    }
 }
