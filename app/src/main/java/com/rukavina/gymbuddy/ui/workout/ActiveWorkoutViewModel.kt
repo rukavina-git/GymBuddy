@@ -92,48 +92,55 @@ class ActiveWorkoutViewModel @Inject constructor(
      * Start a new workout from a template.
      */
     fun startWorkoutFromTemplate(template: WorkoutTemplate) {
-        val exerciseMap = availableExercises.associateBy { it.id }
-        val workoutId = System.currentTimeMillis()
+        viewModelScope.launch {
+            // Ensure exercises are loaded before starting
+            if (availableExercises.isEmpty()) {
+                availableExercises = getAllExercisesUseCase().first()
+            }
 
-        val activeExercises = template.templateExercises
-            .sortedBy { it.orderIndex }
-            .mapIndexed { exerciseIndex, templateExercise ->
-                val exerciseName = exerciseMap[templateExercise.exerciseId]?.name ?: "Unknown Exercise"
+            val exerciseMap = availableExercises.associateBy { it.id }
+            val workoutId = System.currentTimeMillis()
 
-                // Create individual sets for this exercise with unique IDs
-                val sets = (1..templateExercise.plannedSets).mapIndexed { setIndex, setNumber ->
-                    WorkoutSet(
-                        id = "${workoutId}_ex${exerciseIndex}_set${setIndex}",
-                        setNumber = setNumber + 1,
-                        reps = "",
-                        weight = "",
-                        notes = ""
+            val activeExercises = template.templateExercises
+                .sortedBy { it.orderIndex }
+                .mapIndexed { exerciseIndex, templateExercise ->
+                    val exerciseName = exerciseMap[templateExercise.exerciseId]?.name ?: "Unknown Exercise"
+
+                    // Create individual sets for this exercise with unique IDs
+                    val sets = (1..templateExercise.plannedSets).mapIndexed { setIndex, setNumber ->
+                        WorkoutSet(
+                            id = "${workoutId}_ex${exerciseIndex}_set${setIndex}",
+                            setNumber = setNumber + 1,
+                            reps = "",
+                            weight = "",
+                            notes = ""
+                        )
+                    }
+
+                    ActiveExercise(
+                        id = "${workoutId}_exercise_${exerciseIndex}",
+                        exerciseId = templateExercise.exerciseId,
+                        exerciseName = exerciseName,
+                        sets = sets,
+                        plannedSets = templateExercise.plannedSets,
+                        plannedReps = templateExercise.plannedReps
                     )
                 }
 
-                ActiveExercise(
-                    id = "${workoutId}_exercise_${exerciseIndex}",
-                    exerciseId = templateExercise.exerciseId,
-                    exerciseName = exerciseName,
-                    sets = sets,
-                    plannedSets = templateExercise.plannedSets,
-                    plannedReps = templateExercise.plannedReps
-                )
-            }
+            // Reset state completely when starting new workout
+            _uiState.value = ActiveWorkoutUiState(
+                workoutTitle = template.title,
+                workoutStartTime = System.currentTimeMillis(),
+                exercises = activeExercises,
+                isTimerRunning = true,
+                workoutSaved = false,
+                isLoading = false,
+                errorMessage = null,
+                elapsedSeconds = 0L
+            )
 
-        // Reset state completely when starting new workout
-        _uiState.value = ActiveWorkoutUiState(
-            workoutTitle = template.title,
-            workoutStartTime = System.currentTimeMillis(),
-            exercises = activeExercises,
-            isTimerRunning = true,
-            workoutSaved = false,
-            isLoading = false,
-            errorMessage = null,
-            elapsedSeconds = 0L
-        )
-
-        startTimer()
+            startTimer()
+        }
     }
 
     /**
@@ -238,33 +245,46 @@ class ActiveWorkoutViewModel @Inject constructor(
 
             val state = _uiState.value
 
-            // Convert active exercises to performed exercises
+            // Convert active exercises to performed exercises with individual sets
             val performedExercises = state.exercises.mapNotNull { activeExercise ->
-                // Calculate average weight and reps from all sets
-                val completedSets = activeExercise.sets.filter {
-                    it.reps.isNotBlank() && it.weight.isNotBlank()
-                }
+                // Get completed sets
+                val completedSets = activeExercise.sets
+                    .filter { it.reps.isNotBlank() && it.weight.isNotBlank() }
+                    .mapIndexed { index, uiSet ->
+                        com.rukavina.gymbuddy.data.model.WorkoutSet(
+                            id = UUID.randomUUID().toString(),
+                            weight = uiSet.weight.toFloatOrNull() ?: 0f,
+                            reps = uiSet.reps.toIntOrNull() ?: 0,
+                            orderIndex = index
+                        )
+                    }
 
                 if (completedSets.isEmpty()) return@mapNotNull null
-
-                val avgWeight = completedSets.mapNotNull { it.weight.toFloatOrNull() }.average().toFloat()
-                val avgReps = completedSets.mapNotNull { it.reps.toIntOrNull() }.average().toInt()
 
                 PerformedExercise(
                     id = UUID.randomUUID().toString(),
                     exerciseId = activeExercise.exerciseId,
-                    weight = avgWeight,
-                    reps = avgReps,
-                    sets = completedSets.size
+                    sets = completedSets
                 )
             }
 
-            val durationMinutes = (state.elapsedSeconds / 60).toInt()
+            // Validate that there are exercises logged
+            if (performedExercises.isEmpty()) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        workoutDiscarded = true, // Treat as discard - go back to template screen
+                        errorMessage = "No exercises logged. Workout not saved."
+                    )
+                }
+                return@launch
+            }
 
             val workoutSession = WorkoutSession(
                 id = UUID.randomUUID().toString(),
                 date = state.workoutStartTime,
-                durationMinutes = durationMinutes,
+                durationSeconds = state.elapsedSeconds.toInt(), // Store total seconds
+                title = state.workoutTitle.ifBlank { "Workout" },
                 performedExercises = performedExercises
             )
 

@@ -5,6 +5,9 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+import androidx.room.Embedded
+import androidx.room.Relation
+
 /**
  * Room entity for PerformedExercise table.
  * Has foreign key relationship with WorkoutSession (cascade delete).
@@ -17,20 +20,29 @@ import androidx.room.PrimaryKey
             entity = WorkoutSessionEntity::class,
             parentColumns = ["id"],
             childColumns = ["workoutSessionId"],
-            onDelete = ForeignKey.CASCADE // Delete performed exercises when workout session is deleted
+            onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
-        Index(value = ["workoutSessionId"]), // Index for faster queries by workout session
-        Index(value = ["exerciseId"]) // Index for faster queries by exercise
+        Index(value = ["workoutSessionId"]),
+        Index(value = ["exerciseId"])
     ]
 )
 data class PerformedExerciseEntity(
     @PrimaryKey
     val id: String,
-    val workoutSessionId: String, // Foreign key to WorkoutSessionEntity
-    val exerciseId: String, // Reference to ExerciseEntity
-    val weight: Float,
-    val reps: Int,
-    val sets: Int
+    val workoutSessionId: String,
+    val exerciseId: String
+)
+
+/**
+ * Relation object for PerformedExercise with its sets.
+ */
+data class PerformedExerciseWithSets(
+    @Embedded val performedExercise: PerformedExerciseEntity,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "performedExerciseId"
+    )
+    val sets: List<WorkoutSetEntity>
 )

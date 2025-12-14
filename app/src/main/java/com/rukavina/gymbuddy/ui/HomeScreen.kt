@@ -119,8 +119,6 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
-            Text("Home Screen", style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

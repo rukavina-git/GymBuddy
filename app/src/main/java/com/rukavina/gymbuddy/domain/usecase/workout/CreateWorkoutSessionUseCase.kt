@@ -20,7 +20,7 @@ class CreateWorkoutSessionUseCase @Inject constructor(
     suspend operator fun invoke(workoutSession: WorkoutSession): Result<Unit> {
         return try {
             // Validate
-            require(workoutSession.durationMinutes >= 0) { "Duration must be non-negative" }
+            require(workoutSession.durationSeconds >= 0) { "Duration must be non-negative" }
             require(workoutSession.date > 0) { "Invalid workout session date" }
 
             // Generate IDs if empty
