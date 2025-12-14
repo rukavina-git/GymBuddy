@@ -4,13 +4,38 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import com.rukavina.gymbuddy.data.local.converter.MuscleGroupConverter
+import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.dao.UserProfileDao
+import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
+import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
+import com.rukavina.gymbuddy.data.local.entity.ExerciseEntity
+import com.rukavina.gymbuddy.data.local.entity.PerformedExerciseEntity
+import com.rukavina.gymbuddy.data.local.entity.TemplateExerciseEntity
+import com.rukavina.gymbuddy.data.local.entity.WorkoutSessionEntity
+import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
 import com.rukavina.gymbuddy.data.model.UserProfile
 
-@Database(entities = [UserProfile::class], version = 1)
+@Database(
+    entities = [
+        UserProfile::class,
+        ExerciseEntity::class,
+        WorkoutSessionEntity::class,
+        PerformedExerciseEntity::class,
+        WorkoutTemplateEntity::class,
+        TemplateExerciseEntity::class
+    ],
+    version = 4,
+    exportSchema = false
+)
+@TypeConverters(MuscleGroupConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userProfileDao(): UserProfileDao
+    abstract fun exerciseDao(): ExerciseDao
+    abstract fun workoutSessionDao(): WorkoutSessionDao
+    abstract fun workoutTemplateDao(): WorkoutTemplateDao
 
     companion object {
         @Volatile
