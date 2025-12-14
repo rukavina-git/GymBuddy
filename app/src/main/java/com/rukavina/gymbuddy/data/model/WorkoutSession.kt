@@ -22,10 +22,16 @@ data class WorkoutSession(
     val date: Long,
 
     /**
-     * Total duration of the workout session in minutes.
-     * Useful for tracking workout length and analyzing training volume.
+     * Total duration of the workout session in seconds.
+     * Stores precise duration to avoid losing seconds when converting to/from minutes.
      */
-    val durationMinutes: Int,
+    val durationSeconds: Int,
+
+    /**
+     * Title for the workout session.
+     * Required field - should always have a value (e.g., template name or "Workout").
+     */
+    val title: String,
 
     /**
      * List of exercises performed during this workout session.

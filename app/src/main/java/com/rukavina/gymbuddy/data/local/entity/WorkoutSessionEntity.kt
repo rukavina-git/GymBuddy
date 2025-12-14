@@ -12,5 +12,6 @@ data class WorkoutSessionEntity(
     @PrimaryKey
     val id: String,
     val date: Long,
-    val durationMinutes: Int
+    val durationSeconds: Int,
+    val title: String
 )

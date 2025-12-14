@@ -7,8 +7,10 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.rukavina.gymbuddy.data.local.entity.PerformedExerciseEntity
+import com.rukavina.gymbuddy.data.local.entity.PerformedExerciseWithSets
 import com.rukavina.gymbuddy.data.local.entity.WorkoutSessionEntity
 import com.rukavina.gymbuddy.data.local.entity.WorkoutSessionWithPerformedExercises
+import com.rukavina.gymbuddy.data.local.entity.WorkoutSetEntity
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -123,5 +125,36 @@ interface WorkoutSessionDao {
         updateWorkoutSession(workoutSession)
         deletePerformedExercisesByWorkoutSessionId(workoutSession.id)
         insertPerformedExercises(performedExercises)
+    }
+
+    /**
+     * Get performed exercises with their sets for a workout session.
+     */
+    @Transaction
+    @Query("SELECT * FROM performed_exercises WHERE workoutSessionId = :workoutSessionId")
+    suspend fun getPerformedExercisesWithSets(workoutSessionId: String): List<PerformedExerciseWithSets>
+
+    /**
+     * Insert workout sets for a performed exercise.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWorkoutSets(sets: List<WorkoutSetEntity>)
+
+    /**
+     * Delete workout sets for a performed exercise.
+     */
+    @Query("DELETE FROM workout_sets WHERE performedExerciseId = :performedExerciseId")
+    suspend fun deleteWorkoutSetsByPerformedExerciseId(performedExerciseId: String)
+
+    /**
+     * Transaction to insert performed exercise with its sets atomically.
+     */
+    @Transaction
+    suspend fun insertPerformedExerciseWithSets(
+        exercise: PerformedExerciseEntity,
+        sets: List<WorkoutSetEntity>
+    ) {
+        insertPerformedExercise(exercise)
+        insertWorkoutSets(sets)
     }
 }

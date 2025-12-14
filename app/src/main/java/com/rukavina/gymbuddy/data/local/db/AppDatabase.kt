@@ -24,9 +24,10 @@ import com.rukavina.gymbuddy.data.model.UserProfile
         WorkoutSessionEntity::class,
         PerformedExerciseEntity::class,
         WorkoutTemplateEntity::class,
-        TemplateExerciseEntity::class
+        TemplateExerciseEntity::class,
+        com.rukavina.gymbuddy.data.local.entity.WorkoutSetEntity::class
     ],
-    version = 4,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(MuscleGroupConverter::class)
@@ -47,7 +48,12 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "gym_app_database"
-                ).build()
+                )
+                    // Keep data between sessions
+                    // Note: Using destructive migration during development
+                    // In production, implement proper migrations
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

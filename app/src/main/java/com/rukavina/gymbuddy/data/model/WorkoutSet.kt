@@ -1,0 +1,29 @@
+package com.rukavina.gymbuddy.data.model
+
+/**
+ * Domain model representing a single set within a performed exercise.
+ * Each set can have different weight and reps.
+ */
+data class WorkoutSet(
+    /**
+     * Unique identifier for this set.
+     * Use UUID string format for offline-first compatibility.
+     */
+    val id: String,
+
+    /**
+     * Weight used for this set in the user's preferred unit (kg or lbs).
+     */
+    val weight: Float,
+
+    /**
+     * Number of repetitions performed in this set.
+     */
+    val reps: Int,
+
+    /**
+     * Order index of this set within the exercise (0-based).
+     * Used to maintain the sequence of sets.
+     */
+    val orderIndex: Int
+)

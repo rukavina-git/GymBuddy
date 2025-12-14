@@ -242,23 +242,32 @@ class WorkoutSessionViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            // Convert TemplateExercises to PerformedExercises
+            // Convert TemplateExercises to PerformedExercises with sets
             val performedExercises = template.templateExercises
                 .sortedBy { it.orderIndex }
                 .map { templateExercise ->
+                    // Create empty sets that user will fill in during workout
+                    val sets = List(templateExercise.plannedSets) { index ->
+                        com.rukavina.gymbuddy.data.model.WorkoutSet(
+                            id = UUID.randomUUID().toString(),
+                            weight = 0f, // User will fill in
+                            reps = templateExercise.plannedReps,
+                            orderIndex = index
+                        )
+                    }
+
                     PerformedExercise(
                         id = UUID.randomUUID().toString(),
                         exerciseId = templateExercise.exerciseId,
-                        weight = 0f, // User will fill in during workout
-                        reps = templateExercise.plannedReps,
-                        sets = templateExercise.plannedSets
+                        sets = sets
                     )
                 }
 
             val newSession = WorkoutSession(
                 id = UUID.randomUUID().toString(),
                 date = System.currentTimeMillis(),
-                durationMinutes = 0, // Will be updated when session ends
+                durationSeconds = 0, // Will be updated when session ends
+                title = template.title, // Use template title as default title
                 performedExercises = performedExercises
             )
 

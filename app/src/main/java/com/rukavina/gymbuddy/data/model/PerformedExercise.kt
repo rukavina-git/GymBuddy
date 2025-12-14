@@ -4,8 +4,8 @@ package com.rukavina.gymbuddy.data.model
  * Domain model representing a single exercise performed during a workout session.
  * Multiple performed exercises can reference the same Exercise template within one Workout.
  *
- * For example, if a workout includes 3 sets of bench press followed by 3 sets of incline bench press,
- * there would be two PerformedExercise instances, both potentially referencing different Exercise templates.
+ * Each performed exercise contains multiple sets, where each set can have different
+ * weight and rep counts.
  *
  * Independent of persistence layer - can be mapped to Room entities or server DTOs.
  */
@@ -23,18 +23,9 @@ data class PerformedExercise(
     val exerciseId: String,
 
     /**
-     * Weight used for this exercise in the user's preferred unit (kg or lbs).
-     * Use Float for sufficient precision while maintaining reasonable storage size.
+     * List of sets performed for this exercise.
+     * Each set can have different weight and reps.
+     * Order in the list represents the sequence in which sets were performed.
      */
-    val weight: Float,
-
-    /**
-     * Number of repetitions performed per set.
-     */
-    val reps: Int,
-
-    /**
-     * Number of sets completed for this exercise.
-     */
-    val sets: Int
+    val sets: List<WorkoutSet>
 )
