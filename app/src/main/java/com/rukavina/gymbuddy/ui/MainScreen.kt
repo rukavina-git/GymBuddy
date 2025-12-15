@@ -77,6 +77,9 @@ fun MainScreen(rootNavController: NavHostController) {
                     },
                     onNavigateToTemplates = {
                         bottomNavController.navigate(NavRoutes.Templates)
+                    },
+                    onNavigateToProfile = {
+                        bottomNavController.navigate(NavRoutes.Profile)
                     }
                 )
             }
