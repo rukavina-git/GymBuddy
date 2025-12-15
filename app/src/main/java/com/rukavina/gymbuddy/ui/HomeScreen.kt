@@ -50,6 +50,7 @@ import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutUiState
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
+import com.rukavina.gymbuddy.utils.getTimeBasedGreeting
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -72,6 +73,11 @@ fun HomeScreen(
     val userName = "Alex"
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+
+    // Get time-based greeting
+    val greeting = remember {
+        getTimeBasedGreeting()
+    }
 
     // Get workout sessions from the view model
     val workoutSessionState by workoutSessionViewModel.uiState.collectAsState()
@@ -101,10 +107,14 @@ fun HomeScreen(
             // 1. Welcome Section
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 WelcomeSection(
+                    greeting = greeting,
                     userName = userName,
                     onProfileClick = onNavigateToProfile
                 )
             }
+
+            // Notification Space
+            Spacer(modifier = Modifier.height(24.dp))
 
             // 2. Current Workout Card
             if (uiState != null) {
@@ -151,6 +161,7 @@ fun HomeScreen(
 
 @Composable
 private fun WelcomeSection(
+    greeting: String,
     userName: String,
     onProfileClick: () -> Unit
 ) {
@@ -161,7 +172,7 @@ private fun WelcomeSection(
     ) {
         Column {
             Text(
-                text = "Welcome back,",
+                text = "$greeting,",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -396,7 +407,7 @@ private fun Day(
             .clip(CircleShape)
             .background(
                 when {
-                    isWorkoutDay && isCurrentMonth -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                    isWorkoutDay && isCurrentMonth -> Color(0xFF81C784) // Softer green for workout days
                     isToday && isCurrentMonth -> MaterialTheme.colorScheme.primaryContainer
                     else -> Color.Transparent
                 }
@@ -412,7 +423,7 @@ private fun Day(
             style = MaterialTheme.typography.bodyMedium,
             color = when {
                 !isCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                isWorkoutDay -> MaterialTheme.colorScheme.primary
+                isWorkoutDay -> Color.White // White text on green background
                 isToday -> MaterialTheme.colorScheme.onPrimaryContainer
                 else -> MaterialTheme.colorScheme.onSurfaceVariant
             },
