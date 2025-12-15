@@ -71,6 +71,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.okhttp)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.datastore.preferences)
+    implementation(libs.kizitonwose.calendar.compose)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.testExtJunit)
