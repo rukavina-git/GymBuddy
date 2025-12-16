@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.ui.profile
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,12 +29,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,6 +71,12 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showDiscardDialog by remember { mutableStateOf(false) }
+
+    // Intercept back button when there are unsaved changes
+    BackHandler(enabled = viewModel.hasUnsavedChanges()) {
+        showDiscardDialog = true
+    }
 
     // Show message in snackbar
     LaunchedEffect(uiState.message) {
@@ -74,18 +85,26 @@ fun ProfileScreen(
         }
     }
 
-    // Observe logout event and navigate
-    LaunchedEffect(Unit) {
-        viewModel.logoutEvent.collect {
-            rootNavController.navigate(NavRoutes.Login) {
-                popUpTo(NavRoutes.Main) { inclusive = true }
-            }
-        }
-    }
-
     Scaffold(
         topBar = { TopAppBar(title = { Text("Your Profile") }) },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            if (!uiState.isLoading) {
+                Surface(
+                    shadowElevation = 4.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = { viewModel.onSaveClick() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text("Save")
+                    }
+                }
+            }
+        }
     ) { padding ->
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -95,10 +114,9 @@ fun ProfileScreen(
             Column(
                 modifier = Modifier
                     .padding(padding)
-                    .padding(16.dp)
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -197,25 +215,37 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth().height(120.dp),
                     maxLines = 5
                 )
-
-                Button(
-                    onClick = { viewModel.onSaveClick() },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Save")
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Button(
-                    onClick = { viewModel.logout() },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("Log Out", color = Color.White)
-                }
             }
         }
+    }
+
+    // Discard confirmation dialog
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text("Discard Changes?") },
+            text = {
+                Text("Are you sure you want to discard your changes? All unsaved changes will be lost.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.onCancelClick()
+                        showDiscardDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Discard")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -384,3 +414,4 @@ fun PreferredUnitsDropdown(
         }
     }
 }
+

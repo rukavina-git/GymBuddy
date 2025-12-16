@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomNavItem(val route: String, val label: String, val icon: ImageVector) {
@@ -15,9 +16,9 @@ sealed class BottomNavItem(val route: String, val label: String, val icon: Image
     object Exercises : BottomNavItem("exercises", "Exercises", Icons.Default.FitnessCenter)
     object Workouts : BottomNavItem("workouts", "Workouts", Icons.AutoMirrored.Filled.List)
     object Statistics : BottomNavItem("statistics", "Stats", Icons.Default.BarChart)
-    object Profile : BottomNavItem("profile", "Profile", Icons.Default.Person)
+    object Settings : BottomNavItem("settings", "Settings", Icons.Default.Settings)
 
     companion object {
-        val items = listOf(Home, Templates, Exercises, Workouts, Statistics, Profile)
+        val items = listOf(Home, Templates, Exercises, Workouts, Statistics, Settings)
     }
 }

@@ -31,6 +31,7 @@ app/src/google-services.json
 
 # Android Profiling
 *.hprof
-/.claude/settings.local.json
+/.claude
 /IMPLEMENTATION_SUMMARY.md
 /ACTIVE_WORKOUT_IMPLEMENTATION.md
+local_assets
