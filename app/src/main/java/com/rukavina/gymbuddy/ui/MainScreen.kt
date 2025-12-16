@@ -58,7 +58,8 @@ fun MainScreen(rootNavController: NavHostController) {
                             }
                         },
                         icon = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label) }
+                        label = { Text(item.label) },
+                        alwaysShowLabel = false
                     )
                 }
             }
