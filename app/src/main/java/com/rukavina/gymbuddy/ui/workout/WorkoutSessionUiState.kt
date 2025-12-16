@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.ui.workout
 
+import com.rukavina.gymbuddy.data.model.PreferredUnits
 import com.rukavina.gymbuddy.data.model.WorkoutSession
 
 /**
@@ -18,6 +19,11 @@ data class WorkoutSessionUiState(
      * Null if no workout session is selected.
      */
     val selectedWorkoutSession: WorkoutSession? = null,
+
+    /**
+     * User's preferred units for display
+     */
+    val preferredUnits: PreferredUnits = PreferredUnits.METRIC,
 
     /**
      * Date range filter - start date in milliseconds.

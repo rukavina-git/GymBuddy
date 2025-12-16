@@ -65,12 +65,14 @@ import java.util.Locale
 fun HomeScreen(
     activeWorkoutViewModel: ActiveWorkoutViewModel? = null,
     workoutSessionViewModel: com.rukavina.gymbuddy.ui.workout.WorkoutSessionViewModel = hiltViewModel(),
+    profileViewModel: com.rukavina.gymbuddy.ui.profile.ProfileViewModel = hiltViewModel(),
     onNavigateToWorkout: () -> Unit = {},
     onNavigateToTemplates: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState = activeWorkoutViewModel?.uiState?.collectAsState()
-    val userName = "Alex"
+    val profileUiState by profileViewModel.uiState.collectAsState()
+    val userName = profileUiState.name.ifBlank { "User" }
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 

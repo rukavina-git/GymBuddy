@@ -2,15 +2,18 @@ package com.rukavina.gymbuddy.ui.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.rukavina.gymbuddy.data.model.PerformedExercise
 import com.rukavina.gymbuddy.data.model.WorkoutSession
 import com.rukavina.gymbuddy.data.model.WorkoutTemplate
+import com.rukavina.gymbuddy.data.repository.UserProfileRepository
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.DeleteWorkoutSessionUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.GetAllWorkoutSessionsUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.GetWorkoutSessionByIdUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.GetWorkoutSessionsByDateRangeUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.UpdateWorkoutSessionUseCase
+import com.rukavina.gymbuddy.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +36,8 @@ class WorkoutSessionViewModel @Inject constructor(
     private val getWorkoutSessionsByDateRangeUseCase: GetWorkoutSessionsByDateRangeUseCase,
     private val createWorkoutSessionUseCase: CreateWorkoutSessionUseCase,
     private val updateWorkoutSessionUseCase: UpdateWorkoutSessionUseCase,
-    private val deleteWorkoutSessionUseCase: DeleteWorkoutSessionUseCase
+    private val deleteWorkoutSessionUseCase: DeleteWorkoutSessionUseCase,
+    private val userProfileRepository: UserProfileRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkoutSessionUiState())
@@ -41,6 +45,21 @@ class WorkoutSessionViewModel @Inject constructor(
 
     init {
         loadWorkoutSessions()
+        loadUserPreferences()
+    }
+
+    private fun loadUserPreferences() {
+        viewModelScope.launch {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid
+            uid?.let {
+                val profile = userProfileRepository.getProfile(it)
+                profile?.let { p ->
+                    _uiState.update { state ->
+                        state.copy(preferredUnits = p.preferredUnits)
+                    }
+                }
+            }
+        }
     }
 
     /**

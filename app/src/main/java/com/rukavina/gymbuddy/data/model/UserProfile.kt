@@ -6,12 +6,17 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "user_profile")
 data class UserProfile(
     @PrimaryKey val uid: String, // FirebaseAuth UID
-    val firstName: String,
-    val lastName: String,
+    val name: String,
     val email: String,
-    val age: Int?,
-    val weight: Float?,
-    val height: Float?,
-    val gender: String?,
-    val goal: String
+    val profileImageUrl: String? = null,
+    val age: Int? = null,
+    val weight: Float? = null,
+    val height: Float? = null,
+    val gender: Gender? = null,
+    val fitnessGoal: FitnessGoal,
+    val activityLevel: ActivityLevel? = null,
+    val targetWeight: Float? = null,
+    val preferredUnits: PreferredUnits = PreferredUnits.METRIC,
+    val joinedDate: Long,
+    val bio: String? = null
 )

@@ -1,6 +1,8 @@
 package com.rukavina.gymbuddy.ui.workout
 
 import androidx.compose.foundation.background
+import com.rukavina.gymbuddy.data.model.PreferredUnits
+import com.rukavina.gymbuddy.utils.UnitConverter
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -121,6 +123,7 @@ fun ActiveWorkoutScreen(
                         ExerciseCard(
                             exerciseNumber = index + 1,
                             exercise = exercise,
+                            preferredUnits = uiState.preferredUnits,
                             onUpdateReps = { setId, reps ->
                                 viewModel.updateSetReps(exercise.id, setId, reps)
                             },
@@ -334,6 +337,7 @@ fun WorkoutHeader(
 fun ExerciseCard(
     exerciseNumber: Int,
     exercise: ActiveExercise,
+    preferredUnits: PreferredUnits,
     onUpdateReps: (setId: String, reps: String) -> Unit,
     onUpdateWeight: (setId: String, weight: String) -> Unit,
     onNoteClick: (setId: String) -> Unit
@@ -414,6 +418,7 @@ fun ExerciseCard(
                 exercise.sets.forEach { set ->
                     SetRow(
                         set = set,
+                        preferredUnits = preferredUnits,
                         onUpdateReps = { reps -> onUpdateReps(set.id, reps) },
                         onUpdateWeight = { weight -> onUpdateWeight(set.id, weight) },
                         onNoteClick = { onNoteClick(set.id) }
@@ -431,6 +436,7 @@ fun ExerciseCard(
 @Composable
 fun SetRow(
     set: WorkoutSet,
+    preferredUnits: PreferredUnits,
     onUpdateReps: (String) -> Unit,
     onUpdateWeight: (String) -> Unit,
     onNoteClick: () -> Unit
@@ -459,10 +465,11 @@ fun SetRow(
         )
 
         // Weight input
+        val weightUnit = UnitConverter.getWeightUnitLabel(preferredUnits)
         OutlinedTextField(
             value = set.weight,
             onValueChange = onUpdateWeight,
-            label = { Text("Weight") },
+            label = { Text("Weight ($weightUnit)") },
             modifier = Modifier.weight(1f),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
