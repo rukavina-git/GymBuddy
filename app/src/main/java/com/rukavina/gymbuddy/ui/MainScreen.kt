@@ -19,6 +19,7 @@ import com.rukavina.gymbuddy.navigation.BottomNavItem
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.exercise.ExerciseScreen
 import com.rukavina.gymbuddy.ui.profile.ProfileScreen
+import com.rukavina.gymbuddy.ui.settings.SettingsScreen
 import com.rukavina.gymbuddy.ui.template.WorkoutTemplateScreen
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutScreen
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
@@ -43,7 +44,7 @@ fun MainScreen(rootNavController: NavHostController) {
                     BottomNavItem.Exercises,
                     BottomNavItem.Workouts,
                     BottomNavItem.Statistics,
-                    BottomNavItem.Profile
+                    BottomNavItem.Settings
                 )
                 bottomNavItems.forEach { item ->
                     val selected =
@@ -80,7 +81,7 @@ fun MainScreen(rootNavController: NavHostController) {
                         bottomNavController.navigate(NavRoutes.Templates)
                     },
                     onNavigateToProfile = {
-                        bottomNavController.navigate(NavRoutes.Profile)
+                        bottomNavController.navigate(NavRoutes.Settings)
                     }
                 )
             }
@@ -93,6 +94,12 @@ fun MainScreen(rootNavController: NavHostController) {
             composable(NavRoutes.Exercises) { ExerciseScreen() }
             composable(NavRoutes.Workouts) { WorkoutScreen() }
             composable(NavRoutes.Statistics) { StatisticsScreen() }
+            composable(NavRoutes.Settings) {
+                SettingsScreen(
+                    bottomNavController = bottomNavController,
+                    rootNavController = rootNavController
+                )
+            }
             composable(NavRoutes.Profile) { ProfileScreen(rootNavController) }
             composable(NavRoutes.ActiveWorkout) {
                 ActiveWorkoutScreen(

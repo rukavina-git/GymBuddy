@@ -29,8 +29,28 @@ class ProfileViewModel @Inject constructor(
 
     private val uid: String? = FirebaseAuth.getInstance().currentUser?.uid
 
+    // Store the saved profile state for change tracking
+    private var savedProfileState = ProfileUiState()
+
     init {
         loadProfile()
+    }
+
+    fun hasUnsavedChanges(): Boolean {
+        val current = _uiState.value
+        val saved = savedProfileState
+
+        return current.name != saved.name ||
+                current.age != saved.age ||
+                current.weight != saved.weight ||
+                current.height != saved.height ||
+                current.targetWeight != saved.targetWeight ||
+                current.gender != saved.gender ||
+                current.fitnessGoal != saved.fitnessGoal ||
+                current.activityLevel != saved.activityLevel ||
+                current.preferredUnits != saved.preferredUnits ||
+                current.bio != saved.bio ||
+                current.profileImageUri != saved.profileImageUri
     }
 
     private fun loadProfile() {
@@ -55,9 +75,12 @@ class ProfileViewModel @Inject constructor(
                         preferredUnits = p.preferredUnits,
                         bio = p.bio ?: ""
                     )
+                    // Save the loaded state as baseline for change tracking
+                    savedProfileState = _uiState.value
                 } ?: run {
                     // No profile exists, set email from Firebase
                     _uiState.value = _uiState.value.copy(email = firebaseEmail)
+                    savedProfileState = _uiState.value
                 }
             }
         }
@@ -142,8 +165,17 @@ class ProfileViewModel @Inject constructor(
                 )
                 repository.saveProfile(profile)
                 _uiState.value = currentState.copy(message = "Profile saved.")
+                // Update saved state after successful save
+                savedProfileState = _uiState.value
             }
         }
+    }
+
+    fun onCancelClick() {
+        // Revert to the last saved state
+        _uiState.value = savedProfileState.copy(
+            message = null // Don't restore old messages
+        )
     }
 
     fun onImageClick() {

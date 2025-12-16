@@ -11,6 +11,7 @@ object NavRoutes {
     const val Exercises = "exercises"
     const val Workouts = "workouts"
     const val Statistics = "statistics"
+    const val Settings = "settings"
     const val Profile = "profile"
     const val ActiveWorkout = "active_workout"
 }
