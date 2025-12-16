@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.rukavina.gymbuddy.data.local.converter.MuscleGroupConverter
+import com.rukavina.gymbuddy.data.local.converter.ProfileEnumConverters
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.dao.UserProfileDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
@@ -27,10 +28,10 @@ import com.rukavina.gymbuddy.data.model.UserProfile
         TemplateExerciseEntity::class,
         com.rukavina.gymbuddy.data.local.entity.WorkoutSetEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
-@TypeConverters(MuscleGroupConverter::class)
+@TypeConverters(MuscleGroupConverter::class, ProfileEnumConverters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userProfileDao(): UserProfileDao

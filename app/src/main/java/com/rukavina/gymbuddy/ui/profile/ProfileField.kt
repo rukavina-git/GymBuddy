@@ -1,5 +1,5 @@
 package com.rukavina.gymbuddy.ui.profile
 
 enum class ProfileField {
-    FirstName, LastName, Email, Age, Weight, Height, Gender, Goal
+    Name, Age, Weight, Height, TargetWeight, Gender, FitnessGoal, ActivityLevel, PreferredUnits, Bio
 }

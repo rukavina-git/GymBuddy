@@ -12,7 +12,9 @@ data class WorkoutSet(
     val id: String,
 
     /**
-     * Weight used for this set in the user's preferred unit (kg or lbs).
+     * Weight used for this set in kilograms (kg).
+     * Always stored in metric for consistency.
+     * Convert to user's preferred display unit in the UI layer.
      */
     val weight: Float,
 

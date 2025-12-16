@@ -17,6 +17,7 @@ import com.rukavina.gymbuddy.data.model.Exercise
 import com.rukavina.gymbuddy.data.model.PerformedExercise
 import com.rukavina.gymbuddy.data.model.WorkoutSession
 import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
+import com.rukavina.gymbuddy.utils.UnitConverter
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -85,6 +86,7 @@ fun WorkoutScreen(
                             WorkoutSessionItem(
                                 workoutSession = workoutSession,
                                 availableExercises = exerciseUiState.exercises,
+                                preferredUnits = uiState.preferredUnits,
                                 onEdit = {
                                     editingWorkoutSession = workoutSession
                                     showDialog = true
@@ -181,6 +183,7 @@ fun WorkoutScreen(
 fun WorkoutSessionItem(
     workoutSession: WorkoutSession,
     availableExercises: List<Exercise>,
+    preferredUnits: com.rukavina.gymbuddy.data.model.PreferredUnits,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -237,11 +240,14 @@ fun WorkoutSessionItem(
                         val exerciseName = exerciseMap[exercise.exerciseId]?.name ?: "Unknown Exercise"
                         val setCount = exercise.sets.size
                         val totalReps = exercise.sets.sumOf { it.reps }
-                        val avgWeight = if (exercise.sets.isNotEmpty()) {
+                        val avgWeightInKg = if (exercise.sets.isNotEmpty()) {
                             exercise.sets.map { it.weight }.average().toFloat()
                         } else 0f
+                        // Convert weight from metric (kg) to user's preferred display unit
+                        val displayWeight = UnitConverter.weightToDisplayUnit(avgWeightInKg, preferredUnits)
+                        val weightUnit = UnitConverter.getWeightUnitLabel(preferredUnits)
                         Text(
-                            text = "• $exerciseName: $setCount sets, $totalReps reps @ ${String.format("%.1f", avgWeight)}kg",
+                            text = "• $exerciseName: $setCount sets, $totalReps reps @ $displayWeight$weightUnit",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary
                         )

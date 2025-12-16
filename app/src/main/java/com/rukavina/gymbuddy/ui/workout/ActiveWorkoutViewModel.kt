@@ -2,12 +2,16 @@ package com.rukavina.gymbuddy.ui.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.rukavina.gymbuddy.data.model.Exercise
 import com.rukavina.gymbuddy.data.model.PerformedExercise
+import com.rukavina.gymbuddy.data.model.PreferredUnits
 import com.rukavina.gymbuddy.data.model.WorkoutSession
 import com.rukavina.gymbuddy.data.model.WorkoutTemplate
+import com.rukavina.gymbuddy.data.repository.UserProfileRepository
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
+import com.rukavina.gymbuddy.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -53,6 +57,7 @@ data class ActiveWorkoutUiState(
     val elapsedSeconds: Long = 0L,
     val isTimerRunning: Boolean = true,
     val exercises: List<ActiveExercise> = emptyList(),
+    val preferredUnits: PreferredUnits = PreferredUnits.METRIC,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val workoutSaved: Boolean = false,
@@ -66,7 +71,8 @@ data class ActiveWorkoutUiState(
 @HiltViewModel
 class ActiveWorkoutViewModel @Inject constructor(
     private val createWorkoutSessionUseCase: CreateWorkoutSessionUseCase,
-    private val getAllExercisesUseCase: GetAllExercisesUseCase
+    private val getAllExercisesUseCase: GetAllExercisesUseCase,
+    private val userProfileRepository: UserProfileRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ActiveWorkoutUiState())
@@ -77,6 +83,24 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     init {
         loadExercises()
+        loadUserPreferences()
+    }
+
+    /**
+     * Load user's preferred units from their profile.
+     */
+    private fun loadUserPreferences() {
+        viewModelScope.launch {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid
+            uid?.let {
+                val profile = userProfileRepository.getProfile(it)
+                profile?.let { p ->
+                    _uiState.update { state ->
+                        state.copy(preferredUnits = p.preferredUnits)
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -251,9 +275,11 @@ class ActiveWorkoutViewModel @Inject constructor(
                 val completedSets = activeExercise.sets
                     .filter { it.reps.isNotBlank() && it.weight.isNotBlank() }
                     .mapIndexed { index, uiSet ->
+                        // Convert weight from display units to metric (kg) for storage
+                        val weightInKg = UnitConverter.weightToMetric(uiSet.weight, state.preferredUnits) ?: 0f
                         com.rukavina.gymbuddy.data.model.WorkoutSet(
                             id = UUID.randomUUID().toString(),
-                            weight = uiSet.weight.toFloatOrNull() ?: 0f,
+                            weight = weightInKg,
                             reps = uiSet.reps.toIntOrNull() ?: 0,
                             orderIndex = index
                         )
