@@ -73,7 +73,8 @@ class ProfileViewModel @Inject constructor(
                         fitnessGoal = p.fitnessGoal,
                         activityLevel = p.activityLevel,
                         preferredUnits = p.preferredUnits,
-                        bio = p.bio ?: ""
+                        bio = p.bio ?: "",
+                        profileImageUri = p.profileImageUrl
                     )
                     // Save the loaded state as baseline for change tracking
                     savedProfileState = _uiState.value
@@ -151,7 +152,7 @@ class ProfileViewModel @Inject constructor(
                     uid = userId,
                     name = currentState.name,
                     email = currentState.email,
-                    profileImageUrl = null, // TODO: Implement image upload
+                    profileImageUrl = currentState.profileImageUri,
                     age = currentState.age.toIntOrNull(),
                     weight = weightInKg,
                     height = heightInCm,
@@ -178,8 +179,8 @@ class ProfileViewModel @Inject constructor(
         )
     }
 
-    fun onImageClick() {
-        // TODO: Launch image picker
+    fun onImageSelected(uri: String) {
+        _uiState.value = _uiState.value.copy(profileImageUri = uri)
     }
 
     fun logout() {

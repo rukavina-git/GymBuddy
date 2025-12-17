@@ -100,7 +100,12 @@ fun MainScreen(rootNavController: NavHostController) {
                     rootNavController = rootNavController
                 )
             }
-            composable(NavRoutes.Profile) { ProfileScreen(rootNavController) }
+            composable(NavRoutes.Profile) {
+                ProfileScreen(
+                    rootNavController = rootNavController,
+                    bottomNavController = bottomNavController
+                )
+            }
             composable(NavRoutes.ActiveWorkout) {
                 ActiveWorkoutScreen(
                     viewModel = activeWorkoutViewModel,
