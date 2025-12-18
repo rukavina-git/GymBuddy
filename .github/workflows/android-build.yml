@@ -39,11 +39,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # Decode google-services.json from secret
-      - name: Setup google-services.json
-        run: |
-            echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > app/google-services.json
-        shell: bash
+      # Create google-services.json from GitHub secret
+      - name: Create google-services.json
+        run: echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > ./app/src/google-services.json
 
       # Build debug APK
       - name: Build debug APK
@@ -56,10 +54,6 @@ jobs:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
-
-      # Clean up google-services.json
-      - name: Remove google-services.json
-        run: rm -f app/google-services.json
 
       # Build report (shows build summary)
       - name: Build Summary
