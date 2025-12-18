@@ -158,7 +158,7 @@ class ProfileViewModel @Inject constructor(
                     height = heightInCm,
                     targetWeight = targetWeightInKg,
                     gender = currentState.gender,
-                    fitnessGoal = currentState.fitnessGoal!!,
+                    fitnessGoal = currentState.fitnessGoal,
                     activityLevel = currentState.activityLevel,
                     preferredUnits = currentState.preferredUnits,
                     joinedDate = System.currentTimeMillis(), // TODO: Store actual join date
