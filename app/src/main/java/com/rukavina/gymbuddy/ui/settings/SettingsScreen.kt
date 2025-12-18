@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -43,6 +45,11 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showLogoutDialog by remember { mutableStateOf(false) }
+
+    // Refresh profile data when screen is displayed
+    LaunchedEffect(Unit) {
+        viewModel.refreshProfile()
+    }
 
     // Observe logout event and navigate to login
     LaunchedEffect(Unit) {
@@ -82,6 +89,40 @@ fun SettingsScreen(
                             bottomNavController.navigate(NavRoutes.Profile)
                         }
                     )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                item {
+                    SettingsSection {
+                        SettingsItem(
+                            icon = androidx.compose.material.icons.Icons.Default.Settings,
+                            label = "Units",
+                            onClick = {
+                                bottomNavController.navigate(NavRoutes.EditUnits)
+                            },
+                            showDivider = false
+                        )
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                item {
+                    SettingsSection {
+                        SettingsItem(
+                            icon = androidx.compose.material.icons.Icons.Default.Info,
+                            label = "About",
+                            onClick = {
+                                bottomNavController.navigate(NavRoutes.About)
+                            },
+                            showDivider = false
+                        )
+                    }
                 }
 
                 item {

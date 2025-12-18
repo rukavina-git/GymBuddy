@@ -36,6 +36,10 @@ class ProfileViewModel @Inject constructor(
         loadProfile()
     }
 
+    fun refreshProfile() {
+        loadProfile()
+    }
+
     fun hasUnsavedChanges(): Boolean {
         val current = _uiState.value
         val saved = savedProfileState
@@ -133,13 +137,9 @@ class ProfileViewModel @Inject constructor(
             uid?.let { userId ->
                 val currentState = _uiState.value
 
-                // Validate required fields
+                // Only validate name as required field
                 if (currentState.name.isBlank()) {
                     _uiState.value = currentState.copy(message = "Name is required")
-                    return@launch
-                }
-                if (currentState.fitnessGoal == null) {
-                    _uiState.value = currentState.copy(message = "Please select a fitness goal")
                     return@launch
                 }
 
@@ -187,6 +187,111 @@ class ProfileViewModel @Inject constructor(
         FirebaseAuth.getInstance().signOut()
         viewModelScope.launch {
             _logoutEvent.emit(Unit)
+        }
+    }
+
+    // Individual field save methods
+    fun onNameSaved(name: String) {
+        _uiState.value = _uiState.value.copy(name = name)
+        saveProfileToDatabase()
+    }
+
+    fun onBioSaved(bio: String) {
+        _uiState.value = _uiState.value.copy(bio = bio)
+        saveProfileToDatabase()
+    }
+
+    fun onAgeSaved(age: Int) {
+        _uiState.value = _uiState.value.copy(age = age.toString())
+        saveProfileToDatabase()
+    }
+
+    fun onWeightSaved(weight: Float) {
+        _uiState.value = _uiState.value.copy(weight = "%.1f".format(weight))
+        saveProfileToDatabase()
+    }
+
+    fun onHeightSaved(height: Float) {
+        val currentState = _uiState.value
+        val heightStr = if (currentState.preferredUnits == PreferredUnits.METRIC) {
+            "%.0f".format(height)
+        } else {
+            "%.0f".format(height)
+        }
+        _uiState.value = currentState.copy(height = heightStr)
+        saveProfileToDatabase()
+    }
+
+    fun onTargetWeightSaved(targetWeight: Float) {
+        _uiState.value = _uiState.value.copy(targetWeight = "%.1f".format(targetWeight))
+        saveProfileToDatabase()
+    }
+
+    fun onGenderSaved(gender: com.rukavina.gymbuddy.data.model.Gender?) {
+        _uiState.value = _uiState.value.copy(gender = gender)
+        saveProfileToDatabase()
+    }
+
+    fun onFitnessGoalSaved(goal: com.rukavina.gymbuddy.data.model.FitnessGoal?) {
+        _uiState.value = _uiState.value.copy(fitnessGoal = goal)
+        saveProfileToDatabase()
+    }
+
+    fun onActivityLevelSaved(level: com.rukavina.gymbuddy.data.model.ActivityLevel?) {
+        _uiState.value = _uiState.value.copy(activityLevel = level)
+        saveProfileToDatabase()
+    }
+
+    fun onPreferredUnitsSaved(units: PreferredUnits) {
+        val currentState = _uiState.value
+        val oldUnits = currentState.preferredUnits
+
+        // Convert currently displayed values from old units to new units
+        val currentWeightInMetric = UnitConverter.weightToMetric(currentState.weight, oldUnits)
+        val currentHeightInMetric = UnitConverter.heightToMetric(currentState.height, oldUnits)
+        val currentTargetWeightInMetric = UnitConverter.weightToMetric(currentState.targetWeight, oldUnits)
+
+        _uiState.value = currentState.copy(
+            preferredUnits = units,
+            weight = UnitConverter.weightToDisplayUnit(currentWeightInMetric, units),
+            height = UnitConverter.heightToDisplayUnit(currentHeightInMetric, units),
+            targetWeight = UnitConverter.weightToDisplayUnit(currentTargetWeightInMetric, units)
+        )
+        saveProfileToDatabase()
+    }
+
+    private fun saveProfileToDatabase() {
+        viewModelScope.launch {
+            uid?.let { userId ->
+                val currentState = _uiState.value
+
+                // Check if profile exists in database first
+                val existingProfile = repository.getProfile(userId)
+
+                // Convert from display units to metric for database storage
+                val weightInKg = UnitConverter.weightToMetric(currentState.weight, currentState.preferredUnits)
+                val heightInCm = UnitConverter.heightToMetric(currentState.height, currentState.preferredUnits)
+                val targetWeightInKg = UnitConverter.weightToMetric(currentState.targetWeight, currentState.preferredUnits)
+
+                val profile = UserProfile(
+                    uid = userId,
+                    name = currentState.name.ifBlank { "User" },
+                    email = currentState.email,
+                    profileImageUrl = currentState.profileImageUri,
+                    age = currentState.age.toIntOrNull(),
+                    weight = weightInKg,
+                    height = heightInCm,
+                    targetWeight = targetWeightInKg,
+                    gender = currentState.gender,
+                    fitnessGoal = currentState.fitnessGoal,
+                    activityLevel = currentState.activityLevel,
+                    preferredUnits = currentState.preferredUnits,
+                    joinedDate = existingProfile?.joinedDate ?: System.currentTimeMillis(),
+                    bio = currentState.bio.ifBlank { null }
+                )
+                repository.saveProfile(profile)
+                savedProfileState = _uiState.value
+            }
         }
     }
 }

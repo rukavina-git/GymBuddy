@@ -76,6 +76,11 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
+    // Refresh profile data when screen is displayed
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        profileViewModel.refreshProfile()
+    }
+
     // Get time-based greeting
     val greeting = remember {
         getTimeBasedGreeting()
