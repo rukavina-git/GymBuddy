@@ -37,6 +37,10 @@ class SettingsViewModel @Inject constructor(
         loadProfile()
     }
 
+    fun refreshProfile() {
+        loadProfile()
+    }
+
     private fun loadProfile() {
         viewModelScope.launch {
             val firebaseEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
