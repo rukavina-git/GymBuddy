@@ -16,7 +16,17 @@ object ExerciseMapper {
             id = exercise.id,
             name = exercise.name,
             primaryMuscles = exercise.primaryMuscles,
-            secondaryMuscles = exercise.secondaryMuscles
+            secondaryMuscles = exercise.secondaryMuscles,
+            description = exercise.description,
+            instructions = exercise.instructions,
+            difficulty = exercise.difficulty,
+            equipmentNeeded = exercise.equipmentNeeded,
+            category = exercise.category,
+            exerciseType = exercise.exerciseType,
+            videoUrl = exercise.videoUrl,
+            thumbnailUrl = exercise.thumbnailUrl,
+            isCustom = exercise.isCustom,
+            createdBy = exercise.createdBy
         )
     }
 
@@ -28,7 +38,17 @@ object ExerciseMapper {
             id = entity.id,
             name = entity.name,
             primaryMuscles = entity.primaryMuscles,
-            secondaryMuscles = entity.secondaryMuscles
+            secondaryMuscles = entity.secondaryMuscles,
+            description = entity.description,
+            instructions = entity.instructions,
+            difficulty = entity.difficulty,
+            equipmentNeeded = entity.equipmentNeeded,
+            category = entity.category,
+            exerciseType = entity.exerciseType,
+            videoUrl = entity.videoUrl,
+            thumbnailUrl = entity.thumbnailUrl,
+            isCustom = entity.isCustom,
+            createdBy = entity.createdBy
         )
     }
 
