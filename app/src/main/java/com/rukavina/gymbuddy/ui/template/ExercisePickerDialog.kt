@@ -41,7 +41,7 @@ import com.rukavina.gymbuddy.data.model.MuscleGroup
 fun ExercisePickerDialog(
     availableExercises: List<Exercise>,
     onDismiss: () -> Unit,
-    onExerciseSelected: (String) -> Unit
+    onExerciseSelected: (Int) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedMuscleFilter by remember { mutableStateOf<MuscleGroup?>(null) }

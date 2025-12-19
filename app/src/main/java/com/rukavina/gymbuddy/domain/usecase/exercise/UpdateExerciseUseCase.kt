@@ -16,7 +16,7 @@ class UpdateExerciseUseCase @Inject constructor(
      */
     suspend operator fun invoke(exercise: Exercise): Result<Unit> {
         return try {
-            require(exercise.id.isNotBlank()) { "Exercise ID cannot be blank" }
+            require(exercise.id > 0) { "Exercise ID must be valid" }
             require(exercise.name.isNotBlank()) { "Exercise name cannot be blank" }
             require(exercise.primaryMuscles.isNotEmpty()) { "Exercise must target at least one primary muscle" }
 

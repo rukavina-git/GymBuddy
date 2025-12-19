@@ -347,7 +347,7 @@ fun WorkoutTemplateFormDialog(
     var showExercisePicker by remember { mutableStateOf(false) }
     var editingExerciseIndex by remember { mutableStateOf<Int?>(null) }
     var showExerciseConfig by remember { mutableStateOf(false) }
-    var pendingExerciseId by remember { mutableStateOf<String?>(null) }
+    var pendingExerciseId by remember { mutableStateOf<Int?>(null) }
     var exerciseToDelete by remember { mutableStateOf<TemplateExercise?>(null) }
 
     // Create exercise map for lookups
@@ -502,7 +502,7 @@ fun WorkoutTemplateFormDialog(
         }
 
         ExerciseConfigDialog(
-            exerciseId = pendingExerciseId ?: editingExercise?.exerciseId ?: "",
+            exerciseId = pendingExerciseId ?: editingExercise?.exerciseId ?: 0,
             exerciseName = exerciseMap[pendingExerciseId ?: editingExercise?.exerciseId]?.name ?: "",
             initialSets = editingExercise?.plannedSets ?: 3,
             initialReps = editingExercise?.plannedReps ?: 10,
@@ -529,7 +529,7 @@ fun WorkoutTemplateFormDialog(
                 } else {
                     // Add new
                     val newExercise = TemplateExercise(
-                        id = UUID.randomUUID().toString(),
+                        id = System.currentTimeMillis().toInt(),
                         exerciseId = pendingExerciseId!!,
                         plannedSets = sets,
                         plannedReps = reps,
@@ -588,7 +588,7 @@ fun WorkoutTemplateFormDialog(
  */
 private fun reorderExercise(
     exercises: List<TemplateExercise>,
-    exerciseId: String,
+    exerciseId: Int,
     direction: Int
 ): List<TemplateExercise> {
     val sorted = exercises.sortedBy { it.orderIndex }

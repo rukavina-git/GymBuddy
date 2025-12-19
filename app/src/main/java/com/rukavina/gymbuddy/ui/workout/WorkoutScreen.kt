@@ -604,7 +604,7 @@ fun ExerciseEditDialog(
     onDismiss: () -> Unit,
     onSave: (PerformedExercise) -> Unit
 ) {
-    var selectedExerciseId by remember { mutableStateOf(existingExercise?.exerciseId ?: "") }
+    var selectedExerciseId by remember { mutableStateOf(existingExercise?.exerciseId ?: 0) }
 
     // For new exercises, create sets with placeholder values that will be shown as empty
     // For existing exercises, use their actual values
@@ -769,7 +769,7 @@ fun ExerciseEditDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (selectedExerciseId.isNotEmpty() && workoutSets.isNotEmpty()) {
+                    if (selectedExerciseId > 0 && workoutSets.isNotEmpty()) {
                         // Convert UI sets to domain model, filtering out empty sets
                         val domainSets = workoutSets
                             .filter { it.reps.isNotBlank() || it.weight.isNotBlank() }
@@ -785,7 +785,7 @@ fun ExerciseEditDialog(
                         if (domainSets.isNotEmpty()) {
                             onSave(
                                 PerformedExercise(
-                                    id = existingExercise?.id ?: java.util.UUID.randomUUID().toString(),
+                                    id = existingExercise?.id ?: System.currentTimeMillis().toInt(),
                                     exerciseId = selectedExerciseId,
                                     sets = domainSets
                                 )
@@ -793,7 +793,7 @@ fun ExerciseEditDialog(
                         }
                     }
                 },
-                enabled = selectedExerciseId.isNotEmpty() && workoutSets.any { it.reps.isNotBlank() || it.weight.isNotBlank() }
+                enabled = selectedExerciseId > 0 && workoutSets.any { it.reps.isNotBlank() || it.weight.isNotBlank() }
             ) {
                 Text("Save")
             }

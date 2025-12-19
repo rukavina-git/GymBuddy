@@ -27,8 +27,8 @@ class UpdateWorkoutTemplateUseCase @Inject constructor(
 
             // Validate each exercise
             template.templateExercises.forEach { exercise ->
-                require(exercise.id.isNotBlank()) { "Exercise ID cannot be blank" }
-                require(exercise.exerciseId.isNotBlank()) { "Exercise reference ID cannot be blank" }
+                require(exercise.id > 0) { "Exercise ID must be valid" }
+                require(exercise.exerciseId > 0) { "Exercise reference ID must be valid" }
                 require(exercise.plannedSets > 0) { "Planned sets must be greater than 0" }
                 require(exercise.plannedReps > 0) { "Planned reps must be greater than 0" }
                 require(exercise.orderIndex >= 0) { "Order index must be non-negative" }

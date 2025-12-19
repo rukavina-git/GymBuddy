@@ -21,5 +21,8 @@ enum class MuscleGroup {
     ARMS,
 
     /** Core muscles (abs, obliques, lower back) */
-    CORE
+    CORE,
+
+    /** Other muscles or exercises without a specific category */
+    OTHER
 }

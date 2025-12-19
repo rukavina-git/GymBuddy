@@ -111,7 +111,7 @@ class ExerciseSeeder @Inject constructor(
      */
     private fun parseExercise(json: JSONObject): ExerciseEntity {
         return ExerciseEntity(
-            id = json.getString("id"),
+            id = json.getInt("id"),
             name = json.getString("name"),
             primaryMuscles = parseEnumList<MuscleGroup>(json.getJSONArray("primaryMuscles")),
             secondaryMuscles = parseEnumList<MuscleGroup>(json.getJSONArray("secondaryMuscles")),
@@ -124,7 +124,8 @@ class ExerciseSeeder @Inject constructor(
             videoUrl = json.optString("videoUrl").takeIf { it.isNotEmpty() },
             thumbnailUrl = json.optString("thumbnailUrl").takeIf { it.isNotEmpty() },
             isCustom = json.getBoolean("isCustom"),
-            createdBy = json.optString("createdBy").takeIf { it.isNotEmpty() }
+            createdBy = json.optString("createdBy").takeIf { it.isNotEmpty() },
+            isHidden = false // Default exercises are never hidden by default - this is user-specific preference
         )
     }
 

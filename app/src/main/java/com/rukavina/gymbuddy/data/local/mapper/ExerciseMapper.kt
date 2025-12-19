@@ -26,7 +26,8 @@ object ExerciseMapper {
             videoUrl = exercise.videoUrl,
             thumbnailUrl = exercise.thumbnailUrl,
             isCustom = exercise.isCustom,
-            createdBy = exercise.createdBy
+            createdBy = exercise.createdBy,
+            isHidden = exercise.isHidden
         )
     }
 
@@ -48,7 +49,8 @@ object ExerciseMapper {
             videoUrl = entity.videoUrl,
             thumbnailUrl = entity.thumbnailUrl,
             isCustom = entity.isCustom,
-            createdBy = entity.createdBy
+            createdBy = entity.createdBy,
+            isHidden = entity.isHidden
         )
     }
 

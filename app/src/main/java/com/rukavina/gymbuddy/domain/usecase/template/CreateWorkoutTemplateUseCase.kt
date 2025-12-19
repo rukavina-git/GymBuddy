@@ -28,7 +28,7 @@ class CreateWorkoutTemplateUseCase @Inject constructor(
 
             // Validate each exercise
             template.templateExercises.forEach { exercise ->
-                require(exercise.exerciseId.isNotBlank()) { "Exercise ID cannot be blank" }
+                require(exercise.exerciseId > 0) { "Exercise ID must be valid" }
                 require(exercise.plannedSets > 0) { "Planned sets must be greater than 0" }
                 require(exercise.plannedReps > 0) { "Planned reps must be greater than 0" }
                 require(exercise.orderIndex >= 0) { "Order index must be non-negative" }
@@ -46,8 +46,8 @@ class CreateWorkoutTemplateUseCase @Inject constructor(
 
             // Generate IDs for exercises if needed
             val exercisesWithIds = templateWithId.templateExercises.map { exercise ->
-                if (exercise.id.isBlank()) {
-                    exercise.copy(id = UUID.randomUUID().toString())
+                if (exercise.id <= 0) {
+                    exercise.copy(id = System.currentTimeMillis().toInt())
                 } else {
                     exercise
                 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -102,6 +103,14 @@ fun SettingsScreen(
                             label = "Units",
                             onClick = {
                                 bottomNavController.navigate(NavRoutes.EditUnits)
+                            },
+                            showDivider = true
+                        )
+                        SettingsItem(
+                            icon = androidx.compose.material.icons.Icons.Default.VisibilityOff,
+                            label = "Hidden Exercises",
+                            onClick = {
+                                bottomNavController.navigate(NavRoutes.HiddenExercises)
                             },
                             showDivider = false
                         )

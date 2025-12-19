@@ -35,8 +35,8 @@ data class TemplateExerciseEntity(
     /**
      * Primary key - unique identifier for this template exercise.
      */
-    @PrimaryKey
-    val id: String,
+    @PrimaryKey(autoGenerate = false)
+    val id: Int,
 
     /**
      * Foreign key to WorkoutTemplateEntity.
@@ -48,7 +48,7 @@ data class TemplateExerciseEntity(
      * Reference to ExerciseEntity.
      * Points to the exercise definition (e.g., "Bench Press", "Squat").
      */
-    val exerciseId: String,
+    val exerciseId: Int,
 
     /**
      * Planned number of sets for this exercise.

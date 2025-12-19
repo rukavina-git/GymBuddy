@@ -10,10 +10,10 @@ package com.rukavina.gymbuddy.data.model
 data class Exercise(
     /**
      * Unique identifier for the exercise.
-     * Use UUID string format for offline-first compatibility and server sync.
-     * Generated locally when created offline, persisted when synced to server.
+     * Default exercises use 5-digit IDs (10001-99999).
+     * Custom exercises use 6+ digit IDs (100000+) generated from timestamp.
      */
-    val id: String,
+    val id: Int,
 
     /**
      * Name of the exercise (e.g., "Bench Press", "Barbell Squat").
@@ -91,5 +91,12 @@ data class Exercise(
      * User ID of the creator (for custom exercises).
      * null for default exercises.
      */
-    val createdBy: String? = null
+    val createdBy: String? = null,
+
+    /**
+     * Whether this exercise is hidden from the main exercise list.
+     * Users can hide default exercises they don't use.
+     * Hidden exercises can be unhidden in settings.
+     */
+    val isHidden: Boolean = false
 )

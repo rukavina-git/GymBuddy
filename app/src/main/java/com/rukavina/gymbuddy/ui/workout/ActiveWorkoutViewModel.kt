@@ -41,7 +41,7 @@ data class WorkoutSet(
  */
 data class ActiveExercise(
     val id: String,
-    val exerciseId: String,
+    val exerciseId: Int,
     val exerciseName: String,
     val sets: List<WorkoutSet>,
     val plannedSets: Int,
@@ -288,7 +288,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 if (completedSets.isEmpty()) return@mapNotNull null
 
                 PerformedExercise(
-                    id = UUID.randomUUID().toString(),
+                    id = System.currentTimeMillis().toInt(),
                     exerciseId = activeExercise.exerciseId,
                     sets = completedSets
                 )
