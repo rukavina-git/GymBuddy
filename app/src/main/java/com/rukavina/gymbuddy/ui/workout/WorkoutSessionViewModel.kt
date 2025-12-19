@@ -79,9 +79,9 @@ class WorkoutSessionViewModel @Inject constructor(
                     }
                 }
                 .collect { workoutSessions ->
-                    _uiState.update {
-                        it.copy(
-                            workoutSessions = workoutSessions,
+                    _uiState.update { state ->
+                        state.copy(
+                            workoutSessions = applySorting(workoutSessions, state.sortOrder),
                             isLoading = false,
                             errorMessage = null
                         )
@@ -115,9 +115,9 @@ class WorkoutSessionViewModel @Inject constructor(
                     }
                 }
                 .collect { workoutSessions ->
-                    _uiState.update {
-                        it.copy(
-                            workoutSessions = workoutSessions,
+                    _uiState.update { state ->
+                        state.copy(
+                            workoutSessions = applySorting(workoutSessions, state.sortOrder),
                             isLoading = false,
                             errorMessage = null
                         )
@@ -250,6 +250,35 @@ class WorkoutSessionViewModel @Inject constructor(
      */
     fun clearSuccess() {
         _uiState.update { it.copy(successMessage = null) }
+    }
+
+    /**
+     * Change the sort order for workout sessions.
+     */
+    fun setSortOrder(sortOrder: WorkoutSessionSortOrder) {
+        _uiState.update { state ->
+            state.copy(
+                sortOrder = sortOrder,
+                workoutSessions = applySorting(state.workoutSessions, sortOrder)
+            )
+        }
+    }
+
+    /**
+     * Apply sorting to a list of workout sessions based on the sort order.
+     */
+    private fun applySorting(
+        sessions: List<WorkoutSession>,
+        sortOrder: WorkoutSessionSortOrder
+    ): List<WorkoutSession> {
+        return when (sortOrder) {
+            WorkoutSessionSortOrder.DATE_NEWEST_FIRST -> sessions.sortedByDescending { it.date }
+            WorkoutSessionSortOrder.DATE_OLDEST_FIRST -> sessions.sortedBy { it.date }
+            WorkoutSessionSortOrder.DURATION_LONGEST_FIRST -> sessions.sortedByDescending { it.durationSeconds }
+            WorkoutSessionSortOrder.DURATION_SHORTEST_FIRST -> sessions.sortedBy { it.durationSeconds }
+            WorkoutSessionSortOrder.TITLE_A_TO_Z -> sessions.sortedBy { it.title?.lowercase() ?: "" }
+            WorkoutSessionSortOrder.TITLE_Z_TO_A -> sessions.sortedByDescending { it.title?.lowercase() ?: "" }
+        }
     }
 
     /**

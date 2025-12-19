@@ -4,6 +4,18 @@ import com.rukavina.gymbuddy.data.model.PreferredUnits
 import com.rukavina.gymbuddy.data.model.WorkoutSession
 
 /**
+ * Sort order options for workout sessions.
+ */
+enum class WorkoutSessionSortOrder {
+    DATE_NEWEST_FIRST,
+    DATE_OLDEST_FIRST,
+    DURATION_LONGEST_FIRST,
+    DURATION_SHORTEST_FIRST,
+    TITLE_A_TO_Z,
+    TITLE_Z_TO_A
+}
+
+/**
  * UI state for WorkoutSession screen.
  * Immutable state that represents the current UI.
  */
@@ -52,5 +64,11 @@ data class WorkoutSessionUiState(
      * Success message after operations (create, update, delete).
      * Null if no success message to show.
      */
-    val successMessage: String? = null
+    val successMessage: String? = null,
+
+    /**
+     * Current sort order for workout sessions.
+     * Default is most recent first.
+     */
+    val sortOrder: WorkoutSessionSortOrder = WorkoutSessionSortOrder.DATE_NEWEST_FIRST
 )

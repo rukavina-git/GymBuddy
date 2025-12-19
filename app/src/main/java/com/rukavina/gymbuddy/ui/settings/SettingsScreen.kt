@@ -1,8 +1,11 @@
 package com.rukavina.gymbuddy.ui.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -46,6 +50,8 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    var selectedLanguage by remember { mutableStateOf("English") }
 
     // Refresh profile data when screen is displayed
     LaunchedEffect(Unit) {
@@ -98,6 +104,15 @@ fun SettingsScreen(
 
                 item {
                     SettingsSection {
+                        SettingsItemWithValue(
+                            icon = androidx.compose.material.icons.Icons.Default.Language,
+                            label = "Language",
+                            value = selectedLanguage,
+                            onClick = {
+                                showLanguageDialog = true
+                            },
+                            showDivider = true
+                        )
                         SettingsItem(
                             icon = androidx.compose.material.icons.Icons.Default.Settings,
                             label = "Units",
@@ -179,4 +194,60 @@ fun SettingsScreen(
             }
         )
     }
+
+    // Language selection dialog
+    if (showLanguageDialog) {
+        LanguageSelectionDialog(
+            currentLanguage = selectedLanguage,
+            onLanguageSelected = { language ->
+                selectedLanguage = language
+                showLanguageDialog = false
+            },
+            onDismiss = { showLanguageDialog = false }
+        )
+    }
+}
+
+@Composable
+fun LanguageSelectionDialog(
+    currentLanguage: String,
+    onLanguageSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val languages = listOf("English") // For now, only English is available
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Select Language") },
+        text = {
+            Column {
+                languages.forEach { language ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onLanguageSelected(language) }
+                            .padding(vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = language,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        if (language == currentLanguage) {
+                            androidx.compose.material3.RadioButton(
+                                selected = true,
+                                onClick = null
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

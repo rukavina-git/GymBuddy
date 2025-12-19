@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,16 +38,9 @@ fun WorkoutScreen(
     var editingWorkoutSession by remember { mutableStateOf<WorkoutSession?>(null) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var workoutToDelete by remember { mutableStateOf<WorkoutSession?>(null) }
+    var showSortMenu by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Workout Sessions") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -58,13 +52,50 @@ fun WorkoutScreen(
             }
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when {
-                uiState.isLoading -> {
+            // Sort control
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Sort by: ${getSortOrderLabel(uiState.sortOrder)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                IconButton(onClick = { showSortMenu = true }) {
+                    Icon(Icons.Default.Sort, "Sort")
+                }
+
+                DropdownMenu(
+                    expanded = showSortMenu,
+                    onDismissRequest = { showSortMenu = false }
+                ) {
+                    WorkoutSessionSortOrder.entries.forEach { sortOrder ->
+                        DropdownMenuItem(
+                            text = { Text(getSortOrderLabel(sortOrder)) },
+                            onClick = {
+                                viewModel.setSortOrder(sortOrder)
+                                showSortMenu = false
+                            },
+                            leadingIcon = if (uiState.sortOrder == sortOrder) {
+                                { Icon(Icons.Default.Add, null) } // Using Add as checkmark
+                            } else null
+                        )
+                    }
+                }
+            }
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                    uiState.isLoading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -99,6 +130,7 @@ fun WorkoutScreen(
                         }
                     }
                 }
+            }
             }
         }
 
@@ -804,4 +836,18 @@ fun ExerciseEditDialog(
             }
         }
     )
+}
+
+/**
+ * Get a human-readable label for a sort order.
+ */
+private fun getSortOrderLabel(sortOrder: WorkoutSessionSortOrder): String {
+    return when (sortOrder) {
+        WorkoutSessionSortOrder.DATE_NEWEST_FIRST -> "Date (Newest First)"
+        WorkoutSessionSortOrder.DATE_OLDEST_FIRST -> "Date (Oldest First)"
+        WorkoutSessionSortOrder.DURATION_LONGEST_FIRST -> "Duration (Longest First)"
+        WorkoutSessionSortOrder.DURATION_SHORTEST_FIRST -> "Duration (Shortest First)"
+        WorkoutSessionSortOrder.TITLE_A_TO_Z -> "Title (A-Z)"
+        WorkoutSessionSortOrder.TITLE_Z_TO_A -> "Title (Z-A)"
+    }
 }

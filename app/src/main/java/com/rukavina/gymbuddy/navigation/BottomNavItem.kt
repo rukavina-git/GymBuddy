@@ -12,13 +12,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomNavItem(val route: String, val label: String, val icon: ImageVector) {
     object Home : BottomNavItem("home", "Home", Icons.Default.Home)
-    object Templates : BottomNavItem("templates", "Templates", Icons.Default.Assignment)
+    object Workouts : BottomNavItem("workouts", "Workouts", Icons.Default.Assignment)
     object Exercises : BottomNavItem("exercises", "Exercises", Icons.Default.FitnessCenter)
-    object Workouts : BottomNavItem("workouts", "Workouts", Icons.AutoMirrored.Filled.List)
     object Statistics : BottomNavItem("statistics", "Stats", Icons.Default.BarChart)
     object Settings : BottomNavItem("settings", "Settings", Icons.Default.Settings)
 
     companion object {
-        val items = listOf(Home, Templates, Exercises, Workouts, Statistics, Settings)
+        val items = listOf(Home, Workouts, Exercises, Statistics, Settings)
     }
 }

@@ -34,10 +34,8 @@ import com.rukavina.gymbuddy.ui.profile.edit.EditWeightScreen
 import com.rukavina.gymbuddy.ui.settings.AboutScreen
 import com.rukavina.gymbuddy.ui.settings.HiddenExercisesScreen
 import com.rukavina.gymbuddy.ui.settings.SettingsScreen
-import com.rukavina.gymbuddy.ui.template.WorkoutTemplateScreen
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutScreen
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
-import com.rukavina.gymbuddy.ui.workout.WorkoutScreen
 
 
 @Composable
@@ -55,9 +53,8 @@ fun MainScreen(rootNavController: NavHostController) {
             NavigationBar {
                 val bottomNavItems = listOf(
                     BottomNavItem.Home,
-                    BottomNavItem.Templates,
-                    BottomNavItem.Exercises,
                     BottomNavItem.Workouts,
+                    BottomNavItem.Exercises,
                     BottomNavItem.Statistics,
                     BottomNavItem.Settings
                 )
@@ -93,21 +90,20 @@ fun MainScreen(rootNavController: NavHostController) {
                         bottomNavController.navigate(NavRoutes.ActiveWorkout)
                     },
                     onNavigateToTemplates = {
-                        bottomNavController.navigate(NavRoutes.Templates)
+                        bottomNavController.navigate(NavRoutes.Workouts)
                     },
                     onNavigateToProfile = {
                         bottomNavController.navigate(NavRoutes.Settings)
                     }
                 )
             }
-            composable(NavRoutes.Templates) {
-                WorkoutTemplateScreen(
+            composable(NavRoutes.Workouts) {
+                CombinedWorkoutsScreen(
                     activeWorkoutViewModel = activeWorkoutViewModel,
                     onStartWorkout = { bottomNavController.navigate(NavRoutes.ActiveWorkout) }
                 )
             }
             composable(NavRoutes.Exercises) { ExerciseScreen() }
-            composable(NavRoutes.Workouts) { WorkoutScreen() }
             composable(NavRoutes.Statistics) { StatisticsScreen() }
             composable(NavRoutes.Settings) {
                 SettingsScreen(
@@ -229,12 +225,12 @@ fun MainScreen(rootNavController: NavHostController) {
                     viewModel = activeWorkoutViewModel,
                     onWorkoutComplete = {
                         bottomNavController.navigate(NavRoutes.Workouts) {
-                            popUpTo(NavRoutes.Templates) { inclusive = false }
+                            popUpTo(NavRoutes.Workouts) { inclusive = false }
                         }
                     },
                     onWorkoutDiscarded = {
-                        bottomNavController.navigate(NavRoutes.Templates) {
-                            popUpTo(NavRoutes.Templates) { inclusive = false }
+                        bottomNavController.navigate(NavRoutes.Workouts) {
+                            popUpTo(NavRoutes.Workouts) { inclusive = false }
                         }
                     }
                 )
