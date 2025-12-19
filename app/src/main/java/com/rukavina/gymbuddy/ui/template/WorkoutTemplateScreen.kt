@@ -71,14 +71,6 @@ fun WorkoutTemplateScreen(
     var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Workout Templates") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {

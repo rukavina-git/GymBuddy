@@ -8,8 +8,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,6 +38,10 @@ fun ExerciseScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var editingExercise by remember { mutableStateOf<Exercise?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<ExerciseCategory?>(null) }
+    var selectedDifficulty by remember { mutableStateOf<DifficultyLevel?>(null) }
+    var selectedMuscle by remember { mutableStateOf<MuscleGroup?>(null) }
 
     Scaffold(
         topBar = {
@@ -76,25 +82,196 @@ fun ExerciseScreen(
                     )
                 }
                 else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    // Filter exercises based on search and filters
+                    val filteredExercises = uiState.exercises.filter { exercise ->
+                        val matchesSearch = searchQuery.isBlank() ||
+                            exercise.name.contains(searchQuery, ignoreCase = true) ||
+                            exercise.description?.contains(searchQuery, ignoreCase = true) == true ||
+                            exercise.primaryMuscles.any { it.name.contains(searchQuery, ignoreCase = true) }
+
+                        val matchesCategory = selectedCategory == null || exercise.category == selectedCategory
+                        val matchesDifficulty = selectedDifficulty == null || exercise.difficulty == selectedDifficulty
+                        val matchesMuscle = selectedMuscle == null ||
+                            exercise.primaryMuscles.contains(selectedMuscle) ||
+                            exercise.secondaryMuscles.contains(selectedMuscle)
+
+                        matchesSearch && matchesCategory && matchesDifficulty && matchesMuscle
+                    }
+
+                    Column(
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        items(uiState.exercises) { exercise ->
-                            ExerciseItem(
-                                exercise = exercise,
-                                onEdit = {
-                                    editingExercise = exercise
-                                    showDialog = true
-                                },
-                                onDelete = {
-                                    viewModel.deleteExercise(exercise.id)
-                                },
-                                onHide = { id ->
-                                    viewModel.hideExercise(id)
+                        // Search bar
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            placeholder = { Text("Search exercises...") },
+                            leadingIcon = {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { searchQuery = "" }) {
+                                        Icon(Icons.Default.Clear, contentDescription = "Clear")
+                                    }
                                 }
-                            )
+                            },
+                            singleLine = true
+                        )
+
+                        // Filter chips
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Category filter
+                            var showCategoryMenu by remember { mutableStateOf(false) }
+                            Box {
+                                FilterChip(
+                                    selected = selectedCategory != null,
+                                    onClick = { showCategoryMenu = true },
+                                    label = {
+                                        Text(selectedCategory?.name ?: "Category")
+                                    },
+                                    trailingIcon = {
+                                        if (selectedCategory != null) {
+                                            Icon(
+                                                Icons.Default.Clear,
+                                                contentDescription = "Clear",
+                                                modifier = Modifier.clickable { selectedCategory = null }
+                                            )
+                                        }
+                                    }
+                                )
+                                DropdownMenu(
+                                    expanded = showCategoryMenu,
+                                    onDismissRequest = { showCategoryMenu = false }
+                                ) {
+                                    ExerciseCategory.entries.forEach { category ->
+                                        DropdownMenuItem(
+                                            text = { Text(category.name) },
+                                            onClick = {
+                                                selectedCategory = category
+                                                showCategoryMenu = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Difficulty filter
+                            var showDifficultyMenu by remember { mutableStateOf(false) }
+                            Box {
+                                FilterChip(
+                                    selected = selectedDifficulty != null,
+                                    onClick = { showDifficultyMenu = true },
+                                    label = {
+                                        Text(selectedDifficulty?.name ?: "Difficulty")
+                                    },
+                                    trailingIcon = {
+                                        if (selectedDifficulty != null) {
+                                            Icon(
+                                                Icons.Default.Clear,
+                                                contentDescription = "Clear",
+                                                modifier = Modifier.clickable { selectedDifficulty = null }
+                                            )
+                                        }
+                                    }
+                                )
+                                DropdownMenu(
+                                    expanded = showDifficultyMenu,
+                                    onDismissRequest = { showDifficultyMenu = false }
+                                ) {
+                                    DifficultyLevel.entries.forEach { difficulty ->
+                                        DropdownMenuItem(
+                                            text = { Text(difficulty.name) },
+                                            onClick = {
+                                                selectedDifficulty = difficulty
+                                                showDifficultyMenu = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Muscle group filter
+                            var showMuscleMenu by remember { mutableStateOf(false) }
+                            Box {
+                                FilterChip(
+                                    selected = selectedMuscle != null,
+                                    onClick = { showMuscleMenu = true },
+                                    label = {
+                                        Text(selectedMuscle?.name ?: "Muscle")
+                                    },
+                                    trailingIcon = {
+                                        if (selectedMuscle != null) {
+                                            Icon(
+                                                Icons.Default.Clear,
+                                                contentDescription = "Clear",
+                                                modifier = Modifier.clickable { selectedMuscle = null }
+                                            )
+                                        }
+                                    }
+                                )
+                                DropdownMenu(
+                                    expanded = showMuscleMenu,
+                                    onDismissRequest = { showMuscleMenu = false }
+                                ) {
+                                    MuscleGroup.entries.forEach { muscle ->
+                                        DropdownMenuItem(
+                                            text = { Text(muscle.name) },
+                                            onClick = {
+                                                selectedMuscle = muscle
+                                                showMuscleMenu = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Exercise list
+                        if (filteredExercises.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "No exercises match your filters",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(filteredExercises) { exercise ->
+                                    ExerciseItem(
+                                        exercise = exercise,
+                                        onEdit = {
+                                            editingExercise = exercise
+                                            showDialog = true
+                                        },
+                                        onDelete = {
+                                            viewModel.deleteExercise(exercise.id)
+                                        },
+                                        onHide = { id ->
+                                            viewModel.hideExercise(id)
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -180,13 +357,6 @@ fun ExerciseItem(
                         text = exercise.name,
                         style = MaterialTheme.typography.titleMedium
                     )
-                    // Default exercise badge
-                    if (!exercise.isCustom) {
-                        SuggestionChip(
-                            onClick = { },
-                            label = { Text("Default", style = MaterialTheme.typography.labelSmall) }
-                        )
-                    }
                 }
                 Row {
                     if (exercise.isCustom) {
@@ -464,22 +634,10 @@ fun ExerciseDetailDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = exercise.name,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                    if (!exercise.isCustom) {
-                        SuggestionChip(
-                            onClick = { },
-                            label = { Text("Default") }
-                        )
-                    }
-                }
+                Text(
+                    text = exercise.name,
+                    style = MaterialTheme.typography.headlineSmall
+                )
 
                 HorizontalDivider()
 
