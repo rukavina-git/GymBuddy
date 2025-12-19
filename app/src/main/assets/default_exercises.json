@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "exercises": [
     {
       "id": 10001,
@@ -18,10 +18,10 @@
       "equipmentNeeded": ["BARBELL", "BENCH"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
       "thumbnailUrl": null,
       "isCustom": false,
-      "createdBy": null
+      "createdBy": "0"
     },
     {
       "id": 10002,
@@ -40,10 +40,10 @@
       "equipmentNeeded": ["BARBELL"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
       "thumbnailUrl": null,
       "isCustom": false,
-      "createdBy": null
+      "createdBy": "0"
     },
     {
       "id": 10003,
@@ -62,10 +62,10 @@
       "equipmentNeeded": ["BARBELL"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
       "thumbnailUrl": null,
       "isCustom": false,
-      "createdBy": null
+      "createdBy": "0"
     },
     {
       "id": 10004,
@@ -84,10 +84,10 @@
       "equipmentNeeded": ["PULL_UP_BAR"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
       "thumbnailUrl": null,
       "isCustom": false,
-      "createdBy": null
+      "createdBy": "0"
     },
     {
       "id": 10005,
@@ -106,10 +106,10 @@
       "equipmentNeeded": ["BODYWEIGHT"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
       "thumbnailUrl": null,
       "isCustom": false,
-      "createdBy": null
+      "createdBy": "0"
     },
     {
       "id": 10006,
@@ -128,10 +128,10 @@
       "equipmentNeeded": ["BODYWEIGHT"],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
       "thumbnailUrl": null,
       "isCustom": false,
-      "createdBy": null
+      "createdBy": "0"
     },
     {
       "id": 10007,
@@ -150,10 +150,10 @@
       "equipmentNeeded": ["DUMBBELL"],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
       "thumbnailUrl": null,
       "isCustom": false,
-      "createdBy": null
+      "createdBy": "0"
     },
     {
       "id": 10008,
@@ -172,10 +172,10 @@
       "equipmentNeeded": ["DUMBBELL"],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
       "thumbnailUrl": null,
       "isCustom": false,
-      "createdBy": null
+      "createdBy": "0"
     },
     {
       "id": 10009,
@@ -194,10 +194,10 @@
       "equipmentNeeded": ["DUMBBELL"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
       "thumbnailUrl": null,
       "isCustom": false,
-      "createdBy": null
+      "createdBy": "0"
     },
     {
       "id": 10010,
@@ -216,10 +216,10 @@
       "equipmentNeeded": ["DUMBBELL"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
       "thumbnailUrl": null,
       "isCustom": false,
-      "createdBy": null
+      "createdBy": "0"
     }
   ]
 }

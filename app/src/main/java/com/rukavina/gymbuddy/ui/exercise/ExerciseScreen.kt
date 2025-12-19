@@ -1,5 +1,7 @@
 package com.rukavina.gymbuddy.ui.exercise
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,12 +13,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rukavina.gymbuddy.data.model.DifficultyLevel
@@ -39,7 +43,6 @@ fun ExerciseScreen(
     var showDialog by remember { mutableStateOf(false) }
     var editingExercise by remember { mutableStateOf<Exercise?>(null) }
     var searchQuery by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<ExerciseCategory?>(null) }
     var selectedDifficulty by remember { mutableStateOf<DifficultyLevel?>(null) }
     var selectedMuscle by remember { mutableStateOf<MuscleGroup?>(null) }
 
@@ -89,13 +92,12 @@ fun ExerciseScreen(
                             exercise.description?.contains(searchQuery, ignoreCase = true) == true ||
                             exercise.primaryMuscles.any { it.name.contains(searchQuery, ignoreCase = true) }
 
-                        val matchesCategory = selectedCategory == null || exercise.category == selectedCategory
                         val matchesDifficulty = selectedDifficulty == null || exercise.difficulty == selectedDifficulty
                         val matchesMuscle = selectedMuscle == null ||
                             exercise.primaryMuscles.contains(selectedMuscle) ||
                             exercise.secondaryMuscles.contains(selectedMuscle)
 
-                        matchesSearch && matchesCategory && matchesDifficulty && matchesMuscle
+                        matchesSearch && matchesDifficulty && matchesMuscle
                     }
 
                     Column(
@@ -129,41 +131,6 @@ fun ExerciseScreen(
                                 .padding(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            // Category filter
-                            var showCategoryMenu by remember { mutableStateOf(false) }
-                            Box {
-                                FilterChip(
-                                    selected = selectedCategory != null,
-                                    onClick = { showCategoryMenu = true },
-                                    label = {
-                                        Text(selectedCategory?.name ?: "Category")
-                                    },
-                                    trailingIcon = {
-                                        if (selectedCategory != null) {
-                                            Icon(
-                                                Icons.Default.Clear,
-                                                contentDescription = "Clear",
-                                                modifier = Modifier.clickable { selectedCategory = null }
-                                            )
-                                        }
-                                    }
-                                )
-                                DropdownMenu(
-                                    expanded = showCategoryMenu,
-                                    onDismissRequest = { showCategoryMenu = false }
-                                ) {
-                                    ExerciseCategory.entries.forEach { category ->
-                                        DropdownMenuItem(
-                                            text = { Text(category.name) },
-                                            onClick = {
-                                                selectedCategory = category
-                                                showCategoryMenu = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-
                             // Difficulty filter
                             var showDifficultyMenu by remember { mutableStateOf(false) }
                             Box {
@@ -375,45 +342,18 @@ fun ExerciseItem(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-            // Difficulty and Type badges
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Difficulty badge with color
-                AssistChip(
-                    onClick = { },
-                    label = {
-                        Text(
-                            exercise.difficulty.name,
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                )
-
-                // Exercise type
-                AssistChip(
-                    onClick = { },
-                    label = {
-                        Text(
-                            exercise.exerciseType.name,
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                )
-
-                // Category
-                AssistChip(
-                    onClick = { },
-                    label = {
-                        Text(
-                            exercise.category.name,
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                )
-            }
+            // Difficulty badge
+            AssistChip(
+                onClick = { },
+                label = {
+                    Text(
+                        exercise.difficulty.name,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -430,14 +370,6 @@ fun ExerciseItem(
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Equipment
-            Text(
-                text = "Equipment: ${exercise.equipmentNeeded.joinToString(", ") { it.name.replace("_", " ").lowercase().capitalize() }}",
-                style = MaterialTheme.typography.bodySmall
-            )
 
             // Description preview
             exercise.description?.let { desc ->
@@ -619,141 +551,197 @@ fun ExerciseDetailDialog(
     exercise: Exercise,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.fillMaxWidth()
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
-                // Header
-                Text(
-                    text = exercise.name,
-                    style = MaterialTheme.typography.headlineSmall
-                )
-
-                HorizontalDivider()
-
-                // Badges
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                // Header Section
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    AssistChip(
-                        onClick = { },
-                        label = { Text(exercise.difficulty.name) }
+                    Text(
+                        text = exercise.name,
+                        style = MaterialTheme.typography.headlineMedium
                     )
-                    AssistChip(
-                        onClick = { },
-                        label = { Text(exercise.exerciseType.name) }
-                    )
-                }
 
-                // Category and Equipment
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Category",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = exercise.category.name.replace("_", " "),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Equipment Needed",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = exercise.equipmentNeeded.joinToString(", ") {
-                            it.name.replace("_", " ").lowercase().replaceFirstChar { c -> c.uppercase() }
-                        },
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
-                // Muscle Groups
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Muscle Groups",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "Primary: ${exercise.primaryMuscles.joinToString(", ")}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    if (exercise.secondaryMuscles.isNotEmpty()) {
-                        Text(
-                            text = "Secondary: ${exercise.secondaryMuscles.joinToString(", ")}",
-                            style = MaterialTheme.typography.bodyMedium
+                    // Chips row
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        SuggestionChip(
+                            onClick = { },
+                            label = { Text(exercise.difficulty.name) }
+                        )
+                        SuggestionChip(
+                            onClick = { },
+                            label = { Text(exercise.exerciseType.name) }
                         )
                     }
-                }
 
-                // Description
-                exercise.description?.let { desc ->
-                    HorizontalDivider()
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = "Description",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = desc,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-
-                // Instructions
-                if (exercise.instructions.isNotEmpty()) {
-                    HorizontalDivider()
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = "Instructions",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        exercise.instructions.forEachIndexed { index, instruction ->
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = "${index + 1}.",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = instruction,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
+                    // Watch Video Button
+                    exercise.videoUrl?.let { videoUrl ->
+                        FilledTonalButton(
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl))
+                                context.startActivity(intent)
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Watch Video")
                         }
                     }
                 }
 
-                // Action buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                // Content sections
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    Button(
-                        onClick = onDismiss
+                    // Description
+                    exercise.description?.let { desc ->
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = "About",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = desc,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    // Instructions
+                    if (exercise.instructions.isNotEmpty()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(
+                                text = "How to Perform",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            exercise.instructions.forEachIndexed { index, instruction ->
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Surface(
+                                        shape = MaterialTheme.shapes.small,
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(
+                                                text = "${index + 1}",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        text = instruction,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Muscle Groups
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "Muscles",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "Primary",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                exercise.primaryMuscles.forEach { muscle ->
+                                    Text(
+                                        text = muscle.name,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+                            if (exercise.secondaryMuscles.isNotEmpty()) {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        text = "Secondary",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    exercise.secondaryMuscles.forEach { muscle ->
+                                        Text(
+                                            text = muscle.name,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Equipment
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "Equipment",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = exercise.equipmentNeeded.joinToString(", ") {
+                                it.name.replace("_", " ").lowercase().replaceFirstChar { c -> c.uppercase() }
+                            },
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    // Close button
+                    TextButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.align(Alignment.End)
                     ) {
                         Text("Close")
                     }
