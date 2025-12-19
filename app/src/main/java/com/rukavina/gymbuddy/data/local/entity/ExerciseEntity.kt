@@ -18,8 +18,8 @@ import com.rukavina.gymbuddy.data.model.MuscleGroup
 @Entity(tableName = "exercises")
 @TypeConverters(MuscleGroupConverter::class, ExerciseConverters::class)
 data class ExerciseEntity(
-    @PrimaryKey
-    val id: String,
+    @PrimaryKey(autoGenerate = false)
+    val id: Int,
     val name: String,
     val primaryMuscles: List<MuscleGroup>,
     val secondaryMuscles: List<MuscleGroup>,
@@ -32,5 +32,6 @@ data class ExerciseEntity(
     val videoUrl: String?,
     val thumbnailUrl: String?,
     val isCustom: Boolean,
-    val createdBy: String?
+    val createdBy: String?,
+    val isHidden: Boolean
 )

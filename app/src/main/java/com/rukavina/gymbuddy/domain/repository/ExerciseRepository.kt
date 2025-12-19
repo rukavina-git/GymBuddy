@@ -19,11 +19,11 @@ interface ExerciseRepository {
      * Get a single exercise by ID.
      * Returns null if not found.
      */
-    suspend fun getExerciseById(id: String): Exercise?
+    suspend fun getExerciseById(id: Int): Exercise?
 
     /**
      * Create a new exercise.
-     * ID should be generated (UUID) before calling this.
+     * ID should be generated before calling this.
      */
     suspend fun createExercise(exercise: Exercise)
 
@@ -36,7 +36,27 @@ interface ExerciseRepository {
     /**
      * Delete an exercise by ID.
      */
-    suspend fun deleteExercise(id: String)
+    suspend fun deleteExercise(id: Int)
+
+    /**
+     * Hide an exercise (only for default exercises).
+     */
+    suspend fun hideExercise(id: Int)
+
+    /**
+     * Unhide an exercise.
+     */
+    suspend fun unhideExercise(id: Int)
+
+    /**
+     * Get all hidden exercises.
+     */
+    fun getHiddenExercises(): Flow<List<Exercise>>
+
+    /**
+     * Unhide all exercises at once.
+     */
+    suspend fun unhideAllExercises()
 
     /**
      * Search exercises by name (case-insensitive).

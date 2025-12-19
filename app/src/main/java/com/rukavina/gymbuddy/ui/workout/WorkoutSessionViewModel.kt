@@ -276,7 +276,7 @@ class WorkoutSessionViewModel @Inject constructor(
                     }
 
                     PerformedExercise(
-                        id = UUID.randomUUID().toString(),
+                        id = System.currentTimeMillis().toInt(),
                         exerciseId = templateExercise.exerciseId,
                         sets = sets
                     )

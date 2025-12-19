@@ -3,6 +3,7 @@ package com.rukavina.gymbuddy.ui.exercise
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rukavina.gymbuddy.data.model.Exercise
+import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import com.rukavina.gymbuddy.domain.usecase.exercise.CreateExerciseUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.DeleteExerciseUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesUseCase
@@ -30,7 +31,8 @@ class ExerciseViewModel @Inject constructor(
     private val createExerciseUseCase: CreateExerciseUseCase,
     private val updateExerciseUseCase: UpdateExerciseUseCase,
     private val deleteExerciseUseCase: DeleteExerciseUseCase,
-    private val searchExercisesUseCase: SearchExercisesUseCase
+    private val searchExercisesUseCase: SearchExercisesUseCase,
+    private val exerciseRepository: ExerciseRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExerciseUiState())
@@ -98,7 +100,7 @@ class ExerciseViewModel @Inject constructor(
     /**
      * Select an exercise for viewing/editing.
      */
-    fun selectExercise(exerciseId: String) {
+    fun selectExercise(exerciseId: Int) {
         viewModelScope.launch {
             val exercise = getExerciseByIdUseCase(exerciseId)
             _uiState.update { it.copy(selectedExercise = exercise) }
@@ -169,7 +171,7 @@ class ExerciseViewModel @Inject constructor(
     /**
      * Delete an exercise.
      */
-    fun deleteExercise(exerciseId: String) {
+    fun deleteExercise(exerciseId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             deleteExerciseUseCase(exerciseId)
@@ -207,4 +209,63 @@ class ExerciseViewModel @Inject constructor(
     fun clearSuccess() {
         _uiState.update { it.copy(successMessage = null) }
     }
+
+    /**
+     * Hide an exercise (only for default exercises).
+     */
+    fun hideExercise(exerciseId: Int) {
+        viewModelScope.launch {
+            try {
+                exerciseRepository.hideExercise(exerciseId)
+                _uiState.update {
+                    it.copy(successMessage = "Exercise hidden. You can unhide it in Settings.")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = e.message ?: "Failed to hide exercise")
+                }
+            }
+        }
+    }
+
+    /**
+     * Unhide an exercise.
+     */
+    fun unhideExercise(exerciseId: Int) {
+        viewModelScope.launch {
+            try {
+                exerciseRepository.unhideExercise(exerciseId)
+                _uiState.update {
+                    it.copy(successMessage = "Exercise unhidden")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = e.message ?: "Failed to unhide exercise")
+                }
+            }
+        }
+    }
+
+    /**
+     * Unhide all exercises.
+     */
+    fun unhideAllExercises() {
+        viewModelScope.launch {
+            try {
+                exerciseRepository.unhideAllExercises()
+                _uiState.update {
+                    it.copy(successMessage = "All exercises unhidden")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = e.message ?: "Failed to unhide exercises")
+                }
+            }
+        }
+    }
+
+    /**
+     * Flow of hidden exercises.
+     */
+    val hiddenExercises = exerciseRepository.getHiddenExercises()
 }

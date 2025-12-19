@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseConfigDialog(
-    exerciseId: String,
+    exerciseId: Int,
     exerciseName: String,
     initialSets: Int,
     initialReps: Int,

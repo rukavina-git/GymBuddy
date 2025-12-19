@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -89,6 +90,9 @@ fun ExerciseScreen(
                                 },
                                 onDelete = {
                                     viewModel.deleteExercise(exercise.id)
+                                },
+                                onHide = { id ->
+                                    viewModel.hideExercise(id)
                                 }
                             )
                         }
@@ -145,9 +149,11 @@ fun ExerciseScreen(
 fun ExerciseItem(
     exercise: Exercise,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onHide: ((Int) -> Unit)? = null
 ) {
     var showDetails by remember { mutableStateOf(false) }
+    var showHideConfirmation by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -164,33 +170,36 @@ fun ExerciseItem(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = exercise.name,
-                            style = MaterialTheme.typography.titleMedium
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = exercise.name,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    // Default exercise badge
+                    if (!exercise.isCustom) {
+                        SuggestionChip(
+                            onClick = { },
+                            label = { Text("Default", style = MaterialTheme.typography.labelSmall) }
                         )
-                        // Default exercise badge
-                        if (!exercise.isCustom) {
-                            SuggestionChip(
-                                onClick = { },
-                                label = { Text("Default", style = MaterialTheme.typography.labelSmall) }
-                            )
-                        }
                     }
                 }
                 Row {
-                    IconButton(onClick = onEdit) {
-                        Icon(Icons.Default.Edit, "Edit", tint = MaterialTheme.colorScheme.primary)
-                    }
                     if (exercise.isCustom) {
+                        IconButton(onClick = onEdit) {
+                            Icon(Icons.Default.Edit, "Edit", tint = MaterialTheme.colorScheme.primary)
+                        }
                         IconButton(onClick = onDelete) {
                             Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                        }
+                    } else {
+                        // Hide button for default exercises
+                        IconButton(onClick = { showHideConfirmation = true }) {
+                            Icon(Icons.Default.VisibilityOff, "Hide", tint = MaterialTheme.colorScheme.secondary)
                         }
                     }
                 }
@@ -210,14 +219,7 @@ fun ExerciseItem(
                             exercise.difficulty.name,
                             style = MaterialTheme.typography.labelMedium
                         )
-                    },
-                    colors = AssistChipDefaults.assistChipColors(
-                        containerColor = when (exercise.difficulty) {
-                            DifficultyLevel.BEGINNER -> MaterialTheme.colorScheme.primaryContainer
-                            DifficultyLevel.INTERMEDIATE -> MaterialTheme.colorScheme.secondaryContainer
-                            DifficultyLevel.ADVANCED -> MaterialTheme.colorScheme.tertiaryContainer
-                        }
-                    )
+                    }
                 )
 
                 // Exercise type
@@ -286,6 +288,30 @@ fun ExerciseItem(
             onDismiss = { showDetails = false }
         )
     }
+
+    // Hide confirmation dialog
+    if (showHideConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showHideConfirmation = false },
+            title = { Text("Hide Exercise?") },
+            text = {
+                Text("This will hide \"${exercise.name}\" from your exercise list. You can unhide it anytime in Settings.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onHide?.invoke(exercise.id)
+                    showHideConfirmation = false
+                }) {
+                    Text("Hide")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showHideConfirmation = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -316,7 +342,8 @@ fun ExerciseFormDialog(
                     onValueChange = { name = it },
                     label = { Text("Exercise Name") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = exercise?.isCustom != false
                 )
 
                 // Primary Muscles
@@ -372,7 +399,7 @@ fun ExerciseFormDialog(
                     if (name.isNotBlank() && selectedPrimary.isNotEmpty()) {
                         onSave(
                             Exercise(
-                                id = exercise?.id ?: "",
+                                id = exercise?.id ?: 0,
                                 name = name,
                                 primaryMuscles = selectedPrimary,
                                 secondaryMuscles = selectedSecondary,
@@ -385,7 +412,8 @@ fun ExerciseFormDialog(
                                 videoUrl = exercise?.videoUrl,
                                 thumbnailUrl = exercise?.thumbnailUrl,
                                 isCustom = exercise?.isCustom ?: true,
-                                createdBy = exercise?.createdBy
+                                createdBy = exercise?.createdBy,
+                                isHidden = exercise?.isHidden ?: false
                             )
                         )
                     }
@@ -462,14 +490,7 @@ fun ExerciseDetailDialog(
                 ) {
                     AssistChip(
                         onClick = { },
-                        label = { Text(exercise.difficulty.name) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = when (exercise.difficulty) {
-                                DifficultyLevel.BEGINNER -> MaterialTheme.colorScheme.primaryContainer
-                                DifficultyLevel.INTERMEDIATE -> MaterialTheme.colorScheme.secondaryContainer
-                                DifficultyLevel.ADVANCED -> MaterialTheme.colorScheme.tertiaryContainer
-                            }
-                        )
+                        label = { Text(exercise.difficulty.name) }
                     )
                     AssistChip(
                         onClick = { },
@@ -568,12 +589,16 @@ fun ExerciseDetailDialog(
                     }
                 }
 
-                // Close button
-                Button(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.End)
+                // Action buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    Text("Close")
+                    Button(
+                        onClick = onDismiss
+                    ) {
+                        Text("Close")
+                    }
                 }
             }
         }

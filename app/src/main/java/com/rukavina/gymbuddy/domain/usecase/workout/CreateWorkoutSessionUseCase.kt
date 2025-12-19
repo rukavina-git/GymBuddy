@@ -32,8 +32,8 @@ class CreateWorkoutSessionUseCase @Inject constructor(
 
             // Generate IDs for performed exercises if needed
             val performedExercisesWithIds = workoutSessionWithId.performedExercises.map { exercise ->
-                if (exercise.id.isBlank()) {
-                    exercise.copy(id = UUID.randomUUID().toString())
+                if (exercise.id <= 0) {
+                    exercise.copy(id = System.currentTimeMillis().toInt())
                 } else {
                     exercise
                 }

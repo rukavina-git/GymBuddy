@@ -27,4 +27,5 @@ object NavRoutes {
     const val EditFitnessGoal = "edit_fitness_goal"
     const val EditActivityLevel = "edit_activity_level"
     const val EditUnits = "edit_units"
+    const val HiddenExercises = "hidden_exercises"
 }

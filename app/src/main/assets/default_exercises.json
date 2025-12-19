@@ -2,7 +2,7 @@
   "version": 1,
   "exercises": [
     {
-      "id": "default_bench_press",
+      "id": 10001,
       "name": "Barbell Bench Press",
       "description": "A fundamental upper body exercise that targets the chest, shoulders, and triceps. Lie on a flat bench and press the barbell from chest to full extension.",
       "instructions": [
@@ -24,7 +24,7 @@
       "createdBy": null
     },
     {
-      "id": "default_squat",
+      "id": 10002,
       "name": "Barbell Back Squat",
       "description": "The king of leg exercises. A compound movement that builds overall lower body strength and mass.",
       "instructions": [
@@ -46,7 +46,7 @@
       "createdBy": null
     },
     {
-      "id": "default_deadlift",
+      "id": 10003,
       "name": "Conventional Deadlift",
       "description": "A total body strength builder that primarily targets the posterior chain. One of the most effective exercises for building overall strength.",
       "instructions": [
@@ -68,29 +68,7 @@
       "createdBy": null
     },
     {
-      "id": "default_overhead_press",
-      "name": "Overhead Press",
-      "description": "A fundamental shoulder exercise that builds pressing strength and shoulder stability.",
-      "instructions": [
-        "Stand with barbell at shoulder height",
-        "Grip bar just outside shoulders",
-        "Press bar overhead until arms fully extended",
-        "Lower bar to shoulders with control",
-        "Keep core tight throughout movement"
-      ],
-      "primaryMuscles": ["SHOULDERS"],
-      "secondaryMuscles": ["ARMS", "CORE"],
-      "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_pull_up",
+      "id": 10004,
       "name": "Pull-Up",
       "description": "A bodyweight exercise that builds back width and pulling strength.",
       "instructions": [
@@ -112,271 +90,7 @@
       "createdBy": null
     },
     {
-      "id": "default_barbell_row",
-      "name": "Bent Over Barbell Row",
-      "description": "A compound pulling exercise that builds back thickness and strength.",
-      "instructions": [
-        "Bend at hips with slight knee bend",
-        "Grip bar slightly wider than shoulders",
-        "Pull bar to lower chest/upper abdomen",
-        "Squeeze shoulder blades together",
-        "Lower bar with control"
-      ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["ARMS", "CORE"],
-      "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_dumbbell_curl",
-      "name": "Dumbbell Bicep Curl",
-      "description": "An isolation exercise for building bicep size and strength.",
-      "instructions": [
-        "Stand with dumbbells at sides, palms forward",
-        "Curl weights up towards shoulders",
-        "Keep elbows stationary at sides",
-        "Squeeze biceps at top",
-        "Lower with control"
-      ],
-      "primaryMuscles": ["ARMS"],
-      "secondaryMuscles": [],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_tricep_extension",
-      "name": "Overhead Tricep Extension",
-      "description": "An isolation exercise targeting the triceps, particularly the long head.",
-      "instructions": [
-        "Hold dumbbell overhead with both hands",
-        "Keep elbows pointed forward",
-        "Lower weight behind head",
-        "Extend arms back to start",
-        "Keep upper arms stationary"
-      ],
-      "primaryMuscles": ["ARMS"],
-      "secondaryMuscles": [],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_leg_press",
-      "name": "Leg Press",
-      "description": "A machine-based compound exercise for building leg strength with less spinal loading than squats.",
-      "instructions": [
-        "Sit in machine with back against pad",
-        "Place feet shoulder-width on platform",
-        "Release safety and lower platform",
-        "Lower until knees at 90 degrees",
-        "Press through heels to extend"
-      ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": [],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["MACHINE"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_romanian_deadlift",
-      "name": "Romanian Deadlift",
-      "description": "A hip-hinge movement that targets the hamstrings and glutes with emphasis on the eccentric phase.",
-      "instructions": [
-        "Stand holding barbell at hip level",
-        "Keeping slight knee bend, push hips back",
-        "Lower bar along legs until hamstring stretch",
-        "Drive hips forward to return to start",
-        "Keep back straight throughout"
-      ],
-      "primaryMuscles": ["LEGS", "BACK"],
-      "secondaryMuscles": ["CORE"],
-      "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_lateral_raise",
-      "name": "Dumbbell Lateral Raise",
-      "description": "An isolation exercise for building shoulder width by targeting the lateral deltoid.",
-      "instructions": [
-        "Stand with dumbbells at sides",
-        "Raise arms out to sides",
-        "Lift to shoulder height",
-        "Lower with control",
-        "Keep slight bend in elbows"
-      ],
-      "primaryMuscles": ["SHOULDERS"],
-      "secondaryMuscles": [],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_incline_bench",
-      "name": "Incline Barbell Bench Press",
-      "description": "A variation of the bench press that emphasizes the upper chest and front deltoids.",
-      "instructions": [
-        "Set bench to 30-45 degree incline",
-        "Lie back with feet on floor",
-        "Grip bar slightly wider than shoulders",
-        "Lower to upper chest",
-        "Press back to start"
-      ],
-      "primaryMuscles": ["CHEST"],
-      "secondaryMuscles": ["SHOULDERS", "ARMS"],
-      "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL", "BENCH"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_cable_fly",
-      "name": "Cable Chest Fly",
-      "description": "An isolation exercise for the chest that maintains constant tension throughout the movement.",
-      "instructions": [
-        "Set cables to shoulder height",
-        "Grab handles and step forward",
-        "Bring handles together in front of chest",
-        "Squeeze chest muscles",
-        "Return to start with control"
-      ],
-      "primaryMuscles": ["CHEST"],
-      "secondaryMuscles": [],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_face_pull",
-      "name": "Cable Face Pull",
-      "description": "An exercise for rear deltoids and upper back health, improving posture and shoulder balance.",
-      "instructions": [
-        "Set cable to face height with rope attachment",
-        "Pull rope towards face",
-        "Separate hands as you pull",
-        "Focus on rear deltoids and upper back",
-        "Return to start with control"
-      ],
-      "primaryMuscles": ["SHOULDERS", "BACK"],
-      "secondaryMuscles": [],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_leg_curl",
-      "name": "Lying Leg Curl",
-      "description": "An isolation exercise specifically targeting the hamstrings.",
-      "instructions": [
-        "Lie face down on leg curl machine",
-        "Position ankles under pad",
-        "Curl legs up towards glutes",
-        "Squeeze hamstrings at top",
-        "Lower with control"
-      ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": [],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["MACHINE"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_leg_extension",
-      "name": "Leg Extension",
-      "description": "An isolation exercise for the quadriceps, performed on a machine.",
-      "instructions": [
-        "Sit in leg extension machine",
-        "Position ankles under pad",
-        "Extend legs to full extension",
-        "Squeeze quadriceps at top",
-        "Lower with control"
-      ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": [],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["MACHINE"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_plank",
-      "name": "Plank",
-      "description": "A fundamental core stability exercise that builds endurance in the abdominals and lower back.",
-      "instructions": [
-        "Start in push-up position on forearms",
-        "Keep body in straight line",
-        "Engage core and glutes",
-        "Hold position without sagging",
-        "Breathe steadily"
-      ],
-      "primaryMuscles": ["CORE"],
-      "secondaryMuscles": ["SHOULDERS"],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BODYWEIGHT"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_pushup",
+      "id": 10005,
       "name": "Push-Up",
       "description": "A classic bodyweight exercise for building upper body pushing strength.",
       "instructions": [
@@ -398,62 +112,18 @@
       "createdBy": null
     },
     {
-      "id": "default_dip",
-      "name": "Parallel Bar Dips",
-      "description": "A bodyweight exercise that targets the chest, triceps, and shoulders.",
+      "id": 10006,
+      "name": "Plank",
+      "description": "A fundamental core stability exercise that builds endurance in the abdominals and lower back.",
       "instructions": [
-        "Grip parallel bars and support body weight",
-        "Lower body by bending elbows",
-        "Descend until shoulders below elbows",
-        "Press back up to start",
-        "Lean forward for more chest activation"
+        "Start in push-up position on forearms",
+        "Keep body in straight line",
+        "Engage core and glutes",
+        "Hold position without sagging",
+        "Breathe steadily"
       ],
-      "primaryMuscles": ["CHEST", "ARMS"],
+      "primaryMuscles": ["CORE"],
       "secondaryMuscles": ["SHOULDERS"],
-      "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BODYWEIGHT"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_lunge",
-      "name": "Walking Dumbbell Lunge",
-      "description": "A unilateral leg exercise that builds strength and improves balance.",
-      "instructions": [
-        "Hold dumbbells at sides",
-        "Step forward into lunge position",
-        "Lower back knee towards ground",
-        "Push off front foot to step forward",
-        "Alternate legs with each step"
-      ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["CORE"],
-      "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["DUMBBELL"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_calf_raise",
-      "name": "Standing Calf Raise",
-      "description": "An isolation exercise for building calf muscle size and strength.",
-      "instructions": [
-        "Stand with balls of feet on elevated surface",
-        "Raise up onto toes",
-        "Squeeze calves at top",
-        "Lower heels below platform",
-        "Repeat with controlled motion"
-      ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": [],
       "difficulty": "BEGINNER",
       "equipmentNeeded": ["BODYWEIGHT"],
       "category": "STRENGTH",
@@ -464,29 +134,51 @@
       "createdBy": null
     },
     {
-      "id": "default_front_squat",
-      "name": "Front Squat",
-      "description": "A squat variation with the bar positioned on the front shoulders, emphasizing the quads and core.",
+      "id": 10007,
+      "name": "Dumbbell Bicep Curl",
+      "description": "An isolation exercise for building bicep size and strength.",
       "instructions": [
-        "Position barbell on front of shoulders",
-        "Keep elbows high, upper arms parallel to floor",
-        "Squat down keeping torso upright",
-        "Descend until thighs parallel",
-        "Drive through heels to stand"
+        "Stand with dumbbells at sides, palms forward",
+        "Curl weights up towards shoulders",
+        "Keep elbows stationary at sides",
+        "Squeeze biceps at top",
+        "Lower with control"
       ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["CORE"],
-      "difficulty": "ADVANCED",
-      "equipmentNeeded": ["BARBELL"],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL"],
       "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
+      "exerciseType": "ISOLATION",
       "videoUrl": null,
       "thumbnailUrl": null,
       "isCustom": false,
       "createdBy": null
     },
     {
-      "id": "default_goblet_squat",
+      "id": 10008,
+      "name": "Dumbbell Lateral Raise",
+      "description": "An isolation exercise for building shoulder width by targeting the lateral deltoid.",
+      "instructions": [
+        "Stand with dumbbells at sides",
+        "Raise arms out to sides",
+        "Lift to shoulder height",
+        "Lower with control",
+        "Keep slight bend in elbows"
+      ],
+      "primaryMuscles": ["SHOULDERS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": null,
+      "thumbnailUrl": null,
+      "isCustom": false,
+      "createdBy": null
+    },
+    {
+      "id": 10009,
       "name": "Goblet Squat",
       "description": "A beginner-friendly squat variation using a dumbbell or kettlebell held at chest level.",
       "instructions": [
@@ -508,176 +200,22 @@
       "createdBy": null
     },
     {
-      "id": "default_chin_up",
-      "name": "Chin-Up",
-      "description": "A pull-up variation using an underhand grip, placing more emphasis on the biceps.",
+      "id": 10010,
+      "name": "Walking Dumbbell Lunge",
+      "description": "A unilateral leg exercise that builds strength and improves balance.",
       "instructions": [
-        "Hang from bar with underhand grip",
-        "Hands shoulder-width apart",
-        "Pull up until chin over bar",
-        "Lower with control",
-        "Keep core tight"
-      ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["ARMS"],
-      "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["PULL_UP_BAR"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_seated_row",
-      "name": "Seated Cable Row",
-      "description": "A horizontal pulling exercise that builds back thickness and strength.",
-      "instructions": [
-        "Sit at cable row station",
-        "Grip handles with arms extended",
-        "Pull handles to torso",
-        "Squeeze shoulder blades together",
-        "Extend arms to return"
-      ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["ARMS"],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_arnold_press",
-      "name": "Arnold Press",
-      "description": "A shoulder press variation that rotates through full range of motion, hitting all three deltoid heads.",
-      "instructions": [
-        "Start with dumbbells at shoulders, palms facing you",
-        "Press up while rotating palms forward",
-        "End with arms extended, palms forward",
-        "Reverse motion to return",
-        "Keep core tight throughout"
-      ],
-      "primaryMuscles": ["SHOULDERS"],
-      "secondaryMuscles": ["ARMS"],
-      "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["DUMBBELL"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_cable_crunch",
-      "name": "Cable Crunch",
-      "description": "An ab exercise using cable resistance for progressive overload.",
-      "instructions": [
-        "Kneel facing cable machine with rope",
-        "Hold rope at sides of head",
-        "Crunch down towards knees",
-        "Focus on ab contraction",
-        "Return to start with control"
-      ],
-      "primaryMuscles": ["CORE"],
-      "secondaryMuscles": [],
-      "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_bulgarian_split_squat",
-      "name": "Bulgarian Split Squat",
-      "description": "A unilateral leg exercise with the rear foot elevated, excellent for building leg strength and balance.",
-      "instructions": [
-        "Place rear foot on bench behind you",
         "Hold dumbbells at sides",
-        "Lower down into lunge position",
-        "Keep front shin vertical",
-        "Push through front heel to stand"
+        "Step forward into lunge position",
+        "Lower back knee towards ground",
+        "Push off front foot to step forward",
+        "Alternate legs with each step"
       ],
       "primaryMuscles": ["LEGS"],
       "secondaryMuscles": ["CORE"],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["DUMBBELL", "BENCH"],
-      "category": "STRENGTH",
-      "exerciseType": "COMPOUND",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_hammer_curl",
-      "name": "Hammer Curl",
-      "description": "A bicep curl variation with neutral grip that also targets the brachialis and forearms.",
-      "instructions": [
-        "Hold dumbbells with palms facing each other",
-        "Curl weights up towards shoulders",
-        "Keep elbows at sides",
-        "Squeeze at top",
-        "Lower with control"
-      ],
-      "primaryMuscles": ["ARMS"],
-      "secondaryMuscles": [],
-      "difficulty": "BEGINNER",
       "equipmentNeeded": ["DUMBBELL"],
       "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_skull_crusher",
-      "name": "Skull Crusher (Lying Tricep Extension)",
-      "description": "An effective tricep isolation exercise performed lying on a bench.",
-      "instructions": [
-        "Lie on bench holding barbell or EZ bar",
-        "Extend arms straight above chest",
-        "Lower bar towards forehead by bending elbows",
-        "Keep upper arms stationary",
-        "Extend back to start"
-      ],
-      "primaryMuscles": ["ARMS"],
-      "secondaryMuscles": [],
-      "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL", "BENCH"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
-      "videoUrl": null,
-      "thumbnailUrl": null,
-      "isCustom": false,
-      "createdBy": null
-    },
-    {
-      "id": "default_hip_thrust",
-      "name": "Barbell Hip Thrust",
-      "description": "The premier exercise for building glute strength and size.",
-      "instructions": [
-        "Sit on ground with upper back against bench",
-        "Roll barbell over hips (use pad for comfort)",
-        "Plant feet flat, knees bent",
-        "Drive through heels, thrusting hips up",
-        "Squeeze glutes at top, lower with control"
-      ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["CORE"],
-      "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL", "BENCH"],
-      "category": "STRENGTH",
-      "exerciseType": "ISOLATION",
+      "exerciseType": "COMPOUND",
       "videoUrl": null,
       "thumbnailUrl": null,
       "isCustom": false,

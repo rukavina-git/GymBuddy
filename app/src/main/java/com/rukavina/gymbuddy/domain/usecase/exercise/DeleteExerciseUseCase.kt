@@ -12,9 +12,9 @@ class DeleteExerciseUseCase @Inject constructor(
     /**
      * Delete an exercise by ID.
      */
-    suspend operator fun invoke(id: String): Result<Unit> {
+    suspend operator fun invoke(id: Int): Result<Unit> {
         return try {
-            require(id.isNotBlank()) { "Exercise ID cannot be blank" }
+            require(id > 0) { "Exercise ID must be valid" }
             repository.deleteExercise(id)
             Result.success(Unit)
         } catch (e: Exception) {

@@ -12,15 +12,15 @@ package com.rukavina.gymbuddy.data.model
 data class PerformedExercise(
     /**
      * Unique identifier for this performed exercise instance.
-     * Use UUID string format for offline-first compatibility and server sync.
+     * Generated from timestamp for uniqueness.
      */
-    val id: String,
+    val id: Int,
 
     /**
      * Reference to the Exercise template that was performed.
      * Points to Exercise.id.
      */
-    val exerciseId: String,
+    val exerciseId: Int,
 
     /**
      * List of sets performed for this exercise.

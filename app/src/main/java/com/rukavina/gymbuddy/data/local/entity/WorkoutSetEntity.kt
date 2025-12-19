@@ -26,7 +26,7 @@ import androidx.room.PrimaryKey
 data class WorkoutSetEntity(
     @PrimaryKey
     val id: String,
-    val performedExerciseId: String,
+    val performedExerciseId: Int,
     val weight: Float,
     val reps: Int,
     val orderIndex: Int

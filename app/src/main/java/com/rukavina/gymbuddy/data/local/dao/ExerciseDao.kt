@@ -17,16 +17,23 @@ interface ExerciseDao {
     /**
      * Get all exercises as a Flow for reactive updates.
      * Ordered alphabetically by name.
+     * By default, excludes hidden exercises.
+     */
+    @Query("SELECT * FROM exercises WHERE isHidden = 0 ORDER BY name ASC")
+    fun getAllExercises(): Flow<List<ExerciseEntity>>
+
+    /**
+     * Get all exercises including hidden ones.
      */
     @Query("SELECT * FROM exercises ORDER BY name ASC")
-    fun getAllExercises(): Flow<List<ExerciseEntity>>
+    fun getAllExercisesIncludingHidden(): Flow<List<ExerciseEntity>>
 
     /**
      * Get a single exercise by ID.
      * @return ExerciseEntity if found, null otherwise.
      */
     @Query("SELECT * FROM exercises WHERE id = :id")
-    suspend fun getExerciseById(id: String): ExerciseEntity?
+    suspend fun getExerciseById(id: Int): ExerciseEntity?
 
     /**
      * Search exercises by name (case-insensitive).
@@ -52,7 +59,7 @@ interface ExerciseDao {
      * Delete an exercise by ID.
      */
     @Query("DELETE FROM exercises WHERE id = :id")
-    suspend fun deleteExercise(id: String)
+    suspend fun deleteExercise(id: Int)
 
     /**
      * Delete all exercises.
@@ -130,4 +137,28 @@ interface ExerciseDao {
      */
     @Query("DELETE FROM exercises WHERE isCustom = 0")
     suspend fun deleteAllDefaultExercises()
+
+    /**
+     * Hide an exercise by ID.
+     */
+    @Query("UPDATE exercises SET isHidden = 1 WHERE id = :id")
+    suspend fun hideExercise(id: Int)
+
+    /**
+     * Unhide an exercise by ID.
+     */
+    @Query("UPDATE exercises SET isHidden = 0 WHERE id = :id")
+    suspend fun unhideExercise(id: Int)
+
+    /**
+     * Get all hidden exercises.
+     */
+    @Query("SELECT * FROM exercises WHERE isHidden = 1 ORDER BY name ASC")
+    fun getHiddenExercises(): Flow<List<ExerciseEntity>>
+
+    /**
+     * Unhide all exercises.
+     */
+    @Query("UPDATE exercises SET isHidden = 0")
+    suspend fun unhideAllExercises()
 }
