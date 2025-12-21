@@ -273,7 +273,7 @@ fun ExerciseScreen(
 
         // Create/Edit Dialog
         if (showDialog) {
-            ExerciseFormDialog(
+            ExerciseWizardDialog(
                 exercise = editingExercise,
                 onDismiss = { showDialog = false },
                 onSave = { exercise ->
