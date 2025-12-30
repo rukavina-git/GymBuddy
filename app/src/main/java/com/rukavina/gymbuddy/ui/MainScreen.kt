@@ -16,9 +16,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 import com.rukavina.gymbuddy.navigation.BottomNavItem
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.exercise.ExerciseScreen
+import com.rukavina.gymbuddy.ui.exercise.ExerciseDetailsScreen
+import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
 import com.rukavina.gymbuddy.ui.profile.ProfileScreen
 import com.rukavina.gymbuddy.ui.profile.ProfileViewModel
 import com.rukavina.gymbuddy.ui.profile.edit.EditActivityLevelScreen
@@ -103,7 +107,28 @@ fun MainScreen(rootNavController: NavHostController) {
                     onStartWorkout = { bottomNavController.navigate(NavRoutes.ActiveWorkout) }
                 )
             }
-            composable(NavRoutes.Exercises) { ExerciseScreen() }
+            composable(NavRoutes.Exercises) {
+                ExerciseScreen(navController = bottomNavController)
+            }
+            composable(
+                route = NavRoutes.ExerciseDetails,
+                arguments = listOf(navArgument("exerciseId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val exerciseId = backStackEntry.arguments?.getInt("exerciseId") ?: 0
+                val exerciseViewModel: ExerciseViewModel = hiltViewModel()
+                val uiState = exerciseViewModel.uiState.collectAsState().value
+                val exercise = uiState.exercises.find { it.id == exerciseId }
+
+                if (exercise != null) {
+                    ExerciseDetailsScreen(
+                        exercise = exercise,
+                        onNavigateBack = { bottomNavController.navigateUp() },
+                        onUpdateNote = { note ->
+                            exerciseViewModel.updateExerciseNote(exerciseId, note)
+                        }
+                    )
+                }
+            }
             composable(NavRoutes.Statistics) { StatisticsScreen() }
             composable(NavRoutes.Settings) {
                 SettingsScreen(

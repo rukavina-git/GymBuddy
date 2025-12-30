@@ -1,4 +1,5 @@
 [versions]
+accompanistSystemuicontroller = "0.36.0"
 activityCompose = "1.12.1"
 androidxComposeBom = "2025.12.00"
 appcompat = "1.7.1"
@@ -28,6 +29,7 @@ datastore = "1.2.0"
 kizitonwoseCalendar = "2.9.0"
 
 [libraries]
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidxComposeBom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidxCoreKtx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }

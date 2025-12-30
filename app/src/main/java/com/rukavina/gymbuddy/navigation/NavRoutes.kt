@@ -9,6 +9,7 @@ object NavRoutes {
     const val Home = "home"
     const val Templates = "templates"
     const val Exercises = "exercises"
+    const val ExerciseDetails = "exercise_details/{exerciseId}"
     const val Workouts = "workouts"
     const val Statistics = "statistics"
     const val Settings = "settings"
@@ -28,4 +29,8 @@ object NavRoutes {
     const val EditActivityLevel = "edit_activity_level"
     const val EditUnits = "edit_units"
     const val HiddenExercises = "hidden_exercises"
+
+    fun exerciseDetailsRoute(exerciseId: Int): String {
+        return "exercise_details/$exerciseId"
+    }
 }

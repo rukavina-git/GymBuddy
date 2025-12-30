@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.composeMaterial)
     implementation(libs.material3)
     implementation(libs.material.icons.extended)
+    implementation(libs.accompanist.systemuicontroller)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     implementation(libs.coil.compose)

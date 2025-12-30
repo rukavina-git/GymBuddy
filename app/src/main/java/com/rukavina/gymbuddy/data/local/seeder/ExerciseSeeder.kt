@@ -117,6 +117,8 @@ class ExerciseSeeder @Inject constructor(
             secondaryMuscles = parseEnumList<MuscleGroup>(json.getJSONArray("secondaryMuscles")),
             description = json.optString("description").takeIf { it.isNotEmpty() },
             instructions = parseStringList(json.optJSONArray("instructions")),
+            tips = parseStringList(json.optJSONArray("tips")),
+            note = json.optString("note").takeIf { it.isNotEmpty() },
             difficulty = DifficultyLevel.valueOf(json.getString("difficulty")),
             equipmentNeeded = parseEnumList<Equipment>(json.getJSONArray("equipmentNeeded")),
             category = ExerciseCategory.valueOf(json.getString("category")),

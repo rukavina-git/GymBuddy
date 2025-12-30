@@ -2,16 +2,22 @@ package com.rukavina.gymbuddy
 
 import android.app.Application
 import android.util.Log
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import coil3.request.crossfade
 import com.rukavina.gymbuddy.data.local.seeder.ExerciseSeeder
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 @HiltAndroidApp
-class GymBuddyApplication : Application() {
+class GymBuddyApplication : Application(), SingletonImageLoader.Factory {
 
     @Inject
     lateinit var exerciseSeeder: ExerciseSeeder
@@ -35,5 +41,14 @@ class GymBuddyApplication : Application() {
                 Log.e("AppInfo", "Failed to seed default exercises", e)
             }
         }
+    }
+
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
+        return ImageLoader.Builder(context)
+            .components {
+                add(OkHttpNetworkFetcherFactory(callFactory = { OkHttpClient() }))
+            }
+            .crossfade(true)
+            .build()
     }
 }
