@@ -25,6 +25,8 @@ data class ExerciseEntity(
     val secondaryMuscles: List<MuscleGroup>,
     val description: String?,
     val instructions: List<String>,
+    val tips: List<String>,
+    val note: String?,
     val difficulty: DifficultyLevel,
     val equipmentNeeded: List<Equipment>,
     val category: ExerciseCategory,

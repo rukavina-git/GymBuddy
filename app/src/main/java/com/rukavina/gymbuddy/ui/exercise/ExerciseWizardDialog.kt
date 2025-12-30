@@ -170,6 +170,8 @@ fun ExerciseWizardDialog(
                                         secondaryMuscles = secondaryMuscles,
                                         description = description.ifBlank { null },
                                         instructions = instructions.filter { it.isNotBlank() },
+                                        tips = exercise?.tips ?: emptyList(),
+                                        note = exercise?.note,
                                         difficulty = difficulty,
                                         equipmentNeeded = equipmentNeeded,
                                         category = category,

@@ -45,6 +45,18 @@ data class Exercise(
     val instructions: List<String> = emptyList(),
 
     /**
+     * Key tips for performing the exercise correctly.
+     * Provides helpful hints and safety advice.
+     */
+    val tips: List<String> = emptyList(),
+
+    /**
+     * Personal note about this exercise.
+     * User can add their own observations, preferences, or reminders.
+     */
+    val note: String? = null,
+
+    /**
      * Difficulty level of the exercise.
      * Helps users select appropriate exercises for their skill level.
      */

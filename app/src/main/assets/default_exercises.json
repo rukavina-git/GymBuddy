@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 4,
   "exercises": [
     {
       "id": 10001,
@@ -12,6 +12,11 @@
         "Press bar up to starting position",
         "Keep shoulder blades retracted throughout"
       ],
+      "tips": [
+        "Keep your feet flat on the floor for stability",
+        "Maintain a slight arch in your lower back",
+        "Don't bounce the bar off your chest"
+      ],
       "primaryMuscles": ["CHEST"],
       "secondaryMuscles": ["SHOULDERS", "ARMS"],
       "difficulty": "INTERMEDIATE",
@@ -19,7 +24,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": null,
+      "thumbnailUrl": "https://picsum.photos/seed/bench-press/400/300",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -34,6 +39,11 @@
         "Lower until thighs are parallel or below",
         "Drive through heels to return to start"
       ],
+      "tips": [
+        "Keep your chest up and core braced throughout",
+        "Your knees should track over your toes",
+        "Don't let your knees cave inward"
+      ],
       "primaryMuscles": ["LEGS"],
       "secondaryMuscles": ["CORE", "BACK"],
       "difficulty": "INTERMEDIATE",
@@ -41,7 +51,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": null,
+      "thumbnailUrl": "https://picsum.photos/seed/back-squat/400/300",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -56,6 +66,11 @@
         "Drive through heels, extending hips and knees",
         "Stand fully upright, then lower with control"
       ],
+      "tips": [
+        "Keep the bar close to your body throughout the lift",
+        "Maintain a neutral spine - don't round your back",
+        "Engage your lats by pulling the bar into your shins"
+      ],
       "primaryMuscles": ["BACK", "LEGS"],
       "secondaryMuscles": ["CORE", "ARMS"],
       "difficulty": "ADVANCED",
@@ -63,7 +78,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": null,
+      "thumbnailUrl": "https://picsum.photos/seed/deadlift/400/300",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -78,6 +93,11 @@
         "Lower yourself with control",
         "Keep core engaged, avoid swinging"
       ],
+      "tips": [
+        "Pull with your elbows, not just your hands",
+        "Keep your shoulders down and back",
+        "If you can't do a full pull-up, use resistance bands or do negatives"
+      ],
       "primaryMuscles": ["BACK"],
       "secondaryMuscles": ["ARMS"],
       "difficulty": "INTERMEDIATE",
@@ -85,7 +105,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": null,
+      "thumbnailUrl": "https://picsum.photos/seed/pull-up/400/300",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -100,6 +120,11 @@
         "Push back to start position",
         "Maintain straight body line"
       ],
+      "tips": [
+        "Don't let your hips sag or pike up",
+        "Keep your core tight throughout the movement",
+        "For easier variation, elevate your hands or do from knees"
+      ],
       "primaryMuscles": ["CHEST"],
       "secondaryMuscles": ["SHOULDERS", "ARMS", "CORE"],
       "difficulty": "BEGINNER",
@@ -107,7 +132,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": null,
+      "thumbnailUrl": "https://picsum.photos/seed/push-up/400/300",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -122,6 +147,11 @@
         "Hold position without sagging",
         "Breathe steadily"
       ],
+      "tips": [
+        "Focus on maintaining a neutral spine",
+        "Don't hold your breath - breathe normally",
+        "If your form breaks, rest and reset rather than continuing with poor form"
+      ],
       "primaryMuscles": ["CORE"],
       "secondaryMuscles": ["SHOULDERS"],
       "difficulty": "BEGINNER",
@@ -129,7 +159,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": null,
+      "thumbnailUrl": "https://picsum.photos/seed/plank/400/300",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -144,6 +174,11 @@
         "Squeeze biceps at top",
         "Lower with control"
       ],
+      "tips": [
+        "Don't swing or use momentum - keep it controlled",
+        "Keep your elbows pinned to your sides",
+        "Squeeze at the top for maximum contraction"
+      ],
       "primaryMuscles": ["ARMS"],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
@@ -151,7 +186,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": null,
+      "thumbnailUrl": "https://picsum.photos/seed/bicep-curl/400/300",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -166,6 +201,11 @@
         "Lower with control",
         "Keep slight bend in elbows"
       ],
+      "tips": [
+        "Lead with your elbows, not your hands",
+        "Don't go above shoulder height to avoid impingement",
+        "Use lighter weight and focus on form over ego"
+      ],
       "primaryMuscles": ["SHOULDERS"],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
@@ -173,7 +213,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": null,
+      "thumbnailUrl": "https://picsum.photos/seed/lateral-raise/400/300",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -188,6 +228,11 @@
         "Elbows track between knees",
         "Drive through heels to stand"
       ],
+      "tips": [
+        "This is a great exercise for learning proper squat form",
+        "The weight at your chest helps keep your torso upright",
+        "Use this to practice depth before moving to barbell squats"
+      ],
       "primaryMuscles": ["LEGS"],
       "secondaryMuscles": ["CORE"],
       "difficulty": "BEGINNER",
@@ -195,7 +240,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": null,
+      "thumbnailUrl": "https://picsum.photos/seed/goblet-squat/400/300",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -210,6 +255,11 @@
         "Push off front foot to step forward",
         "Alternate legs with each step"
       ],
+      "tips": [
+        "Take a long enough step to avoid knee strain",
+        "Keep your torso upright throughout the movement",
+        "Control the descent - don't crash down"
+      ],
       "primaryMuscles": ["LEGS"],
       "secondaryMuscles": ["CORE"],
       "difficulty": "INTERMEDIATE",
@@ -217,7 +267,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": null,
+      "thumbnailUrl": "https://picsum.photos/seed/walking-lunge/400/300",
       "isCustom": false,
       "createdBy": "0"
     }

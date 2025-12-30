@@ -265,6 +265,39 @@ class ExerciseViewModel @Inject constructor(
     }
 
     /**
+     * Update the note for an exercise.
+     */
+    fun updateExerciseNote(exerciseId: Int, note: String) {
+        viewModelScope.launch {
+            try {
+                val exercise = getExerciseByIdUseCase(exerciseId)
+                if (exercise != null) {
+                    val updatedExercise = exercise.copy(note = note.ifBlank { null })
+                    updateExerciseUseCase(updatedExercise)
+                        .onSuccess {
+                            _uiState.update {
+                                it.copy(successMessage = "Note updated successfully")
+                            }
+                        }
+                        .onFailure { error ->
+                            _uiState.update {
+                                it.copy(errorMessage = error.message ?: "Failed to update note")
+                            }
+                        }
+                } else {
+                    _uiState.update {
+                        it.copy(errorMessage = "Exercise not found")
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = e.message ?: "Failed to update note")
+                }
+            }
+        }
+    }
+
+    /**
      * Flow of hidden exercises.
      */
     val hiddenExercises = exerciseRepository.getHiddenExercises()
