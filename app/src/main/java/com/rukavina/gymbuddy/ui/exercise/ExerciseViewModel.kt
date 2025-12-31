@@ -2,10 +2,13 @@ package com.rukavina.gymbuddy.ui.exercise
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rukavina.gymbuddy.data.model.Equipment
 import com.rukavina.gymbuddy.data.model.Exercise
+import com.rukavina.gymbuddy.data.model.MuscleGroup
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import com.rukavina.gymbuddy.domain.usecase.exercise.CreateExerciseUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.DeleteExerciseUseCase
+import com.rukavina.gymbuddy.domain.usecase.exercise.FilterExercisesUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetExerciseByIdUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.SearchExercisesUseCase
@@ -32,6 +35,7 @@ class ExerciseViewModel @Inject constructor(
     private val updateExerciseUseCase: UpdateExerciseUseCase,
     private val deleteExerciseUseCase: DeleteExerciseUseCase,
     private val searchExercisesUseCase: SearchExercisesUseCase,
+    private val filterExercisesUseCase: FilterExercisesUseCase,
     private val exerciseRepository: ExerciseRepository
 ) : ViewModel() {
 
@@ -66,6 +70,7 @@ class ExerciseViewModel @Inject constructor(
                             errorMessage = null
                         )
                     }
+                    applyFilters()
                 }
         }
     }
@@ -295,6 +300,59 @@ class ExerciseViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * Update search query and recompute filtered exercises.
+     */
+    fun updateSearchQuery(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
+        applyFilters()
+    }
+
+    /**
+     * Update selected muscle filters and recompute.
+     */
+    fun updateMuscleFilters(muscles: Set<MuscleGroup>) {
+        _uiState.update { it.copy(selectedMuscles = muscles) }
+        applyFilters()
+    }
+
+    /**
+     * Update selected equipment filters and recompute.
+     */
+    fun updateEquipmentFilters(equipment: Set<Equipment>) {
+        _uiState.update { it.copy(selectedEquipment = equipment) }
+        applyFilters()
+    }
+
+    /**
+     * Clear all filters (search + muscle + equipment).
+     */
+    fun clearAllFilters() {
+        _uiState.update {
+            it.copy(
+                searchQuery = "",
+                selectedMuscles = emptySet(),
+                selectedEquipment = emptySet()
+            )
+        }
+        applyFilters()
+    }
+
+    /**
+     * Apply all active filters to exercise list.
+     * Updates filteredExercises in state.
+     */
+    private fun applyFilters() {
+        val current = _uiState.value
+        val filtered = filterExercisesUseCase(
+            exercises = current.exercises,
+            searchQuery = current.searchQuery,
+            selectedMuscles = current.selectedMuscles,
+            selectedEquipment = current.selectedEquipment
+        )
+        _uiState.update { it.copy(filteredExercises = filtered) }
     }
 
     /**
