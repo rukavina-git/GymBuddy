@@ -5,13 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -19,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.rukavina.gymbuddy.data.model.Exercise
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,36 +26,8 @@ fun ExerciseDetailsScreen(
     onNavigateBack: () -> Unit,
     onUpdateNote: (String) -> Unit = {}
 ) {
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("INFO", "HISTORY")
-
-    // Set status bar for white background with dark icons
-    val systemUiController = rememberSystemUiController()
-
-    DisposableEffect(systemUiController) {
-        // Set status bar to white with dark icons for visibility
-        systemUiController.setStatusBarColor(
-            color = Color.White,
-            darkIcons = true
-        )
-        // Set navigation bar to match
-        systemUiController.setNavigationBarColor(
-            color = Color.White,
-            darkIcons = true
-        )
-
-        onDispose {
-            // Reset to transparent when leaving screen
-            systemUiController.setStatusBarColor(
-                color = Color.Transparent,
-                darkIcons = true
-            )
-            systemUiController.setNavigationBarColor(
-                color = Color.Transparent,
-                darkIcons = true
-            )
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -357,7 +326,7 @@ fun InfoTab(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = exercise.description ?: "",
+                    text = exercise.description,
                     style = MaterialTheme.typography.bodyMedium,
                     lineHeight = MaterialTheme.typography.bodyMedium.lineHeight.times(1.5f)
                 )
