@@ -11,6 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -18,7 +20,6 @@ import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.components.EmptyState
 import com.rukavina.gymbuddy.ui.components.FilterBottomSheet
 import com.rukavina.gymbuddy.ui.components.LoadingState
-import com.rukavina.gymbuddy.ui.components.SearchDialog
 import com.rukavina.gymbuddy.ui.components.ThumbnailCard
 import com.rukavina.gymbuddy.ui.exercise.components.ExerciseFilterContent
 
@@ -35,8 +36,9 @@ fun ExerciseScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var editingExercise by remember { mutableStateOf<com.rukavina.gymbuddy.data.model.Exercise?>(null) }
-    var showSearchDialog by remember { mutableStateOf(false) }
+    var isSearchExpanded by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
 
     Scaffold(
         floatingActionButton = {
@@ -77,7 +79,7 @@ fun ExerciseScreen(
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        // Clean header with title and search icon
+                        // Expandable search header
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -85,17 +87,51 @@ fun ExerciseScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "EXERCISES",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                            )
-                            IconButton(onClick = { showSearchDialog = true }) {
-                                Icon(
-                                    Icons.Default.Search,
-                                    contentDescription = "Search",
-                                    modifier = Modifier.size(28.dp)
+                            if (isSearchExpanded) {
+                                // Search mode - show text field
+                                OutlinedTextField(
+                                    value = uiState.searchQuery,
+                                    onValueChange = { viewModel.updateSearchQuery(it) },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .focusRequester(focusRequester),
+                                    placeholder = { Text("Search exercises...") },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Search, contentDescription = null)
+                                    },
+                                    trailingIcon = {
+                                        IconButton(onClick = {
+                                            isSearchExpanded = false
+                                            viewModel.updateSearchQuery("")
+                                        }) {
+                                            Icon(Icons.Default.Clear, contentDescription = "Close search")
+                                        }
+                                    },
+                                    singleLine = true,
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                                    )
                                 )
+
+                                // Auto-focus when expanded
+                                LaunchedEffect(Unit) {
+                                    focusRequester.requestFocus()
+                                }
+                            } else {
+                                // Normal mode - show title and search icon
+                                Text(
+                                    text = "EXERCISES",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                                )
+                                IconButton(onClick = { isSearchExpanded = true }) {
+                                    Icon(
+                                        Icons.Default.Search,
+                                        contentDescription = "Search",
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
                             }
                         }
 
@@ -227,17 +263,6 @@ fun ExerciseScreen(
                     }
                     showDialog = false
                 }
-            )
-        }
-
-        // Search Dialog
-        if (showSearchDialog) {
-            SearchDialog(
-                searchQuery = uiState.searchQuery,
-                onSearchQueryChange = { viewModel.updateSearchQuery(it) },
-                onDismiss = { showSearchDialog = false },
-                title = "Search Exercises",
-                placeholder = "Search by name..."
             )
         }
 

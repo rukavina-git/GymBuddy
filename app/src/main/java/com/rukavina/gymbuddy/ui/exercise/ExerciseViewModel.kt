@@ -14,6 +14,8 @@ import com.rukavina.gymbuddy.domain.usecase.exercise.GetExerciseByIdUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.SearchExercisesUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.UpdateExerciseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,6 +43,8 @@ class ExerciseViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ExerciseUiState())
     val uiState: StateFlow<ExerciseUiState> = _uiState.asStateFlow()
+
+    private var searchJob: Job? = null
 
     init {
         loadExercises()
@@ -303,11 +307,20 @@ class ExerciseViewModel @Inject constructor(
     }
 
     /**
-     * Update search query and recompute filtered exercises.
+     * Update search query and recompute filtered exercises with debouncing.
+     * Waits 300ms after user stops typing before applying filter.
      */
     fun updateSearchQuery(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
-        applyFilters()
+
+        // Cancel previous search job
+        searchJob?.cancel()
+
+        // Start new debounced search
+        searchJob = viewModelScope.launch {
+            delay(300) // 300ms debounce
+            applyFilters()
+        }
     }
 
     /**
