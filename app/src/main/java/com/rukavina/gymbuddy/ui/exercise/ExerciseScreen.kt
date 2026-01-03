@@ -20,6 +20,7 @@ import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.components.EmptyState
 import com.rukavina.gymbuddy.ui.components.FilterBottomSheet
 import com.rukavina.gymbuddy.ui.components.LoadingState
+import com.rukavina.gymbuddy.ui.components.ScreenHeader
 import com.rukavina.gymbuddy.ui.components.ThumbnailCard
 import com.rukavina.gymbuddy.ui.exercise.components.ExerciseFilterContent
 
@@ -120,10 +121,8 @@ fun ExerciseScreen(
                                 }
                             } else {
                                 // Normal mode - show title and search icon
-                                Text(
-                                    text = "EXERCISES",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                                ScreenHeader(
+                                    title = "EXERCISES"
                                 )
                                 IconButton(onClick = { isSearchExpanded = true }) {
                                     Icon(
