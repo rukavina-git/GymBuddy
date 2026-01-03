@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.daggerHilt)
+    implementation(libs.androidx.material3)
     ksp(libs.daggerHiltCompiler)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)

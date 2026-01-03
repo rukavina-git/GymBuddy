@@ -1,5 +1,10 @@
 package com.rukavina.gymbuddy.ui
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -76,7 +81,7 @@ fun MainScreen(rootNavController: NavHostController) {
                         },
                         icon = { Icon(item.icon, contentDescription = item.label) },
                         label = { Text(item.label) },
-                        alwaysShowLabel = false
+                        alwaysShowLabel = true
                     )
                 }
             }
@@ -85,7 +90,11 @@ fun MainScreen(rootNavController: NavHostController) {
         NavHost(
             navController = bottomNavController,
             startDestination = NavRoutes.Home,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
+            enterTransition = { fadeIn(animationSpec = tween(300)) + slideInHorizontally(animationSpec = tween(300)) { it / 4 } },
+            exitTransition = { fadeOut(animationSpec = tween(300)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+            popExitTransition = { fadeOut(animationSpec = tween(300)) + slideOutHorizontally(animationSpec = tween(300)) { it / 4 } }
         ) {
             composable(NavRoutes.Home) {
                 HomeScreen(
