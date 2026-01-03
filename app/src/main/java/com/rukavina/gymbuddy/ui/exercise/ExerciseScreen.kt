@@ -249,9 +249,9 @@ fun ExerciseScreen(
             }
         }
 
-        // Create/Edit Dialog
+        // Create/Edit Bottom Sheet
         if (showDialog) {
-            ExerciseWizardDialog(
+            ExerciseCreationBottomSheet(
                 exercise = editingExercise,
                 onDismiss = { showDialog = false },
                 onSave = { exercise ->
