@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.ui.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -15,6 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "ProfileViewModel"
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -58,13 +61,17 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun loadProfile() {
+        Log.d(TAG, "loadProfile called")
         viewModelScope.launch {
             // Get email from Firebase Auth
             val firebaseEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
 
             uid?.let { userId ->
+                Log.d(TAG, "Loading profile for uid: $userId")
                 val profile = repository.getProfile(userId)
+                Log.d(TAG, "Loaded profile: $profile")
                 profile?.let { p ->
+                    Log.d(TAG, "Profile imageUrl from DB: ${p.profileImageUrl}")
                     // Convert from metric (database storage) to user's preferred display units
                     _uiState.value = _uiState.value.copy(
                         name = p.name,
@@ -80,13 +87,17 @@ class ProfileViewModel @Inject constructor(
                         bio = p.bio ?: "",
                         profileImageUri = p.profileImageUrl
                     )
+                    Log.d(TAG, "UI state updated with profileImageUri: ${_uiState.value.profileImageUri}")
                     // Save the loaded state as baseline for change tracking
                     savedProfileState = _uiState.value
                 } ?: run {
+                    Log.d(TAG, "No profile found, using default")
                     // No profile exists, set email from Firebase
                     _uiState.value = _uiState.value.copy(email = firebaseEmail)
                     savedProfileState = _uiState.value
                 }
+            } ?: run {
+                Log.e(TAG, "Cannot load profile - uid is null")
             }
         }
     }
@@ -133,14 +144,18 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun onSaveClick() {
+        Log.d(TAG, "onSaveClick called")
         viewModelScope.launch {
+            Log.d(TAG, "uid: $uid")
             uid?.let { userId ->
-                val currentState = _uiState.value
+                var currentState = _uiState.value
+                Log.d(TAG, "Current profileImageUri: ${currentState.profileImageUri}")
 
-                // Only validate name as required field
+                // Use default name if blank
                 if (currentState.name.isBlank()) {
-                    _uiState.value = currentState.copy(message = "Name is required")
-                    return@launch
+                    Log.d(TAG, "Name is blank, using default 'User'")
+                    currentState = currentState.copy(name = "User")
+                    _uiState.value = currentState
                 }
 
                 // Convert from display units to metric for database storage
@@ -164,10 +179,14 @@ class ProfileViewModel @Inject constructor(
                     joinedDate = System.currentTimeMillis(), // TODO: Store actual join date
                     bio = currentState.bio.ifBlank { null }
                 )
+                Log.d(TAG, "Saving profile with imageUrl: ${profile.profileImageUrl}")
                 repository.saveProfile(profile)
+                Log.d(TAG, "Profile saved successfully")
                 _uiState.value = currentState.copy(message = "Profile saved.")
                 // Update saved state after successful save
                 savedProfileState = _uiState.value
+            } ?: run {
+                Log.e(TAG, "Cannot save - uid is null")
             }
         }
     }

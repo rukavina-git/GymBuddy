@@ -54,10 +54,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.rukavina.gymbuddy.navigation.NavRoutes
+import android.util.Log
 import com.rukavina.gymbuddy.ui.settings.SettingsItem
 import com.rukavina.gymbuddy.ui.settings.SettingsSection
+import com.rukavina.gymbuddy.utils.ImageStorageUtil
 import com.rukavina.gymbuddy.utils.UnitConverter
-import android.content.Intent
+
+private const val TAG = "ProfileScreen"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,18 +78,22 @@ fun ProfileScreen(
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
+        Log.d(TAG, "Image picker returned uri: $uri")
         uri?.let {
-            // Take persistent URI permission
-            try {
-                context.contentResolver.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-            } catch (e: SecurityException) {
-                e.printStackTrace()
+            // Copy image to internal storage for persistence
+            val savedPath = ImageStorageUtil.saveImageToInternalStorage(context, it)
+            Log.d(TAG, "Saved path: $savedPath")
+            if (savedPath != null) {
+                Log.d(TAG, "Calling viewModel.onImageSelected with: $savedPath")
+                viewModel.onImageSelected(savedPath)
+                Log.d(TAG, "Calling viewModel.onSaveClick")
+                viewModel.onSaveClick()
+            } else {
+                Log.e(TAG, "Failed to save image - savedPath is null")
+                scope.launch {
+                    snackbarHostState.showSnackbar("Failed to save image")
+                }
             }
-            viewModel.onImageSelected(it.toString())
-            viewModel.onSaveClick()
         }
     }
 
