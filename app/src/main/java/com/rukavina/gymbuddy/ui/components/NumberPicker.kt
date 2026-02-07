@@ -50,12 +50,20 @@ fun NumberPicker(
 ) {
     val items = range.toList()
     val visibleItemsCount = 5
-    val startIndex = maxOf(0, items.indexOf(value) - visibleItemsCount / 2)
+    val initialIndex = maxOf(0, items.indexOf(value))
 
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = startIndex)
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
 
     val itemHeightPx = with(LocalDensity.current) { itemHeight.toPx() }
+
+    // Scroll to the correct position when value changes externally
+    LaunchedEffect(value, range) {
+        val targetIndex = items.indexOf(value)
+        if (targetIndex >= 0 && targetIndex != listState.firstVisibleItemIndex) {
+            listState.scrollToItem(targetIndex)
+        }
+    }
 
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
@@ -264,6 +272,120 @@ private fun DecimalNumberPickerItem(
     ) {
         Text(
             text = if (label.isNotEmpty()) "%.1f %s".format(value, label) else "%.1f".format(value),
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = (24 * scale).sp),
+            color = LocalContentColor.current.copy(alpha = alpha),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun StringWheelPicker(
+    items: List<String>,
+    selectedIndex: Int,
+    onSelectedIndexChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    itemHeight: Dp = 50.dp
+) {
+    val visibleItemsCount = 5
+
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = selectedIndex)
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+
+    val itemHeightPx = with(LocalDensity.current) { itemHeight.toPx() }
+
+    // Scroll to the correct position when selectedIndex changes externally
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex >= 0 && selectedIndex != listState.firstVisibleItemIndex) {
+            listState.scrollToItem(selectedIndex)
+        }
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+            .map { (index, offset) ->
+                val offsetInItems = offset / itemHeightPx
+                val currentIndex = index + if (offsetInItems > 0.5f) 1 else 0
+                currentIndex.coerceIn(0, items.lastIndex)
+            }
+            .distinctUntilChanged()
+            .collect { onSelectedIndexChange(it) }
+    }
+
+    Box(modifier = modifier) {
+        LazyColumn(
+            state = listState,
+            flingBehavior = flingBehavior,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(itemHeight * visibleItemsCount)
+                .fadingEdges()
+        ) {
+            items(visibleItemsCount / 2) {
+                Box(modifier = Modifier.height(itemHeight))
+            }
+
+            items(items.size) { index ->
+                val item = items[index]
+                StringPickerItem(
+                    value = item,
+                    itemHeight = itemHeight,
+                    listState = listState,
+                    itemIndex = index,
+                    itemHeightPx = itemHeightPx
+                )
+            }
+
+            items(visibleItemsCount / 2) {
+                Box(modifier = Modifier.height(itemHeight))
+            }
+        }
+
+        // Selection indicators
+        HorizontalDivider(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = -itemHeight / 2),
+            color = MaterialTheme.colorScheme.primary
+        )
+        HorizontalDivider(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = itemHeight / 2),
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
+private fun StringPickerItem(
+    value: String,
+    itemHeight: Dp,
+    listState: androidx.compose.foundation.lazy.LazyListState,
+    itemIndex: Int,
+    itemHeightPx: Float
+) {
+    val layoutInfo = listState.layoutInfo
+
+    val itemInfo = layoutInfo.visibleItemsInfo.firstOrNull { it.index == itemIndex + 2 }
+    val delta = itemInfo?.let {
+        val itemCenter = it.offset + it.size / 2f
+        val containerCenter = layoutInfo.viewportEndOffset / 2f
+        abs(itemCenter - containerCenter) / itemHeightPx
+    } ?: 1f
+
+    val alpha = (1f - delta.coerceIn(0f, 1f) * 0.7f).coerceIn(0.3f, 1f)
+    val scale = (1f - delta.coerceIn(0f, 1f) * 0.3f).coerceIn(0.7f, 1f)
+
+    Box(
+        modifier = Modifier
+            .height(itemHeight)
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = value,
             style = MaterialTheme.typography.titleLarge.copy(fontSize = (24 * scale).sp),
             color = LocalContentColor.current.copy(alpha = alpha),
             textAlign = TextAlign.Center

@@ -31,7 +31,7 @@ import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
 import com.rukavina.gymbuddy.ui.profile.ProfileScreen
 import com.rukavina.gymbuddy.ui.profile.ProfileViewModel
 import com.rukavina.gymbuddy.ui.profile.edit.EditActivityLevelScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditAgeScreen
+import com.rukavina.gymbuddy.ui.profile.edit.EditBirthdateScreen
 import com.rukavina.gymbuddy.ui.profile.edit.EditBioScreen
 import com.rukavina.gymbuddy.ui.profile.edit.EditFitnessGoalScreen
 import com.rukavina.gymbuddy.ui.profile.edit.EditGenderScreen
@@ -175,12 +175,12 @@ fun MainScreen(rootNavController: NavHostController) {
                 )
             }
 
-            composable(NavRoutes.EditAge) {
+            composable(NavRoutes.EditBirthdate) {
                 val uiState = profileViewModel.uiState.collectAsState().value
-                EditAgeScreen(
+                EditBirthdateScreen(
                     navController = bottomNavController,
-                    currentAge = uiState.age.toIntOrNull() ?: 25,
-                    onSave = { profileViewModel.onAgeSaved(it) }
+                    currentBirthDate = uiState.birthDate,
+                    onSave = { profileViewModel.onBirthDateSaved(it) }
                 )
             }
 

@@ -96,9 +96,9 @@ fun HomeScreen(
         }
     }
 
-    // Get time-based greeting
-    val greeting = remember {
-        getTimeBasedGreeting()
+    // Get time-based greeting (checks for birthday too)
+    val greeting = remember(profileUiState.birthDate) {
+        getTimeBasedGreeting(profileUiState.birthDate)
     }
 
     // Get workout sessions from the view model

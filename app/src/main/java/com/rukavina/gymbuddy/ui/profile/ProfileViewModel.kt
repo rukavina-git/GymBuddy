@@ -15,6 +15,10 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.Period
+import java.time.ZoneId
 import javax.inject.Inject
 
 private const val TAG = "ProfileViewModel"
@@ -48,7 +52,7 @@ class ProfileViewModel @Inject constructor(
         val saved = savedProfileState
 
         return current.name != saved.name ||
-                current.age != saved.age ||
+                current.birthDate != saved.birthDate ||
                 current.weight != saved.weight ||
                 current.height != saved.height ||
                 current.targetWeight != saved.targetWeight ||
@@ -76,7 +80,7 @@ class ProfileViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(
                         name = p.name,
                         email = p.email.ifBlank { firebaseEmail },
-                        age = p.age?.toString() ?: "",
+                        birthDate = p.birthDate,
                         weight = UnitConverter.weightToDisplayUnit(p.weight, p.preferredUnits),
                         height = UnitConverter.heightToDisplayUnit(p.height, p.preferredUnits),
                         targetWeight = UnitConverter.weightToDisplayUnit(p.targetWeight, p.preferredUnits),
@@ -105,7 +109,6 @@ class ProfileViewModel @Inject constructor(
     fun onFieldChanged(field: ProfileField, value: String) {
         _uiState.value = when (field) {
             ProfileField.Name -> _uiState.value.copy(name = value)
-            ProfileField.Age -> _uiState.value.copy(age = value)
             ProfileField.Weight -> _uiState.value.copy(weight = value)
             ProfileField.Height -> _uiState.value.copy(height = value)
             ProfileField.TargetWeight -> _uiState.value.copy(targetWeight = value)
@@ -168,7 +171,7 @@ class ProfileViewModel @Inject constructor(
                     name = currentState.name,
                     email = currentState.email,
                     profileImageUrl = currentState.profileImageUri,
-                    age = currentState.age.toIntOrNull(),
+                    birthDate = currentState.birthDate,
                     weight = weightInKg,
                     height = heightInCm,
                     targetWeight = targetWeightInKg,
@@ -220,9 +223,18 @@ class ProfileViewModel @Inject constructor(
         saveProfileToDatabase()
     }
 
-    fun onAgeSaved(age: Int) {
-        _uiState.value = _uiState.value.copy(age = age.toString())
+    fun onBirthDateSaved(birthDate: Long) {
+        _uiState.value = _uiState.value.copy(birthDate = birthDate)
         saveProfileToDatabase()
+    }
+
+    fun calculateAge(birthDateMillis: Long?): Int? {
+        if (birthDateMillis == null) return null
+        val birthDate = Instant.ofEpochMilli(birthDateMillis)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+        val today = LocalDate.now()
+        return Period.between(birthDate, today).years
     }
 
     fun onWeightSaved(weight: Float) {
@@ -297,7 +309,7 @@ class ProfileViewModel @Inject constructor(
                     name = currentState.name.ifBlank { "User" },
                     email = currentState.email,
                     profileImageUrl = currentState.profileImageUri,
-                    age = currentState.age.toIntOrNull(),
+                    birthDate = currentState.birthDate,
                     weight = weightInKg,
                     height = heightInCm,
                     targetWeight = targetWeightInKg,

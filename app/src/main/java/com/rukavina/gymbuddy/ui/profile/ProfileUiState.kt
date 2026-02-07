@@ -8,7 +8,7 @@ import com.rukavina.gymbuddy.data.model.PreferredUnits
 data class ProfileUiState(
     val name: String = "",
     val email: String = "",
-    val age: String = "",
+    val birthDate: Long? = null,
     val weight: String = "",
     val height: String = "",
     val targetWeight: String = "",

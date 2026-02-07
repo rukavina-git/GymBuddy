@@ -186,9 +186,9 @@ fun ProfileScreen(
                         ProfileInfoItem(
                             icon = Icons.Default.Person,
                             label = "Age",
-                            value = if (uiState.age.isNotBlank()) "${uiState.age} years" else "Not set",
+                            value = viewModel.calculateAge(uiState.birthDate)?.let { "$it years" } ?: "Not set",
                             onClick = {
-                                bottomNavController?.navigate(NavRoutes.EditAge)
+                                bottomNavController?.navigate(NavRoutes.EditBirthdate)
                             }
                         )
 
