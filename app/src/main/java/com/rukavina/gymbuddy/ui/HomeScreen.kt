@@ -72,12 +72,14 @@ fun HomeScreen(
     activeWorkoutViewModel: ActiveWorkoutViewModel? = null,
     workoutSessionViewModel: com.rukavina.gymbuddy.ui.workout.WorkoutSessionViewModel = hiltViewModel(),
     profileViewModel: com.rukavina.gymbuddy.ui.profile.ProfileViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel(),
     onNavigateToWorkout: () -> Unit = {},
     onNavigateToTemplates: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState = activeWorkoutViewModel?.uiState?.collectAsState()
     val profileUiState by profileViewModel.uiState.collectAsState()
+    val showQuoteOfTheDay by homeViewModel.showQuoteOfTheDay.collectAsState(initial = true)
     val userName = profileUiState.name.ifBlank { "User" }
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -152,8 +154,10 @@ fun HomeScreen(
             }
 
             // 3. Motivation Quote
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                MotivationQuoteCard()
+            if (showQuoteOfTheDay) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    MotivationQuoteCard()
+                }
             }
 
             // 4. Workout Calendar
@@ -310,8 +314,45 @@ private fun CurrentWorkoutCard(
     }
 }
 
+private val motivationalQuotes = listOf(
+    "The only bad workout is the one that didn't happen." to "Unknown",
+    "The body achieves what the mind believes." to "Napoleon Hill",
+    "Success isn't always about greatness. It's about consistency." to "Dwayne Johnson",
+    "The pain you feel today will be the strength you feel tomorrow." to "Arnold Schwarzenegger",
+    "Don't limit your challenges. Challenge your limits." to "Unknown",
+    "Your body can stand almost anything. It's your mind that you have to convince." to "Unknown",
+    "The harder you work, the luckier you get." to "Gary Player",
+    "Fitness is not about being better than someone else. It's about being better than you used to be." to "Khloe Kardashian",
+    "The only way to do great work is to love what you do." to "Steve Jobs",
+    "Strength does not come from physical capacity. It comes from an indomitable will." to "Mahatma Gandhi",
+    "The difference between try and triumph is a little umph." to "Marvin Phillips",
+    "Push yourself, because no one else is going to do it for you." to "Unknown",
+    "Wake up with determination. Go to bed with satisfaction." to "Unknown",
+    "It never gets easier, you just get stronger." to "Unknown",
+    "Sweat is just fat crying." to "Unknown",
+    "The only place where success comes before work is in the dictionary." to "Vidal Sassoon",
+    "Champions keep playing until they get it right." to "Billie Jean King",
+    "You don't have to be great to start, but you have to start to be great." to "Zig Ziglar",
+    "The clock is ticking. Are you becoming the person you want to be?" to "Greg Plitt",
+    "If it doesn't challenge you, it won't change you." to "Fred DeVito",
+    "Excuses don't burn calories." to "Unknown",
+    "Sore today, strong tomorrow." to "Unknown",
+    "The best project you'll ever work on is you." to "Unknown",
+    "Your health is an investment, not an expense." to "Unknown",
+    "Fall in love with taking care of yourself." to "Unknown",
+    "A one hour workout is 4% of your day. No excuses." to "Unknown",
+    "Be stronger than your excuses." to "Unknown",
+    "Making excuses burns zero calories per hour." to "Unknown",
+    "Strive for progress, not perfection." to "Unknown",
+    "The pain of discipline is nothing like the pain of disappointment." to "Justin Langer"
+)
+
 @Composable
 private fun MotivationQuoteCard() {
+    // Get quote based on day of year for daily rotation
+    val dayOfYear = LocalDate.now().dayOfYear
+    val (quote, author) = motivationalQuotes[dayOfYear % motivationalQuotes.size]
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -327,14 +368,14 @@ private fun MotivationQuoteCard() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "\"The only bad workout is the one that didn't happen.\"",
+                text = "\"$quote\"",
                 style = MaterialTheme.typography.bodyLarge,
                 fontStyle = FontStyle.Italic,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )
             Text(
-                text = "— Unknown",
+                text = "— $author",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
             )

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -149,6 +150,14 @@ fun SettingsScreen(
                             label = "Units",
                             onClick = {
                                 bottomNavController.navigate(NavRoutes.EditUnits)
+                            },
+                            showDivider = true
+                        )
+                        SettingsItem(
+                            icon = androidx.compose.material.icons.Icons.Default.Tune,
+                            label = "App Preferences",
+                            onClick = {
+                                bottomNavController.navigate(NavRoutes.AppPreferences)
                             },
                             showDivider = true
                         )
