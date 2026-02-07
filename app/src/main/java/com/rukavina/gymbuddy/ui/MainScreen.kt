@@ -41,6 +41,7 @@ import com.rukavina.gymbuddy.ui.profile.edit.EditTargetWeightScreen
 import com.rukavina.gymbuddy.ui.profile.edit.EditUnitsScreen
 import com.rukavina.gymbuddy.ui.profile.edit.EditWeightScreen
 import com.rukavina.gymbuddy.ui.settings.AboutScreen
+import com.rukavina.gymbuddy.ui.settings.AppPreferencesScreen
 import com.rukavina.gymbuddy.ui.settings.HiddenExercisesScreen
 import com.rukavina.gymbuddy.ui.settings.SettingsScreen
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutScreen
@@ -252,6 +253,10 @@ fun MainScreen(rootNavController: NavHostController) {
 
             composable(NavRoutes.HiddenExercises) {
                 HiddenExercisesScreen(navController = bottomNavController)
+            }
+
+            composable(NavRoutes.AppPreferences) {
+                AppPreferencesScreen(navController = bottomNavController)
             }
 
             composable(NavRoutes.ActiveWorkout) {
