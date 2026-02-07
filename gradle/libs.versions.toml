@@ -29,7 +29,6 @@ kizitonwoseCalendar = "2.10.0"
 material3 = "1.4.0"
 googleServices = "4.4.4"
 
-
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }

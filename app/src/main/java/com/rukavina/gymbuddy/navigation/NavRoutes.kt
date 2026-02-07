@@ -20,7 +20,7 @@ object NavRoutes {
     // Profile edit screens
     const val EditName = "edit_name"
     const val EditBio = "edit_bio"
-    const val EditAge = "edit_age"
+    const val EditBirthdate = "edit_birthdate"
     const val EditWeight = "edit_weight"
     const val EditHeight = "edit_height"
     const val EditTargetWeight = "edit_target_weight"
