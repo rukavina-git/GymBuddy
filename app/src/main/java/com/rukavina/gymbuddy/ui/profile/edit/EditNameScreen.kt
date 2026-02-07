@@ -34,7 +34,9 @@ fun EditNameScreen(
     currentName: String,
     onSave: (String) -> Unit
 ) {
-    var name by remember { mutableStateOf(currentName) }
+    // Treat "User" (the default) as empty for first-time users
+    val isDefaultName = currentName.isBlank() || currentName == "User"
+    var name by remember { mutableStateOf(if (isDefaultName) "" else currentName) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
@@ -64,6 +66,7 @@ fun EditNameScreen(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Name") },
+                placeholder = { Text("Enter your name") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
