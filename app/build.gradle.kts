@@ -1,12 +1,9 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("com.google.dagger.hilt.android")
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
     alias(libs.plugins.compose.compiler)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -25,62 +22,71 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     buildFeatures {
         viewBinding = true
         buildConfig = true
     }
 }
 
-kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-    }
-}
-
 dependencies {
+    // Core Android
     implementation(libs.androidxCoreKtx)
     implementation(libs.lifecycleKtx)
     implementation(libs.activity.compose)
+
+    // Compose
     implementation(platform(libs.androidxComposeBom))
     implementation(libs.composeUi)
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
-    implementation(libs.daggerHilt)
-    implementation(libs.androidx.material3)
-    ksp(libs.daggerHiltCompiler)
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    implementation(libs.navigation.compose)
-    implementation(libs.activity.compose)
-    implementation(libs.composeUi)
-    implementation(libs.androidxMaterial)
     implementation(libs.composeMaterial)
     implementation(libs.composeLiveData)
-    implementation(libs.navigation.compose)
-    implementation(libs.composeMaterial)
+
+    // Material
+    implementation(libs.androidxMaterial)
+    implementation(libs.androidx.material3)
     implementation(libs.material3)
     implementation(libs.material.icons.extended)
+
+    // Navigation
+    implementation(libs.navigation.compose)
+
+    // Hilt
+    implementation(libs.daggerHilt)
+    implementation(libs.hilt.navigation.compose)
+    ksp(libs.daggerHiltCompiler)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
+    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
+    // Other
     implementation(libs.coil.compose)
     implementation(libs.coil.okhttp)
-    implementation(libs.hilt.navigation.compose)
     implementation(libs.datastore.preferences)
     implementation(libs.kizitonwose.calendar.compose)
-    ksp(libs.room.compiler)
+
+    // Testing
     testImplementation(libs.junit)
+    testImplementation(libs.room.testing)
     androidTestImplementation(libs.testExtJunit)
     androidTestImplementation(libs.espressoCore)
     androidTestImplementation(platform(libs.androidxComposeBom))
     androidTestImplementation(libs.ui.test.junit)
-    testImplementation(libs.room.testing)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 }
