@@ -237,24 +237,24 @@ class ProfileViewModel @Inject constructor(
         return Period.between(birthDate, today).years
     }
 
-    fun onWeightSaved(weight: Float) {
-        _uiState.value = _uiState.value.copy(weight = "%.1f".format(weight))
+    fun onWeightSaved(weightKg: Float) {
+        // Weight is always saved in kg from EditWeightScreen, convert to display units
+        val displayWeight = UnitConverter.weightToDisplayUnit(weightKg, _uiState.value.preferredUnits)
+        _uiState.value = _uiState.value.copy(weight = displayWeight)
         saveProfileToDatabase()
     }
 
-    fun onHeightSaved(height: Float) {
-        val currentState = _uiState.value
-        val heightStr = if (currentState.preferredUnits == PreferredUnits.METRIC) {
-            "%.0f".format(height)
-        } else {
-            "%.0f".format(height)
-        }
-        _uiState.value = currentState.copy(height = heightStr)
+    fun onHeightSaved(heightCm: Float) {
+        // Height is always saved in cm from EditHeightScreen, convert to display units
+        val displayHeight = UnitConverter.heightToDisplayUnit(heightCm, _uiState.value.preferredUnits)
+        _uiState.value = _uiState.value.copy(height = displayHeight)
         saveProfileToDatabase()
     }
 
-    fun onTargetWeightSaved(targetWeight: Float) {
-        _uiState.value = _uiState.value.copy(targetWeight = "%.1f".format(targetWeight))
+    fun onTargetWeightSaved(weightKg: Float) {
+        // Weight is always saved in kg from EditTargetWeightScreen, convert to display units
+        val displayWeight = UnitConverter.weightToDisplayUnit(weightKg, _uiState.value.preferredUnits)
+        _uiState.value = _uiState.value.copy(targetWeight = displayWeight)
         saveProfileToDatabase()
     }
 

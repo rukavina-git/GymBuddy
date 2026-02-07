@@ -46,6 +46,7 @@ import com.rukavina.gymbuddy.ui.settings.HiddenExercisesScreen
 import com.rukavina.gymbuddy.ui.settings.SettingsScreen
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutScreen
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
+import com.rukavina.gymbuddy.utils.UnitConverter
 
 
 @Composable
@@ -187,9 +188,11 @@ fun MainScreen(rootNavController: NavHostController) {
 
             composable(NavRoutes.EditWeight) {
                 val uiState = profileViewModel.uiState.collectAsState().value
+                // Convert display units back to kg for the edit screen
+                val weightKg = UnitConverter.weightToMetric(uiState.weight, uiState.preferredUnits) ?: 70f
                 EditWeightScreen(
                     navController = bottomNavController,
-                    currentWeight = uiState.weight.toFloatOrNull() ?: 70f,
+                    currentWeight = weightKg,
                     preferredUnits = uiState.preferredUnits,
                     onSave = { profileViewModel.onWeightSaved(it) }
                 )
@@ -197,9 +200,11 @@ fun MainScreen(rootNavController: NavHostController) {
 
             composable(NavRoutes.EditHeight) {
                 val uiState = profileViewModel.uiState.collectAsState().value
+                // Convert display units back to cm for the edit screen
+                val heightCm = UnitConverter.heightToMetric(uiState.height, uiState.preferredUnits) ?: 170f
                 EditHeightScreen(
                     navController = bottomNavController,
-                    currentHeight = uiState.height.toFloatOrNull() ?: 170f,
+                    currentHeight = heightCm,
                     preferredUnits = uiState.preferredUnits,
                     onSave = { profileViewModel.onHeightSaved(it) }
                 )
@@ -207,9 +212,11 @@ fun MainScreen(rootNavController: NavHostController) {
 
             composable(NavRoutes.EditTargetWeight) {
                 val uiState = profileViewModel.uiState.collectAsState().value
+                // Convert display units back to kg for the edit screen
+                val targetWeightKg = UnitConverter.weightToMetric(uiState.targetWeight, uiState.preferredUnits) ?: 70f
                 EditTargetWeightScreen(
                     navController = bottomNavController,
-                    currentTargetWeight = uiState.targetWeight.toFloatOrNull() ?: 70f,
+                    currentTargetWeight = targetWeightKg,
                     preferredUnits = uiState.preferredUnits,
                     onSave = { profileViewModel.onTargetWeightSaved(it) }
                 )
