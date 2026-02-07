@@ -76,7 +76,9 @@ fun WorkoutTemplateScreen(
                 onClick = {
                     editingTemplate = null
                     showCreateEditDialog = true
-                }
+                },
+                containerColor = MaterialTheme.colorScheme.tertiary,
+                contentColor = MaterialTheme.colorScheme.onTertiary
             ) {
                 Icon(Icons.Default.Add, "Create Template")
             }
@@ -306,7 +308,11 @@ fun WorkoutTemplateItem(
             Button(
                 onClick = onStartWorkout,
                 modifier = Modifier.fillMaxWidth(),
-                enabled = template.templateExercises.isNotEmpty()
+                enabled = template.templateExercises.isNotEmpty(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary
+                )
             ) {
                 Icon(Icons.Default.PlayArrow, "Start", modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))

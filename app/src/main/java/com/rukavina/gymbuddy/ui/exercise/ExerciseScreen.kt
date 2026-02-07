@@ -47,7 +47,9 @@ fun ExerciseScreen(
                 onClick = {
                     editingExercise = null
                     showDialog = true
-                }
+                },
+                containerColor = MaterialTheme.colorScheme.tertiary,
+                contentColor = MaterialTheme.colorScheme.onTertiary
             ) {
                 Icon(Icons.Default.Add, "Add Exercise")
             }

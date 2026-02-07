@@ -229,7 +229,7 @@ private fun CurrentWorkoutCard(
                 }
             },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -247,20 +247,20 @@ private fun CurrentWorkoutCard(
                 Icon(
                     Icons.Default.FitnessCenter,
                     contentDescription = if (hasActiveWorkout) "Active Workout" else "Start Workout",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.size(32.dp)
                 )
                 Column {
                     Text(
                         if (hasActiveWorkout) "Active Workout" else "Start Workout",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                     Text(
                         if (hasActiveWorkout) uiState.workoutTitle else "Choose a template to begin",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 }
             }
