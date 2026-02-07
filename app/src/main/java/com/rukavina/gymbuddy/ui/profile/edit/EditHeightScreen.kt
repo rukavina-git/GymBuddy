@@ -19,31 +19,49 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.rukavina.gymbuddy.Constants
 import com.rukavina.gymbuddy.data.model.PreferredUnits
-import com.rukavina.gymbuddy.ui.components.DecimalNumberPicker
 import com.rukavina.gymbuddy.ui.components.NumberPicker
 import com.rukavina.gymbuddy.utils.UnitConverter
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditHeightScreen(
     navController: NavHostController,
-    currentHeight: Float,
+    currentHeight: Float, // Always in cm from database
     preferredUnits: PreferredUnits,
-    onSave: (Float) -> Unit
+    onSave: (Float) -> Unit // Always saves in cm to database
 ) {
-    var height by remember { mutableFloatStateOf(currentHeight) }
-
     val isMetric = preferredUnits == PreferredUnits.METRIC
-    val heightUnit = UnitConverter.getHeightUnitLabel(preferredUnits)
-    val heightRange = if (isMetric) 100f..250f else 39f..98f
+
+    // Coerce initial height to valid range
+    val initialHeightCm = currentHeight.roundToInt()
+        .coerceIn(Constants.Measurements.MIN_HEIGHT_CM, Constants.Measurements.MAX_HEIGHT_CM)
+
+    // For metric: single cm state (keyed to reinitialize if currentHeight changes)
+    var heightCm by remember(currentHeight) { mutableIntStateOf(initialHeightCm) }
+
+    // For imperial: independent feet and inches state (keyed to reinitialize if currentHeight changes)
+    val initialTotalInches = UnitConverter.cmToInches(initialHeightCm.toFloat()).roundToInt()
+    var feet by remember(currentHeight) { mutableIntStateOf(initialTotalInches / 12) }
+    var inches by remember(currentHeight) { mutableIntStateOf(initialTotalInches % 12) }
+
+    // Calculate min/max feet based on cm limits
+    val minFeet = (UnitConverter.cmToInches(Constants.Measurements.MIN_HEIGHT_CM.toFloat()) / 12).toInt()
+    val maxFeet = (UnitConverter.cmToInches(Constants.Measurements.MAX_HEIGHT_CM.toFloat()) / 12).toInt()
+
+    // Calculate max inches when at max feet (to not exceed cm limit)
+    val maxInchesAtMaxFeet = (UnitConverter.cmToInches(Constants.Measurements.MAX_HEIGHT_CM.toFloat()) % 12).toInt()
+    // Calculate min inches when at min feet (to not go below cm limit)
+    val minInchesAtMinFeet = kotlin.math.ceil(UnitConverter.cmToInches(Constants.Measurements.MIN_HEIGHT_CM.toFloat()) % 12).toInt()
 
     Scaffold(
         topBar = {
@@ -75,20 +93,16 @@ fun EditHeightScreen(
             )
 
             if (isMetric) {
-                DecimalNumberPicker(
-                    value = height,
-                    onValueChange = { height = it },
-                    range = heightRange,
-                    step = 1f,
-                    label = heightUnit,
+                // Metric: simple cm picker
+                NumberPicker(
+                    value = heightCm,
+                    onValueChange = { heightCm = it },
+                    range = Constants.Measurements.MIN_HEIGHT_CM..Constants.Measurements.MAX_HEIGHT_CM,
+                    label = "cm",
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
-                // For imperial, show feet and inches side by side
-                val totalInches = height.toInt()
-                val feet = totalInches / 12
-                val inches = totalInches % 12
-
+                // Imperial: independent feet and inches pickers
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -96,19 +110,23 @@ fun EditHeightScreen(
                     NumberPicker(
                         value = feet,
                         onValueChange = { newFeet ->
-                            height = (newFeet * 12 + inches).toFloat()
+                            feet = newFeet.coerceIn(minFeet, maxFeet)
                         },
-                        range = 3..8,
+                        range = minFeet..maxFeet,
                         label = "ft",
                         modifier = Modifier.weight(1f)
                     )
 
+                    // Dynamic inches range based on current feet
+                    val inchesMin = if (feet == minFeet) minInchesAtMinFeet else 0
+                    val inchesMax = if (feet == maxFeet) maxInchesAtMaxFeet else 11
+
                     NumberPicker(
-                        value = inches,
+                        value = inches.coerceIn(inchesMin, inchesMax),
                         onValueChange = { newInches ->
-                            height = (feet * 12 + newInches).toFloat()
+                            inches = newInches.coerceIn(inchesMin, inchesMax)
                         },
-                        range = 0..11,
+                        range = inchesMin..inchesMax,
                         label = "in",
                         modifier = Modifier.weight(1f)
                     )
@@ -119,7 +137,15 @@ fun EditHeightScreen(
 
             Button(
                 onClick = {
-                    onSave(height)
+                    // Convert to cm and save
+                    val finalHeightCm = if (isMetric) {
+                        heightCm
+                    } else {
+                        val totalInches = feet * 12 + inches
+                        UnitConverter.inchesToCm(totalInches.toFloat()).roundToInt()
+                    }.coerceIn(Constants.Measurements.MIN_HEIGHT_CM, Constants.Measurements.MAX_HEIGHT_CM)
+
+                    onSave(finalHeightCm.toFloat())
                     navController.popBackStack()
                 },
                 modifier = Modifier.fillMaxWidth()

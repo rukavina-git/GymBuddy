@@ -206,9 +206,9 @@ fun ProfileScreen(
                             label = "Height",
                             value = if (uiState.height.isNotBlank()) {
                                 if (uiState.preferredUnits == com.rukavina.gymbuddy.data.model.PreferredUnits.IMPERIAL) {
-                                    val totalInches = uiState.height.toFloatOrNull()?.toInt() ?: 0
-                                    val feet = totalInches / 12
-                                    val inches = totalInches % 12
+                                    val totalInches = uiState.height.toFloatOrNull() ?: 0f
+                                    val feet = (totalInches / 12).toInt()
+                                    val inches = kotlin.math.round(totalInches % 12).toInt()
                                     "$feet'$inches\""
                                 } else {
                                     "${uiState.height} $heightUnit"

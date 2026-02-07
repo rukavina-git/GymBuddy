@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.rukavina.gymbuddy.Constants
 import com.rukavina.gymbuddy.data.model.PreferredUnits
 import com.rukavina.gymbuddy.ui.components.DecimalNumberPicker
 import com.rukavina.gymbuddy.utils.UnitConverter
@@ -33,15 +34,33 @@ import com.rukavina.gymbuddy.utils.UnitConverter
 @Composable
 fun EditTargetWeightScreen(
     navController: NavHostController,
-    currentTargetWeight: Float,
+    currentTargetWeight: Float, // Always in kg from database
     preferredUnits: PreferredUnits,
-    onSave: (Float) -> Unit
+    onSave: (Float) -> Unit // Always saves in kg to database
 ) {
-    var targetWeight by remember { mutableFloatStateOf(currentTargetWeight) }
-
     val isMetric = preferredUnits == PreferredUnits.METRIC
+
+    // Weight is always stored in kg internally
+    var weightKg by remember {
+        mutableFloatStateOf(
+            currentTargetWeight.coerceIn(
+                Constants.Measurements.MIN_WEIGHT_KG.toFloat(),
+                Constants.Measurements.MAX_WEIGHT_KG.toFloat()
+            )
+        )
+    }
+
+    // Display value in user's preferred units
+    val displayWeight = if (isMetric) weightKg else UnitConverter.kgToLbs(weightKg)
     val weightUnit = UnitConverter.getWeightUnitLabel(preferredUnits)
-    val weightRange = if (isMetric) 30f..200f else 66f..440f
+
+    // Calculate display range based on kg limits
+    val displayRange = if (isMetric) {
+        Constants.Measurements.MIN_WEIGHT_KG.toFloat()..Constants.Measurements.MAX_WEIGHT_KG.toFloat()
+    } else {
+        UnitConverter.kgToLbs(Constants.Measurements.MIN_WEIGHT_KG.toFloat())..
+                UnitConverter.kgToLbs(Constants.Measurements.MAX_WEIGHT_KG.toFloat())
+    }
 
     Scaffold(
         topBar = {
@@ -73,9 +92,19 @@ fun EditTargetWeightScreen(
             )
 
             DecimalNumberPicker(
-                value = targetWeight,
-                onValueChange = { targetWeight = it },
-                range = weightRange,
+                value = displayWeight,
+                onValueChange = { newDisplayWeight ->
+                    // Convert back to kg for internal storage
+                    weightKg = if (isMetric) {
+                        newDisplayWeight
+                    } else {
+                        UnitConverter.lbsToKg(newDisplayWeight)
+                    }.coerceIn(
+                        Constants.Measurements.MIN_WEIGHT_KG.toFloat(),
+                        Constants.Measurements.MAX_WEIGHT_KG.toFloat()
+                    )
+                },
+                range = displayRange,
                 step = if (isMetric) 0.1f else 0.5f,
                 label = weightUnit,
                 modifier = Modifier.fillMaxWidth()
@@ -85,7 +114,8 @@ fun EditTargetWeightScreen(
 
             Button(
                 onClick = {
-                    onSave(targetWeight)
+                    // Always save in kg
+                    onSave(weightKg)
                     navController.popBackStack()
                 },
                 modifier = Modifier.fillMaxWidth()
