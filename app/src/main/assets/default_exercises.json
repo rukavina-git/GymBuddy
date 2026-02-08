@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 6,
   "exercises": [
     {
       "id": 10001,
@@ -23,8 +23,8 @@
       "equipmentNeeded": ["BARBELL", "BENCH"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": "https://picsum.photos/seed/bench-press/400/300",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -50,8 +50,8 @@
       "equipmentNeeded": ["BARBELL"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": "https://picsum.photos/seed/back-squat/400/300",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Squat/0.jpg",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -77,8 +77,8 @@
       "equipmentNeeded": ["BARBELL"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": "https://picsum.photos/seed/deadlift/400/300",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -104,8 +104,8 @@
       "equipmentNeeded": ["PULL_UP_BAR"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": "https://picsum.photos/seed/pull-up/400/300",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -131,8 +131,8 @@
       "equipmentNeeded": ["BODYWEIGHT"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": "https://picsum.photos/seed/push-up/400/300",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/0.jpg",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -158,8 +158,8 @@
       "equipmentNeeded": ["BODYWEIGHT"],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
-      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": "https://picsum.photos/seed/plank/400/300",
+      "videoUrl": "",
+      "thumbnailUrl": "",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -185,8 +185,8 @@
       "equipmentNeeded": ["DUMBBELL"],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
-      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": "https://picsum.photos/seed/bicep-curl/400/300",
+      "videoUrl": "",
+      "thumbnailUrl": "",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -212,8 +212,8 @@
       "equipmentNeeded": ["DUMBBELL"],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
-      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": "https://picsum.photos/seed/lateral-raise/400/300",
+      "videoUrl": "",
+      "thumbnailUrl": "",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -239,8 +239,8 @@
       "equipmentNeeded": ["DUMBBELL"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": "https://picsum.photos/seed/goblet-squat/400/300",
+      "videoUrl": "",
+      "thumbnailUrl": "",
       "isCustom": false,
       "createdBy": "0"
     },
@@ -266,8 +266,1358 @@
       "equipmentNeeded": ["DUMBBELL"],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "videoUrl": "https://www.youtube.com/watch?v=gRVjAtPip0Y",
-      "thumbnailUrl": "https://picsum.photos/seed/walking-lunge/400/300",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10011,
+      "name": "Incline Barbell Bench Press",
+      "description": "A chest press variation that emphasizes the upper chest and front deltoids.",
+      "instructions": [
+        "Set bench to 30-45 degree incline",
+        "Lie back and grip barbell slightly wider than shoulders",
+        "Unrack bar and lower to upper chest",
+        "Press bar up to full extension",
+        "Keep shoulder blades retracted"
+      ],
+      "tips": [
+        "Don't set the incline too high or it becomes a shoulder exercise",
+        "Touch the bar to your upper chest, not your neck",
+        "Keep your feet firmly planted for stability"
+      ],
+      "primaryMuscles": ["CHEST"],
+      "secondaryMuscles": ["SHOULDERS", "ARMS"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BARBELL", "BENCH"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Incline_Bench_Press_-_Medium_Grip/0.jpg",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10012,
+      "name": "Incline Dumbbell Press",
+      "description": "A dumbbell chest press on an incline bench for upper chest development.",
+      "instructions": [
+        "Set bench to 30-45 degree incline",
+        "Sit back with dumbbells at shoulder level",
+        "Press dumbbells up and together",
+        "Lower with control to shoulder level",
+        "Keep core engaged throughout"
+      ],
+      "tips": [
+        "Dumbbells allow for a greater range of motion than barbell",
+        "Don't let the dumbbells drift too far apart at the bottom",
+        "Control the weight on the way down"
+      ],
+      "primaryMuscles": ["CHEST"],
+      "secondaryMuscles": ["SHOULDERS", "ARMS"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["DUMBBELL", "BENCH"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10013,
+      "name": "Dumbbell Chest Fly",
+      "description": "An isolation exercise that stretches and contracts the chest muscles through a wide arc.",
+      "instructions": [
+        "Lie flat on bench with dumbbells above chest",
+        "Lower dumbbells out to sides with slight elbow bend",
+        "Feel stretch in chest at bottom",
+        "Squeeze chest to bring dumbbells back together",
+        "Maintain the same elbow bend throughout"
+      ],
+      "tips": [
+        "Don't go too heavy - this is an isolation movement",
+        "Keep a slight bend in your elbows to protect the joint",
+        "Focus on the stretch and squeeze, not the weight"
+      ],
+      "primaryMuscles": ["CHEST"],
+      "secondaryMuscles": ["SHOULDERS"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL", "BENCH"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10014,
+      "name": "Cable Crossover",
+      "description": "A cable exercise that provides constant tension throughout the chest fly movement.",
+      "instructions": [
+        "Stand between cable stations with handles at high position",
+        "Step forward into split stance",
+        "Pull handles down and together in front of chest",
+        "Squeeze chest at bottom of movement",
+        "Return with control"
+      ],
+      "tips": [
+        "Lean slightly forward to emphasize the chest",
+        "Keep a slight bend in your elbows",
+        "Vary the cable height to target different parts of the chest"
+      ],
+      "primaryMuscles": ["CHEST"],
+      "secondaryMuscles": ["SHOULDERS"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["CABLE"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10015,
+      "name": "Chest Dip",
+      "description": "A compound bodyweight exercise that targets the lower chest and triceps.",
+      "instructions": [
+        "Grip parallel bars and lift yourself up",
+        "Lean forward slightly to emphasize chest",
+        "Lower body by bending elbows",
+        "Descend until upper arms are parallel to floor",
+        "Push back up to starting position"
+      ],
+      "tips": [
+        "Lean forward to target chest more than triceps",
+        "Don't go too deep if you have shoulder issues",
+        "Add weight with a belt once bodyweight becomes easy"
+      ],
+      "primaryMuscles": ["CHEST"],
+      "secondaryMuscles": ["ARMS", "SHOULDERS"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BODYWEIGHT"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10016,
+      "name": "Lat Pulldown",
+      "description": "A cable exercise that mimics the pull-up motion, great for building lat width.",
+      "instructions": [
+        "Sit at lat pulldown machine with thighs secured",
+        "Grip bar slightly wider than shoulder width",
+        "Pull bar down to upper chest",
+        "Squeeze lats at the bottom",
+        "Return bar with control"
+      ],
+      "tips": [
+        "Don't lean too far back - slight lean is fine",
+        "Pull with your elbows, not your hands",
+        "Avoid pulling behind the neck"
+      ],
+      "primaryMuscles": ["BACK"],
+      "secondaryMuscles": ["ARMS"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["CABLE"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10017,
+      "name": "Barbell Bent-Over Row",
+      "description": "A fundamental back exercise that builds thickness and strength in the upper back.",
+      "instructions": [
+        "Stand with feet hip-width apart, grip barbell",
+        "Hinge at hips until torso is nearly parallel to floor",
+        "Pull bar to lower chest/upper abdomen",
+        "Squeeze shoulder blades together at top",
+        "Lower bar with control"
+      ],
+      "tips": [
+        "Keep your back straight throughout the movement",
+        "Don't use momentum to swing the weight",
+        "Pull to your belly button for more lat engagement"
+      ],
+      "primaryMuscles": ["BACK"],
+      "secondaryMuscles": ["ARMS", "CORE"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BARBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10018,
+      "name": "Dumbbell Row",
+      "description": "A unilateral back exercise that allows for a greater range of motion.",
+      "instructions": [
+        "Place one knee and hand on bench",
+        "Hold dumbbell in other hand, arm extended",
+        "Pull dumbbell to hip",
+        "Squeeze lat at top of movement",
+        "Lower with control"
+      ],
+      "tips": [
+        "Keep your back flat and parallel to the floor",
+        "Pull to your hip, not your armpit",
+        "Don't rotate your torso as you row"
+      ],
+      "primaryMuscles": ["BACK"],
+      "secondaryMuscles": ["ARMS"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL", "BENCH"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10019,
+      "name": "Seated Cable Row",
+      "description": "A cable exercise that targets the middle back with constant tension.",
+      "instructions": [
+        "Sit at cable row machine with feet on platform",
+        "Grip handle with arms extended",
+        "Pull handle to abdomen",
+        "Squeeze shoulder blades together",
+        "Return with control"
+      ],
+      "tips": [
+        "Keep your back straight - don't round forward",
+        "Avoid swinging your torso back and forth",
+        "Focus on pulling with your back, not your arms"
+      ],
+      "primaryMuscles": ["BACK"],
+      "secondaryMuscles": ["ARMS"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["CABLE"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10020,
+      "name": "Face Pull",
+      "description": "A cable exercise that targets the rear deltoids and upper back for shoulder health.",
+      "instructions": [
+        "Set cable at face height with rope attachment",
+        "Grip rope with overhand grip",
+        "Pull rope towards face, separating hands",
+        "Squeeze rear delts and upper back",
+        "Return with control"
+      ],
+      "tips": [
+        "Pull to your face, not your chest",
+        "Externally rotate your shoulders at the end",
+        "This is a great exercise for posture and shoulder health"
+      ],
+      "primaryMuscles": ["SHOULDERS"],
+      "secondaryMuscles": ["BACK"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["CABLE"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10021,
+      "name": "T-Bar Row",
+      "description": "A row variation that allows for heavy loading and targets the middle back.",
+      "instructions": [
+        "Straddle the T-bar with feet wide",
+        "Grip handle and hinge at hips",
+        "Pull bar to chest",
+        "Squeeze back at top",
+        "Lower with control"
+      ],
+      "tips": [
+        "Keep your back straight throughout",
+        "Don't round your lower back",
+        "You can use a close or wide grip for variety"
+      ],
+      "primaryMuscles": ["BACK"],
+      "secondaryMuscles": ["ARMS", "CORE"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BARBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10022,
+      "name": "Barbell Overhead Press",
+      "description": "A fundamental shoulder exercise for building overhead pressing strength.",
+      "instructions": [
+        "Stand with barbell at shoulder level",
+        "Grip slightly wider than shoulder width",
+        "Press bar overhead to lockout",
+        "Keep core tight throughout",
+        "Lower bar back to shoulders"
+      ],
+      "tips": [
+        "Keep your core braced to protect your lower back",
+        "Don't lean back excessively",
+        "Push your head through at the top"
+      ],
+      "primaryMuscles": ["SHOULDERS"],
+      "secondaryMuscles": ["ARMS", "CORE"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BARBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/0.jpg",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10023,
+      "name": "Dumbbell Shoulder Press",
+      "description": "A seated or standing shoulder press using dumbbells for balanced development.",
+      "instructions": [
+        "Hold dumbbells at shoulder level",
+        "Press dumbbells overhead",
+        "Bring dumbbells together at top",
+        "Lower with control to shoulders",
+        "Keep core engaged"
+      ],
+      "tips": [
+        "Don't lock out aggressively at the top",
+        "Keep your back against the pad if seated",
+        "Control the weight on the way down"
+      ],
+      "primaryMuscles": ["SHOULDERS"],
+      "secondaryMuscles": ["ARMS"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10024,
+      "name": "Dumbbell Front Raise",
+      "description": "An isolation exercise targeting the front deltoids.",
+      "instructions": [
+        "Stand with dumbbells in front of thighs",
+        "Raise one or both dumbbells to shoulder height",
+        "Keep arms straight with slight elbow bend",
+        "Lower with control",
+        "Alternate arms or do both together"
+      ],
+      "tips": [
+        "Don't swing the weight - use control",
+        "Stop at shoulder height",
+        "Use lighter weight and focus on the contraction"
+      ],
+      "primaryMuscles": ["SHOULDERS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10025,
+      "name": "Rear Delt Fly",
+      "description": "An isolation exercise for the rear deltoids, important for shoulder balance.",
+      "instructions": [
+        "Bend over at hips or use incline bench",
+        "Hold dumbbells hanging down",
+        "Raise arms out to sides",
+        "Squeeze rear delts at top",
+        "Lower with control"
+      ],
+      "tips": [
+        "Keep your torso stable - don't swing",
+        "Lead with your elbows, not your hands",
+        "Use lighter weight for better mind-muscle connection"
+      ],
+      "primaryMuscles": ["SHOULDERS"],
+      "secondaryMuscles": ["BACK"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10026,
+      "name": "Arnold Press",
+      "description": "A shoulder press variation that rotates through the movement for complete deltoid activation.",
+      "instructions": [
+        "Start with dumbbells at shoulder level, palms facing you",
+        "Press up while rotating palms to face forward",
+        "At top, palms should face away from you",
+        "Reverse the motion on the way down",
+        "Rotate back to starting position"
+      ],
+      "tips": [
+        "The rotation happens as you press, not before",
+        "Keep the movement smooth and controlled",
+        "This exercise hits all three deltoid heads"
+      ],
+      "primaryMuscles": ["SHOULDERS"],
+      "secondaryMuscles": ["ARMS"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["DUMBBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Arnold_Dumbbell_Press/0.jpg",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10027,
+      "name": "Barbell Shrug",
+      "description": "An isolation exercise for building the trapezius muscles.",
+      "instructions": [
+        "Stand holding barbell at thigh level",
+        "Shrug shoulders straight up towards ears",
+        "Hold briefly at the top",
+        "Lower with control",
+        "Keep arms straight throughout"
+      ],
+      "tips": [
+        "Don't roll your shoulders - just go straight up and down",
+        "Hold at the top for a brief squeeze",
+        "Keep your neck neutral"
+      ],
+      "primaryMuscles": ["BACK"],
+      "secondaryMuscles": ["SHOULDERS"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["BARBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shrug/0.jpg",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10028,
+      "name": "Tricep Pushdown",
+      "description": "A cable exercise that isolates the triceps for arm development.",
+      "instructions": [
+        "Stand at cable machine with bar or rope attachment",
+        "Grip with palms down, elbows at sides",
+        "Push down until arms are straight",
+        "Squeeze triceps at bottom",
+        "Return with control, keeping elbows fixed"
+      ],
+      "tips": [
+        "Keep your elbows pinned to your sides",
+        "Don't lean into the movement",
+        "Focus on the squeeze at the bottom"
+      ],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["CABLE"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10029,
+      "name": "Overhead Tricep Extension",
+      "description": "An isolation exercise that targets the long head of the triceps.",
+      "instructions": [
+        "Hold dumbbell or cable overhead with both hands",
+        "Lower weight behind head by bending elbows",
+        "Keep upper arms stationary",
+        "Extend arms back to starting position",
+        "Squeeze triceps at top"
+      ],
+      "tips": [
+        "Keep your elbows close to your head",
+        "Don't let your elbows flare out",
+        "Control the weight on the way down"
+      ],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10030,
+      "name": "Skull Crusher",
+      "description": "A lying tricep extension that effectively targets all three tricep heads.",
+      "instructions": [
+        "Lie on bench with barbell or dumbbells extended over chest",
+        "Lower weight towards forehead by bending elbows",
+        "Keep upper arms perpendicular to floor",
+        "Extend arms back to starting position",
+        "Squeeze triceps at top"
+      ],
+      "tips": [
+        "Lower to your forehead, not behind your head",
+        "Keep your elbows pointing up, not flaring out",
+        "Use an EZ bar for easier wrist positioning"
+      ],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": [],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["EZ_BAR", "BENCH"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10031,
+      "name": "Close-Grip Bench Press",
+      "description": "A bench press variation that emphasizes the triceps.",
+      "instructions": [
+        "Lie on bench and grip bar at shoulder width or narrower",
+        "Lower bar to lower chest with elbows tucked",
+        "Press bar back up to full extension",
+        "Keep elbows close to body throughout",
+        "Focus on tricep engagement"
+      ],
+      "tips": [
+        "Hands about shoulder width apart",
+        "Keep elbows at 45 degrees or less",
+        "Don't go too narrow or you'll strain your wrists"
+      ],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": ["CHEST", "SHOULDERS"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BARBELL", "BENCH"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10032,
+      "name": "Tricep Dip",
+      "description": "A bodyweight exercise that targets the triceps using parallel bars or a bench.",
+      "instructions": [
+        "Grip parallel bars and lift yourself up",
+        "Keep torso upright to emphasize triceps",
+        "Lower body by bending elbows",
+        "Descend until upper arms are parallel to floor",
+        "Push back up to starting position"
+      ],
+      "tips": [
+        "Stay upright to keep focus on triceps",
+        "Don't go too deep if you have shoulder issues",
+        "For bench dips, keep feet on floor or elevated"
+      ],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": ["CHEST", "SHOULDERS"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BODYWEIGHT"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10033,
+      "name": "Barbell Curl",
+      "description": "A fundamental bicep exercise using a barbell for heavy loading.",
+      "instructions": [
+        "Stand with barbell at thigh level, palms up",
+        "Curl bar up towards shoulders",
+        "Keep elbows stationary at sides",
+        "Squeeze biceps at top",
+        "Lower with control"
+      ],
+      "tips": [
+        "Don't swing your body to lift the weight",
+        "Keep your elbows pinned to your sides",
+        "Use an EZ bar for easier wrist positioning"
+      ],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["BARBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/0.jpg",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10034,
+      "name": "Hammer Curl",
+      "description": "A curl variation that targets the brachialis and brachioradialis for arm thickness.",
+      "instructions": [
+        "Stand with dumbbells at sides, palms facing in",
+        "Curl weights up keeping palms facing each other",
+        "Keep elbows stationary at sides",
+        "Squeeze at top",
+        "Lower with control"
+      ],
+      "tips": [
+        "The neutral grip targets different muscles than regular curls",
+        "Don't swing the weight",
+        "You can curl both arms together or alternate"
+      ],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hammer_Curls/0.jpg",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10035,
+      "name": "Preacher Curl",
+      "description": "A bicep curl performed on a preacher bench for strict isolation.",
+      "instructions": [
+        "Sit at preacher bench with upper arms on pad",
+        "Hold barbell or dumbbells with arms extended",
+        "Curl weight up towards shoulders",
+        "Squeeze biceps at top",
+        "Lower with control"
+      ],
+      "tips": [
+        "Don't come all the way down to avoid elbow strain",
+        "Keep your upper arms pressed against the pad",
+        "Control the negative portion"
+      ],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["EZ_BAR", "BENCH"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10036,
+      "name": "Cable Curl",
+      "description": "A bicep curl using cables for constant tension throughout the movement.",
+      "instructions": [
+        "Stand facing cable machine with handle at low position",
+        "Grip handle with palm up",
+        "Curl handle towards shoulder",
+        "Keep elbow stationary at side",
+        "Lower with control"
+      ],
+      "tips": [
+        "The cable provides constant tension unlike free weights",
+        "Try different attachments for variety",
+        "Stand far enough back for proper tension"
+      ],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["CABLE"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10037,
+      "name": "Concentration Curl",
+      "description": "A seated single-arm curl that isolates the bicep with strict form.",
+      "instructions": [
+        "Sit on bench with legs spread",
+        "Brace elbow against inner thigh",
+        "Curl dumbbell towards shoulder",
+        "Squeeze bicep at top",
+        "Lower with control"
+      ],
+      "tips": [
+        "This is a great exercise for mind-muscle connection",
+        "Don't swing - the position forces strict form",
+        "Focus on the peak contraction"
+      ],
+      "primaryMuscles": ["ARMS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10038,
+      "name": "Leg Press",
+      "description": "A machine exercise for building quad, hamstring, and glute strength.",
+      "instructions": [
+        "Sit in leg press machine with back against pad",
+        "Place feet shoulder-width apart on platform",
+        "Lower platform by bending knees",
+        "Descend until knees are at 90 degrees",
+        "Press back up without locking knees"
+      ],
+      "tips": [
+        "Don't lock out your knees at the top",
+        "Keep your lower back pressed against the pad",
+        "Foot placement changes muscle emphasis"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["MACHINE"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10039,
+      "name": "Leg Extension",
+      "description": "An isolation exercise that targets the quadriceps.",
+      "instructions": [
+        "Sit in leg extension machine",
+        "Hook ankles under pad",
+        "Extend legs until straight",
+        "Squeeze quads at top",
+        "Lower with control"
+      ],
+      "tips": [
+        "Don't use momentum - keep it controlled",
+        "Squeeze hard at the top",
+        "Don't go too heavy - this exercise can stress the knees"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["MACHINE"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10040,
+      "name": "Lying Leg Curl",
+      "description": "An isolation exercise that targets the hamstrings.",
+      "instructions": [
+        "Lie face down on leg curl machine",
+        "Hook ankles under pad",
+        "Curl legs up towards glutes",
+        "Squeeze hamstrings at top",
+        "Lower with control"
+      ],
+      "tips": [
+        "Don't lift your hips off the pad",
+        "Focus on the mind-muscle connection with your hamstrings",
+        "Control the negative portion"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["MACHINE"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10041,
+      "name": "Romanian Deadlift",
+      "description": "A hip-hinge movement that targets the hamstrings and glutes.",
+      "instructions": [
+        "Stand with barbell at thigh level",
+        "Push hips back while lowering bar",
+        "Keep slight bend in knees",
+        "Lower until you feel hamstring stretch",
+        "Drive hips forward to return to start"
+      ],
+      "tips": [
+        "Keep the bar close to your body",
+        "Don't round your back",
+        "Feel the stretch in your hamstrings at the bottom"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": ["BACK", "CORE"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BARBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10042,
+      "name": "Standing Calf Raise",
+      "description": "An isolation exercise for building calf size and strength.",
+      "instructions": [
+        "Stand on calf raise machine or step",
+        "Rise up on toes as high as possible",
+        "Squeeze calves at top",
+        "Lower heels below platform level",
+        "Feel stretch at bottom"
+      ],
+      "tips": [
+        "Get a full stretch at the bottom",
+        "Pause briefly at the top",
+        "Keep your knees straight but not locked"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["MACHINE"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10043,
+      "name": "Seated Calf Raise",
+      "description": "A calf exercise that emphasizes the soleus muscle.",
+      "instructions": [
+        "Sit in seated calf raise machine",
+        "Place balls of feet on platform",
+        "Raise heels as high as possible",
+        "Squeeze calves at top",
+        "Lower heels below platform"
+      ],
+      "tips": [
+        "The bent knee position targets the soleus more",
+        "Use a full range of motion",
+        "Pause at the top for a better contraction"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["MACHINE"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10044,
+      "name": "Hip Thrust",
+      "description": "A glute-focused exercise that builds strength and size in the posterior chain.",
+      "instructions": [
+        "Sit on ground with upper back against bench",
+        "Roll barbell over hips",
+        "Drive through heels to lift hips",
+        "Squeeze glutes hard at top",
+        "Lower with control"
+      ],
+      "tips": [
+        "Keep your chin tucked throughout",
+        "Push through your heels, not your toes",
+        "Squeeze your glutes hard at the top"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": ["CORE"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BARBELL", "BENCH"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10045,
+      "name": "Bulgarian Split Squat",
+      "description": "A single-leg squat variation that builds unilateral leg strength.",
+      "instructions": [
+        "Stand in front of bench with one foot behind on bench",
+        "Hold dumbbells at sides",
+        "Lower back knee towards ground",
+        "Front thigh should reach parallel",
+        "Drive through front foot to stand"
+      ],
+      "tips": [
+        "Keep your torso upright",
+        "Front shin should stay relatively vertical",
+        "Start with bodyweight before adding weight"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": ["CORE"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["DUMBBELL", "BENCH"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10046,
+      "name": "Crunch",
+      "description": "A fundamental core exercise that targets the rectus abdominis.",
+      "instructions": [
+        "Lie on back with knees bent",
+        "Place hands behind head or across chest",
+        "Curl shoulders towards hips",
+        "Squeeze abs at top",
+        "Lower with control"
+      ],
+      "tips": [
+        "Don't pull on your neck",
+        "Focus on curling your ribcage towards your pelvis",
+        "Keep your lower back on the ground"
+      ],
+      "primaryMuscles": ["CORE"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["BODYWEIGHT"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10047,
+      "name": "Hanging Leg Raise",
+      "description": "An advanced core exercise that targets the lower abs.",
+      "instructions": [
+        "Hang from pull-up bar with arms straight",
+        "Keep legs straight or slightly bent",
+        "Raise legs until parallel to ground or higher",
+        "Lower with control",
+        "Avoid swinging"
+      ],
+      "tips": [
+        "Don't swing - use control",
+        "Focus on tilting your pelvis up",
+        "Bend knees to make it easier"
+      ],
+      "primaryMuscles": ["CORE"],
+      "secondaryMuscles": [],
+      "difficulty": "ADVANCED",
+      "equipmentNeeded": ["PULL_UP_BAR"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10048,
+      "name": "Russian Twist",
+      "description": "A rotational core exercise that targets the obliques.",
+      "instructions": [
+        "Sit with knees bent, feet off ground or on ground",
+        "Lean back slightly, keeping back straight",
+        "Hold weight at chest or extend arms",
+        "Rotate torso side to side",
+        "Touch weight to ground on each side"
+      ],
+      "tips": [
+        "Keep your back straight - don't round",
+        "The rotation comes from your core, not your arms",
+        "Keep your feet off the ground for added difficulty"
+      ],
+      "primaryMuscles": ["CORE"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["BODYWEIGHT"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10049,
+      "name": "Dead Bug",
+      "description": "A core stability exercise that teaches proper bracing.",
+      "instructions": [
+        "Lie on back with arms extended up",
+        "Raise legs with knees bent at 90 degrees",
+        "Lower opposite arm and leg towards ground",
+        "Keep lower back pressed to floor",
+        "Return and alternate sides"
+      ],
+      "tips": [
+        "Keep your lower back pressed into the ground",
+        "Move slowly and with control",
+        "This is great for teaching core stability"
+      ],
+      "primaryMuscles": ["CORE"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["BODYWEIGHT"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10050,
+      "name": "Mountain Climber",
+      "description": "A dynamic core exercise that also elevates heart rate.",
+      "instructions": [
+        "Start in high plank position",
+        "Drive one knee towards chest",
+        "Quickly switch legs",
+        "Continue alternating in running motion",
+        "Keep hips level"
+      ],
+      "tips": [
+        "Keep your hips down - don't pike up",
+        "Land on your toes",
+        "Go faster for more cardio, slower for more core focus"
+      ],
+      "primaryMuscles": ["CORE"],
+      "secondaryMuscles": ["SHOULDERS", "LEGS"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["BODYWEIGHT"],
+      "category": "CARDIO",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10051,
+      "name": "Cable Crunch",
+      "description": "A weighted core exercise using cable resistance.",
+      "instructions": [
+        "Kneel facing cable machine with rope at high position",
+        "Hold rope behind head",
+        "Crunch down by flexing spine",
+        "Squeeze abs at bottom",
+        "Return with control"
+      ],
+      "tips": [
+        "Focus on flexing your spine, not just bowing",
+        "Keep your hips stationary",
+        "This allows for progressive overload on abs"
+      ],
+      "primaryMuscles": ["CORE"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["CABLE"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10052,
+      "name": "Bicycle Crunch",
+      "description": "A dynamic crunch variation that targets both the rectus abdominis and obliques.",
+      "instructions": [
+        "Lie on back with hands behind head",
+        "Lift shoulders off ground",
+        "Bring one knee to chest while extending other leg",
+        "Rotate torso to bring opposite elbow to knee",
+        "Alternate sides in cycling motion"
+      ],
+      "tips": [
+        "Don't pull on your neck",
+        "Focus on the rotation and elbow-to-knee connection",
+        "Keep your lower back pressed to the ground"
+      ],
+      "primaryMuscles": ["CORE"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["BODYWEIGHT"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10053,
+      "name": "Dumbbell Bench Press",
+      "description": "A chest press using dumbbells for a greater range of motion and balanced development.",
+      "instructions": [
+        "Lie on flat bench with dumbbells at chest level",
+        "Press dumbbells up until arms are extended",
+        "Lower dumbbells to sides of chest",
+        "Feel stretch in chest at bottom",
+        "Keep feet flat on floor"
+      ],
+      "tips": [
+        "Dumbbells allow for a deeper stretch than barbell",
+        "Keep your shoulder blades retracted",
+        "Control the weight on the way down"
+      ],
+      "primaryMuscles": ["CHEST"],
+      "secondaryMuscles": ["SHOULDERS", "ARMS"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["DUMBBELL", "BENCH"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10054,
+      "name": "Chin-Up",
+      "description": "A pull-up variation with underhand grip that emphasizes the biceps.",
+      "instructions": [
+        "Hang from bar with underhand grip",
+        "Hands shoulder-width apart",
+        "Pull yourself up until chin over bar",
+        "Lower yourself with control",
+        "Keep core engaged"
+      ],
+      "tips": [
+        "The underhand grip makes this easier than pull-ups",
+        "Squeeze your biceps at the top",
+        "Don't swing - use controlled movement"
+      ],
+      "primaryMuscles": ["BACK"],
+      "secondaryMuscles": ["ARMS"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["PULL_UP_BAR"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10055,
+      "name": "Upright Row",
+      "description": "A shoulder exercise that targets the lateral deltoids and traps.",
+      "instructions": [
+        "Stand holding barbell or dumbbells at thighs",
+        "Pull weight up along body to chin level",
+        "Lead with elbows, keeping them above hands",
+        "Lower with control",
+        "Keep weight close to body"
+      ],
+      "tips": [
+        "Don't go too heavy - this can stress the shoulders",
+        "Stop when elbows reach shoulder height",
+        "Use dumbbells if you have shoulder issues"
+      ],
+      "primaryMuscles": ["SHOULDERS"],
+      "secondaryMuscles": ["BACK", "ARMS"],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BARBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10056,
+      "name": "Front Squat",
+      "description": "A squat variation with the barbell in front, emphasizing the quads and core.",
+      "instructions": [
+        "Rest barbell on front deltoids with clean grip or crossed arms",
+        "Stand with feet shoulder-width apart",
+        "Descend by breaking at hips and knees",
+        "Keep elbows high and chest up",
+        "Drive through heels to stand"
+      ],
+      "tips": [
+        "Keep your elbows up throughout the movement",
+        "Stay more upright than back squat",
+        "Work on wrist mobility for the clean grip"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": ["CORE"],
+      "difficulty": "ADVANCED",
+      "equipmentNeeded": ["BARBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10057,
+      "name": "Leg Raise",
+      "description": "A core exercise performed lying down that targets the lower abs.",
+      "instructions": [
+        "Lie on back with legs extended",
+        "Place hands under lower back for support",
+        "Raise legs until perpendicular to floor",
+        "Lower legs slowly without touching ground",
+        "Keep lower back pressed down"
+      ],
+      "tips": [
+        "Keep your lower back pressed into the floor",
+        "Bend your knees to make it easier",
+        "Don't let your lower back arch off the ground"
+      ],
+      "primaryMuscles": ["CORE"],
+      "secondaryMuscles": [],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": ["BODYWEIGHT"],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10058,
+      "name": "Reverse Lunge",
+      "description": "A lunge variation stepping backward, easier on the knees.",
+      "instructions": [
+        "Stand with feet hip-width apart",
+        "Step one foot back into lunge position",
+        "Lower back knee towards ground",
+        "Front thigh should reach parallel",
+        "Push through front foot to return"
+      ],
+      "tips": [
+        "Easier on the knees than forward lunges",
+        "Keep your torso upright",
+        "Step back far enough to maintain balance"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": ["CORE"],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["BODYWEIGHT"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10059,
+      "name": "Sumo Deadlift",
+      "description": "A deadlift variation with wide stance that emphasizes the quads and adductors.",
+      "instructions": [
+        "Stand with wide stance, toes pointed out",
+        "Grip bar between legs with arms straight",
+        "Push through legs while keeping chest up",
+        "Stand fully upright",
+        "Lower with control"
+      ],
+      "tips": [
+        "Push your knees out over your toes",
+        "Keep your chest up throughout",
+        "This variation is easier on the lower back"
+      ],
+      "primaryMuscles": ["LEGS", "BACK"],
+      "secondaryMuscles": ["CORE"],
+      "difficulty": "ADVANCED",
+      "equipmentNeeded": ["BARBELL"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
+      "isCustom": false,
+      "createdBy": "0"
+    },
+    {
+      "id": 10060,
+      "name": "Hack Squat",
+      "description": "A machine squat variation that targets the quadriceps.",
+      "instructions": [
+        "Position yourself in hack squat machine",
+        "Place feet shoulder-width apart on platform",
+        "Lower by bending knees",
+        "Descend until thighs are parallel",
+        "Push back up without locking knees"
+      ],
+      "tips": [
+        "The machine provides stability for heavy loading",
+        "Vary foot placement to target different muscles",
+        "Don't lock out your knees at the top"
+      ],
+      "primaryMuscles": ["LEGS"],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": ["MACHINE"],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "videoUrl": "",
+      "thumbnailUrl": "",
       "isCustom": false,
       "createdBy": "0"
     }

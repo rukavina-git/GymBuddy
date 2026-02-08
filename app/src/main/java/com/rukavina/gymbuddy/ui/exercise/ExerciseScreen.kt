@@ -6,7 +6,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,6 +43,8 @@ fun ExerciseScreen(
     var isSearchExpanded by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    var exerciseToDelete by remember { mutableStateOf<com.rukavina.gymbuddy.data.model.Exercise?>(null) }
+    var exerciseToHide by remember { mutableStateOf<com.rukavina.gymbuddy.data.model.Exercise?>(null) }
 
     Scaffold(
         floatingActionButton = {
@@ -214,6 +219,43 @@ fun ExerciseScreen(
                                             thumbnailUrl = exercise.thumbnailUrl,
                                             onClick = {
                                                 navController.navigate(NavRoutes.exerciseDetailsRoute(exercise.id))
+                                            },
+                                            trailingContent = {
+                                                Row {
+                                                    if (exercise.isCustom) {
+                                                        // Custom exercises can be edited and deleted
+                                                        IconButton(onClick = {
+                                                            editingExercise = exercise
+                                                            showDialog = true
+                                                        }) {
+                                                            Icon(
+                                                                Icons.Default.Edit,
+                                                                contentDescription = "Edit",
+                                                                tint = MaterialTheme.colorScheme.primary
+                                                            )
+                                                        }
+                                                        IconButton(onClick = {
+                                                            exerciseToDelete = exercise
+                                                        }) {
+                                                            Icon(
+                                                                Icons.Default.Delete,
+                                                                contentDescription = "Delete",
+                                                                tint = MaterialTheme.colorScheme.error
+                                                            )
+                                                        }
+                                                    } else {
+                                                        // Default exercises can only be hidden
+                                                        IconButton(onClick = {
+                                                            exerciseToHide = exercise
+                                                        }) {
+                                                            Icon(
+                                                                Icons.Default.VisibilityOff,
+                                                                contentDescription = "Hide",
+                                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                            )
+                                                        }
+                                                    }
+                                                }
                                             }
                                         )
                                     }
@@ -293,6 +335,61 @@ fun ExerciseScreen(
                     onEquipmentChange = { tempEquipment = it }
                 )
             }
+        }
+
+        // Delete exercise confirmation dialog
+        exerciseToDelete?.let { exercise ->
+            AlertDialog(
+                onDismissRequest = { exerciseToDelete = null },
+                title = { Text("Delete Exercise?") },
+                text = {
+                    Text("Are you sure you want to delete \"${exercise.name}\"? This action cannot be undone.")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.deleteExercise(exercise.id)
+                            exerciseToDelete = null
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { exerciseToDelete = null }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+
+        // Hide exercise confirmation dialog
+        exerciseToHide?.let { exercise ->
+            AlertDialog(
+                onDismissRequest = { exerciseToHide = null },
+                title = { Text("Hide Exercise?") },
+                text = {
+                    Text("\"${exercise.name}\" will be hidden from your exercise list. You can restore it from App Preferences.")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.hideExercise(exercise.id)
+                            exerciseToHide = null
+                        }
+                    ) {
+                        Text("Hide")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { exerciseToHide = null }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }

@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.VisibilityOff
+import com.rukavina.gymbuddy.navigation.NavRoutes
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,6 +63,27 @@ fun AppPreferencesScreen(
                         description = "Show motivational quotes on home screen",
                         checked = showQuoteOfTheDay,
                         onCheckedChange = { viewModel.setShowQuoteOfTheDay(it) },
+                        showDivider = false
+                    )
+                }
+            }
+
+            item {
+                SettingsSection {
+                    SettingsItem(
+                        icon = Icons.Default.VisibilityOff,
+                        label = "Hidden Exercises",
+                        onClick = {
+                            navController.navigate(NavRoutes.HiddenExercises)
+                        },
+                        showDivider = true
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.FitnessCenter,
+                        label = "Hidden Templates",
+                        onClick = {
+                            navController.navigate(NavRoutes.HiddenTemplates)
+                        },
                         showDivider = false
                     )
                 }

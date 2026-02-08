@@ -22,7 +22,9 @@ object WorkoutTemplateMapper {
     fun toEntities(template: WorkoutTemplate): Pair<WorkoutTemplateEntity, List<TemplateExerciseEntity>> {
         val templateEntity = WorkoutTemplateEntity(
             id = template.id,
-            title = template.title
+            title = template.title,
+            isDefault = template.isDefault,
+            isHidden = template.isHidden
         )
 
         val exerciseEntities = template.templateExercises.map { exercise ->
@@ -66,7 +68,9 @@ object WorkoutTemplateMapper {
         return WorkoutTemplate(
             id = templateWithExercises.template.id,
             title = templateWithExercises.template.title,
-            templateExercises = exercises
+            templateExercises = exercises,
+            isDefault = templateWithExercises.template.isDefault,
+            isHidden = templateWithExercises.template.isHidden
         )
     }
 

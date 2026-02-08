@@ -38,22 +38,22 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.rukavina.gymbuddy.data.model.Exercise
-import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
+import com.rukavina.gymbuddy.data.model.WorkoutTemplate
+import com.rukavina.gymbuddy.ui.template.WorkoutTemplateViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HiddenExercisesScreen(
+fun HiddenTemplatesScreen(
     navController: NavHostController,
-    viewModel: ExerciseViewModel = hiltViewModel()
+    viewModel: WorkoutTemplateViewModel = hiltViewModel()
 ) {
-    val hiddenExercises by viewModel.hiddenExercises.collectAsState(initial = emptyList())
+    val hiddenTemplates by viewModel.hiddenTemplates.collectAsState(initial = emptyList())
     var showRestoreAllDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Hidden Exercises") },
+                title = { Text("Hidden Templates") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
@@ -68,13 +68,13 @@ fun HiddenExercisesScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            if (hiddenExercises.isEmpty()) {
+            if (hiddenTemplates.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No hidden exercises",
+                        text = "No hidden templates",
                         style = MaterialTheme.typography.bodyLarge,
                         fontStyle = FontStyle.Italic,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -86,19 +86,19 @@ fun HiddenExercisesScreen(
                     onClick = { showRestoreAllDialog = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Restore All Exercises")
+                    Text("Restore All Templates")
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // List of hidden exercises (no individual confirmation - just click to restore)
+                // List of hidden templates (no individual confirmation - just click to restore)
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(hiddenExercises) { exercise ->
-                        HiddenExerciseItem(
-                            exercise = exercise,
-                            onRestore = { viewModel.unhideExercise(exercise.id) }
+                    items(hiddenTemplates) { template ->
+                        HiddenTemplateItem(
+                            template = template,
+                            onRestore = { viewModel.unhideTemplate(template.id) }
                         )
                     }
                 }
@@ -110,13 +110,15 @@ fun HiddenExercisesScreen(
     if (showRestoreAllDialog) {
         AlertDialog(
             onDismissRequest = { showRestoreAllDialog = false },
-            title = { Text("Restore All Exercises?") },
+            title = { Text("Restore All Templates?") },
             text = {
-                Text("This will restore all ${hiddenExercises.size} hidden exercises. They will appear in your exercise list again.")
+                Text("This will restore all ${hiddenTemplates.size} hidden templates. They will appear in your template list again.")
             },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.unhideAllExercises()
+                    hiddenTemplates.forEach { template ->
+                        viewModel.unhideTemplate(template.id)
+                    }
                     showRestoreAllDialog = false
                 }) {
                     Text("Restore All")
@@ -132,8 +134,8 @@ fun HiddenExercisesScreen(
 }
 
 @Composable
-fun HiddenExerciseItem(
-    exercise: Exercise,
+fun HiddenTemplateItem(
+    template: WorkoutTemplate,
     onRestore: () -> Unit
 ) {
     Card(
@@ -150,11 +152,11 @@ fun HiddenExerciseItem(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = exercise.name,
+                    text = template.title,
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = exercise.primaryMuscles.joinToString(", "),
+                    text = "${template.templateExercises.size} exercises",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
