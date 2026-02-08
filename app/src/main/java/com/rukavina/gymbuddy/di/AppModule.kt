@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
+import com.rukavina.gymbuddy.data.local.dao.TemplateVersionDao
 import com.rukavina.gymbuddy.data.local.dao.UserProfileDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
@@ -62,6 +63,11 @@ object AppModule {
     @Provides
     fun provideWorkoutTemplateDao(database: AppDatabase): WorkoutTemplateDao {
         return database.workoutTemplateDao()
+    }
+
+    @Provides
+    fun provideTemplateVersionDao(database: AppDatabase): TemplateVersionDao {
+        return database.templateVersionDao()
     }
 
     // Repositories

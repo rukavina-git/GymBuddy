@@ -52,4 +52,18 @@ class WorkoutTemplateRepositoryImpl @Inject constructor(
         workoutTemplateDao.deleteTemplate(id)
         // TODO: Sync deletion with remote API when online
     }
+
+    override suspend fun hideTemplate(id: String) {
+        workoutTemplateDao.hideTemplate(id)
+    }
+
+    override suspend fun unhideTemplate(id: String) {
+        workoutTemplateDao.unhideTemplate(id)
+    }
+
+    override fun getHiddenTemplates(): Flow<List<WorkoutTemplate>> {
+        return workoutTemplateDao.getHiddenTemplates().map { templatesWithExercises ->
+            WorkoutTemplateMapper.toDomainList(templatesWithExercises)
+        }
+    }
 }

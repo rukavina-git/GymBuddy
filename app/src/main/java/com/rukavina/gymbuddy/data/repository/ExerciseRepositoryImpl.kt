@@ -68,4 +68,10 @@ class ExerciseRepositoryImpl @Inject constructor(
             ExerciseMapper.toDomainList(entities)
         }
     }
+
+    override fun getAllExercisesIncludingHidden(): Flow<List<Exercise>> {
+        return exerciseDao.getAllExercisesIncludingHidden().map { entities ->
+            ExerciseMapper.toDomainList(entities)
+        }
+    }
 }

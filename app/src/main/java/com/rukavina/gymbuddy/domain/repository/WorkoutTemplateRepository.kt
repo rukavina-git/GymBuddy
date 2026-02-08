@@ -61,4 +61,27 @@ interface WorkoutTemplateRepository {
      * @param id The template ID to delete
      */
     suspend fun deleteTemplate(id: String)
+
+    /**
+     * Hide a template by ID.
+     * Hidden templates won't appear in the main list.
+     *
+     * @param id The template ID to hide
+     */
+    suspend fun hideTemplate(id: String)
+
+    /**
+     * Unhide a template by ID.
+     * Makes the template visible again.
+     *
+     * @param id The template ID to unhide
+     */
+    suspend fun unhideTemplate(id: String)
+
+    /**
+     * Get all hidden templates.
+     *
+     * @return Flow of hidden templates
+     */
+    fun getHiddenTemplates(): Flow<List<WorkoutTemplate>>
 }

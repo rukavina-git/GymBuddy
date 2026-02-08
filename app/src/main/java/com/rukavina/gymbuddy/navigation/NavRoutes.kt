@@ -29,6 +29,7 @@ object NavRoutes {
     const val EditActivityLevel = "edit_activity_level"
     const val EditUnits = "edit_units"
     const val HiddenExercises = "hidden_exercises"
+    const val HiddenTemplates = "hidden_templates"
     const val AppPreferences = "app_preferences"
 
     fun exerciseDetailsRoute(exerciseId: Int): String {

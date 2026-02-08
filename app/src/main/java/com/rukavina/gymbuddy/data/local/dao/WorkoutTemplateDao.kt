@@ -20,15 +20,23 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WorkoutTemplateDao {
     /**
-     * Get all workout templates with their exercises.
-     * Ordered alphabetically by title for easy browsing.
+     * Get all visible workout templates with their exercises.
+     * Excludes hidden templates. Ordered alphabetically by title for easy browsing.
      *
      * Returns a Flow for reactive updates - UI will automatically
      * update when templates are added, modified, or deleted.
      */
     @Transaction
-    @Query("SELECT * FROM workout_templates ORDER BY title ASC")
+    @Query("SELECT * FROM workout_templates WHERE isHidden = 0 ORDER BY title ASC")
     fun getAllTemplates(): Flow<List<WorkoutTemplateWithExercises>>
+
+    /**
+     * Get all workout templates including hidden ones.
+     * Useful for settings/management screens.
+     */
+    @Transaction
+    @Query("SELECT * FROM workout_templates ORDER BY title ASC")
+    fun getAllTemplatesIncludingHidden(): Flow<List<WorkoutTemplateWithExercises>>
 
     /**
      * Get a single template by ID with its exercises.
@@ -42,14 +50,15 @@ interface WorkoutTemplateDao {
     suspend fun getTemplateById(id: String): WorkoutTemplateWithExercises?
 
     /**
-     * Search templates by title (case-insensitive).
+     * Search visible templates by title (case-insensitive).
+     * Excludes hidden templates.
      * Useful for filtering or autocomplete functionality.
      *
      * @param query Search query (will be wrapped with % for LIKE query)
      * @return Flow of matching templates
      */
     @Transaction
-    @Query("SELECT * FROM workout_templates WHERE title LIKE '%' || :query || '%' ORDER BY title ASC")
+    @Query("SELECT * FROM workout_templates WHERE isHidden = 0 AND title LIKE '%' || :query || '%' ORDER BY title ASC")
     fun searchTemplates(query: String): Flow<List<WorkoutTemplateWithExercises>>
 
     /**
@@ -130,6 +139,54 @@ interface WorkoutTemplateDao {
      */
     @Query("DELETE FROM workout_templates")
     suspend fun deleteAllTemplates()
+
+    /**
+     * Hide a template by ID.
+     * Hidden templates won't appear in the main template list.
+     *
+     * @param id The template ID to hide
+     */
+    @Query("UPDATE workout_templates SET isHidden = 1 WHERE id = :id")
+    suspend fun hideTemplate(id: String)
+
+    /**
+     * Unhide a template by ID.
+     * Makes the template visible again in the main list.
+     *
+     * @param id The template ID to unhide
+     */
+    @Query("UPDATE workout_templates SET isHidden = 0 WHERE id = :id")
+    suspend fun unhideTemplate(id: String)
+
+    /**
+     * Get all hidden templates.
+     * Useful for a "restore hidden templates" feature.
+     */
+    @Transaction
+    @Query("SELECT * FROM workout_templates WHERE isHidden = 1 ORDER BY title ASC")
+    fun getHiddenTemplates(): Flow<List<WorkoutTemplateWithExercises>>
+
+    /**
+     * Unhide all templates.
+     * Useful for resetting hidden state.
+     */
+    @Query("UPDATE workout_templates SET isHidden = 0")
+    suspend fun unhideAllTemplates()
+
+    /**
+     * Get default templates only.
+     * Useful for management screens.
+     */
+    @Transaction
+    @Query("SELECT * FROM workout_templates WHERE isDefault = 1 ORDER BY title ASC")
+    fun getDefaultTemplates(): Flow<List<WorkoutTemplateWithExercises>>
+
+    /**
+     * Get custom (user-created) templates only.
+     */
+    @Transaction
+    @Query("SELECT * FROM workout_templates WHERE isDefault = 0 AND isHidden = 0 ORDER BY title ASC")
+    fun getCustomTemplates(): Flow<List<WorkoutTemplateWithExercises>>
 
     /**
      * Transaction to insert template with exercises atomically.

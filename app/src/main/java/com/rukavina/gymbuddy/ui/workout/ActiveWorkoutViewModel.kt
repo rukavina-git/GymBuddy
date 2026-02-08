@@ -9,7 +9,7 @@ import com.rukavina.gymbuddy.data.model.PreferredUnits
 import com.rukavina.gymbuddy.data.model.WorkoutSession
 import com.rukavina.gymbuddy.data.model.WorkoutTemplate
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
-import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesUseCase
+import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -71,7 +71,7 @@ data class ActiveWorkoutUiState(
 @HiltViewModel
 class ActiveWorkoutViewModel @Inject constructor(
     private val createWorkoutSessionUseCase: CreateWorkoutSessionUseCase,
-    private val getAllExercisesUseCase: GetAllExercisesUseCase,
+    private val getAllExercisesIncludingHiddenUseCase: GetAllExercisesIncludingHiddenUseCase,
     private val userProfileRepository: UserProfileRepository
 ) : ViewModel() {
 
@@ -105,10 +105,12 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /**
      * Load available exercises for name mapping.
+     * Uses getAllExercisesIncludingHiddenUseCase to ensure we can map
+     * exercise names even for hidden exercises.
      */
     private fun loadExercises() {
         viewModelScope.launch {
-            availableExercises = getAllExercisesUseCase().first()
+            availableExercises = getAllExercisesIncludingHiddenUseCase().first()
         }
     }
 
@@ -119,7 +121,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         viewModelScope.launch {
             // Ensure exercises are loaded before starting
             if (availableExercises.isEmpty()) {
-                availableExercises = getAllExercisesUseCase().first()
+                availableExercises = getAllExercisesIncludingHiddenUseCase().first()
             }
 
             val exerciseMap = availableExercises.associateBy { it.id }

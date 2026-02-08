@@ -162,14 +162,6 @@ fun SettingsScreen(
                             showDivider = true
                         )
                         SettingsItem(
-                            icon = androidx.compose.material.icons.Icons.Default.VisibilityOff,
-                            label = "Hidden Exercises",
-                            onClick = {
-                                bottomNavController.navigate(NavRoutes.HiddenExercises)
-                            },
-                            showDivider = true
-                        )
-                        SettingsItem(
                             icon = androidx.compose.material.icons.Icons.Default.FileDownload,
                             label = "Export Data",
                             onClick = {

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rukavina.gymbuddy.data.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesUseCase
+import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
+import com.rukavina.gymbuddy.domain.repository.WorkoutTemplateRepository
 import com.rukavina.gymbuddy.domain.usecase.template.CreateWorkoutTemplateUseCase
 import com.rukavina.gymbuddy.domain.usecase.template.DeleteWorkoutTemplateUseCase
 import com.rukavina.gymbuddy.domain.usecase.template.GetAllWorkoutTemplatesUseCase
@@ -32,11 +34,15 @@ class WorkoutTemplateViewModel @Inject constructor(
     private val createWorkoutTemplateUseCase: CreateWorkoutTemplateUseCase,
     private val updateWorkoutTemplateUseCase: UpdateWorkoutTemplateUseCase,
     private val deleteWorkoutTemplateUseCase: DeleteWorkoutTemplateUseCase,
-    private val getAllExercisesUseCase: GetAllExercisesUseCase
+    private val getAllExercisesUseCase: GetAllExercisesUseCase,
+    private val getAllExercisesIncludingHiddenUseCase: GetAllExercisesIncludingHiddenUseCase,
+    private val workoutTemplateRepository: WorkoutTemplateRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkoutTemplateUiState())
     val uiState: StateFlow<WorkoutTemplateUiState> = _uiState.asStateFlow()
+
+    val hiddenTemplates = workoutTemplateRepository.getHiddenTemplates()
 
     init {
         loadTemplates()
@@ -73,11 +79,12 @@ class WorkoutTemplateViewModel @Inject constructor(
 
     /**
      * Load all available exercises for template creation/editing.
-     * Populates dropdown/picker UI components.
+     * Uses getAllExercisesIncludingHiddenUseCase to ensure we can look up
+     * exercise names even for hidden exercises (important for template display).
      */
     private fun loadAvailableExercises() {
         viewModelScope.launch {
-            getAllExercisesUseCase()
+            getAllExercisesIncludingHiddenUseCase()
                 .catch { error ->
                     _uiState.update {
                         it.copy(
@@ -235,5 +242,63 @@ class WorkoutTemplateViewModel @Inject constructor(
      */
     fun clearSuccess() {
         _uiState.update { it.copy(successMessage = null) }
+    }
+
+    /**
+     * Hide a default workout template.
+     * Hidden templates won't appear in the main list.
+     */
+    fun hideTemplate(templateId: String) {
+        viewModelScope.launch {
+            try {
+                workoutTemplateRepository.hideTemplate(templateId)
+                _uiState.update {
+                    it.copy(successMessage = "Template hidden")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = e.message ?: "Failed to hide template")
+                }
+            }
+        }
+    }
+
+    /**
+     * Unhide a template.
+     * Makes the template visible again in the main list.
+     */
+    fun unhideTemplate(templateId: String) {
+        viewModelScope.launch {
+            try {
+                workoutTemplateRepository.unhideTemplate(templateId)
+                _uiState.update {
+                    it.copy(successMessage = "Template restored")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = e.message ?: "Failed to unhide template")
+                }
+            }
+        }
+    }
+
+    /**
+     * Unhide all hidden templates.
+     */
+    fun unhideAllTemplates() {
+        viewModelScope.launch {
+            try {
+                // Get all hidden templates and unhide them one by one
+                hiddenTemplates.collect { templates ->
+                    templates.forEach { template ->
+                        workoutTemplateRepository.unhideTemplate(template.id)
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = e.message ?: "Failed to unhide templates")
+                }
+            }
+        }
     }
 }

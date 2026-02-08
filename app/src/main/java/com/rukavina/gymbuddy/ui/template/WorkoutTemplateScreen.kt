@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -65,9 +66,13 @@ fun WorkoutTemplateScreen(
     onStartWorkout: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val activeWorkoutState by activeWorkoutViewModel.uiState.collectAsState()
     var showCreateEditDialog by remember { mutableStateOf(false) }
     var editingTemplate by remember { mutableStateOf<WorkoutTemplate?>(null) }
     var templateToDelete by remember { mutableStateOf<WorkoutTemplate?>(null) }
+    var templateToHide by remember { mutableStateOf<WorkoutTemplate?>(null) }
+    var viewingTemplate by remember { mutableStateOf<WorkoutTemplate?>(null) }
+    var templateToStart by remember { mutableStateOf<WorkoutTemplate?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
@@ -130,6 +135,9 @@ fun WorkoutTemplateScreen(
                                 WorkoutTemplateItem(
                                     template = template,
                                     availableExercises = uiState.availableExercises,
+                                    onClick = {
+                                        viewingTemplate = template
+                                    },
                                     onEdit = {
                                         editingTemplate = template
                                         showCreateEditDialog = true
@@ -137,9 +145,17 @@ fun WorkoutTemplateScreen(
                                     onDelete = {
                                         templateToDelete = template
                                     },
+                                    onHide = {
+                                        templateToHide = template
+                                    },
                                     onStartWorkout = {
-                                        activeWorkoutViewModel.startWorkoutFromTemplate(template)
-                                        onStartWorkout()
+                                        // Check if there's an active workout
+                                        if (activeWorkoutViewModel.hasActiveWorkout()) {
+                                            templateToStart = template
+                                        } else {
+                                            activeWorkoutViewModel.startWorkoutFromTemplate(template)
+                                            onStartWorkout()
+                                        }
                                     }
                                 )
                             }
@@ -218,6 +234,96 @@ fun WorkoutTemplateScreen(
                 }
             )
         }
+
+        // Hide template confirmation dialog
+        templateToHide?.let { template ->
+            AlertDialog(
+                onDismissRequest = { templateToHide = null },
+                title = { Text("Hide Template?") },
+                text = {
+                    Text("\"${template.title}\" will be hidden from your template list. You can restore it from App Preferences.")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.hideTemplate(template.id)
+                            templateToHide = null
+                        }
+                    ) {
+                        Text("Hide")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { templateToHide = null }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+
+        // View template dialog (read-only for default templates)
+        viewingTemplate?.let { template ->
+            WorkoutTemplateViewDialog(
+                template = template,
+                availableExercises = uiState.availableExercises,
+                onDismiss = { viewingTemplate = null },
+                onStartWorkout = {
+                    viewingTemplate = null
+                    // Check if there's an active workout
+                    if (activeWorkoutViewModel.hasActiveWorkout()) {
+                        templateToStart = template
+                    } else {
+                        activeWorkoutViewModel.startWorkoutFromTemplate(template)
+                        onStartWorkout()
+                    }
+                }
+            )
+        }
+
+        // Active workout confirmation dialog
+        templateToStart?.let { template ->
+            AlertDialog(
+                onDismissRequest = { templateToStart = null },
+                title = { Text("Active Workout in Progress") },
+                text = {
+                    Column {
+                        Text("You have an active workout: \"${activeWorkoutState.workoutTitle}\"")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Starting a new workout will discard your current session. Do you want to continue?")
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            activeWorkoutViewModel.discardWorkout()
+                            activeWorkoutViewModel.startWorkoutFromTemplate(template)
+                            templateToStart = null
+                            onStartWorkout()
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Discard & Start New")
+                    }
+                },
+                dismissButton = {
+                    Row {
+                        TextButton(
+                            onClick = {
+                                templateToStart = null
+                                onStartWorkout() // Navigate to continue active workout
+                            }
+                        ) {
+                            Text("Continue Active Workout")
+                        }
+                        TextButton(onClick = { templateToStart = null }) {
+                            Text("Cancel")
+                        }
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -229,8 +335,10 @@ fun WorkoutTemplateScreen(
 fun WorkoutTemplateItem(
     template: WorkoutTemplate,
     availableExercises: List<Exercise>,
+    onClick: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    onHide: () -> Unit,
     onStartWorkout: () -> Unit
 ) {
     // Create exercise ID to name mapping
@@ -240,7 +348,8 @@ fun WorkoutTemplateItem(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        onClick = onClick
     ) {
         Column(
             modifier = Modifier
@@ -266,11 +375,19 @@ fun WorkoutTemplateItem(
                     )
                 }
                 Row {
-                    IconButton(onClick = onEdit) {
-                        Icon(Icons.Default.Edit, "Edit", tint = MaterialTheme.colorScheme.primary)
-                    }
-                    IconButton(onClick = onDelete) {
-                        Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                    if (template.isDefault) {
+                        // Default templates can only be hidden, not edited or deleted
+                        IconButton(onClick = onHide) {
+                            Icon(Icons.Default.VisibilityOff, "Hide", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    } else {
+                        // Custom templates can be edited and deleted
+                        IconButton(onClick = onEdit) {
+                            Icon(Icons.Default.Edit, "Edit", tint = MaterialTheme.colorScheme.primary)
+                        }
+                        IconButton(onClick = onDelete) {
+                            Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                        }
                     }
                 }
             }
@@ -575,6 +692,116 @@ fun WorkoutTemplateFormDialog(
             }
         )
     }
+}
+
+/**
+ * Read-only dialog for viewing a workout template's details.
+ * Shows the template exercises without editing capabilities.
+ */
+@Composable
+fun WorkoutTemplateViewDialog(
+    template: WorkoutTemplate,
+    availableExercises: List<Exercise>,
+    onDismiss: () -> Unit,
+    onStartWorkout: () -> Unit
+) {
+    val exerciseMap = remember(availableExercises) {
+        availableExercises.associateBy { it.id }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Column {
+                Text(
+                    text = template.title,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                if (template.isDefault) {
+                    Text(
+                        text = "Default Template",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.heightIn(max = 400.dp)
+            ) {
+                Text(
+                    text = "${template.templateExercises.size} exercises",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(template.templateExercises.sortedBy { it.orderIndex }) { templateExercise ->
+                        val exerciseName = exerciseMap[templateExercise.exerciseId]?.name ?: "Unknown"
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp)
+                            ) {
+                                Text(
+                                    text = exerciseName,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    text = "${templateExercise.plannedSets} sets x ${templateExercise.plannedReps} reps",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                templateExercise.restSeconds?.let { rest ->
+                                    Text(
+                                        text = "Rest: ${rest}s",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                templateExercise.notes?.let { notes ->
+                                    Text(
+                                        text = notes,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontStyle = FontStyle.Italic,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onStartWorkout,
+                enabled = template.templateExercises.isNotEmpty(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                )
+            ) {
+                Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Start Workout")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
 }
 
 /**

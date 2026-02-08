@@ -41,6 +41,7 @@ import coil3.request.crossfade
  * @param onClick Callback when the card is clicked
  * @param modifier Modifier to be applied to the card
  * @param thumbnailSize Size of the thumbnail (default 60.dp)
+ * @param trailingContent Optional composable content to display at the end (e.g., action buttons)
  */
 @Composable
 fun ThumbnailCard(
@@ -50,7 +51,8 @@ fun ThumbnailCard(
     fallbackIcon: ImageVector = Icons.Default.PlayArrow,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    thumbnailSize: Dp = 60.dp
+    thumbnailSize: Dp = 60.dp,
+    trailingContent: @Composable (() -> Unit)? = null
 ) {
     val context = LocalContext.current
 
@@ -77,7 +79,7 @@ fun ThumbnailCard(
                 shape = MaterialTheme.shapes.small,
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                if (thumbnailUrl != null) {
+                if (!thumbnailUrl.isNullOrBlank()) {
                     SubcomposeAsyncImage(
                         model = ImageRequest.Builder(context)
                             .data(thumbnailUrl)
@@ -142,6 +144,9 @@ fun ThumbnailCard(
                     )
                 }
             }
+
+            // Optional trailing content (e.g., action buttons)
+            trailingContent?.invoke()
         }
     }
 }

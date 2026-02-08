@@ -1,0 +1,179 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "id": "template-chest-triceps",
+      "title": "Chest & Triceps",
+      "exercises": [
+        {"exerciseId": 10001, "plannedSets": 4, "plannedReps": 8, "orderIndex": 0, "restSeconds": 120, "notes": "Main compound lift"},
+        {"exerciseId": 10012, "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Upper chest focus"},
+        {"exerciseId": 10013, "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Stretch and squeeze"},
+        {"exerciseId": 10015, "plannedSets": 3, "plannedReps": 10, "orderIndex": 3, "restSeconds": 90, "notes": "Lean forward for chest"},
+        {"exerciseId": 10031, "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 90, "notes": "Compound tricep movement"},
+        {"exerciseId": 10028, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Squeeze at bottom"},
+        {"exerciseId": 10029, "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Long head focus"}
+      ]
+    },
+    {
+      "id": "template-chest",
+      "title": "Chest",
+      "exercises": [
+        {"exerciseId": 10001, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy compound"},
+        {"exerciseId": 10011, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Upper chest"},
+        {"exerciseId": 10053, "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90, "notes": "Full range of motion"},
+        {"exerciseId": 10013, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Stretch focus"},
+        {"exerciseId": 10014, "plannedSets": 3, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60, "notes": "Constant tension"},
+        {"exerciseId": 10015, "plannedSets": 3, "plannedReps": 10, "orderIndex": 5, "restSeconds": 90, "notes": "Bodyweight finisher"}
+      ]
+    },
+    {
+      "id": "template-back-biceps",
+      "title": "Back & Biceps",
+      "exercises": [
+        {"exerciseId": 10003, "plannedSets": 4, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy pull"},
+        {"exerciseId": 10004, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Lat width"},
+        {"exerciseId": 10017, "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Back thickness"},
+        {"exerciseId": 10019, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Squeeze shoulder blades"},
+        {"exerciseId": 10033, "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 60, "notes": "Strict form"},
+        {"exerciseId": 10034, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Neutral grip"},
+        {"exerciseId": 10035, "plannedSets": 3, "plannedReps": 10, "orderIndex": 6, "restSeconds": 60, "notes": "Strict isolation"}
+      ]
+    },
+    {
+      "id": "template-back",
+      "title": "Back",
+      "exercises": [
+        {"exerciseId": 10003, "plannedSets": 5, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy compound"},
+        {"exerciseId": 10004, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Width builder"},
+        {"exerciseId": 10017, "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Thickness builder"},
+        {"exerciseId": 10016, "plannedSets": 3, "plannedReps": 10, "orderIndex": 3, "restSeconds": 60, "notes": "Lat isolation"},
+        {"exerciseId": 10018, "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 60, "notes": "Each arm"},
+        {"exerciseId": 10019, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Cable tension"},
+        {"exerciseId": 10027, "plannedSets": 3, "plannedReps": 15, "orderIndex": 6, "restSeconds": 60, "notes": "Trap focus"}
+      ]
+    },
+    {
+      "id": "template-legs",
+      "title": "Legs",
+      "exercises": [
+        {"exerciseId": 10002, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "King of exercises"},
+        {"exerciseId": 10041, "plannedSets": 4, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Hamstring focus"},
+        {"exerciseId": 10038, "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 90, "notes": "Quad builder"},
+        {"exerciseId": 10040, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Hamstring isolation"},
+        {"exerciseId": 10039, "plannedSets": 3, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60, "notes": "Quad isolation"},
+        {"exerciseId": 10044, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 90, "notes": "Glute builder"},
+        {"exerciseId": 10042, "plannedSets": 4, "plannedReps": 15, "orderIndex": 6, "restSeconds": 60, "notes": "Full stretch"},
+        {"exerciseId": 10043, "plannedSets": 3, "plannedReps": 15, "orderIndex": 7, "restSeconds": 60, "notes": "Soleus focus"}
+      ]
+    },
+    {
+      "id": "template-shoulders",
+      "title": "Shoulders",
+      "exercises": [
+        {"exerciseId": 10022, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 120, "notes": "Main overhead press"},
+        {"exerciseId": 10023, "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Dumbbell variation"},
+        {"exerciseId": 10008, "plannedSets": 4, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Side delt focus"},
+        {"exerciseId": 10024, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Front delt"},
+        {"exerciseId": 10025, "plannedSets": 4, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60, "notes": "Rear delt balance"},
+        {"exerciseId": 10020, "plannedSets": 3, "plannedReps": 15, "orderIndex": 5, "restSeconds": 60, "notes": "Shoulder health"},
+        {"exerciseId": 10027, "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Trap builder"}
+      ]
+    },
+    {
+      "id": "template-arms",
+      "title": "Arms",
+      "exercises": [
+        {"exerciseId": 10033, "plannedSets": 3, "plannedReps": 10, "orderIndex": 0, "restSeconds": 90, "notes": "Bicep mass builder"},
+        {"exerciseId": 10031, "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Tricep compound"},
+        {"exerciseId": 10034, "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Brachialis focus"},
+        {"exerciseId": 10028, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Tricep isolation"},
+        {"exerciseId": 10007, "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Bicep peak"},
+        {"exerciseId": 10029, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Long head tricep"},
+        {"exerciseId": 10035, "plannedSets": 3, "plannedReps": 10, "orderIndex": 6, "restSeconds": 60, "notes": "Strict bicep"},
+        {"exerciseId": 10030, "plannedSets": 3, "plannedReps": 12, "orderIndex": 7, "restSeconds": 60, "notes": "Tricep finisher"}
+      ]
+    },
+    {
+      "id": "template-core",
+      "title": "Core",
+      "exercises": [
+        {"exerciseId": 10006, "plannedSets": 3, "plannedReps": 60, "orderIndex": 0, "restSeconds": 60, "notes": "Hold for 60 seconds"},
+        {"exerciseId": 10051, "plannedSets": 3, "plannedReps": 15, "orderIndex": 1, "restSeconds": 60, "notes": "Weighted abs"},
+        {"exerciseId": 10047, "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Lower abs"},
+        {"exerciseId": 10048, "plannedSets": 3, "plannedReps": 20, "orderIndex": 3, "restSeconds": 60, "notes": "10 each side"},
+        {"exerciseId": 10052, "plannedSets": 3, "plannedReps": 20, "orderIndex": 4, "restSeconds": 60, "notes": "Oblique focus"},
+        {"exerciseId": 10049, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 45, "notes": "Core stability"},
+        {"exerciseId": 10050, "plannedSets": 3, "plannedReps": 30, "orderIndex": 6, "restSeconds": 45, "notes": "15 each side"}
+      ]
+    },
+    {
+      "id": "template-full-body",
+      "title": "Full Body",
+      "exercises": [
+        {"exerciseId": 10002, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Legs compound"},
+        {"exerciseId": 10001, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Push compound"},
+        {"exerciseId": 10017, "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Pull compound"},
+        {"exerciseId": 10022, "plannedSets": 3, "plannedReps": 8, "orderIndex": 3, "restSeconds": 90, "notes": "Shoulders"},
+        {"exerciseId": 10041, "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 90, "notes": "Posterior chain"},
+        {"exerciseId": 10007, "plannedSets": 2, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Biceps"},
+        {"exerciseId": 10028, "plannedSets": 2, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Triceps"},
+        {"exerciseId": 10006, "plannedSets": 3, "plannedReps": 45, "orderIndex": 7, "restSeconds": 45, "notes": "Core finisher"}
+      ]
+    },
+    {
+      "id": "template-upper-body",
+      "title": "Upper Body",
+      "exercises": [
+        {"exerciseId": 10001, "plannedSets": 4, "plannedReps": 8, "orderIndex": 0, "restSeconds": 120, "notes": "Horizontal push"},
+        {"exerciseId": 10017, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 90, "notes": "Horizontal pull"},
+        {"exerciseId": 10022, "plannedSets": 3, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Vertical push"},
+        {"exerciseId": 10004, "plannedSets": 3, "plannedReps": 8, "orderIndex": 3, "restSeconds": 90, "notes": "Vertical pull"},
+        {"exerciseId": 10012, "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 60, "notes": "Upper chest"},
+        {"exerciseId": 10019, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Cable row"},
+        {"exerciseId": 10008, "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Side delts"},
+        {"exerciseId": 10007, "plannedSets": 3, "plannedReps": 12, "orderIndex": 7, "restSeconds": 60, "notes": "Biceps"},
+        {"exerciseId": 10028, "plannedSets": 3, "plannedReps": 12, "orderIndex": 8, "restSeconds": 60, "notes": "Triceps"}
+      ]
+    },
+    {
+      "id": "template-lower-body",
+      "title": "Lower Body",
+      "exercises": [
+        {"exerciseId": 10002, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Main squat"},
+        {"exerciseId": 10041, "plannedSets": 4, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Hamstring focus"},
+        {"exerciseId": 10045, "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90, "notes": "Each leg"},
+        {"exerciseId": 10038, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 90, "notes": "Quad volume"},
+        {"exerciseId": 10040, "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Hamstring curl"},
+        {"exerciseId": 10044, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 90, "notes": "Glute builder"},
+        {"exerciseId": 10039, "plannedSets": 3, "plannedReps": 15, "orderIndex": 6, "restSeconds": 60, "notes": "Quad burnout"},
+        {"exerciseId": 10042, "plannedSets": 4, "plannedReps": 15, "orderIndex": 7, "restSeconds": 60, "notes": "Calves"}
+      ]
+    },
+    {
+      "id": "template-push",
+      "title": "Push Day",
+      "exercises": [
+        {"exerciseId": 10001, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy bench"},
+        {"exerciseId": 10022, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Overhead press"},
+        {"exerciseId": 10012, "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90, "notes": "Upper chest"},
+        {"exerciseId": 10008, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Side delts"},
+        {"exerciseId": 10013, "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Chest stretch"},
+        {"exerciseId": 10028, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Triceps"},
+        {"exerciseId": 10029, "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Overhead triceps"}
+      ]
+    },
+    {
+      "id": "template-pull",
+      "title": "Pull Day",
+      "exercises": [
+        {"exerciseId": 10003, "plannedSets": 4, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy deadlift"},
+        {"exerciseId": 10004, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Lat width"},
+        {"exerciseId": 10017, "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Back thickness"},
+        {"exerciseId": 10020, "plannedSets": 3, "plannedReps": 15, "orderIndex": 3, "restSeconds": 60, "notes": "Rear delts"},
+        {"exerciseId": 10019, "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Cable row"},
+        {"exerciseId": 10033, "plannedSets": 3, "plannedReps": 10, "orderIndex": 5, "restSeconds": 60, "notes": "Biceps"},
+        {"exerciseId": 10034, "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Hammer curls"}
+      ]
+    }
+  ]
+}

@@ -63,4 +63,11 @@ interface ExerciseRepository {
      * Useful for autocomplete or filtering.
      */
     fun searchExercises(query: String): Flow<List<Exercise>>
+
+    /**
+     * Get all exercises including hidden ones.
+     * Useful for lookups where we need to find exercise names by ID
+     * regardless of hidden status.
+     */
+    fun getAllExercisesIncludingHidden(): Flow<List<Exercise>>
 }

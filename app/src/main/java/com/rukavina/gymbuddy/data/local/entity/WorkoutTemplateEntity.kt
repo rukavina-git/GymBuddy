@@ -23,5 +23,17 @@ data class WorkoutTemplateEntity(
      * User-defined title for the template.
      * Examples: "Push Day", "Pull Day", "Leg Day"
      */
-    val title: String
+    val title: String,
+
+    /**
+     * Whether this is a default/bundled template.
+     * Default templates cannot be edited or deleted, only hidden.
+     */
+    val isDefault: Boolean = false,
+
+    /**
+     * Whether this template is hidden by the user.
+     * Hidden templates don't appear in the main list but can be restored.
+     */
+    val isHidden: Boolean = false
 )
