@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.rukavina.gymbuddy.utils.validation.InputValidation
 
 /**
  * Dialog for configuring exercise details (sets, reps, rest time, notes).
@@ -66,7 +67,7 @@ fun ExerciseConfigDialog(
                 ) {
                     OutlinedTextField(
                         value = sets,
-                        onValueChange = { sets = it.filter { char -> char.isDigit() } },
+                        onValueChange = { sets = InputValidation.validateReps(it) },
                         label = { Text("Sets *") },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
@@ -74,7 +75,7 @@ fun ExerciseConfigDialog(
                     )
                     OutlinedTextField(
                         value = reps,
-                        onValueChange = { reps = it.filter { char -> char.isDigit() } },
+                        onValueChange = { reps = InputValidation.validateReps(it) },
                         label = { Text("Reps *") },
                         modifier = Modifier.weight(1f),
                         singleLine = true,

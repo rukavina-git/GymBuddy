@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.ui.workout
 
 import androidx.compose.foundation.background
 import com.rukavina.gymbuddy.data.model.PreferredUnits
+import com.rukavina.gymbuddy.utils.validation.InputValidation
 import com.rukavina.gymbuddy.utils.UnitConverter
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -457,7 +458,9 @@ fun SetRow(
         // Reps input
         OutlinedTextField(
             value = set.reps,
-            onValueChange = onUpdateReps,
+            onValueChange = { input ->
+                onUpdateReps(InputValidation.validateReps(input))
+            },
             label = { Text("Reps") },
             modifier = Modifier.weight(1f),
             singleLine = true,
@@ -468,7 +471,9 @@ fun SetRow(
         val weightUnit = UnitConverter.getWeightUnitLabel(preferredUnits)
         OutlinedTextField(
             value = set.weight,
-            onValueChange = onUpdateWeight,
+            onValueChange = { input ->
+                InputValidation.validateWeight(input)?.let { onUpdateWeight(it) }
+            },
             label = { Text("Weight ($weightUnit)") },
             modifier = Modifier.weight(1f),
             singleLine = true,

@@ -1,24 +1,29 @@
 package com.rukavina.gymbuddy.ui.workout
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rukavina.gymbuddy.data.model.Exercise
 import com.rukavina.gymbuddy.data.model.PerformedExercise
 import com.rukavina.gymbuddy.data.model.WorkoutSession
 import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
-import com.rukavina.gymbuddy.utils.UnitConverter
+import com.rukavina.gymbuddy.utils.validation.InputValidation
+import com.rukavina.gymbuddy.utils.validation.ValidationConstants
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -118,15 +123,9 @@ fun WorkoutScreen(
                         items(uiState.workoutSessions) { workoutSession ->
                             WorkoutSessionItem(
                                 workoutSession = workoutSession,
-                                availableExercises = exerciseUiState.exercises,
-                                preferredUnits = uiState.preferredUnits,
                                 onEdit = {
                                     editingWorkoutSession = workoutSession
                                     showDialog = true
-                                },
-                                onDelete = {
-                                    workoutToDelete = workoutSession
-                                    showDeleteConfirmDialog = true
                                 }
                             )
                         }
@@ -207,7 +206,14 @@ fun WorkoutScreen(
                         viewModel.createWorkoutSession(workoutSession)
                     }
                     showDialog = false
-                }
+                },
+                onDelete = if (editingWorkoutSession != null) {
+                    {
+                        viewModel.deleteWorkoutSession(editingWorkoutSession!!.id)
+                        showDialog = false
+                        editingWorkoutSession = null
+                    }
+                } else null
             )
         }
     }
@@ -216,23 +222,23 @@ fun WorkoutScreen(
 @Composable
 fun WorkoutSessionItem(
     workoutSession: WorkoutSession,
-    availableExercises: List<Exercise>,
-    preferredUnits: com.rukavina.gymbuddy.data.model.PreferredUnits,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onEdit: () -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     val date = remember(workoutSession.date) { dateFormat.format(Date(workoutSession.date)) }
     val time = remember(workoutSession.date) { timeFormat.format(Date(workoutSession.date)) }
 
-    // Create exercise ID to name mapping
-    val exerciseMap = remember(availableExercises) {
-        availableExercises.associateBy { it.id }
-    }
+    // Format duration as HH:MM:SS
+    val hours = workoutSession.durationSeconds / 3600
+    val minutes = (workoutSession.durationSeconds % 3600) / 60
+    val seconds = workoutSession.durationSeconds % 60
+    val durationText = String.format("%02d:%02d:%02d", hours, minutes, seconds)
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onEdit() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -245,56 +251,28 @@ fun WorkoutSessionItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = workoutSession.title ?: "Workout",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = ValidationConstants.MAX_TITLE_LINES,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "$date $time",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Format duration as HH:MM:SS
-                val hours = workoutSession.durationSeconds / 3600
-                val minutes = (workoutSession.durationSeconds % 3600) / 60
-                val seconds = workoutSession.durationSeconds % 60
-                val durationText = String.format("%02d:%02d:%02d", hours, minutes, seconds)
-
+            }
+            Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "$durationText • ${workoutSession.performedExercises.size} exercises",
+                    text = durationText,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "${workoutSession.performedExercises.size} exercises",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (workoutSession.performedExercises.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Divider()
-                    Spacer(modifier = Modifier.height(8.dp))
-                    workoutSession.performedExercises.forEach { exercise ->
-                        val exerciseName = exerciseMap[exercise.exerciseId]?.name ?: "Unknown Exercise"
-                        val setCount = exercise.sets.size
-                        val totalReps = exercise.sets.sumOf { it.reps }
-                        val avgWeightInKg = if (exercise.sets.isNotEmpty()) {
-                            exercise.sets.map { it.weight }.average().toFloat()
-                        } else 0f
-                        // Convert weight from metric (kg) to user's preferred display unit
-                        val displayWeight = UnitConverter.weightToDisplayUnit(avgWeightInKg, preferredUnits)
-                        val weightUnit = UnitConverter.getWeightUnitLabel(preferredUnits)
-                        Text(
-                            text = "• $exerciseName: $setCount sets, $totalReps reps @ $displayWeight$weightUnit",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                }
-            }
-            Row {
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, "Edit", tint = MaterialTheme.colorScheme.primary)
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
-                }
             }
         }
     }
@@ -306,7 +284,8 @@ fun WorkoutSessionFormDialog(
     workoutSession: WorkoutSession?,
     availableExercises: List<Exercise>,
     onDismiss: () -> Unit,
-    onSave: (WorkoutSession) -> Unit
+    onSave: (WorkoutSession) -> Unit,
+    onDelete: (() -> Unit)? = null
 ) {
     val calendar = remember {
         Calendar.getInstance().apply {
@@ -332,6 +311,8 @@ fun WorkoutSessionFormDialog(
     var editingExerciseIndex by remember { mutableStateOf<Int?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showDeleteWorkoutConfirm by remember { mutableStateOf(false) }
+    var exerciseToDeleteIndex by remember { mutableStateOf<Int?>(null) }
 
     // Create exercise ID to name mapping
     val exerciseMap = remember(availableExercises) {
@@ -347,31 +328,33 @@ fun WorkoutSessionFormDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
+            // Title row with edit button on the left
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (isEditingTitle) {
                     OutlinedTextField(
                         value = title,
-                        onValueChange = { title = it },
+                        onValueChange = { title = InputValidation.validateTitle(it) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         placeholder = { Text("Workout Title") }
                     )
                     IconButton(onClick = { isEditingTitle = false }) {
-                        Icon(Icons.Default.Add, "Done") // Using Add as checkmark
+                        Icon(Icons.Default.Check, "Done")
                     }
                 } else {
-                    Text(
-                        text = title,
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleLarge
-                    )
                     IconButton(onClick = { isEditingTitle = true }) {
                         Icon(Icons.Default.Edit, "Edit Title")
                     }
+                    Text(
+                        text = title,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = ValidationConstants.MAX_TITLE_LINES,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         },
@@ -411,6 +394,7 @@ fun WorkoutSessionFormDialog(
 
                 item {
                     Text("Duration (HH:MM:SS)", style = MaterialTheme.typography.labelMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -418,32 +402,33 @@ fun WorkoutSessionFormDialog(
                     ) {
                         OutlinedTextField(
                             value = if (durationHours == 0) "" else durationHours.toString(),
-                            onValueChange = {
-                                durationHours = if (it.isEmpty()) 0 else (it.toIntOrNull() ?: 0)
+                            onValueChange = { input ->
+                                val hours = input.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                if (hours <= 23) durationHours = hours
                             },
-                            label = { Text("H") },
+                            placeholder = { Text("00") },
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
                         Text(":", style = MaterialTheme.typography.titleLarge)
                         OutlinedTextField(
                             value = if (durationMinutes == 0 && durationHours == 0) "" else durationMinutes.toString(),
-                            onValueChange = {
-                                val mins = if (it.isEmpty()) 0 else (it.toIntOrNull() ?: 0)
-                                if (mins < 60) durationMinutes = mins
+                            onValueChange = { input ->
+                                val mins = input.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                if (mins <= 59) durationMinutes = mins
                             },
-                            label = { Text("M") },
+                            placeholder = { Text("00") },
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
                         Text(":", style = MaterialTheme.typography.titleLarge)
                         OutlinedTextField(
                             value = if (durationSeconds == 0 && durationMinutes == 0 && durationHours == 0) "" else durationSeconds.toString(),
-                            onValueChange = {
-                                val secs = if (it.isEmpty()) 0 else (it.toIntOrNull() ?: 0)
-                                if (secs < 60) durationSeconds = secs
+                            onValueChange = { input ->
+                                val secs = input.filter { it.isDigit() }.toIntOrNull() ?: 0
+                                if (secs <= 59) durationSeconds = secs
                             },
-                            label = { Text("S") },
+                            placeholder = { Text("00") },
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
@@ -502,7 +487,7 @@ fun WorkoutSessionFormDialog(
                                         )
                                     }
                                     IconButton(onClick = {
-                                        performedExercises = performedExercises.filterIndexed { i, _ -> i != index }
+                                        exerciseToDeleteIndex = index
                                     }) {
                                         Icon(
                                             Icons.Default.Delete,
@@ -515,6 +500,7 @@ fun WorkoutSessionFormDialog(
                         }
                     }
                 }
+
             }
         },
         confirmButton = {
@@ -548,8 +534,16 @@ fun WorkoutSessionFormDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Delete button (only for existing workouts)
+                if (workoutSession != null && onDelete != null) {
+                    TextButton(onClick = { showDeleteWorkoutConfirm = true }) {
+                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                    }
+                }
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
+                }
             }
         }
     )
@@ -628,6 +622,59 @@ fun WorkoutSessionFormDialog(
             }
         )
     }
+
+    // Delete workout confirmation dialog
+    if (showDeleteWorkoutConfirm && onDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteWorkoutConfirm = false },
+            title = { Text("Delete Workout?") },
+            text = {
+                Text("Are you sure you want to delete this workout? This action cannot be undone.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteWorkoutConfirm = false
+                        onDelete()
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteWorkoutConfirm = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Exercise delete confirmation dialog
+    exerciseToDeleteIndex?.let { index ->
+        val exerciseName = exerciseMap[performedExercises.getOrNull(index)?.exerciseId]?.name ?: "this exercise"
+        AlertDialog(
+            onDismissRequest = { exerciseToDeleteIndex = null },
+            title = { Text("Delete Exercise?") },
+            text = {
+                Text("Are you sure you want to remove $exerciseName from this workout?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        performedExercises = performedExercises.filterIndexed { i, _ -> i != index }
+                        exerciseToDeleteIndex = null
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { exerciseToDeleteIndex = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -673,9 +720,20 @@ fun ExerciseEditDialog(
         )
     }
     var expanded by remember { mutableStateOf(false) }
+    var exerciseSearchQuery by remember { mutableStateOf("") }
 
     val selectedExercise = remember(selectedExerciseId, availableExercises) {
         availableExercises.find { it.id == selectedExerciseId }
+    }
+
+    val filteredExercises = remember(availableExercises, exerciseSearchQuery) {
+        if (exerciseSearchQuery.isBlank()) {
+            availableExercises
+        } else {
+            availableExercises.filter {
+                it.name.contains(exerciseSearchQuery, ignoreCase = true)
+            }
+        }
     }
 
     AlertDialog(
@@ -689,32 +747,64 @@ fun ExerciseEditDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it }
-                    ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        // Search field (separate from dropdown)
                         OutlinedTextField(
-                            value = selectedExercise?.name ?: "Select Exercise",
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Exercise") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor()
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            availableExercises.forEach { exercise ->
-                                DropdownMenuItem(
-                                    text = { Text(exercise.name) },
-                                    onClick = {
-                                        selectedExerciseId = exercise.id
-                                        expanded = false
-                                    }
+                            value = exerciseSearchQuery,
+                            onValueChange = { exerciseSearchQuery = it },
+                            placeholder = { Text("Search exercises...") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
                                 )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+
+                        // Exercise dropdown
+                        ExposedDropdownMenuBox(
+                            expanded = expanded,
+                            onExpandedChange = { expanded = it }
+                        ) {
+                            OutlinedTextField(
+                                value = selectedExercise?.name ?: "Select Exercise",
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Exercise") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                if (filteredExercises.isEmpty()) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                "No exercises found",
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        },
+                                        onClick = { },
+                                        enabled = false
+                                    )
+                                } else {
+                                    filteredExercises.forEach { exercise ->
+                                        DropdownMenuItem(
+                                            text = { Text(exercise.name) },
+                                            onClick = {
+                                                selectedExerciseId = exercise.id
+                                                expanded = false
+                                            }
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -761,8 +851,9 @@ fun ExerciseEditDialog(
                                 OutlinedTextField(
                                     value = set.reps,
                                     onValueChange = { newReps ->
+                                        val validated = InputValidation.validateReps(newReps)
                                         workoutSets = workoutSets.mapIndexed { i, s ->
-                                            if (i == index) s.copy(reps = newReps.filter { it.isDigit() }) else s
+                                            if (i == index) s.copy(reps = validated) else s
                                         }
                                     },
                                     label = { Text("Reps") },
@@ -772,8 +863,10 @@ fun ExerciseEditDialog(
                                 OutlinedTextField(
                                     value = set.weight,
                                     onValueChange = { newWeight ->
-                                        workoutSets = workoutSets.mapIndexed { i, s ->
-                                            if (i == index) s.copy(weight = newWeight.filter { it.isDigit() || it == '.' }) else s
+                                        InputValidation.validateWeight(newWeight)?.let { validated ->
+                                            workoutSets = workoutSets.mapIndexed { i, s ->
+                                                if (i == index) s.copy(weight = validated) else s
+                                            }
                                         }
                                     },
                                     label = { Text("kg") },
