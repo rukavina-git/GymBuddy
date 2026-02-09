@@ -348,10 +348,11 @@ fun InfoTab(
                 exercise.instructions.forEachIndexed { index, instruction ->
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.Top,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "${index + 1}",
+                            text = "${index + 1}.",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.width(24.dp)
@@ -359,8 +360,7 @@ fun InfoTab(
                         Text(
                             text = instruction,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f),
-                            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight.times(1.5f)
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -382,10 +382,11 @@ fun InfoTab(
                 exercise.tips.forEachIndexed { index, tip ->
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.Top,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "${index + 1}",
+                            text = "${index + 1}.",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.width(24.dp)
@@ -393,8 +394,7 @@ fun InfoTab(
                         Text(
                             text = tip,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f),
-                            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight.times(1.5f)
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }

@@ -8,14 +8,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,7 +33,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rukavina.gymbuddy.data.model.Exercise
-import com.rukavina.gymbuddy.data.model.MuscleGroup
 
 /**
  * Dialog for selecting an exercise from the complete exercise list.
@@ -44,76 +46,43 @@ fun ExercisePickerDialog(
     onExerciseSelected: (Int) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedMuscleFilter by remember { mutableStateOf<MuscleGroup?>(null) }
 
-    // Filter exercises based on search and muscle filter
-    val filteredExercises = remember(searchQuery, selectedMuscleFilter, availableExercises) {
-        availableExercises.filter { exercise ->
-            val matchesSearch = searchQuery.isBlank() ||
+    // Filter exercises based on search
+    val filteredExercises = remember(searchQuery, availableExercises) {
+        if (searchQuery.isBlank()) {
+            availableExercises
+        } else {
+            availableExercises.filter { exercise ->
                 exercise.name.contains(searchQuery, ignoreCase = true)
-            val matchesFilter = selectedMuscleFilter == null ||
-                exercise.primaryMuscles.contains(selectedMuscleFilter)
-            matchesSearch && matchesFilter
+            }
         }
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        title = { Text("Select Exercise") },
         text = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 500.dp),
+                    .heightIn(max = 450.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Search field
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    label = { Text("Search exercises") },
+                    placeholder = { Text("Search exercises...") },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-
-                // Muscle group filter chips
-                Text(
-                    "Filter by muscle group",
-                    style = MaterialTheme.typography.labelSmall
-                )
-
-                // FlowRow with filter chips
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // "All" chip
-                    FilterChip(
-                        selected = selectedMuscleFilter == null,
-                        onClick = { selectedMuscleFilter = null },
-                        label = { Text("All") }
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    // Individual muscle group chips
-                    MuscleGroup.entries.chunked(3).forEach { row ->
-                        androidx.compose.foundation.layout.Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            row.forEach { muscle ->
-                                FilterChip(
-                                    selected = selectedMuscleFilter == muscle,
-                                    onClick = {
-                                        selectedMuscleFilter = if (selectedMuscleFilter == muscle) {
-                                            null
-                                        } else {
-                                            muscle
-                                        }
-                                    },
-                                    label = { Text(muscle.name) }
-                                )
-                            }
-                        }
-                    }
-                }
 
                 HorizontalDivider()
 

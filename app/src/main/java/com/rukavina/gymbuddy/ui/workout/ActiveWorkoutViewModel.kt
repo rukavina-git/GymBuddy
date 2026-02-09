@@ -322,7 +322,10 @@ class ActiveWorkoutViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             workoutSaved = true,
-                            isTimerRunning = false
+                            isTimerRunning = false,
+                            exercises = emptyList(),
+                            elapsedSeconds = 0L,
+                            workoutTitle = ""
                         )
                     }
                 }

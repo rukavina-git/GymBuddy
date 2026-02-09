@@ -140,7 +140,7 @@ fun HomeScreen(
             }
 
             // Notification Space
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // 2. Current Workout Card
             if (uiState != null) {
@@ -285,12 +285,12 @@ private fun CurrentWorkoutCard(
                 )
                 Column {
                     Text(
-                        if (hasActiveWorkout) "Active Workout" else "Start Workout",
+                        if (hasActiveWorkout) "Active Workout" else "Ready to train?",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                     Text(
-                        if (hasActiveWorkout) uiState.workoutTitle else "Choose a template to begin",
+                        if (hasActiveWorkout) uiState.workoutTitle else "Start workout",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onTertiaryContainer
