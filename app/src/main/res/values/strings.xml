@@ -3,4 +3,6 @@
     <string name="welcome_auth">Welcome to Gym Buddy</string>
     <string name="password_visible">Password Visible</string>
     <string name="password_hidden">Password Hidden</string>
+
+    <string name="default_web_client_id">740806913339-pl47aju2kugtjoih804gcscf2fc26e71.apps.googleusercontent.com</string>
 </resources>
