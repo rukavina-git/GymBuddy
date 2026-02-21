@@ -1,18 +1,25 @@
 package com.rukavina.gymbuddy.ui.auth
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -28,12 +35,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.components.AppSnackbar
@@ -54,10 +69,13 @@ fun LoginScreen(
     var email by remember { mutableStateOf(if (isDebug) "test001@gmail.com" else "") }
     var password by remember { mutableStateOf(if (isDebug) "Test.1234567" else "") }
 
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var isGoogleSignInLoading by remember { mutableStateOf(false) }
+
     val emailFocusRequester = remember { FocusRequester() }
     val passwordFocusRequester = remember { FocusRequester() }
     val snackbarHostState by remember { mutableStateOf(SnackbarHostState()) }
-    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -105,30 +123,23 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            // @todo check for email format maybe?
             onClick = {
                 if (email.isNotEmpty() && password.isNotEmpty()) {
-                    //@todo extract this logic
                     authViewModel.loginUser(email, password) { isSuccess, error ->
                         if (isSuccess) {
-                            // Login successful
                             Log.d(tag, "Login successful")
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar("Login successful.")
                             }
                             onLoginSuccess()
                         } else {
-                            // Account not found
                             if (error != null && error.contains("no user record")) {
                                 Log.d(tag, "Login error. Please check your credentials.")
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar("Login failed. Please check your credentials.")
                                 }
                             } else {
-                                // Other login errors
-                                Log.d(
-                                    tag, "Login error: Login failed. Please check your credentials."
-                                )
+                                Log.d(tag, "Login error: Login failed. Please check your credentials.")
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar("Login failed. Please check your credentials.")
                                 }
@@ -136,7 +147,6 @@ fun LoginScreen(
                         }
                     }
                 } else {
-                    // Empty input
                     Log.d(tag, "Login error: Email and password cannot be empty.")
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar("Email and password cannot be empty.")
@@ -148,6 +158,87 @@ fun LoginScreen(
             Text(text = "Log In")
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HorizontalDivider(modifier = Modifier.weight(1f))
+            Text(
+                text = "  or  ",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            HorizontalDivider(modifier = Modifier.weight(1f))
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        val webClientId = stringResource(R.string.default_web_client_id)
+
+        OutlinedButton(
+            onClick = {
+                isGoogleSignInLoading = true
+                coroutineScope.launch {
+                    try {
+                        val credentialManager = CredentialManager.create(context)
+                        val googleIdOption = GetGoogleIdOption.Builder()
+                            .setFilterByAuthorizedAccounts(false)
+                            .setServerClientId(webClientId)
+                            .build()
+
+                        val request = GetCredentialRequest.Builder()
+                            .addCredentialOption(googleIdOption)
+                            .build()
+
+                        val result = credentialManager.getCredential(context, request)
+                        val credential = result.credential
+                        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                        val idToken = googleIdTokenCredential.idToken
+
+                        authViewModel.signInWithGoogle(idToken) { isSuccess, error ->
+                            isGoogleSignInLoading = false
+                            if (isSuccess) {
+                                Log.d(tag, "Google Sign-In successful")
+                                onLoginSuccess()
+                            } else {
+                                Log.e(tag, "Google Sign-In failed: $error")
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("Google Sign-In failed: $error")
+                                }
+                            }
+                        }
+                    } catch (e: GetCredentialCancellationException) {
+                        isGoogleSignInLoading = false
+                        Log.d(tag, "Google Sign-In cancelled")
+                    } catch (e: Exception) {
+                        isGoogleSignInLoading = false
+                        Log.e(tag, "Google Sign-In failed: ${e.message}")
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("Google Sign-In failed: ${e.message}")
+                        }
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isGoogleSignInLoading,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_google),
+                    contentDescription = "Google",
+                    modifier = Modifier.size(18.dp),
+                    tint = Color.Unspecified
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = if (isGoogleSignInLoading) "Signing in..." else "Continue with Google")
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -163,10 +254,7 @@ fun LoginScreen(
         snackbarHostState = snackbarHostState,
         modifier = Modifier.padding(16.dp),
     )
-
-
 }
-
 
 @Preview
 @Composable

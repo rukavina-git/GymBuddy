@@ -2,10 +2,23 @@ package com.rukavina.gymbuddy.ui.auth
 
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 
 class AuthViewModel : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
+
+    fun signInWithGoogle(idToken: String, onComplete: (Boolean, String?) -> Unit) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onComplete(true, null)
+                } else {
+                    onComplete(false, task.exception?.localizedMessage)
+                }
+            }
+    }
 
     fun isPasswordStrong(password: String): Boolean {
         return isStrongPassword(password)

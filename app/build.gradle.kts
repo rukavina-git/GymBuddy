@@ -63,11 +63,17 @@ dependencies {
     // Hilt
     implementation(libs.daggerHilt)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.google.googleid)
     ksp(libs.daggerHiltCompiler)
 
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+
+    // Google Sign-In (Credential Manager)
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     // Room
     implementation(libs.room.runtime)
