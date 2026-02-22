@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +54,6 @@ import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.components.AppSnackbar
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
@@ -72,10 +71,83 @@ fun LoginScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var isGoogleSignInLoading by remember { mutableStateOf(false) }
+    var isLoginLoading by remember { mutableStateOf(false) }
+
+    // Account linking dialog state
+    var showLinkDialog by remember { mutableStateOf(false) }
+    var linkEmail by remember { mutableStateOf("") }
+    var linkPassword by remember { mutableStateOf("") }
+    var isLinkPasswordVisible by remember { mutableStateOf(false) }
 
     val emailFocusRequester = remember { FocusRequester() }
     val passwordFocusRequester = remember { FocusRequester() }
     val snackbarHostState by remember { mutableStateOf(SnackbarHostState()) }
+
+    // Account linking dialog
+    if (showLinkDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showLinkDialog = false
+                authViewModel.clearPendingCredential()
+            },
+            title = { Text("Link Your Account") },
+            text = {
+                Column {
+                    Text(
+                        "An account with $linkEmail already exists. Enter your password to link your Google account.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    PasswordToggleTextField(
+                        value = linkPassword,
+                        onValueChange = { linkPassword = it },
+                        label = "Password",
+                        isPasswordVisible = isLinkPasswordVisible,
+                        onTogglePasswordVisibility = { isLinkPasswordVisible = !isLinkPasswordVisible },
+                        modifier = Modifier.fillMaxWidth(),
+                        focusDirection = FocusDirection.Down,
+                        imeAction = ImeAction.Done
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        authViewModel.loginAndLinkGoogle(linkEmail, linkPassword) { result ->
+                            when (result) {
+                                is AuthResult.Success -> {
+                                    showLinkDialog = false
+                                    linkPassword = ""
+                                    onLoginSuccess()
+                                }
+                                is AuthResult.Error -> {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(result.message)
+                                    }
+                                }
+                                is AuthResult.AccountExists -> {
+                                    // Shouldn't happen here
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Text("Link & Sign In")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showLinkDialog = false
+                        linkPassword = ""
+                        authViewModel.clearPendingCredential()
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -92,7 +164,8 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(value = email,
+        OutlinedTextField(
+            value = email,
             onValueChange = { email = it },
             modifier = Modifier
                 .fillMaxWidth()
@@ -125,24 +198,22 @@ fun LoginScreen(
         Button(
             onClick = {
                 if (email.isNotEmpty() && password.isNotEmpty()) {
-                    authViewModel.loginUser(email, password) { isSuccess, error ->
-                        if (isSuccess) {
-                            Log.d(tag, "Login successful")
-                            coroutineScope.launch {
-                                snackbarHostState.showSnackbar("Login successful.")
+                    isLoginLoading = true
+                    authViewModel.loginUser(email, password) { result ->
+                        isLoginLoading = false
+                        when (result) {
+                            is AuthResult.Success -> {
+                                Log.d(tag, "Login successful")
+                                onLoginSuccess()
                             }
-                            onLoginSuccess()
-                        } else {
-                            if (error != null && error.contains("no user record")) {
-                                Log.d(tag, "Login error. Please check your credentials.")
+                            is AuthResult.Error -> {
+                                Log.d(tag, "Login error: ${result.message}")
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar("Login failed. Please check your credentials.")
                                 }
-                            } else {
-                                Log.d(tag, "Login error: Login failed. Please check your credentials.")
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar("Login failed. Please check your credentials.")
-                                }
+                            }
+                            is AuthResult.AccountExists -> {
+                                // Shouldn't happen for login
                             }
                         }
                     }
@@ -154,8 +225,9 @@ fun LoginScreen(
                 }
             },
             modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoginLoading
         ) {
-            Text(text = "Log In")
+            Text(text = if (isLoginLoading) "Signing in..." else "Log In")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -192,20 +264,29 @@ fun LoginScreen(
                             .addCredentialOption(googleIdOption)
                             .build()
 
-                        val result = credentialManager.getCredential(context, request)
-                        val credential = result.credential
+                        val credentialResult = credentialManager.getCredential(context, request)
+                        val credential = credentialResult.credential
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                         val idToken = googleIdTokenCredential.idToken
 
-                        authViewModel.signInWithGoogle(idToken) { isSuccess, error ->
+                        authViewModel.signInWithGoogle(idToken) { result ->
                             isGoogleSignInLoading = false
-                            if (isSuccess) {
-                                Log.d(tag, "Google Sign-In successful")
-                                onLoginSuccess()
-                            } else {
-                                Log.e(tag, "Google Sign-In failed: $error")
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar("Google Sign-In failed: $error")
+                            when (result) {
+                                is AuthResult.Success -> {
+                                    Log.d(tag, "Google Sign-In successful")
+                                    onLoginSuccess()
+                                }
+                                is AuthResult.Error -> {
+                                    Log.e(tag, "Google Sign-In failed: ${result.message}")
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar("Google Sign-In failed: ${result.message}")
+                                    }
+                                }
+                                is AuthResult.AccountExists -> {
+                                    // Account exists with email/password, show link dialog
+                                    linkEmail = result.email
+                                    linkPassword = ""
+                                    showLinkDialog = true
                                 }
                             }
                         }
