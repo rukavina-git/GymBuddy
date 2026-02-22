@@ -239,22 +239,31 @@ fun RegistrationScreen(
                     if (authViewModel.isPasswordStrong(password)) {
                         if (password == confirmPassword) {
                             // Proceed with Firebase sign-up
-                            authViewModel.registerUser(email, password, username) { isSuccess, _ ->
-                                if (isSuccess) {
-                                    // Registration successful
-                                    Log.d(tag, "Registration successful.")
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("Registration successful.")
+                            authViewModel.registerUser(email, password, username) { result ->
+                                when (result) {
+                                    is AuthResult.Success -> {
+                                        Log.d(tag, "Registration successful.")
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Registration successful.")
+                                        }
+                                        onRegistrationSuccess()
                                     }
-                                    onRegistrationSuccess()
-                                } else {
-                                    // Registration failed
-                                    Log.d(
-                                        tag,
-                                        "Registration error: Sorry, there was an issue with your registration. Please review your input and ensure it meets the required format and criteria."
-                                    )
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("Sorry, there was an issue with your registration. Please review your input and ensure it meets the required format and criteria.")
+                                    is AuthResult.AccountExists -> {
+                                        val message = if (result.isGoogleAccount) {
+                                            "This email is already registered with Google. Please sign in with Google instead."
+                                        } else {
+                                            "An account with this email already exists. Please sign in instead."
+                                        }
+                                        Log.d(tag, "Registration error: $message")
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(message)
+                                        }
+                                    }
+                                    is AuthResult.Error -> {
+                                        Log.d(tag, "Registration error: ${result.message}")
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Registration failed: ${result.message}")
+                                        }
                                     }
                                 }
                             }
