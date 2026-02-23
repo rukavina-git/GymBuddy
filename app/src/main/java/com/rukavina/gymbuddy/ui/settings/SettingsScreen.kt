@@ -135,18 +135,14 @@ fun SettingsScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 ScreenHeader(
                     title = "SETTINGS"
@@ -166,120 +162,125 @@ fun SettingsScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                item {
-                    ProfileHeaderCard(
-                        name = uiState.userName,
-                        email = uiState.userEmail,
-                        profileImageUri = uiState.profileImageUri,
-                        onClick = {
-                            bottomNavController.navigate(NavRoutes.Profile)
-                        }
-                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                item {
-                    SettingsSection {
-                        SettingsItemWithValue(
-                            icon = Icons.Default.Language,
-                            label = "Language",
-                            value = selectedLanguage,
-                            onClick = {
-                                showLanguageDialog = true
-                            },
-                            showDivider = true
-                        )
-                        SettingsItem(
-                            icon = Icons.Default.Settings,
-                            label = "Units",
-                            onClick = {
-                                bottomNavController.navigate(NavRoutes.EditUnits)
-                            },
-                            showDivider = true
-                        )
-                        SettingsItem(
-                            icon = Icons.Default.Tune,
-                            label = "App Preferences",
-                            onClick = {
-                                bottomNavController.navigate(NavRoutes.AppPreferences)
-                            },
-                            showDivider = true
-                        )
-                        SettingsItem(
-                            icon = Icons.Default.FileDownload,
-                            label = "Export Data",
-                            onClick = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar("This feature is not implemented yet")
+                        item {
+                            ProfileHeaderCard(
+                                name = uiState.userName,
+                                email = uiState.userEmail,
+                                profileImageUri = uiState.profileImageUri,
+                                onClick = {
+                                    bottomNavController.navigate(NavRoutes.Profile)
                                 }
-                            },
-                            showDivider = false
-                        )
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        item {
+                            SettingsSection {
+                                SettingsItemWithValue(
+                                    icon = Icons.Default.Language,
+                                    label = "Language",
+                                    value = selectedLanguage,
+                                    onClick = {
+                                        showLanguageDialog = true
+                                    },
+                                    showDivider = true
+                                )
+                                SettingsItem(
+                                    icon = Icons.Default.Settings,
+                                    label = "Units",
+                                    onClick = {
+                                        bottomNavController.navigate(NavRoutes.EditUnits)
+                                    },
+                                    showDivider = true
+                                )
+                                SettingsItem(
+                                    icon = Icons.Default.Tune,
+                                    label = "App Preferences",
+                                    onClick = {
+                                        bottomNavController.navigate(NavRoutes.AppPreferences)
+                                    },
+                                    showDivider = true
+                                )
+                                SettingsItem(
+                                    icon = Icons.Default.FileDownload,
+                                    label = "Export Data",
+                                    onClick = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar("This feature is not implemented yet")
+                                        }
+                                    },
+                                    showDivider = false
+                                )
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        // Account section
+                        item {
+                            SettingsSection {
+                                SettingsItemWithValue(
+                                    icon = Icons.Default.Lock,
+                                    label = "Password",
+                                    value = if (uiState.hasPassword) "" else "Not set",
+                                    onClick = { passwordDialogState = passwordDialogState.copy(isVisible = true) },
+                                    showDivider = true
+                                )
+                                SettingsItem(
+                                    icon = Icons.Default.DeleteForever,
+                                    label = "Delete Account",
+                                    onClick = { deleteAccountDialogState = deleteAccountDialogState.copy(isVisible = true) },
+                                    showDivider = false,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        item {
+                            SettingsSection {
+                                SettingsItem(
+                                    icon = Icons.Default.Info,
+                                    label = "About",
+                                    onClick = {
+                                        bottomNavController.navigate(NavRoutes.About)
+                                    },
+                                    showDivider = false
+                                )
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        item {
+                            Button(
+                                onClick = { showLogoutDialog = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Text("Log Out", color = Color.White)
+                            }
+                        }
                     }
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                // Account section
-                item {
-                    SettingsSection {
-                        SettingsItemWithValue(
-                            icon = Icons.Default.Lock,
-                            label = "Password",
-                            value = if (uiState.hasPassword) "" else "Not set",
-                            onClick = { passwordDialogState = passwordDialogState.copy(isVisible = true) },
-                            showDivider = true
-                        )
-                        SettingsItem(
-                            icon = Icons.Default.DeleteForever,
-                            label = "Delete Account",
-                            onClick = { deleteAccountDialogState = deleteAccountDialogState.copy(isVisible = true) },
-                            showDivider = false,
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                item {
-                    SettingsSection {
-                        SettingsItem(
-                            icon = Icons.Default.Info,
-                            label = "About",
-                            onClick = {
-                                bottomNavController.navigate(NavRoutes.About)
-                            },
-                            showDivider = false
-                        )
-                    }
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-
-                item {
-                    Button(
-                        onClick = { showLogoutDialog = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text("Log Out", color = Color.White)
-                    }
-                }
             }
         }
-        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
 
         // Logout confirmation dialog
         if (showLogoutDialog) {

@@ -75,24 +75,9 @@ fun WorkoutTemplateScreen(
     var templateToStart by remember { mutableStateOf<WorkoutTemplate?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    editingTemplate = null
-                    showCreateEditDialog = true
-                },
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary
-            ) {
-                Icon(Icons.Default.Add, "Create Template")
-            }
-        }
-    ) { paddingValues ->
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) {
             // Search bar
             OutlinedTextField(
@@ -104,7 +89,7 @@ fun WorkoutTemplateScreen(
                 label = { Text("Search templates") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 singleLine = true
             )
 
@@ -187,6 +172,21 @@ fun WorkoutTemplateScreen(
                     }
                 }
             }
+        }
+
+        // Floating Action Button
+        FloatingActionButton(
+            onClick = {
+                editingTemplate = null
+                showCreateEditDialog = true
+            },
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, "Create Template")
         }
 
         // Create/Edit Dialog

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,23 +13,19 @@ import com.rukavina.gymbuddy.ui.components.ScreenHeader
 
 @Composable
 fun StatisticsScreen() {
-    Scaffold { paddingValues ->
-        Column(
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                ScreenHeader(
-                    title = "STATISTICS"
-                )
-            }
-
-            Text("Statistics Screen", modifier = Modifier.padding(16.dp))
+            ScreenHeader(
+                title = "STATISTICS"
+            )
         }
+
+        Text("Statistics Screen", modifier = Modifier.padding(16.dp))
     }
 }

@@ -117,17 +117,14 @@ fun HomeScreen(
         }.distinct()
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .padding(paddingValues)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // 1. Welcome Section
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -184,6 +181,11 @@ fun HomeScreen(
             // 5. Bottom section - reserved for future
             Spacer(modifier = Modifier.height(8.dp))
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 

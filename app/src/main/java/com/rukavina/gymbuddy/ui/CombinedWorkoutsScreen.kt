@@ -1,8 +1,19 @@
 package com.rukavina.gymbuddy.ui
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,44 +34,40 @@ fun CombinedWorkoutsScreen(
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Templates", "Sessions")
 
-    Scaffold { paddingValues ->
-        Column(
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                ScreenHeader(
-                    title = "WORKOUTS"
+            ScreenHeader(
+                title = "WORKOUTS"
+            )
+        }
+
+        // Tab Row
+        TabRow(
+            selectedTabIndex = selectedTabIndex,
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index },
+                    text = { Text(title) }
                 )
             }
+        }
 
-            // Tab Row
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(title) }
-                    )
-                }
-            }
-
-            // Tab Content
-            when (selectedTabIndex) {
-                0 -> WorkoutTemplateScreen(
-                    activeWorkoutViewModel = activeWorkoutViewModel,
-                    onStartWorkout = onStartWorkout
-                )
-                1 -> WorkoutScreen()
-            }
+        // Tab Content
+        when (selectedTabIndex) {
+            0 -> WorkoutTemplateScreen(
+                activeWorkoutViewModel = activeWorkoutViewModel,
+                onStartWorkout = onStartWorkout
+            )
+            1 -> WorkoutScreen()
         }
     }
 }
