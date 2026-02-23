@@ -14,7 +14,7 @@ android {
         applicationId = "com.rukavina.gymbuddy"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 3
+        versionCode = 4
         versionName = "0.0.2-SNAPSHOT"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
