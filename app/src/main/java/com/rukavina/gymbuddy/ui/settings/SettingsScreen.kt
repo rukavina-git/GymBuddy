@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
@@ -47,10 +49,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.auth.PasswordToggleTextField
 import com.rukavina.gymbuddy.ui.components.ScreenHeader
@@ -71,6 +75,17 @@ private data class PasswordDialogState(
     val isLoading: Boolean = false
 )
 
+/**
+ * State for delete account dialog.
+ */
+private data class DeleteAccountDialogState(
+    val isVisible: Boolean = false,
+    val password: String = "",
+    val isPasswordVisible: Boolean = false,
+    val error: String = "",
+    val isLoading: Boolean = false
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -85,6 +100,8 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var passwordDialogState by remember { mutableStateOf(PasswordDialogState()) }
+    var deleteAccountDialogState by remember { mutableStateOf(DeleteAccountDialogState()) }
+    val context = LocalContext.current
 
     // Refresh profile data when screen resumes
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -103,6 +120,15 @@ fun SettingsScreen(
     // Observe logout event and navigate to login
     LaunchedEffect(Unit) {
         viewModel.logoutEvent.collect {
+            rootNavController.navigate(NavRoutes.Login) {
+                popUpTo(NavRoutes.Main) { inclusive = true }
+            }
+        }
+    }
+
+    // Observe account deleted event and navigate to login
+    LaunchedEffect(Unit) {
+        viewModel.accountDeletedEvent.collect {
             rootNavController.navigate(NavRoutes.Login) {
                 popUpTo(NavRoutes.Main) { inclusive = true }
             }
@@ -207,7 +233,14 @@ fun SettingsScreen(
                             label = "Password",
                             value = if (uiState.hasPassword) "" else "Not set",
                             onClick = { passwordDialogState = passwordDialogState.copy(isVisible = true) },
-                            showDivider = false
+                            showDivider = true
+                        )
+                        SettingsItem(
+                            icon = Icons.Default.DeleteForever,
+                            label = "Delete Account",
+                            onClick = { deleteAccountDialogState = deleteAccountDialogState.copy(isVisible = true) },
+                            showDivider = false,
+                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
@@ -311,6 +344,41 @@ fun SettingsScreen(
                 },
                 onValidate = { viewModel.isPasswordStrong(it) },
                 onDismiss = { passwordDialogState = PasswordDialogState() }
+            )
+        }
+
+        // Delete account dialog
+        if (deleteAccountDialogState.isVisible) {
+            DeleteAccountDialog(
+                state = deleteAccountDialogState,
+                isGoogleOnly = uiState.isGoogleOnly,
+                onStateChange = { deleteAccountDialogState = it },
+                onDeleteWithPassword = { password ->
+                    deleteAccountDialogState = deleteAccountDialogState.copy(isLoading = true)
+                    viewModel.deleteAccountWithPassword(password) { success, error ->
+                        if (!success) {
+                            deleteAccountDialogState = deleteAccountDialogState.copy(
+                                isLoading = false,
+                                error = error ?: "Failed to delete account"
+                            )
+                        }
+                        // On success, the accountDeletedEvent will handle navigation
+                    }
+                },
+                onDeleteWithGoogle = {
+                    deleteAccountDialogState = deleteAccountDialogState.copy(isLoading = true)
+                    val webClientId = context.getString(R.string.default_web_client_id)
+                    viewModel.deleteAccountWithGoogle(context, webClientId) { success, error ->
+                        if (!success) {
+                            deleteAccountDialogState = deleteAccountDialogState.copy(
+                                isLoading = false,
+                                error = error ?: "Failed to delete account"
+                            )
+                        }
+                        // On success, the accountDeletedEvent will handle navigation
+                    }
+                },
+                onDismiss = { deleteAccountDialogState = DeleteAccountDialogState() }
             )
         }
     }
@@ -486,6 +554,115 @@ private fun PasswordManagementDialog(
                 enabled = !state.isLoading
             ) {
                 Text(if (state.isLoading) "Saving..." else "Save")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !state.isLoading
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun DeleteAccountDialog(
+    state: DeleteAccountDialogState,
+    isGoogleOnly: Boolean,
+    onStateChange: (DeleteAccountDialogState) -> Unit,
+    onDeleteWithPassword: (String) -> Unit,
+    onDeleteWithGoogle: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { if (!state.isLoading) onDismiss() },
+        title = {
+            Text(
+                text = "Delete Account",
+                color = MaterialTheme.colorScheme.error
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "This action is permanent and cannot be undone. All your data will be deleted:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Column(
+                    modifier = Modifier.padding(start = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text("• Profile information", style = MaterialTheme.typography.bodySmall)
+                    Text("• Workout history", style = MaterialTheme.typography.bodySmall)
+                    Text("• Custom exercises", style = MaterialTheme.typography.bodySmall)
+                    Text("• All saved data", style = MaterialTheme.typography.bodySmall)
+                }
+
+                if (state.error.isNotEmpty()) {
+                    Text(
+                        text = state.error,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                if (!isGoogleOnly) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Enter your password to confirm:",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    PasswordToggleTextField(
+                        value = state.password,
+                        onValueChange = { onStateChange(state.copy(password = it, error = "")) },
+                        label = "Password",
+                        isPasswordVisible = state.isPasswordVisible,
+                        onTogglePasswordVisibility = {
+                            onStateChange(state.copy(isPasswordVisible = !state.isPasswordVisible))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        focusDirection = FocusDirection.Down,
+                        imeAction = ImeAction.Done
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "You'll need to sign in with Google to confirm deletion.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Button(
+                    onClick = {
+                        if (isGoogleOnly) {
+                            onDeleteWithGoogle()
+                        } else {
+                            if (state.password.isEmpty()) {
+                                onStateChange(state.copy(error = "Please enter your password"))
+                            } else {
+                                onDeleteWithPassword(state.password)
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(if (isGoogleOnly) "Sign in & Delete" else "Delete Account")
+                }
             }
         },
         dismissButton = {

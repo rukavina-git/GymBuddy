@@ -148,7 +148,8 @@ fun SettingsItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     showChevron: Boolean = true,
-    showDivider: Boolean = true
+    showDivider: Boolean = true,
+    tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary
 ) {
     Column(modifier = modifier) {
         Row(
@@ -168,7 +169,7 @@ fun SettingsItem(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = tint,
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
