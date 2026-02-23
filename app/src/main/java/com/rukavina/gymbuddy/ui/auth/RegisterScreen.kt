@@ -1,7 +1,6 @@
 package com.rukavina.gymbuddy.ui.auth
 
 import android.util.Log
-import android.util.Patterns
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +42,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.components.AppSnackbar
+import com.rukavina.gymbuddy.utils.validation.ValidationResult
+import com.rukavina.gymbuddy.utils.validation.Validators
+import com.rukavina.gymbuddy.utils.validation.isStrongPassword
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,6 +70,7 @@ fun RegistrationScreen(
 
     val snackbarHostState by remember { mutableStateOf(SnackbarHostState()) }
     val coroutineScope = rememberCoroutineScope()
+
 
     Column(
         modifier = Modifier
@@ -169,7 +172,7 @@ fun RegistrationScreen(
                 if (getPasswordStrengthMessage(password) != "Valid password") {
                     Text(
                         text = passwordStrengthMessage,
-                        color = getPasswordStrengthColor(passwordStrengthMessage),
+                        color = getPasswordStrengthColor(password),
                         fontSize = 12.sp,
                         modifier = Modifier
                             .padding(start = 8.dp)
@@ -249,14 +252,11 @@ fun RegistrationScreen(
                                         onRegistrationSuccess()
                                     }
                                     is AuthResult.AccountExists -> {
-                                        val message = if (result.isGoogleAccount) {
-                                            "This email is already registered with Google. Please sign in with Google instead."
-                                        } else {
-                                            "An account with this email already exists. Please sign in instead."
-                                        }
-                                        Log.d(tag, "Registration error: $message")
+                                        Log.d(tag, "Registration error: Account already exists")
                                         coroutineScope.launch {
-                                            snackbarHostState.showSnackbar(message)
+                                            snackbarHostState.showSnackbar(
+                                                "This email is already registered. Please sign in instead. If you registered with Google, use Google sign-in."
+                                            )
                                         }
                                     }
                                     is AuthResult.Error -> {
@@ -319,35 +319,21 @@ fun RegistrationScreen(
 }
 
 
-// Function to check email validity
-// @todo extract this
-fun isEmailValid(email: String): Boolean {
-    return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+// Uses shared validators from utils/validation/Validators.kt
+private fun isEmailValid(email: String): Boolean {
+    return Validators.email().validate(email) is ValidationResult.Valid
 }
 
-fun getPasswordStrengthMessage(password: String): String {
-    // Return a message indicating the strength, e.g., "Weak," "Medium," or "Strong"
-
-    val length = password.length
-    val hasLowerCase = password.any { it.isLowerCase() }
-    val hasUpperCase = password.any { it.isUpperCase() }
-    val hasDigit = password.any { it.isDigit() }
-
-    return when {
-        length < 8 || !hasLowerCase || !hasUpperCase || !hasDigit -> "Password must be a minimum of 8 characters and include at least one uppercase letter, one lowercase letter, and one digit."
-        else -> "Valid password"
+private fun getPasswordStrengthMessage(password: String): String {
+    val result = Validators.password().validate(password)
+    return when (result) {
+        is ValidationResult.Valid -> "Valid password"
+        is ValidationResult.Invalid -> result.message
     }
 }
 
-fun getPasswordStrengthColor(strengthMessage: String): Color {
-    // Set the color based on the strength message
-
-    return when (strengthMessage) {
-        //@todo implement color strength check later on
-        "Password must be a minimum of 8 characters and include at least one uppercase letter, one lowercase letter, and one digit." -> Color.Red
-        "Valid password" -> Color.Black
-        else -> Color.Black
-    }
+private fun getPasswordStrengthColor(password: String): Color {
+    return if (password.isStrongPassword()) Color.Unspecified else Color.Red
 }
 
 

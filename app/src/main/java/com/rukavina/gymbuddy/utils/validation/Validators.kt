@@ -120,4 +120,66 @@ object Validators {
             ValidationResult.Invalid("Invalid email format")
         else ValidationResult.Valid
     }
+
+    /**
+     * Validates password strength.
+     * Requirements: 8+ chars, uppercase, lowercase, digit
+     */
+    fun password() = Validator { value ->
+        when {
+            value.length < PASSWORD_MIN_LENGTH ->
+                ValidationResult.Invalid("Password must be at least $PASSWORD_MIN_LENGTH characters")
+            !value.any { it.isUpperCase() } ->
+                ValidationResult.Invalid("Password must contain an uppercase letter")
+            !value.any { it.isLowerCase() } ->
+                ValidationResult.Invalid("Password must contain a lowercase letter")
+            !value.any { it.isDigit() } ->
+                ValidationResult.Invalid("Password must contain a digit")
+            else -> ValidationResult.Valid
+        }
+    }
+
+    /**
+     * Validates username format.
+     * Requirements: 4+ chars, lowercase letters and numbers only
+     */
+    fun username() = Validator { value ->
+        when {
+            value.length < USERNAME_MIN_LENGTH ->
+                ValidationResult.Invalid("Username must be at least $USERNAME_MIN_LENGTH characters")
+            !value.matches(Regex("^[a-z0-9]+$")) ->
+                ValidationResult.Invalid("Username can only contain lowercase letters and numbers")
+            else -> ValidationResult.Valid
+        }
+    }
+
+    /**
+     * Checks if two values match (for password confirmation).
+     */
+    fun matches(other: String, fieldName: String = "Passwords") = Validator { value ->
+        if (value != other) ValidationResult.Invalid("$fieldName do not match")
+        else ValidationResult.Valid
+    }
+
+    // Constants
+    const val PASSWORD_MIN_LENGTH = 8
+    const val USERNAME_MIN_LENGTH = 4
+}
+
+/**
+ * Extension function to check if password is strong (simple boolean check).
+ */
+fun String.isStrongPassword(): Boolean {
+    return length >= Validators.PASSWORD_MIN_LENGTH &&
+            any { it.isUpperCase() } &&
+            any { it.isLowerCase() } &&
+            any { it.isDigit() }
+}
+
+/**
+ * Extension function to check if username is valid (simple boolean check).
+ */
+fun String.isValidUsername(): Boolean {
+    return length >= Validators.USERNAME_MIN_LENGTH &&
+            matches(Regex("^[a-z0-9]+$"))
 }

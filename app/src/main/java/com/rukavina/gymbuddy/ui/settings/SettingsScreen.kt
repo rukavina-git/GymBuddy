@@ -12,18 +12,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -38,18 +40,36 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.rukavina.gymbuddy.navigation.NavRoutes
+import com.rukavina.gymbuddy.ui.auth.PasswordToggleTextField
 import com.rukavina.gymbuddy.ui.components.ScreenHeader
+import kotlinx.coroutines.launch
+
+/**
+ * State for password setup/change dialog.
+ */
+private data class PasswordDialogState(
+    val isVisible: Boolean = false,
+    val currentPassword: String = "",
+    val newPassword: String = "",
+    val confirmPassword: String = "",
+    val isCurrentPasswordVisible: Boolean = false,
+    val isNewPasswordVisible: Boolean = false,
+    val isConfirmPasswordVisible: Boolean = false,
+    val error: String = "",
+    val isLoading: Boolean = false
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +84,7 @@ fun SettingsScreen(
     var selectedLanguage by remember { mutableStateOf("English") }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    var passwordDialogState by remember { mutableStateOf(PasswordDialogState()) }
 
     // Refresh profile data when screen resumes
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -137,7 +158,7 @@ fun SettingsScreen(
                 item {
                     SettingsSection {
                         SettingsItemWithValue(
-                            icon = androidx.compose.material.icons.Icons.Default.Language,
+                            icon = Icons.Default.Language,
                             label = "Language",
                             value = selectedLanguage,
                             onClick = {
@@ -146,7 +167,7 @@ fun SettingsScreen(
                             showDivider = true
                         )
                         SettingsItem(
-                            icon = androidx.compose.material.icons.Icons.Default.Settings,
+                            icon = Icons.Default.Settings,
                             label = "Units",
                             onClick = {
                                 bottomNavController.navigate(NavRoutes.EditUnits)
@@ -154,7 +175,7 @@ fun SettingsScreen(
                             showDivider = true
                         )
                         SettingsItem(
-                            icon = androidx.compose.material.icons.Icons.Default.Tune,
+                            icon = Icons.Default.Tune,
                             label = "App Preferences",
                             onClick = {
                                 bottomNavController.navigate(NavRoutes.AppPreferences)
@@ -162,7 +183,7 @@ fun SettingsScreen(
                             showDivider = true
                         )
                         SettingsItem(
-                            icon = androidx.compose.material.icons.Icons.Default.FileDownload,
+                            icon = Icons.Default.FileDownload,
                             label = "Export Data",
                             onClick = {
                                 scope.launch {
@@ -178,10 +199,27 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
+                // Account section
+                item {
+                    SettingsSection {
+                        SettingsItemWithValue(
+                            icon = Icons.Default.Lock,
+                            label = "Password",
+                            value = if (uiState.hasPassword) "" else "Not set",
+                            onClick = { passwordDialogState = passwordDialogState.copy(isVisible = true) },
+                            showDivider = false
+                        )
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
                 item {
                     SettingsSection {
                         SettingsItem(
-                            icon = androidx.compose.material.icons.Icons.Default.Info,
+                            icon = Icons.Default.Info,
                             label = "About",
                             onClick = {
                                 bottomNavController.navigate(NavRoutes.About)
@@ -212,28 +250,12 @@ fun SettingsScreen(
 
         // Logout confirmation dialog
         if (showLogoutDialog) {
-            AlertDialog(
-                onDismissRequest = { showLogoutDialog = false },
-                title = { Text("Log Out") },
-                text = { Text("Are you sure you want to log out?") },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            showLogoutDialog = false
-                            viewModel.logout()
-                        },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text("Log Out")
-                    }
+            LogoutConfirmationDialog(
+                onConfirm = {
+                    showLogoutDialog = false
+                    viewModel.logout()
                 },
-                dismissButton = {
-                    TextButton(onClick = { showLogoutDialog = false }) {
-                        Text("Cancel")
-                    }
-                }
+                onDismiss = { showLogoutDialog = false }
             )
         }
 
@@ -248,11 +270,81 @@ fun SettingsScreen(
                 onDismiss = { showLanguageDialog = false }
             )
         }
+
+        // Password setup/change dialog
+        if (passwordDialogState.isVisible) {
+            PasswordManagementDialog(
+                state = passwordDialogState,
+                isSetup = uiState.isGoogleOnly,
+                onStateChange = { passwordDialogState = it },
+                onSave = { isSetup, currentPwd, newPwd ->
+                    passwordDialogState = passwordDialogState.copy(isLoading = true)
+                    if (isSetup) {
+                        viewModel.setupPassword(newPwd) { success, error ->
+                            if (success) {
+                                passwordDialogState = PasswordDialogState()
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Password set up successfully!")
+                                }
+                            } else {
+                                passwordDialogState = passwordDialogState.copy(
+                                    isLoading = false,
+                                    error = error ?: "Failed to set password"
+                                )
+                            }
+                        }
+                    } else {
+                        viewModel.changePassword(currentPwd, newPwd) { success, error ->
+                            if (success) {
+                                passwordDialogState = PasswordDialogState()
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Password changed successfully!")
+                                }
+                            } else {
+                                passwordDialogState = passwordDialogState.copy(
+                                    isLoading = false,
+                                    error = error ?: "Failed to change password"
+                                )
+                            }
+                        }
+                    }
+                },
+                onValidate = { viewModel.isPasswordStrong(it) },
+                onDismiss = { passwordDialogState = PasswordDialogState() }
+            )
+        }
     }
 }
 
 @Composable
-fun LanguageSelectionDialog(
+private fun LogoutConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Log Out") },
+        text = { Text("Are you sure you want to log out?") },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Log Out")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun LanguageSelectionDialog(
     currentLanguage: String,
     onLanguageSelected: (String) -> Unit,
     onDismiss: () -> Unit
@@ -278,7 +370,7 @@ fun LanguageSelectionDialog(
                             style = MaterialTheme.typography.bodyLarge
                         )
                         if (language == currentLanguage) {
-                            androidx.compose.material3.RadioButton(
+                            RadioButton(
                                 selected = true,
                                 onClick = null
                             )
@@ -289,6 +381,118 @@ fun LanguageSelectionDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun PasswordManagementDialog(
+    state: PasswordDialogState,
+    isSetup: Boolean,
+    onStateChange: (PasswordDialogState) -> Unit,
+    onSave: (isSetup: Boolean, currentPassword: String, newPassword: String) -> Unit,
+    onValidate: (String) -> Boolean,
+    onDismiss: () -> Unit
+) {
+    val dialogTitle = if (isSetup) "Set Up Password" else "Change Password"
+
+    AlertDialog(
+        onDismissRequest = { if (!state.isLoading) onDismiss() },
+        title = { Text(dialogTitle) },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (state.error.isNotEmpty()) {
+                    Text(
+                        text = state.error,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                // Current password field (only for change, not setup)
+                if (!isSetup) {
+                    PasswordToggleTextField(
+                        value = state.currentPassword,
+                        onValueChange = { onStateChange(state.copy(currentPassword = it, error = "")) },
+                        label = "Current Password",
+                        isPasswordVisible = state.isCurrentPasswordVisible,
+                        onTogglePasswordVisibility = {
+                            onStateChange(state.copy(isCurrentPasswordVisible = !state.isCurrentPasswordVisible))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        focusDirection = FocusDirection.Down,
+                        imeAction = ImeAction.Next
+                    )
+                }
+
+                PasswordToggleTextField(
+                    value = state.newPassword,
+                    onValueChange = { onStateChange(state.copy(newPassword = it, error = "")) },
+                    label = if (isSetup) "Password" else "New Password",
+                    isPasswordVisible = state.isNewPasswordVisible,
+                    onTogglePasswordVisibility = {
+                        onStateChange(state.copy(isNewPasswordVisible = !state.isNewPasswordVisible))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    focusDirection = FocusDirection.Down,
+                    imeAction = ImeAction.Next
+                )
+
+                PasswordToggleTextField(
+                    value = state.confirmPassword,
+                    onValueChange = { onStateChange(state.copy(confirmPassword = it, error = "")) },
+                    label = "Confirm Password",
+                    isPasswordVisible = state.isConfirmPasswordVisible,
+                    onTogglePasswordVisibility = {
+                        onStateChange(state.copy(isConfirmPasswordVisible = !state.isConfirmPasswordVisible))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    focusDirection = FocusDirection.Down,
+                    imeAction = ImeAction.Done
+                )
+
+                Text(
+                    text = "Password must be at least 8 characters with uppercase, lowercase, and a number.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    when {
+                        !isSetup && state.currentPassword.isEmpty() -> {
+                            onStateChange(state.copy(error = "Please enter current password"))
+                        }
+                        state.newPassword.isEmpty() || state.confirmPassword.isEmpty() -> {
+                            onStateChange(state.copy(error = "Please fill in all fields"))
+                        }
+                        state.newPassword != state.confirmPassword -> {
+                            onStateChange(state.copy(error = "Passwords do not match"))
+                        }
+                        !onValidate(state.newPassword) -> {
+                            onStateChange(state.copy(error = "Password does not meet requirements"))
+                        }
+                        else -> {
+                            onSave(isSetup, state.currentPassword, state.newPassword)
+                        }
+                    }
+                },
+                enabled = !state.isLoading
+            ) {
+                Text(if (state.isLoading) "Saving..." else "Save")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !state.isLoading
+            ) {
                 Text("Cancel")
             }
         }
