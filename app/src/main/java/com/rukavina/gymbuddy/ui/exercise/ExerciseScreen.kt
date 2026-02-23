@@ -47,24 +47,9 @@ fun ExerciseScreen(
     var exerciseToDelete by remember { mutableStateOf<com.rukavina.gymbuddy.data.model.Exercise?>(null) }
     var exerciseToHide by remember { mutableStateOf<com.rukavina.gymbuddy.data.model.Exercise?>(null) }
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    editingExercise = null
-                    showDialog = true
-                },
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary
-            ) {
-                Icon(Icons.Default.Add, "Add Exercise")
-            }
-        }
-    ) { paddingValues ->
+    Box(modifier = Modifier.fillMaxSize()) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) {
             when {
                 uiState.isLoading -> {
@@ -306,6 +291,21 @@ fun ExerciseScreen(
                     }
                 }
             }
+        }
+
+        // Floating Action Button
+        FloatingActionButton(
+            onClick = {
+                editingExercise = null
+                showDialog = true
+            },
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, "Add Exercise")
         }
 
         // Show success/error messages

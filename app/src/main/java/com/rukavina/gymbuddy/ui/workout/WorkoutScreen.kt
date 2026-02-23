@@ -45,24 +45,9 @@ fun WorkoutScreen(
     var workoutToDelete by remember { mutableStateOf<WorkoutSession?>(null) }
     var showSortMenu by remember { mutableStateOf(false) }
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    editingWorkoutSession = null
-                    showDialog = true
-                },
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary
-            ) {
-                Icon(Icons.Default.Add, "Add Workout Session")
-            }
-        }
-    ) { paddingValues ->
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) {
             // Sort control
             Row(
@@ -133,6 +118,21 @@ fun WorkoutScreen(
                 }
             }
             }
+        }
+
+        // Floating Action Button
+        FloatingActionButton(
+            onClick = {
+                editingWorkoutSession = null
+                showDialog = true
+            },
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, "Add Workout Session")
         }
 
         // Show success/error messages
