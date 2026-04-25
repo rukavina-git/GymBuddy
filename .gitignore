@@ -39,3 +39,5 @@ app/src/google-services.json
 /IMPLEMENTATION_SUMMARY.md
 /ACTIVE_WORKOUT_IMPLEMENTATION.md
 local_assets
+/app/src/main/assets/adi-registration.properties
+/app/debug/output-metadata.json
