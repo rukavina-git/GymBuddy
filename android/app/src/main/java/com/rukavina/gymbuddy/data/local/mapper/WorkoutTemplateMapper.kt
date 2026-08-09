@@ -23,8 +23,9 @@ object WorkoutTemplateMapper {
         val templateEntity = WorkoutTemplateEntity(
             id = template.id,
             title = template.title,
-            isDefault = template.isDefault,
-            isHidden = template.isHidden,
+            source = template.source,
+            ownerId = template.ownerId,
+            derivedFromId = template.derivedFromId,
             deprecated = template.deprecated
         )
 
@@ -80,8 +81,9 @@ object WorkoutTemplateMapper {
             id = templateWithExercises.template.id,
             title = templateWithExercises.template.title,
             templateExercises = exercises,
-            isDefault = templateWithExercises.template.isDefault,
-            isHidden = templateWithExercises.template.isHidden,
+            source = templateWithExercises.template.source,
+            ownerId = templateWithExercises.template.ownerId,
+            derivedFromId = templateWithExercises.template.derivedFromId,
             deprecated = templateWithExercises.template.deprecated
         )
     }

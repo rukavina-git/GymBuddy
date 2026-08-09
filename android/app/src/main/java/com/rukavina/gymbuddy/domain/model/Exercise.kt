@@ -50,12 +50,6 @@ data class Exercise(
     val tips: List<String> = emptyList(),
 
     /**
-     * Personal note about this exercise.
-     * User can add their own observations, preferences, or reminders.
-     */
-    val note: String? = null,
-
-    /**
      * Difficulty level of the exercise.
      * Helps users select appropriate exercises for their skill level.
      */
@@ -98,24 +92,21 @@ data class Exercise(
     val thumbnailUrl: String? = null,
 
     /**
-     * Indicates whether this is a user-created custom exercise.
-     * false = default/preset exercise shipped with the app or from backend
-     * true = created by the user
+     * Whether this is a default/bundled (or future server-provided)
+     * exercise, or one the user created.
      */
-    val isCustom: Boolean = true,
+    val source: EntitySource = EntitySource.CUSTOM,
 
     /**
-     * User ID of the creator (for custom exercises).
-     * null for default exercises.
+     * User ID of the creator, for CUSTOM exercises. Null for DEFAULT rows.
      */
-    val createdBy: String? = null,
+    val ownerId: String? = null,
 
     /**
-     * Whether this exercise is hidden from the main exercise list.
-     * Users can hide default exercises they don't use.
-     * Hidden exercises can be unhidden in settings.
+     * Id of the DEFAULT exercise this one was duplicated from, for a
+     * future "duplicate and edit" action on a default entry. Not used yet.
      */
-    val isHidden: Boolean = false,
+    val derivedFromId: String? = null,
 
     /**
      * Whether this exercise has been superseded and should no longer

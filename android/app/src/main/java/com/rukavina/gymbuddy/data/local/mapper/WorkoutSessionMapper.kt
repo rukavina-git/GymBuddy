@@ -42,7 +42,8 @@ object WorkoutSessionMapper {
                     exerciseName = performedExercise.exerciseName,
                     exerciseCategory = performedExercise.exerciseCategory,
                     exerciseTrackingType = performedExercise.exerciseTrackingType,
-                    exercisePrimaryMuscles = performedExercise.exercisePrimaryMuscles
+                    exercisePrimaryMuscles = performedExercise.exercisePrimaryMuscles,
+                    supersetGroup = performedExercise.supersetGroup
                 )
             )
 
@@ -101,7 +102,8 @@ object WorkoutSessionMapper {
                 exerciseCategory = entity.exerciseCategory,
                 exerciseTrackingType = entity.exerciseTrackingType,
                 exercisePrimaryMuscles = entity.exercisePrimaryMuscles,
-                sets = sets
+                sets = sets,
+                supersetGroup = entity.supersetGroup
             )
         }
 
@@ -134,7 +136,8 @@ object WorkoutSessionMapper {
             exerciseName = performedExercise.exerciseName,
             exerciseCategory = performedExercise.exerciseCategory,
             exerciseTrackingType = performedExercise.exerciseTrackingType,
-            exercisePrimaryMuscles = performedExercise.exercisePrimaryMuscles
+            exercisePrimaryMuscles = performedExercise.exercisePrimaryMuscles,
+            supersetGroup = performedExercise.supersetGroup
         )
 
         val workoutSetEntities = performedExercise.sets.map { set ->

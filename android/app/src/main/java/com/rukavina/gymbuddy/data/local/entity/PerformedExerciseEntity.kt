@@ -47,7 +47,8 @@ data class PerformedExerciseEntity(
     val exerciseName: String,
     val exerciseCategory: ExerciseCategory,
     val exerciseTrackingType: ExerciseTrackingType,
-    val exercisePrimaryMuscles: List<MuscleGroup>
+    val exercisePrimaryMuscles: List<MuscleGroup>,
+    val supersetGroup: Int? = null
 )
 
 /**

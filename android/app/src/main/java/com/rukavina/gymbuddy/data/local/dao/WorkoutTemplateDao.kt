@@ -16,6 +16,13 @@ import kotlinx.coroutines.flow.Flow
  * Handles queries for both tables due to their relationship.
  *
  * Follows the same pattern as WorkoutSessionDao for consistency.
+ *
+ * Hidden/favorite state lives in user_template_state, not on the
+ * workout_templates row itself - see UserTemplateStateEntity. List/search
+ * queries below LEFT JOIN that table only to exclude hidden templates -
+ * the primary query still projects exactly WorkoutTemplateEntity's own
+ * columns (via `wt.*`), so the @Relation-based exercise fetch on
+ * WorkoutTemplateWithExercises is unaffected by the join.
  */
 @Dao
 interface WorkoutTemplateDao {
@@ -27,7 +34,14 @@ interface WorkoutTemplateDao {
      * update when templates are added, modified, or deleted.
      */
     @Transaction
-    @Query("SELECT * FROM workout_templates WHERE isHidden = 0 AND deprecated = 0 ORDER BY title ASC")
+    @Query(
+        """
+        SELECT wt.* FROM workout_templates wt
+        LEFT JOIN user_template_state s ON s.templateId = wt.id
+        WHERE COALESCE(s.isHidden, 0) = 0 AND wt.deprecated = 0
+        ORDER BY wt.title ASC
+        """
+    )
     fun getAllTemplates(): Flow<List<WorkoutTemplateWithExercises>>
 
     /**
@@ -40,7 +54,8 @@ interface WorkoutTemplateDao {
 
     /**
      * Get a single template by ID with its exercises.
-     * Returns null if template not found.
+     * Not filtered by hidden or deprecated - a detail lookup must resolve
+     * regardless of either status.
      *
      * @param id The template ID to search for
      * @return The template with exercises, or null if not found
@@ -58,7 +73,14 @@ interface WorkoutTemplateDao {
      * @return Flow of matching templates
      */
     @Transaction
-    @Query("SELECT * FROM workout_templates WHERE isHidden = 0 AND title LIKE '%' || :query || '%' AND deprecated = 0 ORDER BY title ASC")
+    @Query(
+        """
+        SELECT wt.* FROM workout_templates wt
+        LEFT JOIN user_template_state s ON s.templateId = wt.id
+        WHERE COALESCE(s.isHidden, 0) = 0 AND wt.title LIKE '%' || :query || '%' AND wt.deprecated = 0
+        ORDER BY wt.title ASC
+        """
+    )
     fun searchTemplates(query: String): Flow<List<WorkoutTemplateWithExercises>>
 
     /**
@@ -141,51 +163,42 @@ interface WorkoutTemplateDao {
     suspend fun deleteAllTemplates()
 
     /**
-     * Hide a template by ID.
-     * Hidden templates won't appear in the main template list.
-     *
-     * @param id The template ID to hide
-     */
-    @Query("UPDATE workout_templates SET isHidden = 1 WHERE id = :id")
-    suspend fun hideTemplate(id: String)
-
-    /**
-     * Unhide a template by ID.
-     * Makes the template visible again in the main list.
-     *
-     * @param id The template ID to unhide
-     */
-    @Query("UPDATE workout_templates SET isHidden = 0 WHERE id = :id")
-    suspend fun unhideTemplate(id: String)
-
-    /**
-     * Get all hidden templates.
+     * Get all hidden templates. Requires an overlay row marking the
+     * template hidden, so orphaned overlay rows (template no longer
+     * exists) never appear here.
      * Useful for a "restore hidden templates" feature.
      */
     @Transaction
-    @Query("SELECT * FROM workout_templates WHERE isHidden = 1 AND deprecated = 0 ORDER BY title ASC")
+    @Query(
+        """
+        SELECT wt.* FROM workout_templates wt
+        INNER JOIN user_template_state s ON s.templateId = wt.id
+        WHERE s.isHidden = 1 AND wt.deprecated = 0
+        ORDER BY wt.title ASC
+        """
+    )
     fun getHiddenTemplates(): Flow<List<WorkoutTemplateWithExercises>>
-
-    /**
-     * Unhide all templates.
-     * Useful for resetting hidden state.
-     */
-    @Query("UPDATE workout_templates SET isHidden = 0")
-    suspend fun unhideAllTemplates()
 
     /**
      * Get default templates only.
      * Useful for management screens.
      */
     @Transaction
-    @Query("SELECT * FROM workout_templates WHERE isDefault = 1 AND deprecated = 0 ORDER BY title ASC")
+    @Query("SELECT * FROM workout_templates WHERE source = 'DEFAULT' AND deprecated = 0 ORDER BY title ASC")
     fun getDefaultTemplates(): Flow<List<WorkoutTemplateWithExercises>>
 
     /**
-     * Get custom (user-created) templates only.
+     * Get custom (user-created) templates only. Excludes hidden templates.
      */
     @Transaction
-    @Query("SELECT * FROM workout_templates WHERE isDefault = 0 AND isHidden = 0 AND deprecated = 0 ORDER BY title ASC")
+    @Query(
+        """
+        SELECT wt.* FROM workout_templates wt
+        LEFT JOIN user_template_state s ON s.templateId = wt.id
+        WHERE wt.source = 'CUSTOM' AND COALESCE(s.isHidden, 0) = 0 AND wt.deprecated = 0
+        ORDER BY wt.title ASC
+        """
+    )
     fun getCustomTemplates(): Flow<List<WorkoutTemplateWithExercises>>
 
     /**

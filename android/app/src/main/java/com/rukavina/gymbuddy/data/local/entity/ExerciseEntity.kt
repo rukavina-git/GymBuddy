@@ -6,6 +6,7 @@ import androidx.room.TypeConverters
 import com.rukavina.gymbuddy.data.local.converter.ExerciseConverters
 import com.rukavina.gymbuddy.data.local.converter.MuscleGroupConverter
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
+import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
@@ -27,7 +28,6 @@ data class ExerciseEntity(
     val description: String?,
     val instructions: List<String>,
     val tips: List<String>,
-    val note: String?,
     val difficulty: DifficultyLevel,
     val equipmentNeeded: List<Equipment>,
     val category: ExerciseCategory,
@@ -35,8 +35,8 @@ data class ExerciseEntity(
     val trackingType: ExerciseTrackingType,
     val videoUrl: String?,
     val thumbnailUrl: String?,
-    val isCustom: Boolean,
-    val createdBy: String?,
-    val isHidden: Boolean,
+    val source: EntitySource,
+    val ownerId: String?,
+    val derivedFromId: String?,
     val deprecated: Boolean = false
 )

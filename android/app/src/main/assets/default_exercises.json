@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 9,
   "exercises": [
     {
       "id": "019fe506-359a-7601-92f2-f441cf1dae33",
@@ -18,17 +18,23 @@
         "Maintain a slight arch in your lower back",
         "Don't bounce the bar off your chest"
       ],
-      "primaryMuscles": ["CHEST"],
-      "secondaryMuscles": ["SHOULDERS", "ARMS"],
+      "primaryMuscles": [
+        "CHEST"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS",
+        "ARMS"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL", "BENCH"],
+      "equipmentNeeded": [
+        "BARBELL",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg"
     },
     {
       "id": "019fe506-359b-7a6f-82f9-90f196c28c0a",
@@ -47,17 +53,22 @@
         "Your knees should track over your toes",
         "Don't let your knees cave inward"
       ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["CORE", "BACK"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE",
+        "BACK"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Squat/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Squat/0.jpg"
     },
     {
       "id": "019fe506-359c-7fb2-942a-65d8449bbd9a",
@@ -76,17 +87,23 @@
         "Maintain a neutral spine - don't round your back",
         "Engage your lats by pulling the bar into your shins"
       ],
-      "primaryMuscles": ["BACK", "LEGS"],
-      "secondaryMuscles": ["CORE", "ARMS"],
+      "primaryMuscles": [
+        "BACK",
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE",
+        "ARMS"
+      ],
       "difficulty": "ADVANCED",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg"
     },
     {
       "id": "019fe506-359d-71d4-a51e-49d6d3b0e760",
@@ -105,17 +122,21 @@
         "Keep your shoulders down and back",
         "If you can't do a full pull-up, use resistance bands or do negatives"
       ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "BACK"
+      ],
+      "secondaryMuscles": [
+        "ARMS"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["PULL_UP_BAR"],
+      "equipmentNeeded": [
+        "PULL_UP_BAR"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg"
     },
     {
       "id": "019fe506-359e-734f-84b4-bfbe1cb1ce35",
@@ -134,17 +155,23 @@
         "Keep your core tight throughout the movement",
         "For easier variation, elevate your hands or do from knees"
       ],
-      "primaryMuscles": ["CHEST"],
-      "secondaryMuscles": ["SHOULDERS", "ARMS", "CORE"],
+      "primaryMuscles": [
+        "CHEST"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS",
+        "ARMS",
+        "CORE"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "REPS_ONLY",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/0.jpg"
     },
     {
       "id": "019fe506-359f-79f1-96c5-ebfb531468f8",
@@ -163,17 +190,21 @@
         "Don't hold your breath - breathe normally",
         "If your form breaks, rest and reset rather than continuing with poor form"
       ],
-      "primaryMuscles": ["CORE"],
-      "secondaryMuscles": ["SHOULDERS"],
+      "primaryMuscles": [
+        "CORE"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "DURATION",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35a0-77c6-9434-2e771281c227",
@@ -192,17 +223,19 @@
         "Keep your elbows pinned to your sides",
         "Squeeze at the top for maximum contraction"
       ],
-      "primaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35a1-7b5a-9ff0-fe15be1e6e3e",
@@ -221,17 +254,19 @@
         "Don't go above shoulder height to avoid impingement",
         "Use lighter weight and focus on form over ego"
       ],
-      "primaryMuscles": ["SHOULDERS"],
+      "primaryMuscles": [
+        "SHOULDERS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35a2-7c84-b00f-0c4f433180f8",
@@ -250,17 +285,21 @@
         "The weight at your chest helps keep your torso upright",
         "Use this to practice depth before moving to barbell squats"
       ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35a3-76e9-b9e2-a956216b7f5f",
@@ -279,17 +318,21 @@
         "Keep your torso upright throughout the movement",
         "Control the descent - don't crash down"
       ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35a4-7bda-8105-7700fc9609e5",
@@ -308,17 +351,23 @@
         "Touch the bar to your upper chest, not your neck",
         "Keep your feet firmly planted for stability"
       ],
-      "primaryMuscles": ["CHEST"],
-      "secondaryMuscles": ["SHOULDERS", "ARMS"],
+      "primaryMuscles": [
+        "CHEST"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS",
+        "ARMS"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL", "BENCH"],
+      "equipmentNeeded": [
+        "BARBELL",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Incline_Bench_Press_-_Medium_Grip/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Incline_Bench_Press_-_Medium_Grip/0.jpg"
     },
     {
       "id": "019fe506-35a5-7a26-b6eb-3ff8b3a134c9",
@@ -337,17 +386,23 @@
         "Don't let the dumbbells drift too far apart at the bottom",
         "Control the weight on the way down"
       ],
-      "primaryMuscles": ["CHEST"],
-      "secondaryMuscles": ["SHOULDERS", "ARMS"],
+      "primaryMuscles": [
+        "CHEST"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS",
+        "ARMS"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["DUMBBELL", "BENCH"],
+      "equipmentNeeded": [
+        "DUMBBELL",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35a6-7b02-94a3-1ea222589774",
@@ -366,17 +421,22 @@
         "Keep a slight bend in your elbows to protect the joint",
         "Focus on the stretch and squeeze, not the weight"
       ],
-      "primaryMuscles": ["CHEST"],
-      "secondaryMuscles": ["SHOULDERS"],
+      "primaryMuscles": [
+        "CHEST"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL", "BENCH"],
+      "equipmentNeeded": [
+        "DUMBBELL",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35a7-777f-ac60-67574cbc06f7",
@@ -395,17 +455,21 @@
         "Keep a slight bend in your elbows",
         "Vary the cable height to target different parts of the chest"
       ],
-      "primaryMuscles": ["CHEST"],
-      "secondaryMuscles": ["SHOULDERS"],
+      "primaryMuscles": [
+        "CHEST"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
+      "equipmentNeeded": [
+        "CABLE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35a8-7b6e-a450-a7d1d3c7d0ad",
@@ -424,17 +488,22 @@
         "Don't go too deep if you have shoulder issues",
         "Add weight with a belt once bodyweight becomes easy"
       ],
-      "primaryMuscles": ["CHEST"],
-      "secondaryMuscles": ["ARMS", "SHOULDERS"],
+      "primaryMuscles": [
+        "CHEST"
+      ],
+      "secondaryMuscles": [
+        "ARMS",
+        "SHOULDERS"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35a9-753d-8fe5-6977136a13d3",
@@ -453,17 +522,21 @@
         "Pull with your elbows, not your hands",
         "Avoid pulling behind the neck"
       ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "BACK"
+      ],
+      "secondaryMuscles": [
+        "ARMS"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
+      "equipmentNeeded": [
+        "CABLE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35aa-7eed-8e2a-89f8ad56d156",
@@ -482,17 +555,22 @@
         "Don't use momentum to swing the weight",
         "Pull to your belly button for more lat engagement"
       ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["ARMS", "CORE"],
+      "primaryMuscles": [
+        "BACK"
+      ],
+      "secondaryMuscles": [
+        "ARMS",
+        "CORE"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg"
     },
     {
       "id": "019fe506-35ab-78cf-8ecd-1da7a4a527ac",
@@ -511,17 +589,22 @@
         "Pull to your hip, not your armpit",
         "Don't rotate your torso as you row"
       ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "BACK"
+      ],
+      "secondaryMuscles": [
+        "ARMS"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL", "BENCH"],
+      "equipmentNeeded": [
+        "DUMBBELL",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35ac-7721-81de-641623045b62",
@@ -540,17 +623,21 @@
         "Avoid swinging your torso back and forth",
         "Focus on pulling with your back, not your arms"
       ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "BACK"
+      ],
+      "secondaryMuscles": [
+        "ARMS"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
+      "equipmentNeeded": [
+        "CABLE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35ad-748c-9746-93ff8da9ba63",
@@ -569,17 +656,21 @@
         "Externally rotate your shoulders at the end",
         "This is a great exercise for posture and shoulder health"
       ],
-      "primaryMuscles": ["SHOULDERS"],
-      "secondaryMuscles": ["BACK"],
+      "primaryMuscles": [
+        "SHOULDERS"
+      ],
+      "secondaryMuscles": [
+        "BACK"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
+      "equipmentNeeded": [
+        "CABLE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35ae-7f94-9c21-58c0f1fa09d7",
@@ -598,17 +689,22 @@
         "Don't round your lower back",
         "You can use a close or wide grip for variety"
       ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["ARMS", "CORE"],
+      "primaryMuscles": [
+        "BACK"
+      ],
+      "secondaryMuscles": [
+        "ARMS",
+        "CORE"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35af-7246-b78e-aeaab3a49230",
@@ -627,17 +723,22 @@
         "Don't lean back excessively",
         "Push your head through at the top"
       ],
-      "primaryMuscles": ["SHOULDERS"],
-      "secondaryMuscles": ["ARMS", "CORE"],
+      "primaryMuscles": [
+        "SHOULDERS"
+      ],
+      "secondaryMuscles": [
+        "ARMS",
+        "CORE"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/0.jpg"
     },
     {
       "id": "019fe506-35b0-7ed4-8772-3f0fe4f3aeba",
@@ -656,17 +757,21 @@
         "Keep your back against the pad if seated",
         "Control the weight on the way down"
       ],
-      "primaryMuscles": ["SHOULDERS"],
-      "secondaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "SHOULDERS"
+      ],
+      "secondaryMuscles": [
+        "ARMS"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35b1-783a-8928-809823dce5c4",
@@ -685,17 +790,19 @@
         "Stop at shoulder height",
         "Use lighter weight and focus on the contraction"
       ],
-      "primaryMuscles": ["SHOULDERS"],
+      "primaryMuscles": [
+        "SHOULDERS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35b2-757f-a130-42a498a93369",
@@ -714,17 +821,21 @@
         "Lead with your elbows, not your hands",
         "Use lighter weight for better mind-muscle connection"
       ],
-      "primaryMuscles": ["SHOULDERS"],
-      "secondaryMuscles": ["BACK"],
+      "primaryMuscles": [
+        "SHOULDERS"
+      ],
+      "secondaryMuscles": [
+        "BACK"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35b3-7d27-b390-cdbb73c7cd62",
@@ -743,17 +854,21 @@
         "Keep the movement smooth and controlled",
         "This exercise hits all three deltoid heads"
       ],
-      "primaryMuscles": ["SHOULDERS"],
-      "secondaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "SHOULDERS"
+      ],
+      "secondaryMuscles": [
+        "ARMS"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Arnold_Dumbbell_Press/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Arnold_Dumbbell_Press/0.jpg"
     },
     {
       "id": "019fe506-35b4-7b32-83e2-6244b1e7d9c0",
@@ -772,17 +887,21 @@
         "Hold at the top for a brief squeeze",
         "Keep your neck neutral"
       ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["SHOULDERS"],
+      "primaryMuscles": [
+        "BACK"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shrug/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shrug/0.jpg"
     },
     {
       "id": "019fe506-35b5-7334-bbaf-0cfabc29cfbd",
@@ -801,17 +920,19 @@
         "Don't lean into the movement",
         "Focus on the squeeze at the bottom"
       ],
-      "primaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
+      "equipmentNeeded": [
+        "CABLE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35b6-73fa-804a-ed95dfa3c92d",
@@ -830,17 +951,19 @@
         "Don't let your elbows flare out",
         "Control the weight on the way down"
       ],
-      "primaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35b7-7c5c-92a1-99813a6a8455",
@@ -859,17 +982,20 @@
         "Keep your elbows pointing up, not flaring out",
         "Use an EZ bar for easier wrist positioning"
       ],
-      "primaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["EZ_BAR", "BENCH"],
+      "equipmentNeeded": [
+        "EZ_BAR",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35b8-72ad-901a-b8cc7e665073",
@@ -888,17 +1014,23 @@
         "Keep elbows at 45 degrees or less",
         "Don't go too narrow or you'll strain your wrists"
       ],
-      "primaryMuscles": ["ARMS"],
-      "secondaryMuscles": ["CHEST", "SHOULDERS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
+      "secondaryMuscles": [
+        "CHEST",
+        "SHOULDERS"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL", "BENCH"],
+      "equipmentNeeded": [
+        "BARBELL",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35b9-7802-85de-b0a9682a8dbc",
@@ -917,17 +1049,22 @@
         "Don't go too deep if you have shoulder issues",
         "For bench dips, keep feet on floor or elevated"
       ],
-      "primaryMuscles": ["ARMS"],
-      "secondaryMuscles": ["CHEST", "SHOULDERS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
+      "secondaryMuscles": [
+        "CHEST",
+        "SHOULDERS"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35ba-7707-8a53-7d0526921af6",
@@ -946,17 +1083,19 @@
         "Keep your elbows pinned to your sides",
         "Use an EZ bar for easier wrist positioning"
       ],
-      "primaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/0.jpg"
     },
     {
       "id": "019fe506-35bb-7357-8c72-401003939cf2",
@@ -975,17 +1114,19 @@
         "Don't swing the weight",
         "You can curl both arms together or alternate"
       ],
-      "primaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hammer_Curls/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hammer_Curls/0.jpg"
     },
     {
       "id": "019fe506-35bc-7a3e-9895-70de3b94f943",
@@ -1004,17 +1145,20 @@
         "Keep your upper arms pressed against the pad",
         "Control the negative portion"
       ],
-      "primaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["EZ_BAR", "BENCH"],
+      "equipmentNeeded": [
+        "EZ_BAR",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35bd-742b-b5de-ae7303ccedd6",
@@ -1033,17 +1177,19 @@
         "Try different attachments for variety",
         "Stand far enough back for proper tension"
       ],
-      "primaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
+      "equipmentNeeded": [
+        "CABLE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35be-7140-b9fe-bff1822040fc",
@@ -1062,17 +1208,19 @@
         "Don't swing - the position forces strict form",
         "Focus on the peak contraction"
       ],
-      "primaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "ARMS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL"],
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35bf-7429-9e35-0a0f1062be96",
@@ -1091,17 +1239,19 @@
         "Keep your lower back pressed against the pad",
         "Foot placement changes muscle emphasis"
       ],
-      "primaryMuscles": ["LEGS"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["MACHINE"],
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35c0-78d9-961a-47d99bf06ff8",
@@ -1120,17 +1270,19 @@
         "Squeeze hard at the top",
         "Don't go too heavy - this exercise can stress the knees"
       ],
-      "primaryMuscles": ["LEGS"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["MACHINE"],
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35c1-7e41-9bed-e192a9d6a12d",
@@ -1149,17 +1301,19 @@
         "Focus on the mind-muscle connection with your hamstrings",
         "Control the negative portion"
       ],
-      "primaryMuscles": ["LEGS"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["MACHINE"],
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35c2-7efc-a884-30f32d884431",
@@ -1178,17 +1332,22 @@
         "Don't round your back",
         "Feel the stretch in your hamstrings at the bottom"
       ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["BACK", "CORE"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "BACK",
+        "CORE"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35c3-7228-92d8-399f90509a74",
@@ -1207,17 +1366,19 @@
         "Pause briefly at the top",
         "Keep your knees straight but not locked"
       ],
-      "primaryMuscles": ["LEGS"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["MACHINE"],
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35c4-7e96-ba37-5c21a0f3d541",
@@ -1236,17 +1397,19 @@
         "Use a full range of motion",
         "Pause at the top for a better contraction"
       ],
-      "primaryMuscles": ["LEGS"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["MACHINE"],
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35c5-7e9d-9bff-db6cca316522",
@@ -1265,17 +1428,22 @@
         "Push through your heels, not your toes",
         "Squeeze your glutes hard at the top"
       ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL", "BENCH"],
+      "equipmentNeeded": [
+        "BARBELL",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg"
     },
     {
       "id": "019fe506-35c6-7c41-a8f8-d8a708d074f0",
@@ -1294,17 +1462,22 @@
         "Front shin should stay relatively vertical",
         "Start with bodyweight before adding weight"
       ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["DUMBBELL", "BENCH"],
+      "equipmentNeeded": [
+        "DUMBBELL",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35c7-7210-a41a-af15ffc08a58",
@@ -1323,17 +1496,19 @@
         "Focus on curling your ribcage towards your pelvis",
         "Keep your lower back on the ground"
       ],
-      "primaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "CORE"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "REPS_ONLY",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35c8-70f3-83aa-68a24c0af02a",
@@ -1352,17 +1527,19 @@
         "Focus on tilting your pelvis up",
         "Bend knees to make it easier"
       ],
-      "primaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "CORE"
+      ],
       "secondaryMuscles": [],
       "difficulty": "ADVANCED",
-      "equipmentNeeded": ["PULL_UP_BAR"],
+      "equipmentNeeded": [
+        "PULL_UP_BAR"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "REPS_ONLY",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35c9-79e4-b2cf-c0a0eb3a9a24",
@@ -1381,17 +1558,19 @@
         "The rotation comes from your core, not your arms",
         "Keep your feet off the ground for added difficulty"
       ],
-      "primaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "CORE"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35ca-7c5a-bc2c-1fbb28056716",
@@ -1410,17 +1589,19 @@
         "Move slowly and with control",
         "This is great for teaching core stability"
       ],
-      "primaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "CORE"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "REPS_ONLY",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35cb-7080-9e3a-9135726bd29c",
@@ -1439,17 +1620,22 @@
         "Land on your toes",
         "Go faster for more cardio, slower for more core focus"
       ],
-      "primaryMuscles": ["CORE"],
-      "secondaryMuscles": ["SHOULDERS", "LEGS"],
+      "primaryMuscles": [
+        "CORE"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS",
+        "LEGS"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "CARDIO",
       "exerciseType": "COMPOUND",
       "trackingType": "REPS_ONLY",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35cc-7cdd-915b-6bc9835ac9b1",
@@ -1468,17 +1654,19 @@
         "Keep your hips stationary",
         "This allows for progressive overload on abs"
       ],
-      "primaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "CORE"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["CABLE"],
+      "equipmentNeeded": [
+        "CABLE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35cd-7cb5-b39b-6fc73c1dd946",
@@ -1497,17 +1685,19 @@
         "Focus on the rotation and elbow-to-knee connection",
         "Keep your lower back pressed to the ground"
       ],
-      "primaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "CORE"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "REPS_ONLY",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35ce-7bb2-ac34-1cf9758d9bfd",
@@ -1526,17 +1716,23 @@
         "Keep your shoulder blades retracted",
         "Control the weight on the way down"
       ],
-      "primaryMuscles": ["CHEST"],
-      "secondaryMuscles": ["SHOULDERS", "ARMS"],
+      "primaryMuscles": [
+        "CHEST"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS",
+        "ARMS"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["DUMBBELL", "BENCH"],
+      "equipmentNeeded": [
+        "DUMBBELL",
+        "BENCH"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35cf-716f-be29-70ea5d1c8a51",
@@ -1555,17 +1751,21 @@
         "Squeeze your biceps at the top",
         "Don't swing - use controlled movement"
       ],
-      "primaryMuscles": ["BACK"],
-      "secondaryMuscles": ["ARMS"],
+      "primaryMuscles": [
+        "BACK"
+      ],
+      "secondaryMuscles": [
+        "ARMS"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["PULL_UP_BAR"],
+      "equipmentNeeded": [
+        "PULL_UP_BAR"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35d0-7520-b3e9-f4fa230d2e1a",
@@ -1584,17 +1784,22 @@
         "Stop when elbows reach shoulder height",
         "Use dumbbells if you have shoulder issues"
       ],
-      "primaryMuscles": ["SHOULDERS"],
-      "secondaryMuscles": ["BACK", "ARMS"],
+      "primaryMuscles": [
+        "SHOULDERS"
+      ],
+      "secondaryMuscles": [
+        "BACK",
+        "ARMS"
+      ],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35d1-7779-835a-03fad2a0e63b",
@@ -1613,17 +1818,21 @@
         "Stay more upright than back squat",
         "Work on wrist mobility for the clean grip"
       ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE"
+      ],
       "difficulty": "ADVANCED",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35d2-72b8-8b9b-3188abd1a9eb",
@@ -1642,17 +1851,19 @@
         "Bend your knees to make it easier",
         "Don't let your lower back arch off the ground"
       ],
-      "primaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "CORE"
+      ],
       "secondaryMuscles": [],
       "difficulty": "INTERMEDIATE",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "REPS_ONLY",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35d3-7f3d-9ab0-d1c26b59e962",
@@ -1671,17 +1882,21 @@
         "Keep your torso upright",
         "Step back far enough to maintain balance"
       ],
-      "primaryMuscles": ["LEGS"],
-      "secondaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE"
+      ],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["BODYWEIGHT"],
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35d4-7f59-af83-ad2466c8d39c",
@@ -1700,17 +1915,22 @@
         "Keep your chest up throughout",
         "This variation is easier on the lower back"
       ],
-      "primaryMuscles": ["LEGS", "BACK"],
-      "secondaryMuscles": ["CORE"],
+      "primaryMuscles": [
+        "LEGS",
+        "BACK"
+      ],
+      "secondaryMuscles": [
+        "CORE"
+      ],
       "difficulty": "ADVANCED",
-      "equipmentNeeded": ["BARBELL"],
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     },
     {
       "id": "019fe506-35d5-7d7f-ae9b-22bbc70bf77d",
@@ -1729,17 +1949,19 @@
         "Vary foot placement to target different muscles",
         "Don't lock out your knees at the top"
       ],
-      "primaryMuscles": ["LEGS"],
+      "primaryMuscles": [
+        "LEGS"
+      ],
       "secondaryMuscles": [],
       "difficulty": "BEGINNER",
-      "equipmentNeeded": ["MACHINE"],
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": "",
-      "thumbnailUrl": "",
-      "isCustom": false,
-      "createdBy": "0"
+      "thumbnailUrl": ""
     }
   ]
 }

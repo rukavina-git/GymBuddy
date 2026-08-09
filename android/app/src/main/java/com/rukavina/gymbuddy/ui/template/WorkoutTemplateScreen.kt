@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.TemplateExercise
@@ -366,7 +367,7 @@ fun WorkoutTemplateItem(
                     )
                 }
                 Row {
-                    if (template.isDefault) {
+                    if (template.source == EntitySource.DEFAULT) {
                         // Default templates can only be hidden, not edited or deleted
                         IconButton(onClick = onHide) {
                             Icon(Icons.Default.VisibilityOff, "Hide", tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -573,7 +574,11 @@ fun WorkoutTemplateFormDialog(
                         WorkoutTemplate(
                             id = template?.id ?: generateTemplateId(),
                             title = title,
-                            templateExercises = templateExercises
+                            templateExercises = templateExercises,
+                            source = template?.source ?: EntitySource.CUSTOM,
+                            ownerId = template?.ownerId,
+                            derivedFromId = template?.derivedFromId,
+                            deprecated = template?.deprecated ?: false
                         )
                     )
                 },
@@ -712,7 +717,7 @@ fun WorkoutTemplateViewDialog(
                     text = template.title,
                     style = MaterialTheme.typography.headlineSmall
                 )
-                if (template.isDefault) {
+                if (template.source == EntitySource.DEFAULT) {
                     Text(
                         text = "Default Template",
                         style = MaterialTheme.typography.bodySmall,

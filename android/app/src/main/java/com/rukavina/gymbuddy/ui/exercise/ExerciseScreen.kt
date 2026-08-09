@@ -20,6 +20,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.components.EmptyState
@@ -249,7 +250,7 @@ fun ExerciseScreen(
                                             },
                                             trailingContent = {
                                                 Row {
-                                                    if (exercise.isCustom) {
+                                                    if (exercise.source == EntitySource.CUSTOM) {
                                                         // Custom exercises can be edited and deleted
                                                         IconButton(onClick = {
                                                             editingExercise = exercise

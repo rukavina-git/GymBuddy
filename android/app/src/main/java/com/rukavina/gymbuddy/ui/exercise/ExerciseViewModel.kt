@@ -44,6 +44,9 @@ class ExerciseViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ExerciseUiState())
     val uiState: StateFlow<ExerciseUiState> = _uiState.asStateFlow()
 
+    private val _selectedExerciseNote = MutableStateFlow<String?>(null)
+    val selectedExerciseNote: StateFlow<String?> = _selectedExerciseNote.asStateFlow()
+
     private var searchJob: Job? = null
 
     init {
@@ -274,29 +277,26 @@ class ExerciseViewModel @Inject constructor(
     }
 
     /**
+     * Load the personal note for an exercise, for display/editing in
+     * ExerciseDetailsScreen. The note lives in the user_exercise_state
+     * overlay, not on the Exercise itself.
+     */
+    fun loadExerciseNote(exerciseId: String) {
+        viewModelScope.launch {
+            _selectedExerciseNote.value = exerciseRepository.getExerciseNote(exerciseId)
+        }
+    }
+
+    /**
      * Update the note for an exercise.
      */
     fun updateExerciseNote(exerciseId: String, note: String) {
         viewModelScope.launch {
             try {
-                val exercise = getExerciseByIdUseCase(exerciseId)
-                if (exercise != null) {
-                    val updatedExercise = exercise.copy(note = note.ifBlank { null })
-                    updateExerciseUseCase(updatedExercise)
-                        .onSuccess {
-                            _uiState.update {
-                                it.copy(successMessage = "Note updated successfully")
-                            }
-                        }
-                        .onFailure { error ->
-                            _uiState.update {
-                                it.copy(errorMessage = error.message ?: "Failed to update note")
-                            }
-                        }
-                } else {
-                    _uiState.update {
-                        it.copy(errorMessage = "Exercise not found")
-                    }
+                exerciseRepository.updateExerciseNote(exerciseId, note.ifBlank { null })
+                _selectedExerciseNote.value = note.ifBlank { null }
+                _uiState.update {
+                    it.copy(successMessage = "Note updated successfully")
                 }
             } catch (e: Exception) {
                 _uiState.update {

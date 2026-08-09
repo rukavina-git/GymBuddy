@@ -11,15 +11,29 @@ import kotlinx.coroutines.flow.Flow
 /**
  * Data Access Object for Exercise operations.
  * Provides database queries for Exercise table.
+ *
+ * Hidden/favorite/note state lives in user_exercise_state, not on the
+ * exercises row itself - see UserExerciseStateEntity. List/search/filter
+ * queries below LEFT JOIN that table only to exclude hidden exercises;
+ * they never need to project its columns since Exercise no longer carries
+ * isHidden/note. Detail lookups by id deliberately skip the join - they
+ * must resolve regardless of hidden/deprecated status.
  */
 @Dao
 interface ExerciseDao {
     /**
      * Get all exercises as a Flow for reactive updates.
      * Ordered alphabetically by name.
-     * By default, excludes hidden exercises.
+     * Excludes hidden exercises.
      */
-    @Query("SELECT * FROM exercises WHERE isHidden = 0 AND deprecated = 0 ORDER BY name ASC")
+    @Query(
+        """
+        SELECT e.* FROM exercises e
+        LEFT JOIN user_exercise_state s ON s.exerciseId = e.id
+        WHERE COALESCE(s.isHidden, 0) = 0 AND e.deprecated = 0
+        ORDER BY e.name ASC
+        """
+    )
     fun getAllExercises(): Flow<List<ExerciseEntity>>
 
     /**
@@ -30,6 +44,8 @@ interface ExerciseDao {
 
     /**
      * Get a single exercise by ID.
+     * Not filtered by hidden or deprecated - a detail lookup must resolve
+     * regardless of either status.
      * @return ExerciseEntity if found, null otherwise.
      */
     @Query("SELECT * FROM exercises WHERE id = :id")
@@ -69,46 +85,81 @@ interface ExerciseDao {
     suspend fun deleteAllExercises()
 
     /**
-     * Get exercises filtered by difficulty level.
+     * Get exercises filtered by difficulty level. Excludes hidden exercises.
      */
-    @Query("SELECT * FROM exercises WHERE difficulty = :difficulty AND deprecated = 0 ORDER BY name ASC")
+    @Query(
+        """
+        SELECT e.* FROM exercises e
+        LEFT JOIN user_exercise_state s ON s.exerciseId = e.id
+        WHERE e.difficulty = :difficulty AND e.deprecated = 0 AND COALESCE(s.isHidden, 0) = 0
+        ORDER BY e.name ASC
+        """
+    )
     fun getExercisesByDifficulty(difficulty: String): Flow<List<ExerciseEntity>>
 
     /**
-     * Get exercises that require specific equipment.
+     * Get exercises that require specific equipment. Excludes hidden exercises.
      * Uses LIKE to match equipment in the comma-separated list.
      */
-    @Query("SELECT * FROM exercises WHERE equipmentNeeded LIKE '%' || :equipment || '%' AND deprecated = 0 ORDER BY name ASC")
+    @Query(
+        """
+        SELECT e.* FROM exercises e
+        LEFT JOIN user_exercise_state s ON s.exerciseId = e.id
+        WHERE e.equipmentNeeded LIKE '%' || :equipment || '%' AND e.deprecated = 0 AND COALESCE(s.isHidden, 0) = 0
+        ORDER BY e.name ASC
+        """
+    )
     fun getExercisesByEquipment(equipment: String): Flow<List<ExerciseEntity>>
 
     /**
-     * Get exercises filtered by category.
+     * Get exercises filtered by category. Excludes hidden exercises.
      */
-    @Query("SELECT * FROM exercises WHERE category = :category AND deprecated = 0 ORDER BY name ASC")
+    @Query(
+        """
+        SELECT e.* FROM exercises e
+        LEFT JOIN user_exercise_state s ON s.exerciseId = e.id
+        WHERE e.category = :category AND e.deprecated = 0 AND COALESCE(s.isHidden, 0) = 0
+        ORDER BY e.name ASC
+        """
+    )
     fun getExercisesByCategory(category: String): Flow<List<ExerciseEntity>>
 
     /**
-     * Get exercises filtered by type (compound vs isolation).
+     * Get exercises filtered by type (compound vs isolation). Excludes hidden exercises.
      */
-    @Query("SELECT * FROM exercises WHERE exerciseType = :type AND deprecated = 0 ORDER BY name ASC")
+    @Query(
+        """
+        SELECT e.* FROM exercises e
+        LEFT JOIN user_exercise_state s ON s.exerciseId = e.id
+        WHERE e.exerciseType = :type AND e.deprecated = 0 AND COALESCE(s.isHidden, 0) = 0
+        ORDER BY e.name ASC
+        """
+    )
     fun getExercisesByType(type: String): Flow<List<ExerciseEntity>>
 
     /**
      * Get only custom (user-created) exercises.
      */
-    @Query("SELECT * FROM exercises WHERE isCustom = 1 AND deprecated = 0 ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE source = 'CUSTOM' AND deprecated = 0 ORDER BY name ASC")
     fun getCustomExercises(): Flow<List<ExerciseEntity>>
 
     /**
      * Get only default (preset) exercises.
      */
-    @Query("SELECT * FROM exercises WHERE isCustom = 0 AND deprecated = 0 ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE source = 'DEFAULT' AND deprecated = 0 ORDER BY name ASC")
     fun getDefaultExercises(): Flow<List<ExerciseEntity>>
 
     /**
-     * Get exercises that target a specific primary muscle group.
+     * Get exercises that target a specific primary muscle group. Excludes hidden exercises.
      */
-    @Query("SELECT * FROM exercises WHERE primaryMuscles LIKE '%' || :muscleGroup || '%' AND deprecated = 0 ORDER BY name ASC")
+    @Query(
+        """
+        SELECT e.* FROM exercises e
+        LEFT JOIN user_exercise_state s ON s.exerciseId = e.id
+        WHERE e.primaryMuscles LIKE '%' || :muscleGroup || '%' AND e.deprecated = 0 AND COALESCE(s.isHidden, 0) = 0
+        ORDER BY e.name ASC
+        """
+    )
     fun getExercisesByPrimaryMuscle(muscleGroup: String): Flow<List<ExerciseEntity>>
 
     /**
@@ -121,7 +172,7 @@ interface ExerciseDao {
     /**
      * Get count of default exercises.
      */
-    @Query("SELECT COUNT(*) FROM exercises WHERE isCustom = 0 AND deprecated = 0")
+    @Query("SELECT COUNT(*) FROM exercises WHERE source = 'DEFAULT' AND deprecated = 0")
     suspend fun getDefaultExerciseCount(): Int
 
     /**
@@ -135,30 +186,21 @@ interface ExerciseDao {
      * Delete all default exercises.
      * Useful when updating default exercise library.
      */
-    @Query("DELETE FROM exercises WHERE isCustom = 0")
+    @Query("DELETE FROM exercises WHERE source = 'DEFAULT'")
     suspend fun deleteAllDefaultExercises()
 
     /**
-     * Hide an exercise by ID.
+     * Get all hidden exercises. Requires an overlay row marking the
+     * exercise hidden, so orphaned overlay rows (exercise no longer
+     * exists) never appear here.
      */
-    @Query("UPDATE exercises SET isHidden = 1 WHERE id = :id")
-    suspend fun hideExercise(id: String)
-
-    /**
-     * Unhide an exercise by ID.
-     */
-    @Query("UPDATE exercises SET isHidden = 0 WHERE id = :id")
-    suspend fun unhideExercise(id: String)
-
-    /**
-     * Get all hidden exercises.
-     */
-    @Query("SELECT * FROM exercises WHERE isHidden = 1 AND deprecated = 0 ORDER BY name ASC")
+    @Query(
+        """
+        SELECT e.* FROM exercises e
+        INNER JOIN user_exercise_state s ON s.exerciseId = e.id
+        WHERE s.isHidden = 1 AND e.deprecated = 0
+        ORDER BY e.name ASC
+        """
+    )
     fun getHiddenExercises(): Flow<List<ExerciseEntity>>
-
-    /**
-     * Unhide all exercises.
-     */
-    @Query("UPDATE exercises SET isHidden = 0")
-    suspend fun unhideAllExercises()
 }
