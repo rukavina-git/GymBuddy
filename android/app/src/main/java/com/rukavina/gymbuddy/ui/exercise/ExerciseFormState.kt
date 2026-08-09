@@ -10,6 +10,7 @@ import com.rukavina.gymbuddy.domain.model.DifficultyLevel
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.ExerciseType
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
 
@@ -112,11 +113,13 @@ class ExerciseFormState(initialExercise: Exercise? = null) {
             equipmentNeeded = equipmentNeeded,
             category = category,
             exerciseType = exerciseType,
+            trackingType = initialExercise?.trackingType ?: ExerciseTrackingType.WEIGHT_REPS,
             videoUrl = videoUrl.trim().ifBlank { null },
             thumbnailUrl = thumbnailUrl.trim().ifBlank { null },
             isCustom = initialExercise?.isCustom ?: true,
             createdBy = initialExercise?.createdBy,
-            isHidden = initialExercise?.isHidden ?: false
+            isHidden = initialExercise?.isHidden ?: false,
+            deprecated = initialExercise?.deprecated ?: false
         )
     }
 

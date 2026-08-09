@@ -9,6 +9,7 @@ import com.rukavina.gymbuddy.data.local.entity.ExerciseVersionEntity
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.ExerciseType
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import org.json.JSONArray
@@ -123,11 +124,13 @@ class ExerciseSeeder @Inject constructor(
             equipmentNeeded = parseEnumList<Equipment>(json.getJSONArray("equipmentNeeded")),
             category = ExerciseCategory.valueOf(json.getString("category")),
             exerciseType = ExerciseType.valueOf(json.getString("exerciseType")),
+            trackingType = ExerciseTrackingType.valueOf(json.getString("trackingType")),
             videoUrl = json.optString("videoUrl").takeIf { it.isNotEmpty() },
             thumbnailUrl = json.optString("thumbnailUrl").takeIf { it.isNotEmpty() },
             isCustom = json.getBoolean("isCustom"),
             createdBy = json.optString("createdBy").takeIf { it.isNotEmpty() },
-            isHidden = false // Default exercises are never hidden by default - this is user-specific preference
+            isHidden = false, // Default exercises are never hidden by default - this is user-specific preference
+            deprecated = json.optBoolean("deprecated")
         )
     }
 

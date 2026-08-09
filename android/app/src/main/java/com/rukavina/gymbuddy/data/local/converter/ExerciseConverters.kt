@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.ExerciseType
 
 /**
@@ -88,6 +89,23 @@ class ExerciseConverters {
         return value?.let {
             try {
                 ExerciseType.valueOf(it)
+            } catch (e: IllegalArgumentException) {
+                null
+            }
+        }
+    }
+
+    // ExerciseTrackingType Converters
+    @TypeConverter
+    fun fromExerciseTrackingType(value: ExerciseTrackingType?): String? {
+        return value?.name
+    }
+
+    @TypeConverter
+    fun toExerciseTrackingType(value: String?): ExerciseTrackingType? {
+        return value?.let {
+            try {
+                ExerciseTrackingType.valueOf(it)
             } catch (e: IllegalArgumentException) {
                 null
             }

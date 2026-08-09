@@ -25,11 +25,13 @@ object ExerciseMapper {
             equipmentNeeded = exercise.equipmentNeeded,
             category = exercise.category,
             exerciseType = exercise.exerciseType,
+            trackingType = exercise.trackingType,
             videoUrl = exercise.videoUrl,
             thumbnailUrl = exercise.thumbnailUrl,
             isCustom = exercise.isCustom,
             createdBy = exercise.createdBy,
-            isHidden = exercise.isHidden
+            isHidden = exercise.isHidden,
+            deprecated = exercise.deprecated
         )
     }
 
@@ -50,11 +52,13 @@ object ExerciseMapper {
             equipmentNeeded = entity.equipmentNeeded,
             category = entity.category,
             exerciseType = entity.exerciseType,
+            trackingType = entity.trackingType,
             videoUrl = entity.videoUrl,
             thumbnailUrl = entity.thumbnailUrl,
             isCustom = entity.isCustom,
             createdBy = entity.createdBy,
-            isHidden = entity.isHidden
+            isHidden = entity.isHidden,
+            deprecated = entity.deprecated
         )
     }
 

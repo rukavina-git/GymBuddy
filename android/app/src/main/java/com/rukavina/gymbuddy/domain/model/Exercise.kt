@@ -80,6 +80,12 @@ data class Exercise(
     val exerciseType: ExerciseType,
 
     /**
+     * Which measurements a set of this exercise records (weight, reps,
+     * duration, distance). Determines which fields the set editor shows.
+     */
+    val trackingType: ExerciseTrackingType,
+
+    /**
      * URL to an external video demonstration (e.g., YouTube).
      * Provides visual guidance for proper form.
      */
@@ -109,5 +115,12 @@ data class Exercise(
      * Users can hide default exercises they don't use.
      * Hidden exercises can be unhidden in settings.
      */
-    val isHidden: Boolean = false
+    val isHidden: Boolean = false,
+
+    /**
+     * Whether this exercise has been superseded and should no longer
+     * appear in lists, search, or filters. Existing references to it
+     * remain resolvable. See docs/adr/0002-deprecation-over-deletion.md.
+     */
+    val deprecated: Boolean = false
 )

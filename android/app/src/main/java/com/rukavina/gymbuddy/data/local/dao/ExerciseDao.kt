@@ -19,13 +19,13 @@ interface ExerciseDao {
      * Ordered alphabetically by name.
      * By default, excludes hidden exercises.
      */
-    @Query("SELECT * FROM exercises WHERE isHidden = 0 ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE isHidden = 0 AND deprecated = 0 ORDER BY name ASC")
     fun getAllExercises(): Flow<List<ExerciseEntity>>
 
     /**
      * Get all exercises including hidden ones.
      */
-    @Query("SELECT * FROM exercises ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE deprecated = 0 ORDER BY name ASC")
     fun getAllExercisesIncludingHidden(): Flow<List<ExerciseEntity>>
 
     /**
@@ -39,7 +39,7 @@ interface ExerciseDao {
      * Search exercises by name (case-insensitive).
      * @param query Search query (will be wrapped with % for LIKE query)
      */
-    @Query("SELECT * FROM exercises WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE name LIKE '%' || :query || '%' AND deprecated = 0 ORDER BY name ASC")
     fun searchExercises(query: String): Flow<List<ExerciseEntity>>
 
     /**
@@ -71,57 +71,57 @@ interface ExerciseDao {
     /**
      * Get exercises filtered by difficulty level.
      */
-    @Query("SELECT * FROM exercises WHERE difficulty = :difficulty ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE difficulty = :difficulty AND deprecated = 0 ORDER BY name ASC")
     fun getExercisesByDifficulty(difficulty: String): Flow<List<ExerciseEntity>>
 
     /**
      * Get exercises that require specific equipment.
      * Uses LIKE to match equipment in the comma-separated list.
      */
-    @Query("SELECT * FROM exercises WHERE equipmentNeeded LIKE '%' || :equipment || '%' ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE equipmentNeeded LIKE '%' || :equipment || '%' AND deprecated = 0 ORDER BY name ASC")
     fun getExercisesByEquipment(equipment: String): Flow<List<ExerciseEntity>>
 
     /**
      * Get exercises filtered by category.
      */
-    @Query("SELECT * FROM exercises WHERE category = :category ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE category = :category AND deprecated = 0 ORDER BY name ASC")
     fun getExercisesByCategory(category: String): Flow<List<ExerciseEntity>>
 
     /**
      * Get exercises filtered by type (compound vs isolation).
      */
-    @Query("SELECT * FROM exercises WHERE exerciseType = :type ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE exerciseType = :type AND deprecated = 0 ORDER BY name ASC")
     fun getExercisesByType(type: String): Flow<List<ExerciseEntity>>
 
     /**
      * Get only custom (user-created) exercises.
      */
-    @Query("SELECT * FROM exercises WHERE isCustom = 1 ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE isCustom = 1 AND deprecated = 0 ORDER BY name ASC")
     fun getCustomExercises(): Flow<List<ExerciseEntity>>
 
     /**
      * Get only default (preset) exercises.
      */
-    @Query("SELECT * FROM exercises WHERE isCustom = 0 ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE isCustom = 0 AND deprecated = 0 ORDER BY name ASC")
     fun getDefaultExercises(): Flow<List<ExerciseEntity>>
 
     /**
      * Get exercises that target a specific primary muscle group.
      */
-    @Query("SELECT * FROM exercises WHERE primaryMuscles LIKE '%' || :muscleGroup || '%' ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE primaryMuscles LIKE '%' || :muscleGroup || '%' AND deprecated = 0 ORDER BY name ASC")
     fun getExercisesByPrimaryMuscle(muscleGroup: String): Flow<List<ExerciseEntity>>
 
     /**
      * Get count of all exercises.
      * Useful for checking if database needs seeding.
      */
-    @Query("SELECT COUNT(*) FROM exercises")
+    @Query("SELECT COUNT(*) FROM exercises WHERE deprecated = 0")
     suspend fun getExerciseCount(): Int
 
     /**
      * Get count of default exercises.
      */
-    @Query("SELECT COUNT(*) FROM exercises WHERE isCustom = 0")
+    @Query("SELECT COUNT(*) FROM exercises WHERE isCustom = 0 AND deprecated = 0")
     suspend fun getDefaultExerciseCount(): Int
 
     /**
@@ -153,7 +153,7 @@ interface ExerciseDao {
     /**
      * Get all hidden exercises.
      */
-    @Query("SELECT * FROM exercises WHERE isHidden = 1 ORDER BY name ASC")
+    @Query("SELECT * FROM exercises WHERE isHidden = 1 AND deprecated = 0 ORDER BY name ASC")
     fun getHiddenExercises(): Flow<List<ExerciseEntity>>
 
     /**
