@@ -111,7 +111,7 @@ class ExerciseSeeder @Inject constructor(
      */
     private fun parseExercise(json: JSONObject): ExerciseEntity {
         return ExerciseEntity(
-            id = json.get("id").toString(),
+            id = json.getString("id"),
             name = json.getString("name"),
             primaryMuscles = parseEnumList<MuscleGroup>(json.getJSONArray("primaryMuscles")),
             secondaryMuscles = parseEnumList<MuscleGroup>(json.getJSONArray("secondaryMuscles")),
