@@ -12,6 +12,8 @@ import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutSessionRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutTemplateRepositoryImpl
+import com.rukavina.gymbuddy.domain.id.IdGenerator
+import com.rukavina.gymbuddy.domain.id.Uuid7Generator
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
 import com.rukavina.gymbuddy.domain.repository.WorkoutTemplateRepository
@@ -20,6 +22,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.time.Clock
 import javax.inject.Singleton
 
 @Module
@@ -94,4 +97,12 @@ object AppModule {
     ): WorkoutTemplateRepository {
         return WorkoutTemplateRepositoryImpl(workoutTemplateDao)
     }
+
+    @Provides
+    @Singleton
+    fun provideClock(): Clock = Clock.systemUTC()
+
+    @Provides
+    @Singleton
+    fun provideIdGenerator(clock: Clock): IdGenerator = Uuid7Generator(clock)
 }
