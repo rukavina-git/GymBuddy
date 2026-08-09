@@ -3,6 +3,7 @@ package com.rukavina.gymbuddy.ui.workout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.PerformedExercise
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
@@ -21,7 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -41,7 +41,7 @@ data class WorkoutSet(
  */
 data class ActiveExercise(
     val id: String,
-    val exerciseId: Int,
+    val exerciseId: String,
     val exerciseName: String,
     val sets: List<WorkoutSet>,
     val plannedSets: Int,
@@ -72,7 +72,8 @@ data class ActiveWorkoutUiState(
 class ActiveWorkoutViewModel @Inject constructor(
     private val createWorkoutSessionUseCase: CreateWorkoutSessionUseCase,
     private val getAllExercisesIncludingHiddenUseCase: GetAllExercisesIncludingHiddenUseCase,
-    private val userProfileRepository: UserProfileRepository
+    private val userProfileRepository: UserProfileRepository,
+    private val idGenerator: IdGenerator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ActiveWorkoutUiState())
@@ -280,7 +281,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                         // Convert weight from display units to metric (kg) for storage
                         val weightInKg = UnitConverter.weightToMetric(uiSet.weight, state.preferredUnits) ?: 0f
                         com.rukavina.gymbuddy.domain.model.WorkoutSet(
-                            id = UUID.randomUUID().toString(),
+                            id = idGenerator.newId(),
                             weight = weightInKg,
                             reps = uiSet.reps.toIntOrNull() ?: 0,
                             orderIndex = index
@@ -290,7 +291,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 if (completedSets.isEmpty()) return@mapNotNull null
 
                 PerformedExercise(
-                    id = System.currentTimeMillis().toInt(),
+                    id = idGenerator.newId(),
                     exerciseId = activeExercise.exerciseId,
                     sets = completedSets
                 )
@@ -309,7 +310,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             }
 
             val workoutSession = WorkoutSession(
-                id = UUID.randomUUID().toString(),
+                id = idGenerator.newId(),
                 date = state.workoutStartTime,
                 durationSeconds = state.elapsedSeconds.toInt(), // Store total seconds
                 title = state.workoutTitle.ifBlank { "Workout" },

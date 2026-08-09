@@ -16,15 +16,14 @@ package com.rukavina.gymbuddy.domain.model
 data class TemplateExercise(
     /**
      * Unique identifier for this template exercise instance.
-     * Generated from timestamp for uniqueness.
      */
-    val id: Int,
+    val id: String,
 
     /**
      * Reference to the Exercise that this template exercise is based on.
      * Points to Exercise.id (e.g., references "Bench Press", "Squat", etc.).
      */
-    val exerciseId: Int,
+    val exerciseId: String,
 
     /**
      * Planned/target number of sets for this exercise.

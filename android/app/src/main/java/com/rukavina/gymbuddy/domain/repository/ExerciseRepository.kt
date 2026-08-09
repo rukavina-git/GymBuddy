@@ -19,7 +19,7 @@ interface ExerciseRepository {
      * Get a single exercise by ID.
      * Returns null if not found.
      */
-    suspend fun getExerciseById(id: Int): Exercise?
+    suspend fun getExerciseById(id: String): Exercise?
 
     /**
      * Create a new exercise.
@@ -36,17 +36,17 @@ interface ExerciseRepository {
     /**
      * Delete an exercise by ID.
      */
-    suspend fun deleteExercise(id: Int)
+    suspend fun deleteExercise(id: String)
 
     /**
      * Hide an exercise (only for default exercises).
      */
-    suspend fun hideExercise(id: Int)
+    suspend fun hideExercise(id: String)
 
     /**
      * Unhide an exercise.
      */
-    suspend fun unhideExercise(id: Int)
+    suspend fun unhideExercise(id: String)
 
     /**
      * Get all hidden exercises.

@@ -19,7 +19,7 @@ import com.rukavina.gymbuddy.domain.model.MuscleGroup
 @TypeConverters(MuscleGroupConverter::class, ExerciseConverters::class)
 data class ExerciseEntity(
     @PrimaryKey(autoGenerate = false)
-    val id: Int,
+    val id: String,
     val name: String,
     val primaryMuscles: List<MuscleGroup>,
     val secondaryMuscles: List<MuscleGroup>,

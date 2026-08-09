@@ -169,7 +169,7 @@ fun ExerciseWizardDialog(
                             onClick = {
                                 onSave(
                                     Exercise(
-                                        id = exercise?.id ?: 0,
+                                        id = exercise?.id ?: "",
                                         name = name,
                                         primaryMuscles = primaryMuscles,
                                         secondaryMuscles = secondaryMuscles,

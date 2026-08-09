@@ -41,3 +41,4 @@ app/src/google-services.json
 local_assets
 /app/src/main/assets/adi-registration.properties
 /app/debug/output-metadata.json
+/CLAUDE.md

@@ -32,7 +32,7 @@ object NavRoutes {
     const val HiddenTemplates = "hidden_templates"
     const val AppPreferences = "app_preferences"
 
-    fun exerciseDetailsRoute(exerciseId: Int): String {
+    fun exerciseDetailsRoute(exerciseId: String): String {
         return "exercise_details/$exerciseId"
     }
 }

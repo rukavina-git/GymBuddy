@@ -1,8 +1,8 @@
 package com.rukavina.gymbuddy.domain.usecase.workout
 
+import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
-import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -10,7 +10,8 @@ import javax.inject.Inject
  * Handles ID generation and validation logic.
  */
 class CreateWorkoutSessionUseCase @Inject constructor(
-    private val repository: WorkoutSessionRepository
+    private val repository: WorkoutSessionRepository,
+    private val idGenerator: IdGenerator
 ) {
     /**
      * Create a new workout session with performed exercises.
@@ -25,15 +26,15 @@ class CreateWorkoutSessionUseCase @Inject constructor(
 
             // Generate IDs if empty
             val workoutSessionWithId = if (workoutSession.id.isBlank()) {
-                workoutSession.copy(id = UUID.randomUUID().toString())
+                workoutSession.copy(id = idGenerator.newId())
             } else {
                 workoutSession
             }
 
             // Generate IDs for performed exercises if needed
             val performedExercisesWithIds = workoutSessionWithId.performedExercises.map { exercise ->
-                if (exercise.id <= 0) {
-                    exercise.copy(id = System.currentTimeMillis().toInt())
+                if (exercise.id.isBlank()) {
+                    exercise.copy(id = idGenerator.newId())
                 } else {
                     exercise
                 }

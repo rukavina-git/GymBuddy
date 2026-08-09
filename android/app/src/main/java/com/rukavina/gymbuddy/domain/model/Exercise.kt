@@ -10,10 +10,9 @@ package com.rukavina.gymbuddy.domain.model
 data class Exercise(
     /**
      * Unique identifier for the exercise.
-     * Default exercises use 5-digit IDs (10001-99999).
-     * Custom exercises use 6+ digit IDs (100000+) generated from timestamp.
+     * See docs/adr/0001-uuidv7-identifiers.md for the identifier scheme.
      */
-    val id: Int,
+    val id: String,
 
     /**
      * Name of the exercise (e.g., "Bench Press", "Barbell Squat").

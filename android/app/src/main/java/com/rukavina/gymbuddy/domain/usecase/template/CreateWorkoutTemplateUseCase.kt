@@ -1,8 +1,8 @@
 package com.rukavina.gymbuddy.domain.usecase.template
 
+import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.repository.WorkoutTemplateRepository
-import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -10,7 +10,8 @@ import javax.inject.Inject
  * Handles ID generation and validation logic.
  */
 class CreateWorkoutTemplateUseCase @Inject constructor(
-    private val repository: WorkoutTemplateRepository
+    private val repository: WorkoutTemplateRepository,
+    private val idGenerator: IdGenerator
 ) {
     /**
      * Create a new template with exercises.
@@ -28,7 +29,7 @@ class CreateWorkoutTemplateUseCase @Inject constructor(
 
             // Validate each exercise
             template.templateExercises.forEach { exercise ->
-                require(exercise.exerciseId > 0) { "Exercise ID must be valid" }
+                require(exercise.exerciseId.isNotBlank()) { "Exercise ID must be valid" }
                 require(exercise.plannedSets > 0) { "Planned sets must be greater than 0" }
                 require(exercise.plannedReps > 0) { "Planned reps must be greater than 0" }
                 require(exercise.orderIndex >= 0) { "Order index must be non-negative" }
@@ -39,15 +40,15 @@ class CreateWorkoutTemplateUseCase @Inject constructor(
 
             // Generate ID if empty
             val templateWithId = if (template.id.isBlank()) {
-                template.copy(id = UUID.randomUUID().toString())
+                template.copy(id = idGenerator.newId())
             } else {
                 template
             }
 
             // Generate IDs for exercises if needed
             val exercisesWithIds = templateWithId.templateExercises.map { exercise ->
-                if (exercise.id <= 0) {
-                    exercise.copy(id = System.currentTimeMillis().toInt())
+                if (exercise.id.isBlank()) {
+                    exercise.copy(id = idGenerator.newId())
                 } else {
                     exercise
                 }

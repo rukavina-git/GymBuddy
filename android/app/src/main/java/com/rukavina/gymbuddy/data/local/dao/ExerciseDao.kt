@@ -33,7 +33,7 @@ interface ExerciseDao {
      * @return ExerciseEntity if found, null otherwise.
      */
     @Query("SELECT * FROM exercises WHERE id = :id")
-    suspend fun getExerciseById(id: Int): ExerciseEntity?
+    suspend fun getExerciseById(id: String): ExerciseEntity?
 
     /**
      * Search exercises by name (case-insensitive).
@@ -59,7 +59,7 @@ interface ExerciseDao {
      * Delete an exercise by ID.
      */
     @Query("DELETE FROM exercises WHERE id = :id")
-    suspend fun deleteExercise(id: Int)
+    suspend fun deleteExercise(id: String)
 
     /**
      * Delete all exercises.
@@ -142,13 +142,13 @@ interface ExerciseDao {
      * Hide an exercise by ID.
      */
     @Query("UPDATE exercises SET isHidden = 1 WHERE id = :id")
-    suspend fun hideExercise(id: Int)
+    suspend fun hideExercise(id: String)
 
     /**
      * Unhide an exercise by ID.
      */
     @Query("UPDATE exercises SET isHidden = 0 WHERE id = :id")
-    suspend fun unhideExercise(id: Int)
+    suspend fun unhideExercise(id: String)
 
     /**
      * Get all hidden exercises.

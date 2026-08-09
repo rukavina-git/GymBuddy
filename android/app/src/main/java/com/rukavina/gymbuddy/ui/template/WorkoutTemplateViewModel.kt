@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.ui.template
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
@@ -36,7 +37,8 @@ class WorkoutTemplateViewModel @Inject constructor(
     private val deleteWorkoutTemplateUseCase: DeleteWorkoutTemplateUseCase,
     private val getAllExercisesUseCase: GetAllExercisesUseCase,
     private val getAllExercisesIncludingHiddenUseCase: GetAllExercisesIncludingHiddenUseCase,
-    private val workoutTemplateRepository: WorkoutTemplateRepository
+    private val workoutTemplateRepository: WorkoutTemplateRepository,
+    private val idGenerator: IdGenerator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkoutTemplateUiState())
@@ -243,6 +245,16 @@ class WorkoutTemplateViewModel @Inject constructor(
     fun clearSuccess() {
         _uiState.update { it.copy(successMessage = null) }
     }
+
+    /**
+     * Generate a new id for a template exercise being created in the UI.
+     */
+    fun newTemplateExerciseId(): String = idGenerator.newId()
+
+    /**
+     * Generate a new id for a workout template being created in the UI.
+     */
+    fun newTemplateId(): String = idGenerator.newId()
 
     /**
      * Hide a default workout template.

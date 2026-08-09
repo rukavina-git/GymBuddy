@@ -14,7 +14,7 @@ class GetExerciseByIdUseCase @Inject constructor(
      * Get exercise by ID.
      * @return Exercise if found, null otherwise.
      */
-    suspend operator fun invoke(id: Int): Exercise? {
+    suspend operator fun invoke(id: String): Exercise? {
         return repository.getExerciseById(id)
     }
 }

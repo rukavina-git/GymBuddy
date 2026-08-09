@@ -43,7 +43,7 @@ import com.rukavina.gymbuddy.domain.model.Exercise
 fun ExercisePickerDialog(
     availableExercises: List<Exercise>,
     onDismiss: () -> Unit,
-    onExerciseSelected: (Int) -> Unit
+    onExerciseSelected: (String) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
 

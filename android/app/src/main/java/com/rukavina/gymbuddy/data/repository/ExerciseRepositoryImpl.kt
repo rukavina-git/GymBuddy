@@ -23,7 +23,7 @@ class ExerciseRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getExerciseById(id: Int): Exercise? {
+    override suspend fun getExerciseById(id: String): Exercise? {
         val entity = exerciseDao.getExerciseById(id)
         return entity?.let { ExerciseMapper.toDomain(it) }
     }
@@ -40,16 +40,16 @@ class ExerciseRepositoryImpl @Inject constructor(
         // TODO: Sync with remote API when online
     }
 
-    override suspend fun deleteExercise(id: Int) {
+    override suspend fun deleteExercise(id: String) {
         exerciseDao.deleteExercise(id)
         // TODO: Sync deletion with remote API when online
     }
 
-    override suspend fun hideExercise(id: Int) {
+    override suspend fun hideExercise(id: String) {
         exerciseDao.hideExercise(id)
     }
 
-    override suspend fun unhideExercise(id: Int) {
+    override suspend fun unhideExercise(id: String) {
         exerciseDao.unhideExercise(id)
     }
 

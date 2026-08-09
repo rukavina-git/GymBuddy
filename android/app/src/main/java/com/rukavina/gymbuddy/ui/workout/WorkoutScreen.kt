@@ -214,7 +214,10 @@ fun WorkoutScreen(
                         showDialog = false
                         editingWorkoutSession = null
                     }
-                } else null
+                } else null,
+                generatePerformedExerciseId = viewModel::newPerformedExerciseId,
+                generateSetId = viewModel::newWorkoutSetId,
+                generateWorkoutSessionId = viewModel::newWorkoutSessionId
             )
         }
     }
@@ -286,7 +289,10 @@ fun WorkoutSessionFormDialog(
     availableExercises: List<Exercise>,
     onDismiss: () -> Unit,
     onSave: (WorkoutSession) -> Unit,
-    onDelete: (() -> Unit)? = null
+    onDelete: (() -> Unit)? = null,
+    generatePerformedExerciseId: () -> String,
+    generateSetId: () -> String,
+    generateWorkoutSessionId: () -> String
 ) {
     val calendar = remember {
         Calendar.getInstance().apply {
@@ -520,7 +526,7 @@ fun WorkoutSessionFormDialog(
 
                         onSave(
                             WorkoutSession(
-                                id = workoutSession?.id ?: UUID.randomUUID().toString(),
+                                id = workoutSession?.id ?: generateWorkoutSessionId(),
                                 date = cal.timeInMillis,
                                 durationSeconds = totalSeconds,
                                 title = title,
@@ -568,7 +574,9 @@ fun WorkoutSessionFormDialog(
                 }
                 showExercisePicker = false
                 editingExerciseIndex = null
-            }
+            },
+            generatePerformedExerciseId = generatePerformedExerciseId,
+            generateSetId = generateSetId
         )
     }
 
@@ -684,9 +692,11 @@ fun ExerciseEditDialog(
     availableExercises: List<Exercise>,
     existingExercise: PerformedExercise?,
     onDismiss: () -> Unit,
-    onSave: (PerformedExercise) -> Unit
+    onSave: (PerformedExercise) -> Unit,
+    generatePerformedExerciseId: () -> String,
+    generateSetId: () -> String
 ) {
-    var selectedExerciseId by remember { mutableStateOf(existingExercise?.exerciseId ?: 0) }
+    var selectedExerciseId by remember { mutableStateOf(existingExercise?.exerciseId ?: "") }
 
     // For new exercises, create sets with placeholder values that will be shown as empty
     // For existing exercises, use their actual values
@@ -711,7 +721,7 @@ fun ExerciseEditDialog(
             } else {
                 listOf(
                     UiWorkoutSet(
-                        id = java.util.UUID.randomUUID().toString(),
+                        id = generateSetId(),
                         weight = "",
                         reps = "",
                         orderIndex = 0
@@ -820,7 +830,7 @@ fun ExerciseEditDialog(
                         Text("Sets (${workoutSets.size})", style = MaterialTheme.typography.titleSmall)
                         IconButton(onClick = {
                             workoutSets = workoutSets + UiWorkoutSet(
-                                id = java.util.UUID.randomUUID().toString(),
+                                id = generateSetId(),
                                 weight = workoutSets.lastOrNull()?.weight ?: "",
                                 reps = workoutSets.lastOrNull()?.reps ?: "",
                                 orderIndex = workoutSets.size
@@ -897,7 +907,7 @@ fun ExerciseEditDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (selectedExerciseId > 0 && workoutSets.isNotEmpty()) {
+                    if (selectedExerciseId.isNotBlank() && workoutSets.isNotEmpty()) {
                         // Convert UI sets to domain model, filtering out empty sets
                         val domainSets = workoutSets
                             .filter { it.reps.isNotBlank() || it.weight.isNotBlank() }
@@ -913,7 +923,7 @@ fun ExerciseEditDialog(
                         if (domainSets.isNotEmpty()) {
                             onSave(
                                 PerformedExercise(
-                                    id = existingExercise?.id ?: System.currentTimeMillis().toInt(),
+                                    id = existingExercise?.id ?: generatePerformedExerciseId(),
                                     exerciseId = selectedExerciseId,
                                     sets = domainSets
                                 )
@@ -921,7 +931,7 @@ fun ExerciseEditDialog(
                         }
                     }
                 },
-                enabled = selectedExerciseId > 0 && workoutSets.any { it.reps.isNotBlank() || it.weight.isNotBlank() }
+                enabled = selectedExerciseId.isNotBlank() && workoutSets.any { it.reps.isNotBlank() || it.weight.isNotBlank() }
             ) {
                 Text("Save")
             }

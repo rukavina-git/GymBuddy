@@ -124,9 +124,9 @@ fun MainScreen(rootNavController: NavHostController) {
             }
             composable(
                 route = NavRoutes.ExerciseDetails,
-                arguments = listOf(navArgument("exerciseId") { type = NavType.IntType })
+                arguments = listOf(navArgument("exerciseId") { type = NavType.StringType })
             ) { backStackEntry ->
-                val exerciseId = backStackEntry.arguments?.getInt("exerciseId") ?: 0
+                val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
                 val exerciseViewModel: ExerciseViewModel = hiltViewModel()
                 val uiState = exerciseViewModel.uiState.collectAsState().value
                 val exercise = uiState.exercises.find { it.id == exerciseId }

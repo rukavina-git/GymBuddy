@@ -29,7 +29,7 @@ import com.rukavina.gymbuddy.utils.validation.InputValidation
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseConfigDialog(
-    exerciseId: Int,
+    exerciseId: String,
     exerciseName: String,
     initialSets: Int,
     initialReps: Int,
