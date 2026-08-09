@@ -35,5 +35,12 @@ data class WorkoutTemplateEntity(
      * Whether this template is hidden by the user.
      * Hidden templates don't appear in the main list but can be restored.
      */
-    val isHidden: Boolean = false
+    val isHidden: Boolean = false,
+
+    /**
+     * Whether this template has been superseded and should no longer
+     * appear in lists, search, or filters. Existing references to it
+     * remain resolvable. See docs/adr/0002-deprecation-over-deletion.md.
+     */
+    val deprecated: Boolean = false
 )

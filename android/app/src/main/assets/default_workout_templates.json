@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "templates": [
     {
       "id": "019fe506-35d6-75b5-a3cf-3bd2184cad28",
@@ -105,7 +105,7 @@
       "deprecated": false,
       "title": "Core",
       "exercises": [
-        {"id": "019fe506-3610-7549-bbde-800fec844172", "exerciseId": "019fe506-359f-79f1-96c5-ebfb531468f8", "plannedSets": 3, "plannedReps": 60, "orderIndex": 0, "restSeconds": 60, "notes": "Hold for 60 seconds"},
+        {"id": "019fe506-3610-7549-bbde-800fec844172", "exerciseId": "019fe506-359f-79f1-96c5-ebfb531468f8", "plannedSets": 3, "plannedDurationSeconds": 60, "orderIndex": 0, "restSeconds": 60},
         {"id": "019fe506-3611-7b53-8014-71ea94a0fa35", "exerciseId": "019fe506-35cc-7cdd-915b-6bc9835ac9b1", "plannedSets": 3, "plannedReps": 15, "orderIndex": 1, "restSeconds": 60, "notes": "Weighted abs"},
         {"id": "019fe506-3612-7b48-b014-714ec185fbb0", "exerciseId": "019fe506-35c8-70f3-83aa-68a24c0af02a", "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Lower abs"},
         {"id": "019fe506-3613-76b0-9702-2938aa944c2f", "exerciseId": "019fe506-35c9-79e4-b2cf-c0a0eb3a9a24", "plannedSets": 3, "plannedReps": 20, "orderIndex": 3, "restSeconds": 60, "notes": "10 each side"},
@@ -126,7 +126,7 @@
         {"id": "019fe506-361c-7dd4-b031-b4b7afdf4bbc", "exerciseId": "019fe506-35c2-7efc-a884-30f32d884431", "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 90, "notes": "Posterior chain"},
         {"id": "019fe506-361d-77d5-b685-fdf7bd1b7594", "exerciseId": "019fe506-35a0-77c6-9434-2e771281c227", "plannedSets": 2, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Biceps"},
         {"id": "019fe506-361e-75ed-87b8-fa578ead2944", "exerciseId": "019fe506-35b5-7334-bbaf-0cfabc29cfbd", "plannedSets": 2, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Triceps"},
-        {"id": "019fe506-361f-7973-9b8a-eec761459b4f", "exerciseId": "019fe506-359f-79f1-96c5-ebfb531468f8", "plannedSets": 3, "plannedReps": 45, "orderIndex": 7, "restSeconds": 45, "notes": "Core finisher"}
+        {"id": "019fe506-361f-7973-9b8a-eec761459b4f", "exerciseId": "019fe506-359f-79f1-96c5-ebfb531468f8", "plannedSets": 3, "plannedDurationSeconds": 45, "orderIndex": 7, "restSeconds": 45}
       ]
     },
     {

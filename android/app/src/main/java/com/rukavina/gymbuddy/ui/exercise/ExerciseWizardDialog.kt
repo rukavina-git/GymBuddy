@@ -19,6 +19,7 @@ import com.rukavina.gymbuddy.domain.model.DifficultyLevel
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.ExerciseType
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
 
@@ -181,11 +182,13 @@ fun ExerciseWizardDialog(
                                         equipmentNeeded = equipmentNeeded,
                                         category = category,
                                         exerciseType = exerciseType,
+                                        trackingType = exercise?.trackingType ?: ExerciseTrackingType.WEIGHT_REPS,
                                         videoUrl = videoUrl.ifBlank { null },
                                         thumbnailUrl = thumbnailUrl.ifBlank { null },
                                         isCustom = exercise?.isCustom ?: true,
                                         createdBy = exercise?.createdBy,
-                                        isHidden = exercise?.isHidden ?: false
+                                        isHidden = exercise?.isHidden ?: false,
+                                        deprecated = exercise?.deprecated ?: false
                                     )
                                 )
                             },

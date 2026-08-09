@@ -24,7 +24,8 @@ object WorkoutTemplateMapper {
             id = template.id,
             title = template.title,
             isDefault = template.isDefault,
-            isHidden = template.isHidden
+            isHidden = template.isHidden,
+            deprecated = template.deprecated
         )
 
         val exerciseEntities = template.templateExercises.map { exercise ->
@@ -70,7 +71,8 @@ object WorkoutTemplateMapper {
             title = templateWithExercises.template.title,
             templateExercises = exercises,
             isDefault = templateWithExercises.template.isDefault,
-            isHidden = templateWithExercises.template.isHidden
+            isHidden = templateWithExercises.template.isHidden,
+            deprecated = templateWithExercises.template.deprecated
         )
     }
 

@@ -101,7 +101,8 @@ class WorkoutTemplateSeeder @Inject constructor(
                 id = templateId,
                 title = templateJson.getString("title"),
                 isDefault = true, // Mark as default template
-                isHidden = false
+                isHidden = false,
+                deprecated = templateJson.optBoolean("deprecated")
             )
 
             val exercisesJson = templateJson.getJSONArray("exercises")
@@ -115,7 +116,10 @@ class WorkoutTemplateSeeder @Inject constructor(
                         templateId = templateId,
                         exerciseId = exerciseJson.getString("exerciseId"),
                         plannedSets = exerciseJson.getInt("plannedSets"),
-                        plannedReps = exerciseJson.getInt("plannedReps"),
+                        // Some entries (e.g. timed holds like Plank) carry plannedDurationSeconds
+                        // instead of plannedReps. That column lands in Group H; until then we
+                        // just default plannedReps to 0 and ignore plannedDurationSeconds.
+                        plannedReps = exerciseJson.optInt("plannedReps"),
                         orderIndex = exerciseJson.getInt("orderIndex"),
                         restSeconds = exerciseJson.optInt("restSeconds").takeIf { it > 0 },
                         notes = exerciseJson.optString("notes").takeIf { it.isNotEmpty() }

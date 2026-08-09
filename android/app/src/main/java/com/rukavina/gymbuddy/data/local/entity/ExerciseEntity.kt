@@ -8,6 +8,7 @@ import com.rukavina.gymbuddy.data.local.converter.MuscleGroupConverter
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.ExerciseType
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
 
@@ -31,9 +32,11 @@ data class ExerciseEntity(
     val equipmentNeeded: List<Equipment>,
     val category: ExerciseCategory,
     val exerciseType: ExerciseType,
+    val trackingType: ExerciseTrackingType,
     val videoUrl: String?,
     val thumbnailUrl: String?,
     val isCustom: Boolean,
     val createdBy: String?,
-    val isHidden: Boolean
+    val isHidden: Boolean,
+    val deprecated: Boolean = false
 )
