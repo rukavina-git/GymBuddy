@@ -1,7 +1,7 @@
 package com.rukavina.gymbuddy.data.local.converter
 
 import androidx.room.TypeConverter
-import com.rukavina.gymbuddy.data.model.MuscleGroup
+import com.rukavina.gymbuddy.domain.model.MuscleGroup
 
 /**
  * Type converter for storing MuscleGroup lists in Room database.

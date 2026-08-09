@@ -15,7 +15,12 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.rukavina.gymbuddy.data.model.*
+import com.rukavina.gymbuddy.domain.model.DifficultyLevel
+import com.rukavina.gymbuddy.domain.model.Equipment
+import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseType
+import com.rukavina.gymbuddy.domain.model.MuscleGroup
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

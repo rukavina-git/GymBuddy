@@ -18,9 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.rukavina.gymbuddy.data.model.Exercise
-import com.rukavina.gymbuddy.data.model.PerformedExercise
-import com.rukavina.gymbuddy.data.model.WorkoutSession
+import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.PerformedExercise
+import com.rukavina.gymbuddy.domain.model.WorkoutSession
+import com.rukavina.gymbuddy.domain.model.WorkoutSet
 import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
 import com.rukavina.gymbuddy.utils.validation.InputValidation
 import com.rukavina.gymbuddy.utils.validation.ValidationConstants
@@ -519,7 +520,7 @@ fun WorkoutSessionFormDialog(
 
                         onSave(
                             WorkoutSession(
-                                id = workoutSession?.id ?: java.util.UUID.randomUUID().toString(),
+                                id = workoutSession?.id ?: UUID.randomUUID().toString(),
                                 date = cal.timeInMillis,
                                 durationSeconds = totalSeconds,
                                 title = title,
@@ -901,7 +902,7 @@ fun ExerciseEditDialog(
                         val domainSets = workoutSets
                             .filter { it.reps.isNotBlank() || it.weight.isNotBlank() }
                             .mapIndexed { index, uiSet ->
-                                com.rukavina.gymbuddy.data.model.WorkoutSet(
+                                WorkoutSet(
                                     id = uiSet.id,
                                     weight = uiSet.weight.toFloatOrNull() ?: 0f,
                                     reps = uiSet.reps.toIntOrNull() ?: 0,

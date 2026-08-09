@@ -24,7 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
-import com.rukavina.gymbuddy.data.model.Exercise
+import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.ui.components.ExpandableSection
 import com.rukavina.gymbuddy.ui.exercise.components.ExerciseFormAdvanced
 import com.rukavina.gymbuddy.ui.exercise.components.ExerciseFormDetails

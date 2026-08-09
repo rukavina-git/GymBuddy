@@ -2,7 +2,7 @@ package com.rukavina.gymbuddy.ui.template
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rukavina.gymbuddy.data.model.WorkoutTemplate
+import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
 import com.rukavina.gymbuddy.domain.repository.WorkoutTemplateRepository

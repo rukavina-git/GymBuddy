@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SportsGymnastics
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,7 +54,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import android.util.Log
-import com.rukavina.gymbuddy.ui.settings.SettingsItem
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.ui.settings.SettingsSection
 import com.rukavina.gymbuddy.utils.ImageStorageUtil
 import com.rukavina.gymbuddy.utils.UnitConverter
@@ -205,7 +204,7 @@ fun ProfileScreen(
                             icon = Icons.Default.MonitorWeight,
                             label = "Height",
                             value = if (uiState.height.isNotBlank()) {
-                                if (uiState.preferredUnits == com.rukavina.gymbuddy.data.model.PreferredUnits.IMPERIAL) {
+                                if (uiState.preferredUnits == PreferredUnits.IMPERIAL) {
                                     val totalInches = uiState.height.toFloatOrNull() ?: 0f
                                     val feet = (totalInches / 12).toInt()
                                     val inches = kotlin.math.round(totalInches % 12).toInt()

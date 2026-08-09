@@ -3,11 +3,11 @@ package com.rukavina.gymbuddy.ui.workout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.rukavina.gymbuddy.data.model.Exercise
-import com.rukavina.gymbuddy.data.model.PerformedExercise
-import com.rukavina.gymbuddy.data.model.PreferredUnits
-import com.rukavina.gymbuddy.data.model.WorkoutSession
-import com.rukavina.gymbuddy.data.model.WorkoutTemplate
+import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.PerformedExercise
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
+import com.rukavina.gymbuddy.domain.model.WorkoutSession
+import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
@@ -279,7 +279,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                     .mapIndexed { index, uiSet ->
                         // Convert weight from display units to metric (kg) for storage
                         val weightInKg = UnitConverter.weightToMetric(uiSet.weight, state.preferredUnits) ?: 0f
-                        com.rukavina.gymbuddy.data.model.WorkoutSet(
+                        com.rukavina.gymbuddy.domain.model.WorkoutSet(
                             id = UUID.randomUUID().toString(),
                             weight = weightInKg,
                             reps = uiSet.reps.toIntOrNull() ?: 0,

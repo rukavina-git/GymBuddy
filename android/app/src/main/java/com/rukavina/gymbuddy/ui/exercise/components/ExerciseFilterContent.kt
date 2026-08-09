@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.rukavina.gymbuddy.data.model.Equipment
-import com.rukavina.gymbuddy.data.model.MuscleGroup
+import com.rukavina.gymbuddy.domain.model.Equipment
+import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import com.rukavina.gymbuddy.ui.components.FilterChipGroup
 
 /**

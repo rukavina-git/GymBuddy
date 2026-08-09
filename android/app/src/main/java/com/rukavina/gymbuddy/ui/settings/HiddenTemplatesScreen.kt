@@ -38,7 +38,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.rukavina.gymbuddy.data.model.WorkoutTemplate
+import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.ui.template.WorkoutTemplateViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

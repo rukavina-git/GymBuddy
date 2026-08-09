@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.utils
 
-import com.rukavina.gymbuddy.data.model.PreferredUnits
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
 
 /**
  * Utility object for converting between metric and imperial units.

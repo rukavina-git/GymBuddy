@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.domain.usecase.exercise
 
-import com.rukavina.gymbuddy.data.model.Exercise
+import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

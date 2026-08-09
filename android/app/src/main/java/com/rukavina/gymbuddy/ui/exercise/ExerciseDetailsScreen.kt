@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.rukavina.gymbuddy.data.model.Exercise
+import com.rukavina.gymbuddy.domain.model.Exercise
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

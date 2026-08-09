@@ -35,21 +35,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.rukavina.gymbuddy.data.model.Exercise
-import com.rukavina.gymbuddy.data.model.TemplateExercise
-import com.rukavina.gymbuddy.data.model.WorkoutTemplate
+import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.TemplateExercise
+import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
 import java.util.UUID
 

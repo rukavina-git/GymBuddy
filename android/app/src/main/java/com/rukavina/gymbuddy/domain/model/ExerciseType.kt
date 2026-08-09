@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.data.model
+package com.rukavina.gymbuddy.domain.model
 
 /**
  * Enum representing whether an exercise is compound or isolation.

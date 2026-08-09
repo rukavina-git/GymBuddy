@@ -1,7 +1,7 @@
 package com.rukavina.gymbuddy.data.repository
 
 import com.rukavina.gymbuddy.data.local.dao.UserProfileDao
-import com.rukavina.gymbuddy.data.model.UserProfile
+import com.rukavina.gymbuddy.domain.model.UserProfile
 import jakarta.inject.Inject
 
 class UserProfileRepository @Inject constructor(

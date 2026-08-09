@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.data.model
+package com.rukavina.gymbuddy.domain.model
 
 /**
  * Enum representing the general category or purpose of an exercise.

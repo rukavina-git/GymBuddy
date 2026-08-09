@@ -24,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.rukavina.gymbuddy.data.model.TemplateExercise
+import com.rukavina.gymbuddy.domain.model.TemplateExercise
 
 /**
  * List item component for displaying and managing an exercise within a template.

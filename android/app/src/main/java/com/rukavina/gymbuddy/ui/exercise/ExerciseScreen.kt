@@ -20,6 +20,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.components.EmptyState
 import com.rukavina.gymbuddy.ui.components.FilterBottomSheet
@@ -40,12 +41,12 @@ fun ExerciseScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
-    var editingExercise by remember { mutableStateOf<com.rukavina.gymbuddy.data.model.Exercise?>(null) }
+    var editingExercise by remember { mutableStateOf<Exercise?>(null) }
     var isSearchExpanded by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
-    var exerciseToDelete by remember { mutableStateOf<com.rukavina.gymbuddy.data.model.Exercise?>(null) }
-    var exerciseToHide by remember { mutableStateOf<com.rukavina.gymbuddy.data.model.Exercise?>(null) }
+    var exerciseToDelete by remember { mutableStateOf<Exercise?>(null) }
+    var exerciseToHide by remember { mutableStateOf<Exercise?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Box(

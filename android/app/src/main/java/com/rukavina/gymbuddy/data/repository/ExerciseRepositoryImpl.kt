@@ -2,7 +2,7 @@ package com.rukavina.gymbuddy.data.repository
 
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.mapper.ExerciseMapper
-import com.rukavina.gymbuddy.data.model.Exercise
+import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

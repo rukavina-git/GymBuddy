@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.data.model
+package com.rukavina.gymbuddy.domain.model
 
 enum class FitnessGoal {
     BUILD_MUSCLE,
