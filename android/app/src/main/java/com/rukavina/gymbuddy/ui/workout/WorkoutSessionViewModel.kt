@@ -314,7 +314,7 @@ class WorkoutSessionViewModel @Inject constructor(
                     val sets = List(templateExercise.plannedSets) { index ->
                         WorkoutSet(
                             id = idGenerator.newId(),
-                            weight = 0f, // User will fill in
+                            weightKg = 0f, // User will fill in
                             reps = templateExercise.plannedReps,
                             orderIndex = index
                         )

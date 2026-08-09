@@ -713,8 +713,8 @@ fun ExerciseEditDialog(
                 existingExercise.sets.map { set ->
                     UiWorkoutSet(
                         id = set.id,
-                        weight = if (set.weight == 0f) "" else set.weight.toString(),
-                        reps = if (set.reps == 0) "" else set.reps.toString(),
+                        weight = set.weightKg?.takeIf { it != 0f }?.toString() ?: "",
+                        reps = set.reps?.takeIf { it != 0 }?.toString() ?: "",
                         orderIndex = set.orderIndex
                     )
                 }
@@ -914,8 +914,9 @@ fun ExerciseEditDialog(
                             .mapIndexed { index, uiSet ->
                                 WorkoutSet(
                                     id = uiSet.id,
-                                    weight = uiSet.weight.toFloatOrNull() ?: 0f,
-                                    reps = uiSet.reps.toIntOrNull() ?: 0,
+                                    weightKg = uiSet.weight.toFloatOrNull(),
+                                    reps = uiSet.reps.toIntOrNull(),
+                                    isCompleted = true,
                                     orderIndex = index
                                 )
                             }

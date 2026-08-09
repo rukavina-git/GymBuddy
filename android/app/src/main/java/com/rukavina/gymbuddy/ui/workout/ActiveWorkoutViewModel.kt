@@ -279,11 +279,12 @@ class ActiveWorkoutViewModel @Inject constructor(
                     .filter { it.reps.isNotBlank() && it.weight.isNotBlank() }
                     .mapIndexed { index, uiSet ->
                         // Convert weight from display units to metric (kg) for storage
-                        val weightInKg = UnitConverter.weightToMetric(uiSet.weight, state.preferredUnits) ?: 0f
+                        val weightInKg = UnitConverter.weightToMetric(uiSet.weight, state.preferredUnits)
                         com.rukavina.gymbuddy.domain.model.WorkoutSet(
                             id = idGenerator.newId(),
-                            weight = weightInKg,
-                            reps = uiSet.reps.toIntOrNull() ?: 0,
+                            weightKg = weightInKg,
+                            reps = uiSet.reps.toIntOrNull(),
+                            isCompleted = true,
                             orderIndex = index
                         )
                     }
