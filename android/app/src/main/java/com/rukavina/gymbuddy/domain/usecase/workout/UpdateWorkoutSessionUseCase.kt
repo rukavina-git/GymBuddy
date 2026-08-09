@@ -22,9 +22,11 @@ class UpdateWorkoutSessionUseCase @Inject constructor(
             require(workoutSession.durationSeconds >= 0) { "Duration must be non-negative" }
             require(workoutSession.date > 0) { "Invalid workout session date" }
 
-            validateWorkoutSessionSets(workoutSession)
+            // Validates sets and stamps each PerformedExercise's exercise
+            // snapshot; must use the returned session, not the original.
+            val sessionWithSnapshots = validateWorkoutSessionSets(workoutSession)
 
-            repository.updateWorkoutSession(workoutSession)
+            repository.updateWorkoutSession(sessionWithSnapshots)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

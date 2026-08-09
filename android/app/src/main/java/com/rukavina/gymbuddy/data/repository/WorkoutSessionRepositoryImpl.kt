@@ -18,32 +18,33 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
 ) : WorkoutSessionRepository {
 
     override fun getAllWorkoutSessions(): Flow<List<WorkoutSession>> {
-        return workoutSessionDao.getAllWorkoutSessions().map { workoutSessionsWithExercises ->
-            workoutSessionsWithExercises.map { sessionWithExercises ->
-                val performedExercisesWithSets = workoutSessionDao.getPerformedExercisesWithSets(sessionWithExercises.workoutSession.id)
-                WorkoutSessionMapper.toDomain(sessionWithExercises.workoutSession, performedExercisesWithSets)
+        return workoutSessionDao.getAllWorkoutSessions().map { sessions ->
+            sessions.map { session ->
+                val performedExercisesWithSets = workoutSessionDao.getPerformedExercisesWithSets(session.id)
+                WorkoutSessionMapper.toDomain(session, performedExercisesWithSets)
             }
         }
     }
 
     override suspend fun getWorkoutSessionById(id: String): WorkoutSession? {
-        val workoutSessionWithExercises = workoutSessionDao.getWorkoutSessionById(id)
-        return workoutSessionWithExercises?.let {
-            val performedExercisesWithSets = workoutSessionDao.getPerformedExercisesWithSets(it.workoutSession.id)
-            WorkoutSessionMapper.toDomain(it.workoutSession, performedExercisesWithSets)
+        val session = workoutSessionDao.getWorkoutSessionById(id)
+        return session?.let {
+            val performedExercisesWithSets = workoutSessionDao.getPerformedExercisesWithSets(it.id)
+            WorkoutSessionMapper.toDomain(it, performedExercisesWithSets)
         }
     }
 
     override fun getWorkoutSessionsByDateRange(startDate: Long, endDate: Long): Flow<List<WorkoutSession>> {
-        return workoutSessionDao.getWorkoutSessionsByDateRange(startDate, endDate).map { workoutSessionsWithExercises ->
-            workoutSessionsWithExercises.map { sessionWithExercises ->
-                val performedExercisesWithSets = workoutSessionDao.getPerformedExercisesWithSets(sessionWithExercises.workoutSession.id)
-                WorkoutSessionMapper.toDomain(sessionWithExercises.workoutSession, performedExercisesWithSets)
+        return workoutSessionDao.getWorkoutSessionsByDateRange(startDate, endDate).map { sessions ->
+            sessions.map { session ->
+                val performedExercisesWithSets = workoutSessionDao.getPerformedExercisesWithSets(session.id)
+                WorkoutSessionMapper.toDomain(session, performedExercisesWithSets)
             }
         }
     }
 
     override suspend fun createWorkoutSession(workoutSession: WorkoutSession) {
+        requireStampedSnapshots(workoutSession)
         val (workoutSessionEntity, performedExerciseEntities, workoutSetEntities) = WorkoutSessionMapper.toEntities(workoutSession)
         workoutSessionDao.insertWorkoutSession(workoutSessionEntity)
         workoutSessionDao.insertPerformedExercises(performedExerciseEntities)
@@ -52,6 +53,7 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateWorkoutSession(workoutSession: WorkoutSession) {
+        requireStampedSnapshots(workoutSession)
         val (workoutSessionEntity, performedExerciseEntities, workoutSetEntities) = WorkoutSessionMapper.toEntities(workoutSession)
         workoutSessionDao.updateWorkoutSession(workoutSessionEntity)
         workoutSessionDao.deletePerformedExercisesByWorkoutSessionId(workoutSession.id)
@@ -63,5 +65,21 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     override suspend fun deleteWorkoutSession(id: String) {
         workoutSessionDao.deleteWorkoutSession(id)
         // TODO: Sync deletion with remote API when online
+    }
+
+    /**
+     * Guards against ever persisting a PerformedExercise whose exercise
+     * snapshot was never stamped. Construction sites are allowed to build a
+     * PerformedExercise with placeholder snapshot values, relying on
+     * ValidateWorkoutSessionSetsUseCase to overwrite them before the session
+     * reaches a write method - this is the boundary every write crosses, so
+     * it's where that reliance gets enforced rather than just documented.
+     */
+    private fun requireStampedSnapshots(workoutSession: WorkoutSession) {
+        workoutSession.performedExercises.forEach { performedExercise ->
+            check(performedExercise.exerciseName.isNotBlank()) {
+                "PerformedExercise with exerciseId=${performedExercise.exerciseId} has an unstamped exercise snapshot (blank exerciseName). ValidateWorkoutSessionSetsUseCase must run before persistence."
+            }
+        }
     }
 }

@@ -19,6 +19,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.PerformedExercise
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.model.WorkoutSet
@@ -321,11 +323,6 @@ fun WorkoutSessionFormDialog(
     var showDeleteWorkoutConfirm by remember { mutableStateOf(false) }
     var exerciseToDeleteIndex by remember { mutableStateOf<Int?>(null) }
 
-    // Create exercise ID to name mapping
-    val exerciseMap = remember(availableExercises) {
-        availableExercises.associateBy { it.id }
-    }
-
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
     val displayDate = remember(selectedDate) { dateFormat.format(Date(selectedDate)) }
     val displayTime = remember(selectedHour, selectedMinute) {
@@ -460,7 +457,7 @@ fun WorkoutSessionFormDialog(
 
                 performedExercises.forEachIndexed { index, exercise ->
                     item {
-                        val exerciseName = exerciseMap[exercise.exerciseId]?.name ?: "Unknown"
+                        val exerciseName = exercise.exerciseName
                         val setCount = exercise.sets.size
 
                         Card(
@@ -571,7 +568,7 @@ fun WorkoutSessionFormDialog(
                     }
                 } else {
                     performedExercises + performedExercise
-                }
+                }.mapIndexed { index, ex -> ex.copy(orderIndex = index) }
                 showExercisePicker = false
                 editingExerciseIndex = null
             },
@@ -660,7 +657,7 @@ fun WorkoutSessionFormDialog(
 
     // Exercise delete confirmation dialog
     exerciseToDeleteIndex?.let { index ->
-        val exerciseName = exerciseMap[performedExercises.getOrNull(index)?.exerciseId]?.name ?: "this exercise"
+        val exerciseName = performedExercises.getOrNull(index)?.exerciseName ?: "this exercise"
         AlertDialog(
             onDismissRequest = { exerciseToDeleteIndex = null },
             title = { Text("Delete Exercise?") },
@@ -670,7 +667,9 @@ fun WorkoutSessionFormDialog(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        performedExercises = performedExercises.filterIndexed { i, _ -> i != index }
+                        performedExercises = performedExercises
+                            .filterIndexed { i, _ -> i != index }
+                            .mapIndexed { i, ex -> ex.copy(orderIndex = i) }
                         exerciseToDeleteIndex = null
                     }
                 ) {
@@ -922,10 +921,20 @@ fun ExerciseEditDialog(
                             }
 
                         if (domainSets.isNotEmpty()) {
+                            // orderIndex is a placeholder - the caller re-stamps it based on
+                            // final position in the performed exercises list. The exercise
+                            // snapshot fields (name/category/trackingType/primaryMuscles) are
+                            // placeholders too - ValidateWorkoutSessionSetsUseCase resolves
+                            // the real Exercise and stamps them before this is persisted.
                             onSave(
                                 PerformedExercise(
                                     id = existingExercise?.id ?: generatePerformedExerciseId(),
                                     exerciseId = selectedExerciseId,
+                                    orderIndex = existingExercise?.orderIndex ?: 0,
+                                    exerciseName = "",
+                                    exerciseCategory = ExerciseCategory.STRENGTH,
+                                    exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
+                                    exercisePrimaryMuscles = emptyList(),
                                     sets = domainSets
                                 )
                             )

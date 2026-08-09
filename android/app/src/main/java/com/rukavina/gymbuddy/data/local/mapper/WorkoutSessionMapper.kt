@@ -33,7 +33,12 @@ object WorkoutSessionMapper {
                 PerformedExerciseEntity(
                     id = performedExercise.id,
                     workoutSessionId = workoutSession.id,
-                    exerciseId = performedExercise.exerciseId
+                    exerciseId = performedExercise.exerciseId,
+                    orderIndex = performedExercise.orderIndex,
+                    exerciseName = performedExercise.exerciseName,
+                    exerciseCategory = performedExercise.exerciseCategory,
+                    exerciseTrackingType = performedExercise.exerciseTrackingType,
+                    exercisePrimaryMuscles = performedExercise.exercisePrimaryMuscles
                 )
             )
 
@@ -59,33 +64,39 @@ object WorkoutSessionMapper {
     }
 
     /**
-     * Convert Room WorkoutSessionWithPerformedExercises to domain WorkoutSession.
-     * Requires performed exercises with their sets to be fetched separately.
+     * Convert a Room WorkoutSessionEntity plus its performed exercises (with
+     * sets) to a domain WorkoutSession. Both performed exercises and sets are
+     * expected to already be ordered by orderIndex - see
+     * WorkoutSessionDao.getPerformedExercisesWithSets, which does that in SQL.
      */
     fun toDomain(
         workoutSessionEntity: WorkoutSessionEntity,
         performedExercisesWithSets: List<PerformedExerciseWithSets>
     ): WorkoutSession {
         val performedExercises = performedExercisesWithSets.map { performedExerciseWithSets ->
-            val sets = performedExerciseWithSets.sets
-                .sortedBy { it.orderIndex }
-                .map { setEntity ->
-                    WorkoutSet(
-                        id = setEntity.id,
-                        weightKg = setEntity.weightKg,
-                        reps = setEntity.reps,
-                        durationSeconds = setEntity.durationSeconds,
-                        distanceMeters = setEntity.distanceMeters,
-                        setType = setEntity.setType,
-                        isCompleted = setEntity.isCompleted,
-                        restTakenSeconds = setEntity.restTakenSeconds,
-                        orderIndex = setEntity.orderIndex
-                    )
-                }
+            val sets = performedExerciseWithSets.sets.map { setEntity ->
+                WorkoutSet(
+                    id = setEntity.id,
+                    weightKg = setEntity.weightKg,
+                    reps = setEntity.reps,
+                    durationSeconds = setEntity.durationSeconds,
+                    distanceMeters = setEntity.distanceMeters,
+                    setType = setEntity.setType,
+                    isCompleted = setEntity.isCompleted,
+                    restTakenSeconds = setEntity.restTakenSeconds,
+                    orderIndex = setEntity.orderIndex
+                )
+            }
 
+            val entity = performedExerciseWithSets.performedExercise
             PerformedExercise(
-                id = performedExerciseWithSets.performedExercise.id,
-                exerciseId = performedExerciseWithSets.performedExercise.exerciseId,
+                id = entity.id,
+                exerciseId = entity.exerciseId,
+                orderIndex = entity.orderIndex,
+                exerciseName = entity.exerciseName,
+                exerciseCategory = entity.exerciseCategory,
+                exerciseTrackingType = entity.exerciseTrackingType,
+                exercisePrimaryMuscles = entity.exercisePrimaryMuscles,
                 sets = sets
             )
         }
@@ -110,7 +121,12 @@ object WorkoutSessionMapper {
         val performedExerciseEntity = PerformedExerciseEntity(
             id = performedExercise.id,
             workoutSessionId = workoutSessionId,
-            exerciseId = performedExercise.exerciseId
+            exerciseId = performedExercise.exerciseId,
+            orderIndex = performedExercise.orderIndex,
+            exerciseName = performedExercise.exerciseName,
+            exerciseCategory = performedExercise.exerciseCategory,
+            exerciseTrackingType = performedExercise.exerciseTrackingType,
+            exercisePrimaryMuscles = performedExercise.exercisePrimaryMuscles
         )
 
         val workoutSetEntities = performedExercise.sets.map { set ->

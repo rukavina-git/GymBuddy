@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.rukavina.gymbuddy.domain.id.IdGenerator
+import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.PerformedExercise
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
@@ -309,20 +311,28 @@ class WorkoutSessionViewModel @Inject constructor(
             // Convert TemplateExercises to PerformedExercises with sets
             val performedExercises = template.templateExercises
                 .sortedBy { it.orderIndex }
-                .map { templateExercise ->
+                .mapIndexed { index, templateExercise ->
                     // Create empty sets that user will fill in during workout
-                    val sets = List(templateExercise.plannedSets) { index ->
+                    val sets = List(templateExercise.plannedSets) { setIndex ->
                         WorkoutSet(
                             id = idGenerator.newId(),
                             weightKg = 0f, // User will fill in
                             reps = templateExercise.plannedReps,
-                            orderIndex = index
+                            orderIndex = setIndex
                         )
                     }
 
+                    // exerciseName/exerciseCategory/exerciseTrackingType/exercisePrimaryMuscles
+                    // are placeholders here - ValidateWorkoutSessionSetsUseCase resolves the
+                    // real Exercise and stamps the actual snapshot before this is persisted.
                     PerformedExercise(
                         id = idGenerator.newId(),
                         exerciseId = templateExercise.exerciseId,
+                        orderIndex = index,
+                        exerciseName = "",
+                        exerciseCategory = ExerciseCategory.STRENGTH,
+                        exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
+                        exercisePrimaryMuscles = emptyList(),
                         sets = sets
                     )
                 }
