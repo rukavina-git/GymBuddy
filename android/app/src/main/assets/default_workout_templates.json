@@ -2,177 +2,190 @@
   "version": 1,
   "templates": [
     {
-      "id": "template-chest-triceps",
+      "id": "019fe506-35d6-75b5-a3cf-3bd2184cad28",
+      "deprecated": false,
       "title": "Chest & Triceps",
       "exercises": [
-        {"exerciseId": 10001, "plannedSets": 4, "plannedReps": 8, "orderIndex": 0, "restSeconds": 120, "notes": "Main compound lift"},
-        {"exerciseId": 10012, "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Upper chest focus"},
-        {"exerciseId": 10013, "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Stretch and squeeze"},
-        {"exerciseId": 10015, "plannedSets": 3, "plannedReps": 10, "orderIndex": 3, "restSeconds": 90, "notes": "Lean forward for chest"},
-        {"exerciseId": 10031, "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 90, "notes": "Compound tricep movement"},
-        {"exerciseId": 10028, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Squeeze at bottom"},
-        {"exerciseId": 10029, "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Long head focus"}
+        {"id": "019fe506-35d7-7912-9386-06b34e7dad26", "exerciseId": "019fe506-359a-7601-92f2-f441cf1dae33", "plannedSets": 4, "plannedReps": 8, "orderIndex": 0, "restSeconds": 120, "notes": "Main compound lift"},
+        {"id": "019fe506-35d8-7cb9-8519-b09b61414b8a", "exerciseId": "019fe506-35a5-7a26-b6eb-3ff8b3a134c9", "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Upper chest focus"},
+        {"id": "019fe506-35d9-75ca-98ba-622fae4ad8fb", "exerciseId": "019fe506-35a6-7b02-94a3-1ea222589774", "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Stretch and squeeze"},
+        {"id": "019fe506-35da-7fa3-8248-df07b8e2de60", "exerciseId": "019fe506-35a8-7b6e-a450-a7d1d3c7d0ad", "plannedSets": 3, "plannedReps": 10, "orderIndex": 3, "restSeconds": 90, "notes": "Lean forward for chest"},
+        {"id": "019fe506-35db-7356-a4ba-97819e712a42", "exerciseId": "019fe506-35b8-72ad-901a-b8cc7e665073", "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 90, "notes": "Compound tricep movement"},
+        {"id": "019fe506-35dc-7cf8-b3a4-08b27be8c713", "exerciseId": "019fe506-35b5-7334-bbaf-0cfabc29cfbd", "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Squeeze at bottom"},
+        {"id": "019fe506-35dd-7573-b4b0-85396ee2db09", "exerciseId": "019fe506-35b6-73fa-804a-ed95dfa3c92d", "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Long head focus"}
       ]
     },
     {
-      "id": "template-chest",
+      "id": "019fe506-35de-7d1f-a463-2e8ecc9f8814",
+      "deprecated": false,
       "title": "Chest",
       "exercises": [
-        {"exerciseId": 10001, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy compound"},
-        {"exerciseId": 10011, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Upper chest"},
-        {"exerciseId": 10053, "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90, "notes": "Full range of motion"},
-        {"exerciseId": 10013, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Stretch focus"},
-        {"exerciseId": 10014, "plannedSets": 3, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60, "notes": "Constant tension"},
-        {"exerciseId": 10015, "plannedSets": 3, "plannedReps": 10, "orderIndex": 5, "restSeconds": 90, "notes": "Bodyweight finisher"}
+        {"id": "019fe506-35df-7457-91f9-2675bcd65e80", "exerciseId": "019fe506-359a-7601-92f2-f441cf1dae33", "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy compound"},
+        {"id": "019fe506-35e0-7bd7-aee7-a9ca14985325", "exerciseId": "019fe506-35a4-7bda-8105-7700fc9609e5", "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Upper chest"},
+        {"id": "019fe506-35e1-75d4-80e0-e2ab656729a1", "exerciseId": "019fe506-35ce-7bb2-ac34-1cf9758d9bfd", "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90, "notes": "Full range of motion"},
+        {"id": "019fe506-35e2-7d52-8bcf-c6cb77e47f7c", "exerciseId": "019fe506-35a6-7b02-94a3-1ea222589774", "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Stretch focus"},
+        {"id": "019fe506-35e3-7813-9199-15e8e01ef2b9", "exerciseId": "019fe506-35a7-777f-ac60-67574cbc06f7", "plannedSets": 3, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60, "notes": "Constant tension"},
+        {"id": "019fe506-35e4-788b-8691-aaaab2994589", "exerciseId": "019fe506-35a8-7b6e-a450-a7d1d3c7d0ad", "plannedSets": 3, "plannedReps": 10, "orderIndex": 5, "restSeconds": 90, "notes": "Bodyweight finisher"}
       ]
     },
     {
-      "id": "template-back-biceps",
+      "id": "019fe506-35e5-70fe-bf9a-0c5fd58b2900",
+      "deprecated": false,
       "title": "Back & Biceps",
       "exercises": [
-        {"exerciseId": 10003, "plannedSets": 4, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy pull"},
-        {"exerciseId": 10004, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Lat width"},
-        {"exerciseId": 10017, "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Back thickness"},
-        {"exerciseId": 10019, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Squeeze shoulder blades"},
-        {"exerciseId": 10033, "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 60, "notes": "Strict form"},
-        {"exerciseId": 10034, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Neutral grip"},
-        {"exerciseId": 10035, "plannedSets": 3, "plannedReps": 10, "orderIndex": 6, "restSeconds": 60, "notes": "Strict isolation"}
+        {"id": "019fe506-35e6-7b94-964d-951a3a7bb952", "exerciseId": "019fe506-359c-7fb2-942a-65d8449bbd9a", "plannedSets": 4, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy pull"},
+        {"id": "019fe506-35e7-74ac-9be8-01c310c7c74c", "exerciseId": "019fe506-359d-71d4-a51e-49d6d3b0e760", "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Lat width"},
+        {"id": "019fe506-35e8-7e53-be21-d76e413f8ab3", "exerciseId": "019fe506-35aa-7eed-8e2a-89f8ad56d156", "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Back thickness"},
+        {"id": "019fe506-35e9-7ac2-a822-9f943796b22e", "exerciseId": "019fe506-35ac-7721-81de-641623045b62", "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Squeeze shoulder blades"},
+        {"id": "019fe506-35ea-752d-b59f-fd2d06efdff0", "exerciseId": "019fe506-35ba-7707-8a53-7d0526921af6", "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 60, "notes": "Strict form"},
+        {"id": "019fe506-35eb-7ed7-88f0-fd644f1fcbb3", "exerciseId": "019fe506-35bb-7357-8c72-401003939cf2", "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Neutral grip"},
+        {"id": "019fe506-35ec-747b-a836-7fda9b51a030", "exerciseId": "019fe506-35bc-7a3e-9895-70de3b94f943", "plannedSets": 3, "plannedReps": 10, "orderIndex": 6, "restSeconds": 60, "notes": "Strict isolation"}
       ]
     },
     {
-      "id": "template-back",
+      "id": "019fe506-35ed-7125-aa5c-da99df46c0bf",
+      "deprecated": false,
       "title": "Back",
       "exercises": [
-        {"exerciseId": 10003, "plannedSets": 5, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy compound"},
-        {"exerciseId": 10004, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Width builder"},
-        {"exerciseId": 10017, "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Thickness builder"},
-        {"exerciseId": 10016, "plannedSets": 3, "plannedReps": 10, "orderIndex": 3, "restSeconds": 60, "notes": "Lat isolation"},
-        {"exerciseId": 10018, "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 60, "notes": "Each arm"},
-        {"exerciseId": 10019, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Cable tension"},
-        {"exerciseId": 10027, "plannedSets": 3, "plannedReps": 15, "orderIndex": 6, "restSeconds": 60, "notes": "Trap focus"}
+        {"id": "019fe506-35ee-795a-aa5f-44a83a63c322", "exerciseId": "019fe506-359c-7fb2-942a-65d8449bbd9a", "plannedSets": 5, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy compound"},
+        {"id": "019fe506-35ef-79ae-8e9e-c3c7a0c51287", "exerciseId": "019fe506-359d-71d4-a51e-49d6d3b0e760", "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Width builder"},
+        {"id": "019fe506-35f0-7226-a725-e046c9044462", "exerciseId": "019fe506-35aa-7eed-8e2a-89f8ad56d156", "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Thickness builder"},
+        {"id": "019fe506-35f1-718b-a4a5-52a923f6de0c", "exerciseId": "019fe506-35a9-753d-8fe5-6977136a13d3", "plannedSets": 3, "plannedReps": 10, "orderIndex": 3, "restSeconds": 60, "notes": "Lat isolation"},
+        {"id": "019fe506-35f2-789d-980a-3d598be7dadb", "exerciseId": "019fe506-35ab-78cf-8ecd-1da7a4a527ac", "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 60, "notes": "Each arm"},
+        {"id": "019fe506-35f3-70a6-b735-b280c0abc4ae", "exerciseId": "019fe506-35ac-7721-81de-641623045b62", "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Cable tension"},
+        {"id": "019fe506-35f4-7a53-90b7-7a35be9d129e", "exerciseId": "019fe506-35b4-7b32-83e2-6244b1e7d9c0", "plannedSets": 3, "plannedReps": 15, "orderIndex": 6, "restSeconds": 60, "notes": "Trap focus"}
       ]
     },
     {
-      "id": "template-legs",
+      "id": "019fe506-35f5-7fa1-925e-a6173f000963",
+      "deprecated": false,
       "title": "Legs",
       "exercises": [
-        {"exerciseId": 10002, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "King of exercises"},
-        {"exerciseId": 10041, "plannedSets": 4, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Hamstring focus"},
-        {"exerciseId": 10038, "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 90, "notes": "Quad builder"},
-        {"exerciseId": 10040, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Hamstring isolation"},
-        {"exerciseId": 10039, "plannedSets": 3, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60, "notes": "Quad isolation"},
-        {"exerciseId": 10044, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 90, "notes": "Glute builder"},
-        {"exerciseId": 10042, "plannedSets": 4, "plannedReps": 15, "orderIndex": 6, "restSeconds": 60, "notes": "Full stretch"},
-        {"exerciseId": 10043, "plannedSets": 3, "plannedReps": 15, "orderIndex": 7, "restSeconds": 60, "notes": "Soleus focus"}
+        {"id": "019fe506-35f6-74d6-85fe-046ea3bba88d", "exerciseId": "019fe506-359b-7a6f-82f9-90f196c28c0a", "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "King of exercises"},
+        {"id": "019fe506-35f7-7417-8470-28012254dc78", "exerciseId": "019fe506-35c2-7efc-a884-30f32d884431", "plannedSets": 4, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Hamstring focus"},
+        {"id": "019fe506-35f8-7a0e-8d52-55f2abea2f16", "exerciseId": "019fe506-35bf-7429-9e35-0a0f1062be96", "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 90, "notes": "Quad builder"},
+        {"id": "019fe506-35f9-79d2-9268-ba875eb66556", "exerciseId": "019fe506-35c1-7e41-9bed-e192a9d6a12d", "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Hamstring isolation"},
+        {"id": "019fe506-35fa-7867-918e-160ccd587407", "exerciseId": "019fe506-35c0-78d9-961a-47d99bf06ff8", "plannedSets": 3, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60, "notes": "Quad isolation"},
+        {"id": "019fe506-35fb-726e-9ef6-cac540461284", "exerciseId": "019fe506-35c5-7e9d-9bff-db6cca316522", "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 90, "notes": "Glute builder"},
+        {"id": "019fe506-35fc-703f-9d69-894191221c72", "exerciseId": "019fe506-35c3-7228-92d8-399f90509a74", "plannedSets": 4, "plannedReps": 15, "orderIndex": 6, "restSeconds": 60, "notes": "Full stretch"},
+        {"id": "019fe506-35fd-7d4c-b9cc-db7d7baca7a2", "exerciseId": "019fe506-35c4-7e96-ba37-5c21a0f3d541", "plannedSets": 3, "plannedReps": 15, "orderIndex": 7, "restSeconds": 60, "notes": "Soleus focus"}
       ]
     },
     {
-      "id": "template-shoulders",
+      "id": "019fe506-35fe-7df8-9990-a3d6d51445d7",
+      "deprecated": false,
       "title": "Shoulders",
       "exercises": [
-        {"exerciseId": 10022, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 120, "notes": "Main overhead press"},
-        {"exerciseId": 10023, "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Dumbbell variation"},
-        {"exerciseId": 10008, "plannedSets": 4, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Side delt focus"},
-        {"exerciseId": 10024, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Front delt"},
-        {"exerciseId": 10025, "plannedSets": 4, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60, "notes": "Rear delt balance"},
-        {"exerciseId": 10020, "plannedSets": 3, "plannedReps": 15, "orderIndex": 5, "restSeconds": 60, "notes": "Shoulder health"},
-        {"exerciseId": 10027, "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Trap builder"}
+        {"id": "019fe506-35ff-736d-9958-5d6d52cd76e1", "exerciseId": "019fe506-35af-7246-b78e-aeaab3a49230", "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 120, "notes": "Main overhead press"},
+        {"id": "019fe506-3600-76ec-870a-f3934fa1e8da", "exerciseId": "019fe506-35b0-7ed4-8772-3f0fe4f3aeba", "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Dumbbell variation"},
+        {"id": "019fe506-3601-770f-af43-032b55cd01da", "exerciseId": "019fe506-35a1-7b5a-9ff0-fe15be1e6e3e", "plannedSets": 4, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Side delt focus"},
+        {"id": "019fe506-3602-74b8-af77-35ba7026f890", "exerciseId": "019fe506-35b1-783a-8928-809823dce5c4", "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Front delt"},
+        {"id": "019fe506-3603-7897-a0af-fed1d1a53ebd", "exerciseId": "019fe506-35b2-757f-a130-42a498a93369", "plannedSets": 4, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60, "notes": "Rear delt balance"},
+        {"id": "019fe506-3604-7629-b04d-fe3fefc9b640", "exerciseId": "019fe506-35ad-748c-9746-93ff8da9ba63", "plannedSets": 3, "plannedReps": 15, "orderIndex": 5, "restSeconds": 60, "notes": "Shoulder health"},
+        {"id": "019fe506-3605-73b1-98e9-562821ffaddf", "exerciseId": "019fe506-35b4-7b32-83e2-6244b1e7d9c0", "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Trap builder"}
       ]
     },
     {
-      "id": "template-arms",
+      "id": "019fe506-3606-7c09-ace2-7cb0d303761f",
+      "deprecated": false,
       "title": "Arms",
       "exercises": [
-        {"exerciseId": 10033, "plannedSets": 3, "plannedReps": 10, "orderIndex": 0, "restSeconds": 90, "notes": "Bicep mass builder"},
-        {"exerciseId": 10031, "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Tricep compound"},
-        {"exerciseId": 10034, "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Brachialis focus"},
-        {"exerciseId": 10028, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Tricep isolation"},
-        {"exerciseId": 10007, "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Bicep peak"},
-        {"exerciseId": 10029, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Long head tricep"},
-        {"exerciseId": 10035, "plannedSets": 3, "plannedReps": 10, "orderIndex": 6, "restSeconds": 60, "notes": "Strict bicep"},
-        {"exerciseId": 10030, "plannedSets": 3, "plannedReps": 12, "orderIndex": 7, "restSeconds": 60, "notes": "Tricep finisher"}
+        {"id": "019fe506-3607-743f-8a5b-28bbc9dba478", "exerciseId": "019fe506-35ba-7707-8a53-7d0526921af6", "plannedSets": 3, "plannedReps": 10, "orderIndex": 0, "restSeconds": 90, "notes": "Bicep mass builder"},
+        {"id": "019fe506-3608-7664-84bf-129b4518e29f", "exerciseId": "019fe506-35b8-72ad-901a-b8cc7e665073", "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Tricep compound"},
+        {"id": "019fe506-3609-75db-98e4-bc15162ba1f1", "exerciseId": "019fe506-35bb-7357-8c72-401003939cf2", "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Brachialis focus"},
+        {"id": "019fe506-360a-71bc-a482-2adc6327c71c", "exerciseId": "019fe506-35b5-7334-bbaf-0cfabc29cfbd", "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Tricep isolation"},
+        {"id": "019fe506-360b-7023-95af-7b0b2da8bc6b", "exerciseId": "019fe506-35a0-77c6-9434-2e771281c227", "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Bicep peak"},
+        {"id": "019fe506-360c-78d9-824c-6502d80a70b0", "exerciseId": "019fe506-35b6-73fa-804a-ed95dfa3c92d", "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Long head tricep"},
+        {"id": "019fe506-360d-7aa8-86c3-3662c8b648cd", "exerciseId": "019fe506-35bc-7a3e-9895-70de3b94f943", "plannedSets": 3, "plannedReps": 10, "orderIndex": 6, "restSeconds": 60, "notes": "Strict bicep"},
+        {"id": "019fe506-360e-7998-a084-2175ae54ade8", "exerciseId": "019fe506-35b7-7c5c-92a1-99813a6a8455", "plannedSets": 3, "plannedReps": 12, "orderIndex": 7, "restSeconds": 60, "notes": "Tricep finisher"}
       ]
     },
     {
-      "id": "template-core",
+      "id": "019fe506-360f-72f7-8f19-bc618be1dd8b",
+      "deprecated": false,
       "title": "Core",
       "exercises": [
-        {"exerciseId": 10006, "plannedSets": 3, "plannedReps": 60, "orderIndex": 0, "restSeconds": 60, "notes": "Hold for 60 seconds"},
-        {"exerciseId": 10051, "plannedSets": 3, "plannedReps": 15, "orderIndex": 1, "restSeconds": 60, "notes": "Weighted abs"},
-        {"exerciseId": 10047, "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Lower abs"},
-        {"exerciseId": 10048, "plannedSets": 3, "plannedReps": 20, "orderIndex": 3, "restSeconds": 60, "notes": "10 each side"},
-        {"exerciseId": 10052, "plannedSets": 3, "plannedReps": 20, "orderIndex": 4, "restSeconds": 60, "notes": "Oblique focus"},
-        {"exerciseId": 10049, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 45, "notes": "Core stability"},
-        {"exerciseId": 10050, "plannedSets": 3, "plannedReps": 30, "orderIndex": 6, "restSeconds": 45, "notes": "15 each side"}
+        {"id": "019fe506-3610-7549-bbde-800fec844172", "exerciseId": "019fe506-359f-79f1-96c5-ebfb531468f8", "plannedSets": 3, "plannedReps": 60, "orderIndex": 0, "restSeconds": 60, "notes": "Hold for 60 seconds"},
+        {"id": "019fe506-3611-7b53-8014-71ea94a0fa35", "exerciseId": "019fe506-35cc-7cdd-915b-6bc9835ac9b1", "plannedSets": 3, "plannedReps": 15, "orderIndex": 1, "restSeconds": 60, "notes": "Weighted abs"},
+        {"id": "019fe506-3612-7b48-b014-714ec185fbb0", "exerciseId": "019fe506-35c8-70f3-83aa-68a24c0af02a", "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60, "notes": "Lower abs"},
+        {"id": "019fe506-3613-76b0-9702-2938aa944c2f", "exerciseId": "019fe506-35c9-79e4-b2cf-c0a0eb3a9a24", "plannedSets": 3, "plannedReps": 20, "orderIndex": 3, "restSeconds": 60, "notes": "10 each side"},
+        {"id": "019fe506-3614-7913-9049-2a9a99bc1af2", "exerciseId": "019fe506-35cd-7cb5-b39b-6fc73c1dd946", "plannedSets": 3, "plannedReps": 20, "orderIndex": 4, "restSeconds": 60, "notes": "Oblique focus"},
+        {"id": "019fe506-3615-79ad-915a-e26fef7f9e1b", "exerciseId": "019fe506-35ca-7c5a-bc2c-1fbb28056716", "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 45, "notes": "Core stability"},
+        {"id": "019fe506-3616-79b3-83f6-8688537560aa", "exerciseId": "019fe506-35cb-7080-9e3a-9135726bd29c", "plannedSets": 3, "plannedReps": 30, "orderIndex": 6, "restSeconds": 45, "notes": "15 each side"}
       ]
     },
     {
-      "id": "template-full-body",
+      "id": "019fe506-3617-70b2-93dd-1639e0490c6b",
+      "deprecated": false,
       "title": "Full Body",
       "exercises": [
-        {"exerciseId": 10002, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Legs compound"},
-        {"exerciseId": 10001, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Push compound"},
-        {"exerciseId": 10017, "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Pull compound"},
-        {"exerciseId": 10022, "plannedSets": 3, "plannedReps": 8, "orderIndex": 3, "restSeconds": 90, "notes": "Shoulders"},
-        {"exerciseId": 10041, "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 90, "notes": "Posterior chain"},
-        {"exerciseId": 10007, "plannedSets": 2, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Biceps"},
-        {"exerciseId": 10028, "plannedSets": 2, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Triceps"},
-        {"exerciseId": 10006, "plannedSets": 3, "plannedReps": 45, "orderIndex": 7, "restSeconds": 45, "notes": "Core finisher"}
+        {"id": "019fe506-3618-797e-b52b-a978db55334c", "exerciseId": "019fe506-359b-7a6f-82f9-90f196c28c0a", "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Legs compound"},
+        {"id": "019fe506-3619-7f87-ac85-c7b185389206", "exerciseId": "019fe506-359a-7601-92f2-f441cf1dae33", "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Push compound"},
+        {"id": "019fe506-361a-7e18-ab77-10062f20266f", "exerciseId": "019fe506-35aa-7eed-8e2a-89f8ad56d156", "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Pull compound"},
+        {"id": "019fe506-361b-7ee6-bc5c-7b834ac2b6d1", "exerciseId": "019fe506-35af-7246-b78e-aeaab3a49230", "plannedSets": 3, "plannedReps": 8, "orderIndex": 3, "restSeconds": 90, "notes": "Shoulders"},
+        {"id": "019fe506-361c-7dd4-b031-b4b7afdf4bbc", "exerciseId": "019fe506-35c2-7efc-a884-30f32d884431", "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 90, "notes": "Posterior chain"},
+        {"id": "019fe506-361d-77d5-b685-fdf7bd1b7594", "exerciseId": "019fe506-35a0-77c6-9434-2e771281c227", "plannedSets": 2, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Biceps"},
+        {"id": "019fe506-361e-75ed-87b8-fa578ead2944", "exerciseId": "019fe506-35b5-7334-bbaf-0cfabc29cfbd", "plannedSets": 2, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Triceps"},
+        {"id": "019fe506-361f-7973-9b8a-eec761459b4f", "exerciseId": "019fe506-359f-79f1-96c5-ebfb531468f8", "plannedSets": 3, "plannedReps": 45, "orderIndex": 7, "restSeconds": 45, "notes": "Core finisher"}
       ]
     },
     {
-      "id": "template-upper-body",
+      "id": "019fe506-3620-7875-bf46-5763387efc44",
+      "deprecated": false,
       "title": "Upper Body",
       "exercises": [
-        {"exerciseId": 10001, "plannedSets": 4, "plannedReps": 8, "orderIndex": 0, "restSeconds": 120, "notes": "Horizontal push"},
-        {"exerciseId": 10017, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 90, "notes": "Horizontal pull"},
-        {"exerciseId": 10022, "plannedSets": 3, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Vertical push"},
-        {"exerciseId": 10004, "plannedSets": 3, "plannedReps": 8, "orderIndex": 3, "restSeconds": 90, "notes": "Vertical pull"},
-        {"exerciseId": 10012, "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 60, "notes": "Upper chest"},
-        {"exerciseId": 10019, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Cable row"},
-        {"exerciseId": 10008, "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Side delts"},
-        {"exerciseId": 10007, "plannedSets": 3, "plannedReps": 12, "orderIndex": 7, "restSeconds": 60, "notes": "Biceps"},
-        {"exerciseId": 10028, "plannedSets": 3, "plannedReps": 12, "orderIndex": 8, "restSeconds": 60, "notes": "Triceps"}
+        {"id": "019fe506-3621-76a3-8c69-19f41a92fa76", "exerciseId": "019fe506-359a-7601-92f2-f441cf1dae33", "plannedSets": 4, "plannedReps": 8, "orderIndex": 0, "restSeconds": 120, "notes": "Horizontal push"},
+        {"id": "019fe506-3622-73ff-be2a-f7203f2e2708", "exerciseId": "019fe506-35aa-7eed-8e2a-89f8ad56d156", "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 90, "notes": "Horizontal pull"},
+        {"id": "019fe506-3623-7c79-961c-f4a94c909bed", "exerciseId": "019fe506-35af-7246-b78e-aeaab3a49230", "plannedSets": 3, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Vertical push"},
+        {"id": "019fe506-3624-7b39-82de-fb1f45a5c464", "exerciseId": "019fe506-359d-71d4-a51e-49d6d3b0e760", "plannedSets": 3, "plannedReps": 8, "orderIndex": 3, "restSeconds": 90, "notes": "Vertical pull"},
+        {"id": "019fe506-3625-776f-8298-ec4ef42ea0c6", "exerciseId": "019fe506-35a5-7a26-b6eb-3ff8b3a134c9", "plannedSets": 3, "plannedReps": 10, "orderIndex": 4, "restSeconds": 60, "notes": "Upper chest"},
+        {"id": "019fe506-3626-77cc-86e6-eefa349bed9b", "exerciseId": "019fe506-35ac-7721-81de-641623045b62", "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Cable row"},
+        {"id": "019fe506-3627-70fa-ad6f-18bf51121d55", "exerciseId": "019fe506-35a1-7b5a-9ff0-fe15be1e6e3e", "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Side delts"},
+        {"id": "019fe506-3628-7ae9-97dd-549d83c7975d", "exerciseId": "019fe506-35a0-77c6-9434-2e771281c227", "plannedSets": 3, "plannedReps": 12, "orderIndex": 7, "restSeconds": 60, "notes": "Biceps"},
+        {"id": "019fe506-3629-7ea0-b62a-f3401c619691", "exerciseId": "019fe506-35b5-7334-bbaf-0cfabc29cfbd", "plannedSets": 3, "plannedReps": 12, "orderIndex": 8, "restSeconds": 60, "notes": "Triceps"}
       ]
     },
     {
-      "id": "template-lower-body",
+      "id": "019fe506-362a-7757-bf38-c6175c874ef5",
+      "deprecated": false,
       "title": "Lower Body",
       "exercises": [
-        {"exerciseId": 10002, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Main squat"},
-        {"exerciseId": 10041, "plannedSets": 4, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Hamstring focus"},
-        {"exerciseId": 10045, "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90, "notes": "Each leg"},
-        {"exerciseId": 10038, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 90, "notes": "Quad volume"},
-        {"exerciseId": 10040, "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Hamstring curl"},
-        {"exerciseId": 10044, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 90, "notes": "Glute builder"},
-        {"exerciseId": 10039, "plannedSets": 3, "plannedReps": 15, "orderIndex": 6, "restSeconds": 60, "notes": "Quad burnout"},
-        {"exerciseId": 10042, "plannedSets": 4, "plannedReps": 15, "orderIndex": 7, "restSeconds": 60, "notes": "Calves"}
+        {"id": "019fe506-362b-74ab-8a43-8bfa2b4bf6eb", "exerciseId": "019fe506-359b-7a6f-82f9-90f196c28c0a", "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Main squat"},
+        {"id": "019fe506-362c-77be-98b9-add75458ca39", "exerciseId": "019fe506-35c2-7efc-a884-30f32d884431", "plannedSets": 4, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90, "notes": "Hamstring focus"},
+        {"id": "019fe506-362d-727c-bd63-46569eccd130", "exerciseId": "019fe506-35c6-7c41-a8f8-d8a708d074f0", "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90, "notes": "Each leg"},
+        {"id": "019fe506-362e-77f5-b37b-c6287959a435", "exerciseId": "019fe506-35bf-7429-9e35-0a0f1062be96", "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 90, "notes": "Quad volume"},
+        {"id": "019fe506-362f-7703-a773-ad685067e5ce", "exerciseId": "019fe506-35c1-7e41-9bed-e192a9d6a12d", "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Hamstring curl"},
+        {"id": "019fe506-3630-77db-a3c4-a03bb81d9da5", "exerciseId": "019fe506-35c5-7e9d-9bff-db6cca316522", "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 90, "notes": "Glute builder"},
+        {"id": "019fe506-3631-71d5-9652-bee961d7d549", "exerciseId": "019fe506-35c0-78d9-961a-47d99bf06ff8", "plannedSets": 3, "plannedReps": 15, "orderIndex": 6, "restSeconds": 60, "notes": "Quad burnout"},
+        {"id": "019fe506-3632-79b3-a4cd-0c64b2653227", "exerciseId": "019fe506-35c3-7228-92d8-399f90509a74", "plannedSets": 4, "plannedReps": 15, "orderIndex": 7, "restSeconds": 60, "notes": "Calves"}
       ]
     },
     {
-      "id": "template-push",
+      "id": "019fe506-3633-7df6-9d15-da47e6ef4b6a",
+      "deprecated": false,
       "title": "Push Day",
       "exercises": [
-        {"exerciseId": 10001, "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy bench"},
-        {"exerciseId": 10022, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Overhead press"},
-        {"exerciseId": 10012, "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90, "notes": "Upper chest"},
-        {"exerciseId": 10008, "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Side delts"},
-        {"exerciseId": 10013, "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Chest stretch"},
-        {"exerciseId": 10028, "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Triceps"},
-        {"exerciseId": 10029, "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Overhead triceps"}
+        {"id": "019fe506-3634-7d4f-b3b0-3d08f576c32f", "exerciseId": "019fe506-359a-7601-92f2-f441cf1dae33", "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy bench"},
+        {"id": "019fe506-3635-79ba-8c0e-8203c7580783", "exerciseId": "019fe506-35af-7246-b78e-aeaab3a49230", "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Overhead press"},
+        {"id": "019fe506-3636-7e2f-9cc8-f2e1bc551056", "exerciseId": "019fe506-35a5-7a26-b6eb-3ff8b3a134c9", "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90, "notes": "Upper chest"},
+        {"id": "019fe506-3637-775f-b5a8-7e2878daf675", "exerciseId": "019fe506-35a1-7b5a-9ff0-fe15be1e6e3e", "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60, "notes": "Side delts"},
+        {"id": "019fe506-3638-7ec0-ae6d-31443896021a", "exerciseId": "019fe506-35a6-7b02-94a3-1ea222589774", "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Chest stretch"},
+        {"id": "019fe506-3639-7cc2-8a5a-a80b1019172e", "exerciseId": "019fe506-35b5-7334-bbaf-0cfabc29cfbd", "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60, "notes": "Triceps"},
+        {"id": "019fe506-363a-7556-b7a5-fa8cfedfad0d", "exerciseId": "019fe506-35b6-73fa-804a-ed95dfa3c92d", "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Overhead triceps"}
       ]
     },
     {
-      "id": "template-pull",
+      "id": "019fe506-363b-738a-a28b-b33849678e18",
+      "deprecated": false,
       "title": "Pull Day",
       "exercises": [
-        {"exerciseId": 10003, "plannedSets": 4, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy deadlift"},
-        {"exerciseId": 10004, "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Lat width"},
-        {"exerciseId": 10017, "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Back thickness"},
-        {"exerciseId": 10020, "plannedSets": 3, "plannedReps": 15, "orderIndex": 3, "restSeconds": 60, "notes": "Rear delts"},
-        {"exerciseId": 10019, "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Cable row"},
-        {"exerciseId": 10033, "plannedSets": 3, "plannedReps": 10, "orderIndex": 5, "restSeconds": 60, "notes": "Biceps"},
-        {"exerciseId": 10034, "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Hammer curls"}
+        {"id": "019fe506-363c-7641-b9a9-cc3f199fcb63", "exerciseId": "019fe506-359c-7fb2-942a-65d8449bbd9a", "plannedSets": 4, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180, "notes": "Heavy deadlift"},
+        {"id": "019fe506-363d-7891-b98c-aa0d2eb0a423", "exerciseId": "019fe506-359d-71d4-a51e-49d6d3b0e760", "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120, "notes": "Lat width"},
+        {"id": "019fe506-363e-7737-92f1-5c2a129674ce", "exerciseId": "019fe506-35aa-7eed-8e2a-89f8ad56d156", "plannedSets": 4, "plannedReps": 8, "orderIndex": 2, "restSeconds": 90, "notes": "Back thickness"},
+        {"id": "019fe506-363f-79a2-b636-b5267e1f736a", "exerciseId": "019fe506-35ad-748c-9746-93ff8da9ba63", "plannedSets": 3, "plannedReps": 15, "orderIndex": 3, "restSeconds": 60, "notes": "Rear delts"},
+        {"id": "019fe506-3640-73a5-94bc-58ff61115b2d", "exerciseId": "019fe506-35ac-7721-81de-641623045b62", "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60, "notes": "Cable row"},
+        {"id": "019fe506-3641-77be-b454-aacc5495c2f2", "exerciseId": "019fe506-35ba-7707-8a53-7d0526921af6", "plannedSets": 3, "plannedReps": 10, "orderIndex": 5, "restSeconds": 60, "notes": "Biceps"},
+        {"id": "019fe506-3642-7dc8-bacd-b83f49697cee", "exerciseId": "019fe506-35bb-7357-8c72-401003939cf2", "plannedSets": 3, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60, "notes": "Hammer curls"}
       ]
     }
   ]

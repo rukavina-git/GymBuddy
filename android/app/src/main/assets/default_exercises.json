@@ -2,7 +2,8 @@
   "version": 6,
   "exercises": [
     {
-      "id": 10001,
+      "id": "019fe506-359a-7601-92f2-f441cf1dae33",
+      "deprecated": false,
       "name": "Barbell Bench Press",
       "description": "A fundamental upper body exercise that targets the chest, shoulders, and triceps. Lie on a flat bench and press the barbell from chest to full extension.",
       "instructions": [
@@ -29,7 +30,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10002,
+      "id": "019fe506-359b-7a6f-82f9-90f196c28c0a",
+      "deprecated": false,
       "name": "Barbell Back Squat",
       "description": "The king of leg exercises. A compound movement that builds overall lower body strength and mass.",
       "instructions": [
@@ -56,7 +58,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10003,
+      "id": "019fe506-359c-7fb2-942a-65d8449bbd9a",
+      "deprecated": false,
       "name": "Conventional Deadlift",
       "description": "A total body strength builder that primarily targets the posterior chain. One of the most effective exercises for building overall strength.",
       "instructions": [
@@ -83,7 +86,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10004,
+      "id": "019fe506-359d-71d4-a51e-49d6d3b0e760",
+      "deprecated": false,
       "name": "Pull-Up",
       "description": "A bodyweight exercise that builds back width and pulling strength.",
       "instructions": [
@@ -110,7 +114,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10005,
+      "id": "019fe506-359e-734f-84b4-bfbe1cb1ce35",
+      "deprecated": false,
       "name": "Push-Up",
       "description": "A classic bodyweight exercise for building upper body pushing strength.",
       "instructions": [
@@ -137,7 +142,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10006,
+      "id": "019fe506-359f-79f1-96c5-ebfb531468f8",
+      "deprecated": false,
       "name": "Plank",
       "description": "A fundamental core stability exercise that builds endurance in the abdominals and lower back.",
       "instructions": [
@@ -164,7 +170,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10007,
+      "id": "019fe506-35a0-77c6-9434-2e771281c227",
+      "deprecated": false,
       "name": "Dumbbell Bicep Curl",
       "description": "An isolation exercise for building bicep size and strength.",
       "instructions": [
@@ -191,7 +198,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10008,
+      "id": "019fe506-35a1-7b5a-9ff0-fe15be1e6e3e",
+      "deprecated": false,
       "name": "Dumbbell Lateral Raise",
       "description": "An isolation exercise for building shoulder width by targeting the lateral deltoid.",
       "instructions": [
@@ -218,7 +226,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10009,
+      "id": "019fe506-35a2-7c84-b00f-0c4f433180f8",
+      "deprecated": false,
       "name": "Goblet Squat",
       "description": "A beginner-friendly squat variation using a dumbbell or kettlebell held at chest level.",
       "instructions": [
@@ -245,7 +254,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10010,
+      "id": "019fe506-35a3-76e9-b9e2-a956216b7f5f",
+      "deprecated": false,
       "name": "Walking Dumbbell Lunge",
       "description": "A unilateral leg exercise that builds strength and improves balance.",
       "instructions": [
@@ -272,7 +282,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10011,
+      "id": "019fe506-35a4-7bda-8105-7700fc9609e5",
+      "deprecated": false,
       "name": "Incline Barbell Bench Press",
       "description": "A chest press variation that emphasizes the upper chest and front deltoids.",
       "instructions": [
@@ -299,7 +310,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10012,
+      "id": "019fe506-35a5-7a26-b6eb-3ff8b3a134c9",
+      "deprecated": false,
       "name": "Incline Dumbbell Press",
       "description": "A dumbbell chest press on an incline bench for upper chest development.",
       "instructions": [
@@ -326,7 +338,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10013,
+      "id": "019fe506-35a6-7b02-94a3-1ea222589774",
+      "deprecated": false,
       "name": "Dumbbell Chest Fly",
       "description": "An isolation exercise that stretches and contracts the chest muscles through a wide arc.",
       "instructions": [
@@ -353,7 +366,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10014,
+      "id": "019fe506-35a7-777f-ac60-67574cbc06f7",
+      "deprecated": false,
       "name": "Cable Crossover",
       "description": "A cable exercise that provides constant tension throughout the chest fly movement.",
       "instructions": [
@@ -380,7 +394,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10015,
+      "id": "019fe506-35a8-7b6e-a450-a7d1d3c7d0ad",
+      "deprecated": false,
       "name": "Chest Dip",
       "description": "A compound bodyweight exercise that targets the lower chest and triceps.",
       "instructions": [
@@ -407,7 +422,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10016,
+      "id": "019fe506-35a9-753d-8fe5-6977136a13d3",
+      "deprecated": false,
       "name": "Lat Pulldown",
       "description": "A cable exercise that mimics the pull-up motion, great for building lat width.",
       "instructions": [
@@ -434,7 +450,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10017,
+      "id": "019fe506-35aa-7eed-8e2a-89f8ad56d156",
+      "deprecated": false,
       "name": "Barbell Bent-Over Row",
       "description": "A fundamental back exercise that builds thickness and strength in the upper back.",
       "instructions": [
@@ -461,7 +478,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10018,
+      "id": "019fe506-35ab-78cf-8ecd-1da7a4a527ac",
+      "deprecated": false,
       "name": "Dumbbell Row",
       "description": "A unilateral back exercise that allows for a greater range of motion.",
       "instructions": [
@@ -488,7 +506,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10019,
+      "id": "019fe506-35ac-7721-81de-641623045b62",
+      "deprecated": false,
       "name": "Seated Cable Row",
       "description": "A cable exercise that targets the middle back with constant tension.",
       "instructions": [
@@ -515,7 +534,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10020,
+      "id": "019fe506-35ad-748c-9746-93ff8da9ba63",
+      "deprecated": false,
       "name": "Face Pull",
       "description": "A cable exercise that targets the rear deltoids and upper back for shoulder health.",
       "instructions": [
@@ -542,7 +562,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10021,
+      "id": "019fe506-35ae-7f94-9c21-58c0f1fa09d7",
+      "deprecated": false,
       "name": "T-Bar Row",
       "description": "A row variation that allows for heavy loading and targets the middle back.",
       "instructions": [
@@ -569,7 +590,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10022,
+      "id": "019fe506-35af-7246-b78e-aeaab3a49230",
+      "deprecated": false,
       "name": "Barbell Overhead Press",
       "description": "A fundamental shoulder exercise for building overhead pressing strength.",
       "instructions": [
@@ -596,7 +618,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10023,
+      "id": "019fe506-35b0-7ed4-8772-3f0fe4f3aeba",
+      "deprecated": false,
       "name": "Dumbbell Shoulder Press",
       "description": "A seated or standing shoulder press using dumbbells for balanced development.",
       "instructions": [
@@ -623,7 +646,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10024,
+      "id": "019fe506-35b1-783a-8928-809823dce5c4",
+      "deprecated": false,
       "name": "Dumbbell Front Raise",
       "description": "An isolation exercise targeting the front deltoids.",
       "instructions": [
@@ -650,7 +674,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10025,
+      "id": "019fe506-35b2-757f-a130-42a498a93369",
+      "deprecated": false,
       "name": "Rear Delt Fly",
       "description": "An isolation exercise for the rear deltoids, important for shoulder balance.",
       "instructions": [
@@ -677,7 +702,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10026,
+      "id": "019fe506-35b3-7d27-b390-cdbb73c7cd62",
+      "deprecated": false,
       "name": "Arnold Press",
       "description": "A shoulder press variation that rotates through the movement for complete deltoid activation.",
       "instructions": [
@@ -704,7 +730,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10027,
+      "id": "019fe506-35b4-7b32-83e2-6244b1e7d9c0",
+      "deprecated": false,
       "name": "Barbell Shrug",
       "description": "An isolation exercise for building the trapezius muscles.",
       "instructions": [
@@ -731,7 +758,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10028,
+      "id": "019fe506-35b5-7334-bbaf-0cfabc29cfbd",
+      "deprecated": false,
       "name": "Tricep Pushdown",
       "description": "A cable exercise that isolates the triceps for arm development.",
       "instructions": [
@@ -758,7 +786,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10029,
+      "id": "019fe506-35b6-73fa-804a-ed95dfa3c92d",
+      "deprecated": false,
       "name": "Overhead Tricep Extension",
       "description": "An isolation exercise that targets the long head of the triceps.",
       "instructions": [
@@ -785,7 +814,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10030,
+      "id": "019fe506-35b7-7c5c-92a1-99813a6a8455",
+      "deprecated": false,
       "name": "Skull Crusher",
       "description": "A lying tricep extension that effectively targets all three tricep heads.",
       "instructions": [
@@ -812,7 +842,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10031,
+      "id": "019fe506-35b8-72ad-901a-b8cc7e665073",
+      "deprecated": false,
       "name": "Close-Grip Bench Press",
       "description": "A bench press variation that emphasizes the triceps.",
       "instructions": [
@@ -839,7 +870,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10032,
+      "id": "019fe506-35b9-7802-85de-b0a9682a8dbc",
+      "deprecated": false,
       "name": "Tricep Dip",
       "description": "A bodyweight exercise that targets the triceps using parallel bars or a bench.",
       "instructions": [
@@ -866,7 +898,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10033,
+      "id": "019fe506-35ba-7707-8a53-7d0526921af6",
+      "deprecated": false,
       "name": "Barbell Curl",
       "description": "A fundamental bicep exercise using a barbell for heavy loading.",
       "instructions": [
@@ -893,7 +926,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10034,
+      "id": "019fe506-35bb-7357-8c72-401003939cf2",
+      "deprecated": false,
       "name": "Hammer Curl",
       "description": "A curl variation that targets the brachialis and brachioradialis for arm thickness.",
       "instructions": [
@@ -920,7 +954,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10035,
+      "id": "019fe506-35bc-7a3e-9895-70de3b94f943",
+      "deprecated": false,
       "name": "Preacher Curl",
       "description": "A bicep curl performed on a preacher bench for strict isolation.",
       "instructions": [
@@ -947,7 +982,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10036,
+      "id": "019fe506-35bd-742b-b5de-ae7303ccedd6",
+      "deprecated": false,
       "name": "Cable Curl",
       "description": "A bicep curl using cables for constant tension throughout the movement.",
       "instructions": [
@@ -974,7 +1010,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10037,
+      "id": "019fe506-35be-7140-b9fe-bff1822040fc",
+      "deprecated": false,
       "name": "Concentration Curl",
       "description": "A seated single-arm curl that isolates the bicep with strict form.",
       "instructions": [
@@ -1001,7 +1038,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10038,
+      "id": "019fe506-35bf-7429-9e35-0a0f1062be96",
+      "deprecated": false,
       "name": "Leg Press",
       "description": "A machine exercise for building quad, hamstring, and glute strength.",
       "instructions": [
@@ -1028,7 +1066,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10039,
+      "id": "019fe506-35c0-78d9-961a-47d99bf06ff8",
+      "deprecated": false,
       "name": "Leg Extension",
       "description": "An isolation exercise that targets the quadriceps.",
       "instructions": [
@@ -1055,7 +1094,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10040,
+      "id": "019fe506-35c1-7e41-9bed-e192a9d6a12d",
+      "deprecated": false,
       "name": "Lying Leg Curl",
       "description": "An isolation exercise that targets the hamstrings.",
       "instructions": [
@@ -1082,7 +1122,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10041,
+      "id": "019fe506-35c2-7efc-a884-30f32d884431",
+      "deprecated": false,
       "name": "Romanian Deadlift",
       "description": "A hip-hinge movement that targets the hamstrings and glutes.",
       "instructions": [
@@ -1109,7 +1150,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10042,
+      "id": "019fe506-35c3-7228-92d8-399f90509a74",
+      "deprecated": false,
       "name": "Standing Calf Raise",
       "description": "An isolation exercise for building calf size and strength.",
       "instructions": [
@@ -1136,7 +1178,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10043,
+      "id": "019fe506-35c4-7e96-ba37-5c21a0f3d541",
+      "deprecated": false,
       "name": "Seated Calf Raise",
       "description": "A calf exercise that emphasizes the soleus muscle.",
       "instructions": [
@@ -1163,7 +1206,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10044,
+      "id": "019fe506-35c5-7e9d-9bff-db6cca316522",
+      "deprecated": false,
       "name": "Hip Thrust",
       "description": "A glute-focused exercise that builds strength and size in the posterior chain.",
       "instructions": [
@@ -1190,7 +1234,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10045,
+      "id": "019fe506-35c6-7c41-a8f8-d8a708d074f0",
+      "deprecated": false,
       "name": "Bulgarian Split Squat",
       "description": "A single-leg squat variation that builds unilateral leg strength.",
       "instructions": [
@@ -1217,7 +1262,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10046,
+      "id": "019fe506-35c7-7210-a41a-af15ffc08a58",
+      "deprecated": false,
       "name": "Crunch",
       "description": "A fundamental core exercise that targets the rectus abdominis.",
       "instructions": [
@@ -1244,7 +1290,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10047,
+      "id": "019fe506-35c8-70f3-83aa-68a24c0af02a",
+      "deprecated": false,
       "name": "Hanging Leg Raise",
       "description": "An advanced core exercise that targets the lower abs.",
       "instructions": [
@@ -1271,7 +1318,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10048,
+      "id": "019fe506-35c9-79e4-b2cf-c0a0eb3a9a24",
+      "deprecated": false,
       "name": "Russian Twist",
       "description": "A rotational core exercise that targets the obliques.",
       "instructions": [
@@ -1298,7 +1346,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10049,
+      "id": "019fe506-35ca-7c5a-bc2c-1fbb28056716",
+      "deprecated": false,
       "name": "Dead Bug",
       "description": "A core stability exercise that teaches proper bracing.",
       "instructions": [
@@ -1325,7 +1374,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10050,
+      "id": "019fe506-35cb-7080-9e3a-9135726bd29c",
+      "deprecated": false,
       "name": "Mountain Climber",
       "description": "A dynamic core exercise that also elevates heart rate.",
       "instructions": [
@@ -1352,7 +1402,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10051,
+      "id": "019fe506-35cc-7cdd-915b-6bc9835ac9b1",
+      "deprecated": false,
       "name": "Cable Crunch",
       "description": "A weighted core exercise using cable resistance.",
       "instructions": [
@@ -1379,7 +1430,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10052,
+      "id": "019fe506-35cd-7cb5-b39b-6fc73c1dd946",
+      "deprecated": false,
       "name": "Bicycle Crunch",
       "description": "A dynamic crunch variation that targets both the rectus abdominis and obliques.",
       "instructions": [
@@ -1406,7 +1458,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10053,
+      "id": "019fe506-35ce-7bb2-ac34-1cf9758d9bfd",
+      "deprecated": false,
       "name": "Dumbbell Bench Press",
       "description": "A chest press using dumbbells for a greater range of motion and balanced development.",
       "instructions": [
@@ -1433,7 +1486,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10054,
+      "id": "019fe506-35cf-716f-be29-70ea5d1c8a51",
+      "deprecated": false,
       "name": "Chin-Up",
       "description": "A pull-up variation with underhand grip that emphasizes the biceps.",
       "instructions": [
@@ -1460,7 +1514,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10055,
+      "id": "019fe506-35d0-7520-b3e9-f4fa230d2e1a",
+      "deprecated": false,
       "name": "Upright Row",
       "description": "A shoulder exercise that targets the lateral deltoids and traps.",
       "instructions": [
@@ -1487,7 +1542,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10056,
+      "id": "019fe506-35d1-7779-835a-03fad2a0e63b",
+      "deprecated": false,
       "name": "Front Squat",
       "description": "A squat variation with the barbell in front, emphasizing the quads and core.",
       "instructions": [
@@ -1514,7 +1570,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10057,
+      "id": "019fe506-35d2-72b8-8b9b-3188abd1a9eb",
+      "deprecated": false,
       "name": "Leg Raise",
       "description": "A core exercise performed lying down that targets the lower abs.",
       "instructions": [
@@ -1541,7 +1598,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10058,
+      "id": "019fe506-35d3-7f3d-9ab0-d1c26b59e962",
+      "deprecated": false,
       "name": "Reverse Lunge",
       "description": "A lunge variation stepping backward, easier on the knees.",
       "instructions": [
@@ -1568,7 +1626,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10059,
+      "id": "019fe506-35d4-7f59-af83-ad2466c8d39c",
+      "deprecated": false,
       "name": "Sumo Deadlift",
       "description": "A deadlift variation with wide stance that emphasizes the quads and adductors.",
       "instructions": [
@@ -1595,7 +1654,8 @@
       "createdBy": "0"
     },
     {
-      "id": 10060,
+      "id": "019fe506-35d5-7d7f-ae9b-22bbc70bf77d",
+      "deprecated": false,
       "name": "Hack Squat",
       "description": "A machine squat variation that targets the quadriceps.",
       "instructions": [

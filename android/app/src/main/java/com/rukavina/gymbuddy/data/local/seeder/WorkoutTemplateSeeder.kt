@@ -7,7 +7,6 @@ import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.entity.TemplateExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateVersionEntity
 import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
-import com.rukavina.gymbuddy.domain.id.IdGenerator
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -17,8 +16,7 @@ import javax.inject.Inject
  */
 class WorkoutTemplateSeeder @Inject constructor(
     private val workoutTemplateDao: WorkoutTemplateDao,
-    private val versionDao: TemplateVersionDao,
-    private val idGenerator: IdGenerator
+    private val versionDao: TemplateVersionDao
 ) {
     companion object {
         private const val TAG = "WorkoutTemplateSeeder"
@@ -113,9 +111,9 @@ class WorkoutTemplateSeeder @Inject constructor(
                 val exerciseJson = exercisesJson.getJSONObject(j)
                 exercises.add(
                     TemplateExerciseEntity(
-                        id = idGenerator.newId(),
+                        id = exerciseJson.getString("id"),
                         templateId = templateId,
-                        exerciseId = exerciseJson.get("exerciseId").toString(),
+                        exerciseId = exerciseJson.getString("exerciseId"),
                         plannedSets = exerciseJson.getInt("plannedSets"),
                         plannedReps = exerciseJson.getInt("plannedReps"),
                         orderIndex = exerciseJson.getInt("orderIndex"),
