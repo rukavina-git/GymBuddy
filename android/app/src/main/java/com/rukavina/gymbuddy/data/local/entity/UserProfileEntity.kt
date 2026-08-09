@@ -1,7 +1,12 @@
-package com.rukavina.gymbuddy.domain.model
+package com.rukavina.gymbuddy.data.local.entity
 
-data class UserProfile(
-    val uid: String,
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.rukavina.gymbuddy.domain.model.*
+
+@Entity(tableName = "user_profile")
+data class UserProfileEntity(
+    @PrimaryKey val uid: String,
     val name: String,
     val email: String,
     val profileImageUrl: String? = null,
