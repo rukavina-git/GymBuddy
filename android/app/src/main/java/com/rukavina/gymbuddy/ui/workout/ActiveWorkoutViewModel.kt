@@ -298,12 +298,16 @@ class ActiveWorkoutViewModel @Inject constructor(
                 )
             }
 
-            // Validate that there are exercises logged
+            // Validate that there are exercises logged. This is a rejected
+            // stop attempt, not a discard - the workout is still in progress,
+            // so resume the timer cancelled above and keep the user here to
+            // add a set or discard explicitly. Only an explicit discard or a
+            // successful save should navigate away.
             if (performedExercises.isEmpty()) {
+                startTimer()
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        workoutDiscarded = true, // Treat as discard - go back to template screen
                         errorMessage = "No exercises logged. Workout not saved."
                     )
                 }
@@ -332,6 +336,13 @@ class ActiveWorkoutViewModel @Inject constructor(
                     }
                 }
                 .onFailure { error ->
+                    // Save failed: this is a rejected stop attempt too, so the
+                    // same treatment applies. Resume the timer cancelled above
+                    // and leave exercises/elapsedSeconds/workoutTitle intact -
+                    // neither workoutDiscarded nor workoutSaved is set here, so
+                    // the user stays on this screen with their data and can
+                    // retry or fix the offending set.
+                    startTimer()
                     _uiState.update {
                         it.copy(
                             isLoading = false,

@@ -55,7 +55,8 @@ object WorkoutSetValidator {
     }
 
     private fun repsError(set: WorkoutSet): WorkoutSetValidationResult.Invalid? {
-        if (set.reps == null) return invalid("reps is required")
+        val reps = set.reps ?: return invalid("reps is required")
+        if (reps == 0) return invalid("reps must be greater than zero")
         return null
     }
 

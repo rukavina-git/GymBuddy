@@ -8,7 +8,8 @@ import javax.inject.Inject
  * Use case for updating an existing workout session.
  */
 class UpdateWorkoutSessionUseCase @Inject constructor(
-    private val repository: WorkoutSessionRepository
+    private val repository: WorkoutSessionRepository,
+    private val validateWorkoutSessionSets: ValidateWorkoutSessionSetsUseCase
 ) {
     /**
      * Update an existing workout session.
@@ -20,6 +21,8 @@ class UpdateWorkoutSessionUseCase @Inject constructor(
             require(workoutSession.id.isNotBlank()) { "Workout session ID cannot be blank" }
             require(workoutSession.durationSeconds >= 0) { "Duration must be non-negative" }
             require(workoutSession.date > 0) { "Invalid workout session date" }
+
+            validateWorkoutSessionSets(workoutSession)
 
             repository.updateWorkoutSession(workoutSession)
             Result.success(Unit)

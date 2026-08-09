@@ -260,11 +260,11 @@ class WorkoutSetValidatorTest {
     }
 
     @Test
-    fun `zero reps is valid`() {
+    fun `zero reps is rejected on completed set`() {
         val result = WorkoutSetValidator.validate(
             set(reps = 0),
             ExerciseTrackingType.WEIGHT_REPS
         )
-        assertValid(result)
+        assertInvalid(result)
     }
 }
