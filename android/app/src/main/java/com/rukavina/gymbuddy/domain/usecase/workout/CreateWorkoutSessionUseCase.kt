@@ -23,7 +23,7 @@ class CreateWorkoutSessionUseCase @Inject constructor(
         return try {
             // Validate
             require(workoutSession.durationSeconds >= 0) { "Duration must be non-negative" }
-            require(workoutSession.date > 0) { "Invalid workout session date" }
+            require(workoutSession.startedAt > 0) { "Invalid workout session start time" }
 
             // Generate IDs if empty
             val workoutSessionWithId = if (workoutSession.id.isBlank()) {

@@ -111,7 +111,7 @@ fun HomeScreen(
     // Convert workout dates to LocalDate - this will update when workoutSessions changes
     val workoutDates = remember(workoutSessions) {
         workoutSessions.map { session ->
-            Instant.ofEpochMilli(session.date)
+            Instant.ofEpochMilli(session.startedAt)
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate()
         }.distinct()

@@ -20,9 +20,13 @@ object WorkoutSessionMapper {
     fun toEntities(workoutSession: WorkoutSession): Triple<WorkoutSessionEntity, List<PerformedExerciseEntity>, List<WorkoutSetEntity>> {
         val workoutSessionEntity = WorkoutSessionEntity(
             id = workoutSession.id,
-            date = workoutSession.date,
+            startedAt = workoutSession.startedAt,
+            endedAt = workoutSession.endedAt,
             durationSeconds = workoutSession.durationSeconds,
-            title = workoutSession.title
+            title = workoutSession.title,
+            notes = workoutSession.notes,
+            templateId = workoutSession.templateId,
+            templateTitle = workoutSession.templateTitle
         )
 
         val performedExerciseEntities = mutableListOf<PerformedExerciseEntity>()
@@ -103,9 +107,13 @@ object WorkoutSessionMapper {
 
         return WorkoutSession(
             id = workoutSessionEntity.id,
-            date = workoutSessionEntity.date,
+            startedAt = workoutSessionEntity.startedAt,
+            endedAt = workoutSessionEntity.endedAt,
             durationSeconds = workoutSessionEntity.durationSeconds,
             title = workoutSessionEntity.title,
+            notes = workoutSessionEntity.notes,
+            templateId = workoutSessionEntity.templateId,
+            templateTitle = workoutSessionEntity.templateTitle,
             performedExercises = performedExercises
         )
     }

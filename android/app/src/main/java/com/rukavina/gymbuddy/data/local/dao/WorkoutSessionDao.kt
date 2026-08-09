@@ -20,9 +20,9 @@ import kotlinx.coroutines.flow.Flow
 interface WorkoutSessionDao {
     /**
      * Get all workout sessions.
-     * Ordered by date descending (most recent first).
+     * Ordered by startedAt descending (most recent first).
      */
-    @Query("SELECT * FROM workout_sessions ORDER BY date DESC")
+    @Query("SELECT * FROM workout_sessions ORDER BY startedAt DESC")
     fun getAllWorkoutSessions(): Flow<List<WorkoutSessionEntity>>
 
     /**
@@ -36,7 +36,7 @@ interface WorkoutSessionDao {
      * @param startDate Unix timestamp in milliseconds
      * @param endDate Unix timestamp in milliseconds
      */
-    @Query("SELECT * FROM workout_sessions WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    @Query("SELECT * FROM workout_sessions WHERE startedAt BETWEEN :startDate AND :endDate ORDER BY startedAt DESC")
     fun getWorkoutSessionsByDateRange(startDate: Long, endDate: Long): Flow<List<WorkoutSessionEntity>>
 
     /**

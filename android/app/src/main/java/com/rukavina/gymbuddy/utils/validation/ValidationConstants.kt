@@ -16,11 +16,15 @@ object ValidationConstants {
     const val MAX_HOURS = 23
     const val MAX_MINUTES = 59
     const val MAX_SECONDS = 59
+    const val MAX_DURATION_SECONDS_DIGITS = 5 // 0-99999 seconds (~27 hours)
+    const val MAX_DISTANCE_WHOLE_DIGITS = 5   // 0-99999
+    const val MAX_DISTANCE_DECIMAL_DIGITS = 2 // .00-.99
 
     // Regex patterns
     val WEIGHT_REGEX = Regex("""^\d{0,3}(\.\d{0,2})?$""")
     val REPS_REGEX = Regex("""^\d{0,2}$""")
     val DIGITS_ONLY_REGEX = Regex("""^\d*$""")
+    val DISTANCE_REGEX = Regex("""^\d{0,5}(\.\d{0,2})?$""")
 }
 
 /**
@@ -43,6 +47,27 @@ object InputValidation {
      */
     fun validateWeight(input: String): String? {
         return if (input.isEmpty() || input.matches(ValidationConstants.WEIGHT_REGEX)) {
+            input
+        } else {
+            null
+        }
+    }
+
+    /**
+     * Validates and formats duration input in whole seconds.
+     * Allows only digits, max MAX_DURATION_SECONDS_DIGITS characters.
+     */
+    fun validateDuration(input: String): String {
+        return input.filter { it.isDigit() }.take(ValidationConstants.MAX_DURATION_SECONDS_DIGITS)
+    }
+
+    /**
+     * Validates distance input in meters.
+     * Allows max 5 digits before decimal, 2 after (e.g., 99999.99).
+     * Returns null if invalid, otherwise returns the valid input.
+     */
+    fun validateDistance(input: String): String? {
+        return if (input.isEmpty() || input.matches(ValidationConstants.DISTANCE_REGEX)) {
             input
         } else {
             null

@@ -1,6 +1,7 @@
 package com.rukavina.gymbuddy.ui.workout
 
 import androidx.compose.foundation.background
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.utils.validation.InputValidation
 import com.rukavina.gymbuddy.utils.UnitConverter
@@ -131,6 +132,12 @@ fun ActiveWorkoutScreen(
                             },
                             onUpdateWeight = { setId, weight ->
                                 viewModel.updateSetWeight(exercise.id, setId, weight)
+                            },
+                            onUpdateDuration = { setId, duration ->
+                                viewModel.updateSetDuration(exercise.id, setId, duration)
+                            },
+                            onUpdateDistance = { setId, distance ->
+                                viewModel.updateSetDistance(exercise.id, setId, distance)
                             },
                             onNoteClick = { setId ->
                                 // TODO: Implement notes dialog
@@ -347,6 +354,8 @@ fun ExerciseCard(
     preferredUnits: PreferredUnits,
     onUpdateReps: (setId: String, reps: String) -> Unit,
     onUpdateWeight: (setId: String, weight: String) -> Unit,
+    onUpdateDuration: (setId: String, duration: String) -> Unit,
+    onUpdateDistance: (setId: String, distance: String) -> Unit,
     onNoteClick: (setId: String) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(true) }
@@ -388,7 +397,8 @@ fun ExerciseCard(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "${exercise.plannedSets} sets × ${exercise.plannedReps} reps",
+                            text = "${exercise.plannedSets} sets" +
+                                (exercise.plannedReps?.let { " × $it reps" } ?: ""),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -425,9 +435,12 @@ fun ExerciseCard(
                 exercise.sets.forEach { set ->
                     SetRow(
                         set = set,
+                        trackingType = exercise.exerciseTrackingType,
                         preferredUnits = preferredUnits,
                         onUpdateReps = { reps -> onUpdateReps(set.id, reps) },
                         onUpdateWeight = { weight -> onUpdateWeight(set.id, weight) },
+                        onUpdateDuration = { duration -> onUpdateDuration(set.id, duration) },
+                        onUpdateDistance = { distance -> onUpdateDistance(set.id, distance) },
                         onNoteClick = { onNoteClick(set.id) }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -438,14 +451,18 @@ fun ExerciseCard(
 }
 
 /**
- * Single set row with input fields for reps and weight.
+ * Single set row with input fields for the measurements its exercise's
+ * tracking type requires (weight, reps, duration, distance).
  */
 @Composable
 fun SetRow(
     set: WorkoutSet,
+    trackingType: ExerciseTrackingType,
     preferredUnits: PreferredUnits,
     onUpdateReps: (String) -> Unit,
     onUpdateWeight: (String) -> Unit,
+    onUpdateDuration: (String) -> Unit,
+    onUpdateDistance: (String) -> Unit,
     onNoteClick: () -> Unit
 ) {
     Row(
@@ -461,30 +478,58 @@ fun SetRow(
             modifier = Modifier.width(60.dp)
         )
 
-        // Reps input
-        OutlinedTextField(
-            value = set.reps,
-            onValueChange = { input ->
-                onUpdateReps(InputValidation.validateReps(input))
-            },
-            label = { Text("Reps") },
-            modifier = Modifier.weight(1f),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
+        if (SetTrackingFields.showsReps(trackingType)) {
+            OutlinedTextField(
+                value = set.reps,
+                onValueChange = { input ->
+                    onUpdateReps(InputValidation.validateReps(input))
+                },
+                label = { Text("Reps") },
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+        }
 
-        // Weight input
-        val weightUnit = UnitConverter.getWeightUnitLabel(preferredUnits)
-        OutlinedTextField(
-            value = set.weight,
-            onValueChange = { input ->
-                InputValidation.validateWeight(input)?.let { onUpdateWeight(it) }
-            },
-            label = { Text("Weight ($weightUnit)") },
-            modifier = Modifier.weight(1f),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-        )
+        if (SetTrackingFields.showsWeight(trackingType)) {
+            val weightUnit = UnitConverter.getWeightUnitLabel(preferredUnits)
+            OutlinedTextField(
+                value = set.weight,
+                onValueChange = { input ->
+                    InputValidation.validateWeight(input)?.let { onUpdateWeight(it) }
+                },
+                label = { Text("Weight ($weightUnit)") },
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            )
+        }
+
+        if (SetTrackingFields.showsDuration(trackingType)) {
+            OutlinedTextField(
+                value = set.duration,
+                onValueChange = { input ->
+                    onUpdateDuration(InputValidation.validateDuration(input))
+                },
+                label = { Text("Duration (s)") },
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+        }
+
+        if (SetTrackingFields.showsDistance(trackingType)) {
+            OutlinedTextField(
+                value = set.distance,
+                onValueChange = { input ->
+                    InputValidation.validateDistance(input)?.let { onUpdateDistance(it) }
+                },
+                label = { Text("Distance (m)") },
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            )
+        }
 
         // Note icon
         IconButton(

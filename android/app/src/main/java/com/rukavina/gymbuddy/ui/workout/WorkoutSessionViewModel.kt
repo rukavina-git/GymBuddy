@@ -290,8 +290,8 @@ class WorkoutSessionViewModel @Inject constructor(
         sortOrder: WorkoutSessionSortOrder
     ): List<WorkoutSession> {
         return when (sortOrder) {
-            WorkoutSessionSortOrder.DATE_NEWEST_FIRST -> sessions.sortedByDescending { it.date }
-            WorkoutSessionSortOrder.DATE_OLDEST_FIRST -> sessions.sortedBy { it.date }
+            WorkoutSessionSortOrder.DATE_NEWEST_FIRST -> sessions.sortedByDescending { it.startedAt }
+            WorkoutSessionSortOrder.DATE_OLDEST_FIRST -> sessions.sortedBy { it.startedAt }
             WorkoutSessionSortOrder.DURATION_LONGEST_FIRST -> sessions.sortedByDescending { it.durationSeconds }
             WorkoutSessionSortOrder.DURATION_SHORTEST_FIRST -> sessions.sortedBy { it.durationSeconds }
             WorkoutSessionSortOrder.TITLE_A_TO_Z -> sessions.sortedBy { it.title?.lowercase() ?: "" }
@@ -339,9 +339,11 @@ class WorkoutSessionViewModel @Inject constructor(
 
             val newSession = WorkoutSession(
                 id = idGenerator.newId(),
-                date = System.currentTimeMillis(),
+                startedAt = System.currentTimeMillis(),
                 durationSeconds = 0, // Will be updated when session ends
                 title = template.title, // Use template title as default title
+                templateId = template.id,
+                templateTitle = template.title,
                 performedExercises = performedExercises
             )
 
