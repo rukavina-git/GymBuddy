@@ -1,61 +1,64 @@
 name: Android Build
 
-# Trigger on every push and pull request
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-build.yml'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-build.yml'
 
 jobs:
   build:
     name: Build Android App
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: android
+
     steps:
-      # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Set up JDK 17 (required for modern Android builds)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # Cache Gradle dependencies for faster builds
       - name: Cache Gradle dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties', 'android/gradle/libs.versions.toml') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # Grant execute permission for gradlew
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      # Create google-services.json from GitHub secret
       - name: Create google-services.json
-        run: echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > ./app/src/google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON" > app/src/google-services.json
 
-      # Build debug APK
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
 
-      # Upload APK as artifact (optional - useful for downloading the built APK)
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
 
-      # Build report (shows build summary)
       - name: Build Summary
         if: always()
         run: |
