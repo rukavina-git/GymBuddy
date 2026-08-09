@@ -18,7 +18,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.rukavina.gymbuddy.data.model.MuscleGroup
+import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import com.rukavina.gymbuddy.ui.exercise.ExerciseFormState
 
 /**

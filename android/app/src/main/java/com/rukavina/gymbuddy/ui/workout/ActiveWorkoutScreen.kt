@@ -1,7 +1,7 @@
 package com.rukavina.gymbuddy.ui.workout
 
 import androidx.compose.foundation.background
-import com.rukavina.gymbuddy.data.model.PreferredUnits
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.utils.validation.InputValidation
 import com.rukavina.gymbuddy.utils.UnitConverter
 import androidx.compose.foundation.layout.Arrangement

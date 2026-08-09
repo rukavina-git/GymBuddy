@@ -1,9 +1,9 @@
 package com.rukavina.gymbuddy.ui.profile
 
-import com.rukavina.gymbuddy.data.model.ActivityLevel
-import com.rukavina.gymbuddy.data.model.FitnessGoal
-import com.rukavina.gymbuddy.data.model.Gender
-import com.rukavina.gymbuddy.data.model.PreferredUnits
+import com.rukavina.gymbuddy.domain.model.ActivityLevel
+import com.rukavina.gymbuddy.domain.model.FitnessGoal
+import com.rukavina.gymbuddy.domain.model.Gender
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
 
 data class ProfileUiState(
     val name: String = "",

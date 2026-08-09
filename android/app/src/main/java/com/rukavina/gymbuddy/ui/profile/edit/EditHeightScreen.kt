@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.rukavina.gymbuddy.Constants
-import com.rukavina.gymbuddy.data.model.PreferredUnits
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.ui.components.NumberPicker
 import com.rukavina.gymbuddy.utils.UnitConverter
 import kotlin.math.roundToInt

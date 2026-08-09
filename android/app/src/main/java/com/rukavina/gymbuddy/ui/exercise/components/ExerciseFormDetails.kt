@@ -12,9 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.rukavina.gymbuddy.data.model.DifficultyLevel
-import com.rukavina.gymbuddy.data.model.ExerciseCategory
-import com.rukavina.gymbuddy.data.model.ExerciseType
+import com.rukavina.gymbuddy.domain.model.DifficultyLevel
+import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseType
 import com.rukavina.gymbuddy.ui.exercise.ExerciseFormState
 
 /**

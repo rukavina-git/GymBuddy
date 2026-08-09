@@ -1,7 +1,7 @@
 package com.rukavina.gymbuddy.data.local.mapper
 
 import com.rukavina.gymbuddy.data.local.entity.ExerciseEntity
-import com.rukavina.gymbuddy.data.model.Exercise
+import com.rukavina.gymbuddy.domain.model.Exercise
 
 /**
  * Mapper to convert between Exercise domain model and ExerciseEntity.

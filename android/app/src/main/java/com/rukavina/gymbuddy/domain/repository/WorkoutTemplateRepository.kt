@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.domain.repository
 
-import com.rukavina.gymbuddy.data.model.WorkoutTemplate
+import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import kotlinx.coroutines.flow.Flow
 
 /**

@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.data.model
+package com.rukavina.gymbuddy.domain.model
 
 /**
  * Domain model representing a single set within a performed exercise.

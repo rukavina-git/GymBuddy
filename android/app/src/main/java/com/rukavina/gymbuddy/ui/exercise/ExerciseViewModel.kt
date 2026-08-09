@@ -2,9 +2,9 @@ package com.rukavina.gymbuddy.ui.exercise
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rukavina.gymbuddy.data.model.Equipment
-import com.rukavina.gymbuddy.data.model.Exercise
-import com.rukavina.gymbuddy.data.model.MuscleGroup
+import com.rukavina.gymbuddy.domain.model.Equipment
+import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import com.rukavina.gymbuddy.domain.usecase.exercise.CreateExerciseUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.DeleteExerciseUseCase

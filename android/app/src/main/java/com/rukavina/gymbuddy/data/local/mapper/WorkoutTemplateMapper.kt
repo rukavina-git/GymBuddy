@@ -3,8 +3,8 @@ package com.rukavina.gymbuddy.data.local.mapper
 import com.rukavina.gymbuddy.data.local.entity.TemplateExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
 import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateWithExercises
-import com.rukavina.gymbuddy.data.model.TemplateExercise
-import com.rukavina.gymbuddy.data.model.WorkoutTemplate
+import com.rukavina.gymbuddy.domain.model.TemplateExercise
+import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 
 /**
  * Mapper to convert between WorkoutTemplate domain models and Room entities.

@@ -4,9 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.rukavina.gymbuddy.data.model.PreferredUnits
-import com.rukavina.gymbuddy.data.model.UserProfile
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
+import com.rukavina.gymbuddy.domain.model.UserProfile
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
+import com.rukavina.gymbuddy.domain.model.ActivityLevel
+import com.rukavina.gymbuddy.domain.model.FitnessGoal
+import com.rukavina.gymbuddy.domain.model.Gender
 import com.rukavina.gymbuddy.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -117,15 +120,15 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun onGenderChanged(gender: com.rukavina.gymbuddy.data.model.Gender?) {
+    fun onGenderChanged(gender: Gender?) {
         _uiState.value = _uiState.value.copy(gender = gender)
     }
 
-    fun onFitnessGoalChanged(goal: com.rukavina.gymbuddy.data.model.FitnessGoal?) {
+    fun onFitnessGoalChanged(goal: FitnessGoal?) {
         _uiState.value = _uiState.value.copy(fitnessGoal = goal)
     }
 
-    fun onActivityLevelChanged(level: com.rukavina.gymbuddy.data.model.ActivityLevel?) {
+    fun onActivityLevelChanged(level: ActivityLevel?) {
         _uiState.value = _uiState.value.copy(activityLevel = level)
     }
 
@@ -258,17 +261,17 @@ class ProfileViewModel @Inject constructor(
         saveProfileToDatabase()
     }
 
-    fun onGenderSaved(gender: com.rukavina.gymbuddy.data.model.Gender?) {
+    fun onGenderSaved(gender: Gender?) {
         _uiState.value = _uiState.value.copy(gender = gender)
         saveProfileToDatabase()
     }
 
-    fun onFitnessGoalSaved(goal: com.rukavina.gymbuddy.data.model.FitnessGoal?) {
+    fun onFitnessGoalSaved(goal: FitnessGoal?) {
         _uiState.value = _uiState.value.copy(fitnessGoal = goal)
         saveProfileToDatabase()
     }
 
-    fun onActivityLevelSaved(level: com.rukavina.gymbuddy.data.model.ActivityLevel?) {
+    fun onActivityLevelSaved(level: ActivityLevel?) {
         _uiState.value = _uiState.value.copy(activityLevel = level)
         saveProfileToDatabase()
     }

@@ -1,10 +1,10 @@
 package com.rukavina.gymbuddy.data.local.converter
 
 import androidx.room.TypeConverter
-import com.rukavina.gymbuddy.data.model.DifficultyLevel
-import com.rukavina.gymbuddy.data.model.Equipment
-import com.rukavina.gymbuddy.data.model.ExerciseCategory
-import com.rukavina.gymbuddy.data.model.ExerciseType
+import com.rukavina.gymbuddy.domain.model.DifficultyLevel
+import com.rukavina.gymbuddy.domain.model.Equipment
+import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseType
 
 /**
  * Type converters for Exercise-related enums and lists.

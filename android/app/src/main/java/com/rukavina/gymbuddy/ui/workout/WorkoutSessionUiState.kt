@@ -1,7 +1,7 @@
 package com.rukavina.gymbuddy.ui.workout
 
-import com.rukavina.gymbuddy.data.model.PreferredUnits
-import com.rukavina.gymbuddy.data.model.WorkoutSession
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
+import com.rukavina.gymbuddy.domain.model.WorkoutSession
 
 /**
  * Sort order options for workout sessions.

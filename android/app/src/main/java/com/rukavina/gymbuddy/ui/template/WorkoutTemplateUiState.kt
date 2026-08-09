@@ -1,7 +1,7 @@
 package com.rukavina.gymbuddy.ui.template
 
-import com.rukavina.gymbuddy.data.model.Exercise
-import com.rukavina.gymbuddy.data.model.WorkoutTemplate
+import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 
 /**
  * UI state for WorkoutTemplate screen.

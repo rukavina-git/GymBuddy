@@ -5,11 +5,11 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.rukavina.gymbuddy.data.local.converter.ExerciseConverters
 import com.rukavina.gymbuddy.data.local.converter.MuscleGroupConverter
-import com.rukavina.gymbuddy.data.model.DifficultyLevel
-import com.rukavina.gymbuddy.data.model.Equipment
-import com.rukavina.gymbuddy.data.model.ExerciseCategory
-import com.rukavina.gymbuddy.data.model.ExerciseType
-import com.rukavina.gymbuddy.data.model.MuscleGroup
+import com.rukavina.gymbuddy.domain.model.DifficultyLevel
+import com.rukavina.gymbuddy.domain.model.Equipment
+import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseType
+import com.rukavina.gymbuddy.domain.model.MuscleGroup
 
 /**
  * Room entity for Exercise table.

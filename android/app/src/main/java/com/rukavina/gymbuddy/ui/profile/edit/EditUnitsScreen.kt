@@ -28,7 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.rukavina.gymbuddy.data.model.PreferredUnits
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

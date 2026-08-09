@@ -6,11 +6,11 @@ import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
 import com.rukavina.gymbuddy.data.local.entity.ExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.ExerciseVersionEntity
-import com.rukavina.gymbuddy.data.model.DifficultyLevel
-import com.rukavina.gymbuddy.data.model.Equipment
-import com.rukavina.gymbuddy.data.model.ExerciseCategory
-import com.rukavina.gymbuddy.data.model.ExerciseType
-import com.rukavina.gymbuddy.data.model.MuscleGroup
+import com.rukavina.gymbuddy.domain.model.DifficultyLevel
+import com.rukavina.gymbuddy.domain.model.Equipment
+import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseType
+import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject

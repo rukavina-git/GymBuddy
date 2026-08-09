@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.rukavina.gymbuddy.data.model.UserProfile
+import com.rukavina.gymbuddy.domain.model.UserProfile
 
 @Dao
 interface UserProfileDao {

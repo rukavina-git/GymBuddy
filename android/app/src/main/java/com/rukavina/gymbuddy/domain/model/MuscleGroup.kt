@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.data.model
+package com.rukavina.gymbuddy.domain.model
 
 /**
  * Enum representing major muscle groups that can be targeted by exercises.

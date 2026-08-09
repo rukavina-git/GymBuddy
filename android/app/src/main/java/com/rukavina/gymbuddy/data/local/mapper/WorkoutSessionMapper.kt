@@ -3,11 +3,10 @@ package com.rukavina.gymbuddy.data.local.mapper
 import com.rukavina.gymbuddy.data.local.entity.PerformedExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.PerformedExerciseWithSets
 import com.rukavina.gymbuddy.data.local.entity.WorkoutSessionEntity
-import com.rukavina.gymbuddy.data.local.entity.WorkoutSessionWithPerformedExercises
 import com.rukavina.gymbuddy.data.local.entity.WorkoutSetEntity
-import com.rukavina.gymbuddy.data.model.PerformedExercise
-import com.rukavina.gymbuddy.data.model.WorkoutSession
-import com.rukavina.gymbuddy.data.model.WorkoutSet
+import com.rukavina.gymbuddy.domain.model.PerformedExercise
+import com.rukavina.gymbuddy.domain.model.WorkoutSession
+import com.rukavina.gymbuddy.domain.model.WorkoutSet
 
 /**
  * Mapper to convert between WorkoutSession domain models and Room entities.
