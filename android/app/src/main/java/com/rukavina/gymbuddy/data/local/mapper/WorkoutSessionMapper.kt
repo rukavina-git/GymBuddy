@@ -42,8 +42,13 @@ object WorkoutSessionMapper {
                     WorkoutSetEntity(
                         id = set.id,
                         performedExerciseId = performedExercise.id,
-                        weight = set.weight,
+                        weightKg = set.weightKg,
                         reps = set.reps,
+                        durationSeconds = set.durationSeconds,
+                        distanceMeters = set.distanceMeters,
+                        setType = set.setType,
+                        isCompleted = set.isCompleted,
+                        restTakenSeconds = set.restTakenSeconds,
                         orderIndex = set.orderIndex
                     )
                 )
@@ -67,8 +72,13 @@ object WorkoutSessionMapper {
                 .map { setEntity ->
                     WorkoutSet(
                         id = setEntity.id,
-                        weight = setEntity.weight,
+                        weightKg = setEntity.weightKg,
                         reps = setEntity.reps,
+                        durationSeconds = setEntity.durationSeconds,
+                        distanceMeters = setEntity.distanceMeters,
+                        setType = setEntity.setType,
+                        isCompleted = setEntity.isCompleted,
+                        restTakenSeconds = setEntity.restTakenSeconds,
                         orderIndex = setEntity.orderIndex
                     )
                 }
@@ -107,8 +117,13 @@ object WorkoutSessionMapper {
             WorkoutSetEntity(
                 id = set.id,
                 performedExerciseId = performedExercise.id,
-                weight = set.weight,
+                weightKg = set.weightKg,
                 reps = set.reps,
+                durationSeconds = set.durationSeconds,
+                distanceMeters = set.distanceMeters,
+                setType = set.setType,
+                isCompleted = set.isCompleted,
+                restTakenSeconds = set.restTakenSeconds,
                 orderIndex = set.orderIndex
             )
         }
