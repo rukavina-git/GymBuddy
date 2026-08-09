@@ -9,7 +9,6 @@ import androidx.room.Update
 import com.rukavina.gymbuddy.data.local.entity.PerformedExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.PerformedExerciseWithSets
 import com.rukavina.gymbuddy.data.local.entity.WorkoutSessionEntity
-import com.rukavina.gymbuddy.data.local.entity.WorkoutSessionWithPerformedExercises
 import com.rukavina.gymbuddy.data.local.entity.WorkoutSetEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -20,28 +19,25 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WorkoutSessionDao {
     /**
-     * Get all workout sessions with their performed exercises.
+     * Get all workout sessions.
      * Ordered by date descending (most recent first).
      */
-    @Transaction
     @Query("SELECT * FROM workout_sessions ORDER BY date DESC")
-    fun getAllWorkoutSessions(): Flow<List<WorkoutSessionWithPerformedExercises>>
+    fun getAllWorkoutSessions(): Flow<List<WorkoutSessionEntity>>
 
     /**
-     * Get a single workout session by ID with its performed exercises.
+     * Get a single workout session by ID.
      */
-    @Transaction
     @Query("SELECT * FROM workout_sessions WHERE id = :id")
-    suspend fun getWorkoutSessionById(id: String): WorkoutSessionWithPerformedExercises?
+    suspend fun getWorkoutSessionById(id: String): WorkoutSessionEntity?
 
     /**
      * Get workout sessions within a date range.
      * @param startDate Unix timestamp in milliseconds
      * @param endDate Unix timestamp in milliseconds
      */
-    @Transaction
     @Query("SELECT * FROM workout_sessions WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
-    fun getWorkoutSessionsByDateRange(startDate: Long, endDate: Long): Flow<List<WorkoutSessionWithPerformedExercises>>
+    fun getWorkoutSessionsByDateRange(startDate: Long, endDate: Long): Flow<List<WorkoutSessionEntity>>
 
     /**
      * Insert a new workout session.
@@ -128,11 +124,32 @@ interface WorkoutSessionDao {
     }
 
     /**
-     * Get performed exercises with their sets for a workout session.
+     * Get performed exercises for a workout session, ordered by orderIndex.
+     * Not annotated with @Relation: Room's @Relation has no ORDER BY support,
+     * so ordering is done here in SQL instead.
+     */
+    @Query("SELECT * FROM performed_exercises WHERE workoutSessionId = :workoutSessionId ORDER BY orderIndex ASC")
+    suspend fun getPerformedExerciseEntitiesForSession(workoutSessionId: String): List<PerformedExerciseEntity>
+
+    /**
+     * Get the sets for a performed exercise, ordered by orderIndex.
+     */
+    @Query("SELECT * FROM workout_sets WHERE performedExerciseId = :performedExerciseId ORDER BY orderIndex ASC")
+    suspend fun getWorkoutSetsForPerformedExercise(performedExerciseId: String): List<WorkoutSetEntity>
+
+    /**
+     * Get performed exercises with their sets for a workout session, both
+     * ordered by orderIndex in SQL so ordering is correct regardless of caller.
      */
     @Transaction
-    @Query("SELECT * FROM performed_exercises WHERE workoutSessionId = :workoutSessionId")
-    suspend fun getPerformedExercisesWithSets(workoutSessionId: String): List<PerformedExerciseWithSets>
+    suspend fun getPerformedExercisesWithSets(workoutSessionId: String): List<PerformedExerciseWithSets> {
+        return getPerformedExerciseEntitiesForSession(workoutSessionId).map { performedExercise ->
+            PerformedExerciseWithSets(
+                performedExercise = performedExercise,
+                sets = getWorkoutSetsForPerformedExercise(performedExercise.id)
+            )
+        }
+    }
 
     /**
      * Insert workout sets for a performed exercise.

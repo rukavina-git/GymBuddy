@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.PerformedExercise
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
@@ -272,7 +274,9 @@ class ActiveWorkoutViewModel @Inject constructor(
 
             val state = _uiState.value
 
-            // Convert active exercises to performed exercises with individual sets
+            // Convert active exercises to performed exercises with individual sets.
+            // Exercises with no completed sets are dropped before assigning
+            // orderIndex, so the kept exercises stay contiguously ordered.
             val performedExercises = state.exercises.mapNotNull { activeExercise ->
                 // Get completed sets
                 val completedSets = activeExercise.sets
@@ -291,9 +295,19 @@ class ActiveWorkoutViewModel @Inject constructor(
 
                 if (completedSets.isEmpty()) return@mapNotNull null
 
+                activeExercise.exerciseId to completedSets
+            }.mapIndexed { index, (exerciseId, completedSets) ->
+                // exerciseName/exerciseCategory/exerciseTrackingType/exercisePrimaryMuscles
+                // are placeholders here - ValidateWorkoutSessionSetsUseCase resolves the
+                // real Exercise and stamps the actual snapshot before this is persisted.
                 PerformedExercise(
                     id = idGenerator.newId(),
-                    exerciseId = activeExercise.exerciseId,
+                    exerciseId = exerciseId,
+                    orderIndex = index,
+                    exerciseName = "",
+                    exerciseCategory = ExerciseCategory.STRENGTH,
+                    exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
+                    exercisePrimaryMuscles = emptyList(),
                     sets = completedSets
                 )
             }

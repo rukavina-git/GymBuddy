@@ -43,9 +43,11 @@ class CreateWorkoutSessionUseCase @Inject constructor(
 
             val finalWorkoutSession = workoutSessionWithId.copy(performedExercises = performedExercisesWithIds)
 
-            validateWorkoutSessionSets(finalWorkoutSession)
+            // Validates sets and stamps each PerformedExercise's exercise
+            // snapshot; must use the returned session, not finalWorkoutSession.
+            val sessionWithSnapshots = validateWorkoutSessionSets(finalWorkoutSession)
 
-            repository.createWorkoutSession(finalWorkoutSession)
+            repository.createWorkoutSession(sessionWithSnapshots)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

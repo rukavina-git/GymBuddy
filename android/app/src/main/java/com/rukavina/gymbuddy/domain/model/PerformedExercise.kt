@@ -17,9 +17,45 @@ data class PerformedExercise(
 
     /**
      * Reference to the Exercise template that was performed.
-     * Points to Exercise.id.
+     * Points to Exercise.id, but this is a soft reference, not a foreign
+     * key: the exercises table can be re-seeded, the referenced exercise
+     * can be deprecated, or (for a custom exercise) deleted entirely.
+     * History must remain readable even when this id no longer resolves -
+     * use the exerciseName/exerciseCategory/exerciseTrackingType/
+     * exercisePrimaryMuscles snapshot below for display, not a live lookup.
      */
     val exerciseId: String,
+
+    /**
+     * Order/position of this exercise within the workout session (0-indexed).
+     */
+    val orderIndex: Int,
+
+    /**
+     * Snapshot of Exercise.name at the time this exercise was performed.
+     * Written once at creation and never updated - a later rename of a
+     * custom exercise, or a library refresh changing the default
+     * exercise's name, must not rewrite history.
+     */
+    val exerciseName: String,
+
+    /**
+     * Snapshot of Exercise.category at the time this exercise was performed.
+     * Written once at creation and never updated; see exerciseName.
+     */
+    val exerciseCategory: ExerciseCategory,
+
+    /**
+     * Snapshot of Exercise.trackingType at the time this exercise was performed.
+     * Written once at creation and never updated; see exerciseName.
+     */
+    val exerciseTrackingType: ExerciseTrackingType,
+
+    /**
+     * Snapshot of Exercise.primaryMuscles at the time this exercise was performed.
+     * Written once at creation and never updated; see exerciseName.
+     */
+    val exercisePrimaryMuscles: List<MuscleGroup>,
 
     /**
      * List of sets performed for this exercise.
