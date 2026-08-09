@@ -32,16 +32,22 @@ data class WorkoutTemplate(
     val templateExercises: List<TemplateExercise>,
 
     /**
-     * Whether this is a default/bundled template.
-     * Default templates cannot be edited or deleted, only hidden.
+     * Whether this is a default/bundled (or future server-provided)
+     * template, or one the user created. Default templates cannot be
+     * edited or deleted, only hidden.
      */
-    val isDefault: Boolean = false,
+    val source: EntitySource = EntitySource.CUSTOM,
 
     /**
-     * Whether this template is hidden by the user.
-     * Hidden templates don't appear in the main list but can be restored.
+     * User ID of the creator, for CUSTOM templates. Null for DEFAULT rows.
      */
-    val isHidden: Boolean = false,
+    val ownerId: String? = null,
+
+    /**
+     * Id of the DEFAULT template this one was duplicated from, for a
+     * future "duplicate and edit" action on a default entry. Not used yet.
+     */
+    val derivedFromId: String? = null,
 
     /**
      * Whether this template has been superseded and should no longer

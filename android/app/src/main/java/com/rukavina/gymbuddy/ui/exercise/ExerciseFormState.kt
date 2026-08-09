@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
+import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
@@ -108,7 +109,6 @@ class ExerciseFormState(initialExercise: Exercise? = null) {
             description = description.trim().ifBlank { null },
             instructions = instructions.filter { it.isNotBlank() },
             tips = tips.filter { it.isNotBlank() },
-            note = initialExercise?.note,
             difficulty = difficulty,
             equipmentNeeded = equipmentNeeded,
             category = category,
@@ -116,9 +116,9 @@ class ExerciseFormState(initialExercise: Exercise? = null) {
             trackingType = initialExercise?.trackingType ?: ExerciseTrackingType.WEIGHT_REPS,
             videoUrl = videoUrl.trim().ifBlank { null },
             thumbnailUrl = thumbnailUrl.trim().ifBlank { null },
-            isCustom = initialExercise?.isCustom ?: true,
-            createdBy = initialExercise?.createdBy,
-            isHidden = initialExercise?.isHidden ?: false,
+            source = initialExercise?.source ?: EntitySource.CUSTOM,
+            ownerId = initialExercise?.ownerId,
+            derivedFromId = initialExercise?.derivedFromId,
             deprecated = initialExercise?.deprecated ?: false
         )
     }

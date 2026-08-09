@@ -59,6 +59,16 @@ interface ExerciseRepository {
     suspend fun unhideAllExercises()
 
     /**
+     * Get the personal note for an exercise, or null if none has been set.
+     */
+    suspend fun getExerciseNote(exerciseId: String): String?
+
+    /**
+     * Set (or clear, with null) the personal note for an exercise.
+     */
+    suspend fun updateExerciseNote(exerciseId: String, note: String?)
+
+    /**
      * Search exercises by name (case-insensitive).
      * Useful for autocomplete or filtering.
      */

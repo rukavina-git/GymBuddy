@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.local.converter
 
 import androidx.room.TypeConverter
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
+import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
@@ -106,6 +107,23 @@ class ExerciseConverters {
         return value?.let {
             try {
                 ExerciseTrackingType.valueOf(it)
+            } catch (e: IllegalArgumentException) {
+                null
+            }
+        }
+    }
+
+    // EntitySource Converters (shared by Exercise and WorkoutTemplate)
+    @TypeConverter
+    fun fromEntitySource(value: EntitySource?): String? {
+        return value?.name
+    }
+
+    @TypeConverter
+    fun toEntitySource(value: String?): EntitySource? {
+        return value?.let {
+            try {
+                EntitySource.valueOf(it)
             } catch (e: IllegalArgumentException) {
                 null
             }

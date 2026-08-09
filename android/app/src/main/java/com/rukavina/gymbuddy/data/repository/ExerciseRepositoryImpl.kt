@@ -1,6 +1,7 @@
 package com.rukavina.gymbuddy.data.repository
 
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
+import com.rukavina.gymbuddy.data.local.dao.UserExerciseStateDao
 import com.rukavina.gymbuddy.data.local.mapper.ExerciseMapper
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
@@ -14,7 +15,8 @@ import javax.inject.Inject
  * Can be extended to sync with remote API in the future.
  */
 class ExerciseRepositoryImpl @Inject constructor(
-    private val exerciseDao: ExerciseDao
+    private val exerciseDao: ExerciseDao,
+    private val userExerciseStateDao: UserExerciseStateDao
 ) : ExerciseRepository {
 
     override fun getAllExercises(): Flow<List<Exercise>> {
@@ -46,11 +48,11 @@ class ExerciseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun hideExercise(id: String) {
-        exerciseDao.hideExercise(id)
+        userExerciseStateDao.setHidden(id, true)
     }
 
     override suspend fun unhideExercise(id: String) {
-        exerciseDao.unhideExercise(id)
+        userExerciseStateDao.setHidden(id, false)
     }
 
     override fun getHiddenExercises(): Flow<List<Exercise>> {
@@ -60,7 +62,15 @@ class ExerciseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun unhideAllExercises() {
-        exerciseDao.unhideAllExercises()
+        userExerciseStateDao.unhideAll()
+    }
+
+    override suspend fun getExerciseNote(exerciseId: String): String? {
+        return userExerciseStateDao.getState(exerciseId)?.note
+    }
+
+    override suspend fun updateExerciseNote(exerciseId: String, note: String?) {
+        userExerciseStateDao.setNote(exerciseId, note)
     }
 
     override fun searchExercises(query: String): Flow<List<Exercise>> {

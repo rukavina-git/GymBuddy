@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.rukavina.gymbuddy.domain.model.EntitySource
 
 /**
  * Room entity for WorkoutTemplate table.
@@ -26,16 +27,20 @@ data class WorkoutTemplateEntity(
     val title: String,
 
     /**
-     * Whether this is a default/bundled template.
-     * Default templates cannot be edited or deleted, only hidden.
+     * Whether this is a default/bundled template. Default templates cannot
+     * be edited or deleted, only hidden.
      */
-    val isDefault: Boolean = false,
+    val source: EntitySource = EntitySource.CUSTOM,
 
     /**
-     * Whether this template is hidden by the user.
-     * Hidden templates don't appear in the main list but can be restored.
+     * User ID of the creator, for CUSTOM templates. Null for DEFAULT rows.
      */
-    val isHidden: Boolean = false,
+    val ownerId: String? = null,
+
+    /**
+     * Id of the DEFAULT template this one was duplicated from. Not used yet.
+     */
+    val derivedFromId: String? = null,
 
     /**
      * Whether this template has been superseded and should no longer

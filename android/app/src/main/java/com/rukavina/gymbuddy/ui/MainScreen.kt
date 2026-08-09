@@ -12,6 +12,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -130,13 +131,19 @@ fun MainScreen(rootNavController: NavHostController) {
                 val exerciseViewModel: ExerciseViewModel = hiltViewModel()
                 val uiState = exerciseViewModel.uiState.collectAsState().value
                 val exercise = uiState.exercises.find { it.id == exerciseId }
+                val note = exerciseViewModel.selectedExerciseNote.collectAsState().value
+
+                LaunchedEffect(exerciseId) {
+                    exerciseViewModel.loadExerciseNote(exerciseId)
+                }
 
                 if (exercise != null) {
                     ExerciseDetailsScreen(
                         exercise = exercise,
+                        note = note,
                         onNavigateBack = { bottomNavController.navigateUp() },
-                        onUpdateNote = { note ->
-                            exerciseViewModel.updateExerciseNote(exerciseId, note)
+                        onUpdateNote = { newNote ->
+                            exerciseViewModel.updateExerciseNote(exerciseId, newNote)
                         }
                     )
                 }

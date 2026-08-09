@@ -62,5 +62,12 @@ data class PerformedExercise(
      * Each set can have different weight and reps.
      * Order in the list represents the sequence in which sets were performed.
      */
-    val sets: List<WorkoutSet>
+    val sets: List<WorkoutSet>,
+
+    /**
+     * Groups exercises performed together in the same session (e.g. a
+     * superset). Exercises sharing a non-null value are performed
+     * together. Stored and round-tripped only - no UI or logic yet.
+     */
+    val supersetGroup: Int? = null
 )

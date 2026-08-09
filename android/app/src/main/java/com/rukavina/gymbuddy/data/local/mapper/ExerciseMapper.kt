@@ -20,7 +20,6 @@ object ExerciseMapper {
             description = exercise.description,
             instructions = exercise.instructions,
             tips = exercise.tips,
-            note = exercise.note,
             difficulty = exercise.difficulty,
             equipmentNeeded = exercise.equipmentNeeded,
             category = exercise.category,
@@ -28,9 +27,9 @@ object ExerciseMapper {
             trackingType = exercise.trackingType,
             videoUrl = exercise.videoUrl,
             thumbnailUrl = exercise.thumbnailUrl,
-            isCustom = exercise.isCustom,
-            createdBy = exercise.createdBy,
-            isHidden = exercise.isHidden,
+            source = exercise.source,
+            ownerId = exercise.ownerId,
+            derivedFromId = exercise.derivedFromId,
             deprecated = exercise.deprecated
         )
     }
@@ -47,7 +46,6 @@ object ExerciseMapper {
             description = entity.description,
             instructions = entity.instructions,
             tips = entity.tips,
-            note = entity.note,
             difficulty = entity.difficulty,
             equipmentNeeded = entity.equipmentNeeded,
             category = entity.category,
@@ -55,9 +53,9 @@ object ExerciseMapper {
             trackingType = entity.trackingType,
             videoUrl = entity.videoUrl,
             thumbnailUrl = entity.thumbnailUrl,
-            isCustom = entity.isCustom,
-            createdBy = entity.createdBy,
-            isHidden = entity.isHidden,
+            source = entity.source,
+            ownerId = entity.ownerId,
+            derivedFromId = entity.derivedFromId,
             deprecated = entity.deprecated
         )
     }

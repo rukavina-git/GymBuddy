@@ -7,6 +7,7 @@ import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
 import com.rukavina.gymbuddy.data.local.entity.ExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.ExerciseVersionEntity
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
+import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
@@ -119,7 +120,6 @@ class ExerciseSeeder @Inject constructor(
             description = json.optString("description").takeIf { it.isNotEmpty() },
             instructions = parseStringList(json.optJSONArray("instructions")),
             tips = parseStringList(json.optJSONArray("tips")),
-            note = json.optString("note").takeIf { it.isNotEmpty() },
             difficulty = DifficultyLevel.valueOf(json.getString("difficulty")),
             equipmentNeeded = parseEnumList<Equipment>(json.getJSONArray("equipmentNeeded")),
             category = ExerciseCategory.valueOf(json.getString("category")),
@@ -127,9 +127,9 @@ class ExerciseSeeder @Inject constructor(
             trackingType = ExerciseTrackingType.valueOf(json.getString("trackingType")),
             videoUrl = json.optString("videoUrl").takeIf { it.isNotEmpty() },
             thumbnailUrl = json.optString("thumbnailUrl").takeIf { it.isNotEmpty() },
-            isCustom = json.getBoolean("isCustom"),
-            createdBy = json.optString("createdBy").takeIf { it.isNotEmpty() },
-            isHidden = false, // Default exercises are never hidden by default - this is user-specific preference
+            source = EntitySource.DEFAULT,
+            ownerId = null,
+            derivedFromId = null,
             deprecated = json.optBoolean("deprecated")
         )
     }

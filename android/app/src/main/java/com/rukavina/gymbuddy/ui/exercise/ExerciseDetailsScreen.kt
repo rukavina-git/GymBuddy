@@ -23,6 +23,7 @@ import com.rukavina.gymbuddy.domain.model.Exercise
 @Composable
 fun ExerciseDetailsScreen(
     exercise: Exercise,
+    note: String?,
     onNavigateBack: () -> Unit,
     onUpdateNote: (String) -> Unit = {}
 ) {
@@ -55,7 +56,7 @@ fun ExerciseDetailsScreen(
 
             // Tab content
             when (selectedTab) {
-                0 -> InfoTab(exercise, onUpdateNote)
+                0 -> InfoTab(exercise, note, onUpdateNote)
                 1 -> HistoryTab()
             }
         }
@@ -81,10 +82,11 @@ fun ExerciseDetailsScreen(
 @Composable
 fun InfoTab(
     exercise: Exercise,
+    note: String?,
     onUpdateNote: (String) -> Unit
 ) {
     val context = LocalContext.current
-    var noteText by remember { mutableStateOf(exercise.note ?: "") }
+    var noteText by remember(note) { mutableStateOf(note ?: "") }
     var isEditingNote by remember { mutableStateOf(false) }
 
     Column(

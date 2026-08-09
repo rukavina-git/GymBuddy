@@ -7,6 +7,7 @@ import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.entity.TemplateExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateVersionEntity
 import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
+import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import org.json.JSONObject
 import javax.inject.Inject
@@ -101,8 +102,9 @@ class WorkoutTemplateSeeder @Inject constructor(
             val template = WorkoutTemplateEntity(
                 id = templateId,
                 title = templateJson.getString("title"),
-                isDefault = true, // Mark as default template
-                isHidden = false,
+                source = EntitySource.DEFAULT,
+                ownerId = null,
+                derivedFromId = null,
                 deprecated = templateJson.optBoolean("deprecated")
             )
 

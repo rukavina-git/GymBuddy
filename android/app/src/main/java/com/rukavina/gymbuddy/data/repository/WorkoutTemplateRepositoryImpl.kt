@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.repository
 
+import com.rukavina.gymbuddy.data.local.dao.UserTemplateStateDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.mapper.WorkoutTemplateMapper
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
@@ -16,7 +17,8 @@ import javax.inject.Inject
  * Follows the same pattern as WorkoutSessionRepositoryImpl for consistency.
  */
 class WorkoutTemplateRepositoryImpl @Inject constructor(
-    private val workoutTemplateDao: WorkoutTemplateDao
+    private val workoutTemplateDao: WorkoutTemplateDao,
+    private val userTemplateStateDao: UserTemplateStateDao
 ) : WorkoutTemplateRepository {
 
     override fun getAllTemplates(): Flow<List<WorkoutTemplate>> {
@@ -56,11 +58,11 @@ class WorkoutTemplateRepositoryImpl @Inject constructor(
     }
 
     override suspend fun hideTemplate(id: String) {
-        workoutTemplateDao.hideTemplate(id)
+        userTemplateStateDao.setHidden(id, true)
     }
 
     override suspend fun unhideTemplate(id: String) {
-        workoutTemplateDao.unhideTemplate(id)
+        userTemplateStateDao.setHidden(id, false)
     }
 
     override fun getHiddenTemplates(): Flow<List<WorkoutTemplate>> {

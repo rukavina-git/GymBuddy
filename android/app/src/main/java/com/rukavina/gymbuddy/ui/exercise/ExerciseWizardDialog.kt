@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
+import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
@@ -177,7 +178,6 @@ fun ExerciseWizardDialog(
                                         description = description.ifBlank { null },
                                         instructions = instructions.filter { it.isNotBlank() },
                                         tips = exercise?.tips ?: emptyList(),
-                                        note = exercise?.note,
                                         difficulty = difficulty,
                                         equipmentNeeded = equipmentNeeded,
                                         category = category,
@@ -185,9 +185,9 @@ fun ExerciseWizardDialog(
                                         trackingType = exercise?.trackingType ?: ExerciseTrackingType.WEIGHT_REPS,
                                         videoUrl = videoUrl.ifBlank { null },
                                         thumbnailUrl = thumbnailUrl.ifBlank { null },
-                                        isCustom = exercise?.isCustom ?: true,
-                                        createdBy = exercise?.createdBy,
-                                        isHidden = exercise?.isHidden ?: false,
+                                        source = exercise?.source ?: EntitySource.CUSTOM,
+                                        ownerId = exercise?.ownerId,
+                                        derivedFromId = exercise?.derivedFromId,
                                         deprecated = exercise?.deprecated ?: false
                                     )
                                 )

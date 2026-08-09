@@ -5,7 +5,9 @@ import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
 import com.rukavina.gymbuddy.data.local.dao.TemplateVersionDao
+import com.rukavina.gymbuddy.data.local.dao.UserExerciseStateDao
 import com.rukavina.gymbuddy.data.local.dao.UserProfileDao
+import com.rukavina.gymbuddy.data.local.dao.UserTemplateStateDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
@@ -73,13 +75,24 @@ object AppModule {
         return database.templateVersionDao()
     }
 
+    @Provides
+    fun provideUserExerciseStateDao(database: AppDatabase): UserExerciseStateDao {
+        return database.userExerciseStateDao()
+    }
+
+    @Provides
+    fun provideUserTemplateStateDao(database: AppDatabase): UserTemplateStateDao {
+        return database.userTemplateStateDao()
+    }
+
     // Repositories
     @Provides
     @Singleton
     fun provideExerciseRepository(
-        exerciseDao: ExerciseDao
+        exerciseDao: ExerciseDao,
+        userExerciseStateDao: UserExerciseStateDao
     ): ExerciseRepository {
-        return ExerciseRepositoryImpl(exerciseDao)
+        return ExerciseRepositoryImpl(exerciseDao, userExerciseStateDao)
     }
 
     @Provides
@@ -93,9 +106,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideWorkoutTemplateRepository(
-        workoutTemplateDao: WorkoutTemplateDao
+        workoutTemplateDao: WorkoutTemplateDao,
+        userTemplateStateDao: UserTemplateStateDao
     ): WorkoutTemplateRepository {
-        return WorkoutTemplateRepositoryImpl(workoutTemplateDao)
+        return WorkoutTemplateRepositoryImpl(workoutTemplateDao, userTemplateStateDao)
     }
 
     @Provides
