@@ -14,7 +14,7 @@ android {
         applicationId = "com.rukavina.gymbuddy"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 4
+        versionCode = 5
         versionName = "0.0.2-SNAPSHOT"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -25,6 +25,7 @@ android {
                 debugSymbolLevel = "FULL"
             }
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -66,7 +67,6 @@ dependencies {
     // Hilt
     implementation(libs.daggerHilt)
     implementation(libs.hilt.navigation.compose)
-    implementation(libs.google.googleid)
     ksp(libs.daggerHiltCompiler)
 
     // Firebase
@@ -94,7 +94,6 @@ dependencies {
     testImplementation(libs.room.testing)
     androidTestImplementation(libs.testExtJunit)
     androidTestImplementation(libs.espressoCore)
-    androidTestImplementation(platform(libs.androidxComposeBom))
     androidTestImplementation(libs.ui.test.junit)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
