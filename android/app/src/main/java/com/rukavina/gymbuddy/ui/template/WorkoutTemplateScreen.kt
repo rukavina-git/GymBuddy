@@ -48,7 +48,6 @@ import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.TemplateExercise
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
-import java.util.UUID
 
 /**
  * Main screen for viewing and managing workout templates.
@@ -199,7 +198,9 @@ fun WorkoutTemplateScreen(
                         viewModel.createTemplate(template)
                     }
                     showCreateEditDialog = false
-                }
+                },
+                generateExerciseId = viewModel::newTemplateExerciseId,
+                generateTemplateId = viewModel::newTemplateId
             )
         }
 
@@ -446,7 +447,9 @@ fun WorkoutTemplateFormDialog(
     template: WorkoutTemplate?,
     availableExercises: List<Exercise>,
     onDismiss: () -> Unit,
-    onSave: (WorkoutTemplate) -> Unit
+    onSave: (WorkoutTemplate) -> Unit,
+    generateExerciseId: () -> String,
+    generateTemplateId: () -> String
 ) {
     // Form state
     var title by remember { mutableStateOf(template?.title ?: "") }
@@ -459,7 +462,7 @@ fun WorkoutTemplateFormDialog(
     var showExercisePicker by remember { mutableStateOf(false) }
     var editingExerciseIndex by remember { mutableStateOf<Int?>(null) }
     var showExerciseConfig by remember { mutableStateOf(false) }
-    var pendingExerciseId by remember { mutableStateOf<Int?>(null) }
+    var pendingExerciseId by remember { mutableStateOf<String?>(null) }
     var exerciseToDelete by remember { mutableStateOf<TemplateExercise?>(null) }
 
     // Create exercise map for lookups
@@ -575,7 +578,7 @@ fun WorkoutTemplateFormDialog(
                 onClick = {
                     onSave(
                         WorkoutTemplate(
-                            id = template?.id ?: UUID.randomUUID().toString(),
+                            id = template?.id ?: generateTemplateId(),
                             title = title,
                             templateExercises = templateExercises
                         )
@@ -614,7 +617,7 @@ fun WorkoutTemplateFormDialog(
         }
 
         ExerciseConfigDialog(
-            exerciseId = pendingExerciseId ?: editingExercise?.exerciseId ?: 0,
+            exerciseId = pendingExerciseId ?: editingExercise?.exerciseId ?: "",
             exerciseName = exerciseMap[pendingExerciseId ?: editingExercise?.exerciseId]?.name ?: "",
             initialSets = editingExercise?.plannedSets ?: 3,
             initialReps = editingExercise?.plannedReps ?: 10,
@@ -641,7 +644,7 @@ fun WorkoutTemplateFormDialog(
                 } else {
                     // Add new
                     val newExercise = TemplateExercise(
-                        id = System.currentTimeMillis().toInt(),
+                        id = generateExerciseId(),
                         exerciseId = pendingExerciseId!!,
                         plannedSets = sets,
                         plannedReps = reps,
@@ -810,7 +813,7 @@ fun WorkoutTemplateViewDialog(
  */
 private fun reorderExercise(
     exercises: List<TemplateExercise>,
-    exerciseId: Int,
+    exerciseId: String,
     direction: Int
 ): List<TemplateExercise> {
     val sorted = exercises.sortedBy { it.orderIndex }

@@ -100,7 +100,7 @@ class ExerciseFormState(initialExercise: Exercise? = null) {
      */
     fun toExercise(): Exercise {
         return Exercise(
-            id = initialExercise?.id ?: 0,
+            id = initialExercise?.id ?: "",
             name = name.trim(),
             primaryMuscles = primaryMuscles,
             secondaryMuscles = secondaryMuscles,

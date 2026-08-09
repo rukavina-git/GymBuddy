@@ -109,7 +109,7 @@ class ExerciseViewModel @Inject constructor(
     /**
      * Select an exercise for viewing/editing.
      */
-    fun selectExercise(exerciseId: Int) {
+    fun selectExercise(exerciseId: String) {
         viewModelScope.launch {
             val exercise = getExerciseByIdUseCase(exerciseId)
             _uiState.update { it.copy(selectedExercise = exercise) }
@@ -180,7 +180,7 @@ class ExerciseViewModel @Inject constructor(
     /**
      * Delete an exercise.
      */
-    fun deleteExercise(exerciseId: Int) {
+    fun deleteExercise(exerciseId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             deleteExerciseUseCase(exerciseId)
@@ -222,7 +222,7 @@ class ExerciseViewModel @Inject constructor(
     /**
      * Hide an exercise (only for default exercises).
      */
-    fun hideExercise(exerciseId: Int) {
+    fun hideExercise(exerciseId: String) {
         viewModelScope.launch {
             try {
                 exerciseRepository.hideExercise(exerciseId)
@@ -240,7 +240,7 @@ class ExerciseViewModel @Inject constructor(
     /**
      * Unhide an exercise.
      */
-    fun unhideExercise(exerciseId: Int) {
+    fun unhideExercise(exerciseId: String) {
         viewModelScope.launch {
             try {
                 exerciseRepository.unhideExercise(exerciseId)
@@ -276,7 +276,7 @@ class ExerciseViewModel @Inject constructor(
     /**
      * Update the note for an exercise.
      */
-    fun updateExerciseNote(exerciseId: Int, note: String) {
+    fun updateExerciseNote(exerciseId: String, note: String) {
         viewModelScope.launch {
             try {
                 val exercise = getExerciseByIdUseCase(exerciseId)

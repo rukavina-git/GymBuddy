@@ -3,6 +3,7 @@ package com.rukavina.gymbuddy.ui.workout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.PerformedExercise
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
@@ -21,7 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -37,7 +37,8 @@ class WorkoutSessionViewModel @Inject constructor(
     private val createWorkoutSessionUseCase: CreateWorkoutSessionUseCase,
     private val updateWorkoutSessionUseCase: UpdateWorkoutSessionUseCase,
     private val deleteWorkoutSessionUseCase: DeleteWorkoutSessionUseCase,
-    private val userProfileRepository: UserProfileRepository
+    private val userProfileRepository: UserProfileRepository,
+    private val idGenerator: IdGenerator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkoutSessionUiState())
@@ -253,6 +254,21 @@ class WorkoutSessionViewModel @Inject constructor(
     }
 
     /**
+     * Generate a new id for a performed exercise being created in the UI.
+     */
+    fun newPerformedExerciseId(): String = idGenerator.newId()
+
+    /**
+     * Generate a new id for a workout set being created in the UI.
+     */
+    fun newWorkoutSetId(): String = idGenerator.newId()
+
+    /**
+     * Generate a new id for a workout session being created in the UI.
+     */
+    fun newWorkoutSessionId(): String = idGenerator.newId()
+
+    /**
      * Change the sort order for workout sessions.
      */
     fun setSortOrder(sortOrder: WorkoutSessionSortOrder) {
@@ -297,7 +313,7 @@ class WorkoutSessionViewModel @Inject constructor(
                     // Create empty sets that user will fill in during workout
                     val sets = List(templateExercise.plannedSets) { index ->
                         WorkoutSet(
-                            id = UUID.randomUUID().toString(),
+                            id = idGenerator.newId(),
                             weight = 0f, // User will fill in
                             reps = templateExercise.plannedReps,
                             orderIndex = index
@@ -305,14 +321,14 @@ class WorkoutSessionViewModel @Inject constructor(
                     }
 
                     PerformedExercise(
-                        id = System.currentTimeMillis().toInt(),
+                        id = idGenerator.newId(),
                         exerciseId = templateExercise.exerciseId,
                         sets = sets
                     )
                 }
 
             val newSession = WorkoutSession(
-                id = UUID.randomUUID().toString(),
+                id = idGenerator.newId(),
                 date = System.currentTimeMillis(),
                 durationSeconds = 0, // Will be updated when session ends
                 title = template.title, // Use template title as default title

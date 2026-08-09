@@ -30,9 +30,9 @@ import androidx.room.Relation
 )
 data class PerformedExerciseEntity(
     @PrimaryKey(autoGenerate = false)
-    val id: Int,
+    val id: String,
     val workoutSessionId: String,
-    val exerciseId: Int
+    val exerciseId: String
 )
 
 /**

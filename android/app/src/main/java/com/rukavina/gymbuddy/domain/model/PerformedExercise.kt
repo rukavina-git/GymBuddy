@@ -12,15 +12,14 @@ package com.rukavina.gymbuddy.domain.model
 data class PerformedExercise(
     /**
      * Unique identifier for this performed exercise instance.
-     * Generated from timestamp for uniqueness.
      */
-    val id: Int,
+    val id: String,
 
     /**
      * Reference to the Exercise template that was performed.
      * Points to Exercise.id.
      */
-    val exerciseId: Int,
+    val exerciseId: String,
 
     /**
      * List of sets performed for this exercise.
