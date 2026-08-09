@@ -36,6 +36,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -201,6 +202,11 @@ fun ActiveWorkoutScreen(
             LaunchedEffect(error) {
                 kotlinx.coroutines.delay(3000)
                 viewModel.clearError()
+            }
+            Snackbar(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(error)
             }
         }
     }

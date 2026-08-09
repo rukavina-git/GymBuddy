@@ -11,7 +11,8 @@ import javax.inject.Inject
  */
 class CreateWorkoutSessionUseCase @Inject constructor(
     private val repository: WorkoutSessionRepository,
-    private val idGenerator: IdGenerator
+    private val idGenerator: IdGenerator,
+    private val validateWorkoutSessionSets: ValidateWorkoutSessionSetsUseCase
 ) {
     /**
      * Create a new workout session with performed exercises.
@@ -41,6 +42,8 @@ class CreateWorkoutSessionUseCase @Inject constructor(
             }
 
             val finalWorkoutSession = workoutSessionWithId.copy(performedExercises = performedExercisesWithIds)
+
+            validateWorkoutSessionSets(finalWorkoutSession)
 
             repository.createWorkoutSession(finalWorkoutSession)
             Result.success(Unit)
