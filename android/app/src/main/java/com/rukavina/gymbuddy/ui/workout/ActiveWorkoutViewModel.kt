@@ -34,6 +34,8 @@ data class WorkoutSet(
     val setNumber: Int,
     var reps: String = "",
     var weight: String = "",
+    var duration: String = "",
+    var distance: String = "",
     var notes: String = "",
     var isCompleted: Boolean = false
 )
@@ -45,9 +47,10 @@ data class ActiveExercise(
     val id: String,
     val exerciseId: String,
     val exerciseName: String,
+    val exerciseTrackingType: ExerciseTrackingType,
     val sets: List<WorkoutSet>,
     val plannedSets: Int,
-    val plannedReps: Int
+    val plannedReps: Int?
 )
 
 /**
@@ -63,7 +66,9 @@ data class ActiveWorkoutUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val workoutSaved: Boolean = false,
-    val workoutDiscarded: Boolean = false
+    val workoutDiscarded: Boolean = false,
+    val templateId: String? = null,
+    val templateTitle: String? = null
 )
 
 /**
@@ -134,6 +139,8 @@ class ActiveWorkoutViewModel @Inject constructor(
                 .sortedBy { it.orderIndex }
                 .mapIndexed { exerciseIndex, templateExercise ->
                     val exerciseName = exerciseMap[templateExercise.exerciseId]?.name ?: "Unknown Exercise"
+                    val exerciseTrackingType = exerciseMap[templateExercise.exerciseId]?.trackingType
+                        ?: ExerciseTrackingType.WEIGHT_REPS
 
                     // Create individual sets for this exercise with unique IDs
                     val sets = (1..templateExercise.plannedSets).mapIndexed { setIndex, setNumber ->
@@ -150,6 +157,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                         id = "${workoutId}_exercise_${exerciseIndex}",
                         exerciseId = templateExercise.exerciseId,
                         exerciseName = exerciseName,
+                        exerciseTrackingType = exerciseTrackingType,
                         sets = sets,
                         plannedSets = templateExercise.plannedSets,
                         plannedReps = templateExercise.plannedReps
@@ -165,7 +173,9 @@ class ActiveWorkoutViewModel @Inject constructor(
                 workoutSaved = false,
                 isLoading = false,
                 errorMessage = null,
-                elapsedSeconds = 0L
+                elapsedSeconds = 0L,
+                templateId = template.id,
+                templateTitle = template.title
             )
 
             startTimer()
@@ -244,6 +254,48 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /**
+     * Update a specific set's duration value (whole seconds).
+     */
+    fun updateSetDuration(exerciseId: String, setId: String, duration: String) {
+        _uiState.update { state ->
+            state.copy(
+                exercises = state.exercises.map { exercise ->
+                    if (exercise.id == exerciseId) {
+                        exercise.copy(
+                            sets = exercise.sets.map { set ->
+                                if (set.id == setId) {
+                                    set.copy(duration = duration.filter { it.isDigit() })
+                                } else set
+                            }
+                        )
+                    } else exercise
+                }
+            )
+        }
+    }
+
+    /**
+     * Update a specific set's distance value (meters).
+     */
+    fun updateSetDistance(exerciseId: String, setId: String, distance: String) {
+        _uiState.update { state ->
+            state.copy(
+                exercises = state.exercises.map { exercise ->
+                    if (exercise.id == exerciseId) {
+                        exercise.copy(
+                            sets = exercise.sets.map { set ->
+                                if (set.id == setId) {
+                                    set.copy(distance = distance.filter { it.isDigit() || it == '.' })
+                                } else set
+                            }
+                        )
+                    } else exercise
+                }
+            )
+        }
+    }
+
+    /**
      * Update a specific set's notes.
      */
     fun updateSetNotes(exerciseId: String, setId: String, notes: String) {
@@ -278,16 +330,39 @@ class ActiveWorkoutViewModel @Inject constructor(
             // Exercises with no completed sets are dropped before assigning
             // orderIndex, so the kept exercises stay contiguously ordered.
             val performedExercises = state.exercises.mapNotNull { activeExercise ->
-                // Get completed sets
+                val trackingType = activeExercise.exerciseTrackingType
+
+                // Get completed sets - which fields are required depends on
+                // the exercise's tracking type, mirroring WorkoutSetValidator.
                 val completedSets = activeExercise.sets
-                    .filter { it.reps.isNotBlank() && it.weight.isNotBlank() }
+                    .filter {
+                        SetTrackingFields.isFilled(trackingType, it.reps, it.duration, it.distance)
+                    }
                     .mapIndexed { index, uiSet ->
                         // Convert weight from display units to metric (kg) for storage
-                        val weightInKg = UnitConverter.weightToMetric(uiSet.weight, state.preferredUnits)
+                        val weightInKg = if (SetTrackingFields.showsWeight(trackingType)) {
+                            UnitConverter.weightToMetric(uiSet.weight, state.preferredUnits)
+                        } else {
+                            null
+                        }
                         com.rukavina.gymbuddy.domain.model.WorkoutSet(
                             id = idGenerator.newId(),
                             weightKg = weightInKg,
-                            reps = uiSet.reps.toIntOrNull(),
+                            reps = if (SetTrackingFields.showsReps(trackingType)) {
+                                uiSet.reps.toIntOrNull()
+                            } else {
+                                null
+                            },
+                            durationSeconds = if (SetTrackingFields.showsDuration(trackingType)) {
+                                uiSet.duration.toIntOrNull()
+                            } else {
+                                null
+                            },
+                            distanceMeters = if (SetTrackingFields.showsDistance(trackingType)) {
+                                uiSet.distance.toFloatOrNull()
+                            } else {
+                                null
+                            },
                             isCompleted = true,
                             orderIndex = index
                         )
@@ -295,18 +370,20 @@ class ActiveWorkoutViewModel @Inject constructor(
 
                 if (completedSets.isEmpty()) return@mapNotNull null
 
-                activeExercise.exerciseId to completedSets
-            }.mapIndexed { index, (exerciseId, completedSets) ->
-                // exerciseName/exerciseCategory/exerciseTrackingType/exercisePrimaryMuscles
-                // are placeholders here - ValidateWorkoutSessionSetsUseCase resolves the
-                // real Exercise and stamps the actual snapshot before this is persisted.
+                Triple(activeExercise.exerciseId, completedSets, trackingType)
+            }.mapIndexed { index, (exerciseId, completedSets, trackingType) ->
+                // exerciseName/exerciseCategory/exercisePrimaryMuscles are
+                // placeholders here - ValidateWorkoutSessionSetsUseCase
+                // resolves the real Exercise and stamps the actual snapshot
+                // before this is persisted. exerciseTrackingType is already
+                // the real, resolved value from the active exercise.
                 PerformedExercise(
                     id = idGenerator.newId(),
                     exerciseId = exerciseId,
                     orderIndex = index,
                     exerciseName = "",
                     exerciseCategory = ExerciseCategory.STRENGTH,
-                    exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
+                    exerciseTrackingType = trackingType,
                     exercisePrimaryMuscles = emptyList(),
                     sets = completedSets
                 )
@@ -330,9 +407,12 @@ class ActiveWorkoutViewModel @Inject constructor(
 
             val workoutSession = WorkoutSession(
                 id = idGenerator.newId(),
-                date = state.workoutStartTime,
+                startedAt = state.workoutStartTime,
+                endedAt = System.currentTimeMillis(),
                 durationSeconds = state.elapsedSeconds.toInt(), // Store total seconds
                 title = state.workoutTitle.ifBlank { "Workout" },
+                templateId = state.templateId,
+                templateTitle = state.templateTitle,
                 performedExercises = performedExercises
             )
 

@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.TemplateExercise
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
@@ -115,7 +116,6 @@ fun WorkoutTemplateScreen(
                             items(uiState.templates) { template ->
                                 WorkoutTemplateItem(
                                     template = template,
-                                    availableExercises = uiState.availableExercises,
                                     onClick = {
                                         viewingTemplate = template
                                     },
@@ -263,7 +263,6 @@ fun WorkoutTemplateScreen(
         viewingTemplate?.let { template ->
             WorkoutTemplateViewDialog(
                 template = template,
-                availableExercises = uiState.availableExercises,
                 onDismiss = { viewingTemplate = null },
                 onStartWorkout = {
                     viewingTemplate = null
@@ -332,18 +331,12 @@ fun WorkoutTemplateScreen(
 @Composable
 fun WorkoutTemplateItem(
     template: WorkoutTemplate,
-    availableExercises: List<Exercise>,
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onHide: () -> Unit,
     onStartWorkout: () -> Unit
 ) {
-    // Create exercise ID to name mapping
-    val exerciseMap = remember(availableExercises) {
-        availableExercises.associateBy { it.id }
-    }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -400,9 +393,9 @@ fun WorkoutTemplateItem(
                     .sortedBy { it.orderIndex }
                     .take(3) // Show first 3 exercises
                     .forEach { templateExercise ->
-                        val exerciseName = exerciseMap[templateExercise.exerciseId]?.name ?: "Unknown"
+                        val exerciseName = templateExercise.exerciseName.ifBlank { "Unknown" }
                         Text(
-                            text = "• $exerciseName: ${templateExercise.plannedSets}x${templateExercise.plannedReps}",
+                            text = "• $exerciseName: ${templateExercise.plannedSets}x${formatPlannedTarget(templateExercise)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -533,7 +526,7 @@ fun WorkoutTemplateFormDialog(
                         ) { exercise ->
                             TemplateExerciseListItem(
                                 templateExercise = exercise,
-                                exerciseName = exerciseMap[exercise.exerciseId]?.name ?: "Unknown",
+                                exerciseName = exercise.exerciseName.ifBlank { "Unknown" },
                                 position = templateExercises.indexOf(exercise),
                                 totalCount = templateExercises.size,
                                 onMoveUp = {
@@ -618,7 +611,10 @@ fun WorkoutTemplateFormDialog(
 
         ExerciseConfigDialog(
             exerciseId = pendingExerciseId ?: editingExercise?.exerciseId ?: "",
-            exerciseName = exerciseMap[pendingExerciseId ?: editingExercise?.exerciseId]?.name ?: "",
+            // editingExercise already carries its stamped snapshot; a brand
+            // new pick (pendingExerciseId) has no TemplateExercise yet, so
+            // that case still needs the live library lookup.
+            exerciseName = editingExercise?.exerciseName ?: exerciseMap[pendingExerciseId]?.name ?: "",
             initialSets = editingExercise?.plannedSets ?: 3,
             initialReps = editingExercise?.plannedReps ?: 10,
             initialRest = editingExercise?.restSeconds,
@@ -642,10 +638,14 @@ fun WorkoutTemplateFormDialog(
                         } else ex
                     }
                 } else {
-                    // Add new
+                    // Add new. exerciseName/exerciseTrackingType are placeholders
+                    // here - StampTemplateExerciseSnapshotsUseCase resolves the
+                    // real Exercise and stamps them before this is persisted.
                     val newExercise = TemplateExercise(
                         id = generateExerciseId(),
                         exerciseId = pendingExerciseId!!,
+                        exerciseName = "",
+                        exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
                         plannedSets = sets,
                         plannedReps = reps,
                         orderIndex = templateExercises.size,
@@ -663,7 +663,7 @@ fun WorkoutTemplateFormDialog(
 
     // Delete exercise confirmation dialog
     exerciseToDelete?.let { exercise ->
-        val exerciseName = exerciseMap[exercise.exerciseId]?.name ?: "this exercise"
+        val exerciseName = exercise.exerciseName.ifBlank { "this exercise" }
         AlertDialog(
             onDismissRequest = { exerciseToDelete = null },
             title = { Text("Remove Exercise?") },
@@ -701,14 +701,9 @@ fun WorkoutTemplateFormDialog(
 @Composable
 fun WorkoutTemplateViewDialog(
     template: WorkoutTemplate,
-    availableExercises: List<Exercise>,
     onDismiss: () -> Unit,
     onStartWorkout: () -> Unit
 ) {
-    val exerciseMap = remember(availableExercises) {
-        availableExercises.associateBy { it.id }
-    }
-
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -743,7 +738,7 @@ fun WorkoutTemplateViewDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(template.templateExercises.sortedBy { it.orderIndex }) { templateExercise ->
-                        val exerciseName = exerciseMap[templateExercise.exerciseId]?.name ?: "Unknown"
+                        val exerciseName = templateExercise.exerciseName.ifBlank { "Unknown" }
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
@@ -758,7 +753,7 @@ fun WorkoutTemplateViewDialog(
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Text(
-                                    text = "${templateExercise.plannedSets} sets x ${templateExercise.plannedReps} reps",
+                                    text = "${templateExercise.plannedSets} sets x ${formatPlannedTarget(templateExercise)}",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -828,5 +823,24 @@ private fun reorderExercise(
 
     return mutable.mapIndexed { index, exercise ->
         exercise.copy(orderIndex = index)
+    }
+}
+
+/**
+ * Formats a TemplateExercise's planned target measurement, branching on
+ * its exerciseTrackingType so the right field (reps, duration, distance)
+ * is shown instead of a hardcoded "reps" that reads "null" for exercises
+ * with no rep target (e.g. a DURATION exercise like Plank).
+ */
+internal fun formatPlannedTarget(templateExercise: TemplateExercise): String {
+    return when (templateExercise.exerciseTrackingType) {
+        ExerciseTrackingType.WEIGHT_REPS, ExerciseTrackingType.REPS_ONLY ->
+            templateExercise.plannedReps?.toString() ?: "-"
+
+        ExerciseTrackingType.DURATION, ExerciseTrackingType.WEIGHT_DURATION ->
+            templateExercise.plannedDurationSeconds?.let { "${it}s" } ?: "-"
+
+        ExerciseTrackingType.DISTANCE_DURATION, ExerciseTrackingType.WEIGHT_DISTANCE ->
+            templateExercise.plannedDistanceMeters?.let { "${it.toInt()}m" } ?: "-"
     }
 }

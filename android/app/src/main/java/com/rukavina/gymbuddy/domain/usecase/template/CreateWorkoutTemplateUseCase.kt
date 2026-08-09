@@ -11,7 +11,8 @@ import javax.inject.Inject
  */
 class CreateWorkoutTemplateUseCase @Inject constructor(
     private val repository: WorkoutTemplateRepository,
-    private val idGenerator: IdGenerator
+    private val idGenerator: IdGenerator,
+    private val stampTemplateExerciseSnapshots: StampTemplateExerciseSnapshotsUseCase
 ) {
     /**
      * Create a new template with exercises.
@@ -31,7 +32,9 @@ class CreateWorkoutTemplateUseCase @Inject constructor(
             template.templateExercises.forEach { exercise ->
                 require(exercise.exerciseId.isNotBlank()) { "Exercise ID must be valid" }
                 require(exercise.plannedSets > 0) { "Planned sets must be greater than 0" }
-                require(exercise.plannedReps > 0) { "Planned reps must be greater than 0" }
+                exercise.plannedReps?.let { reps ->
+                    require(reps > 0) { "Planned reps must be greater than 0 if specified" }
+                }
                 require(exercise.orderIndex >= 0) { "Order index must be non-negative" }
                 exercise.restSeconds?.let { rest ->
                     require(rest > 0) { "Rest seconds must be greater than 0 if specified" }
@@ -56,7 +59,11 @@ class CreateWorkoutTemplateUseCase @Inject constructor(
 
             val finalTemplate = templateWithId.copy(templateExercises = exercisesWithIds)
 
-            repository.createTemplate(finalTemplate)
+            // Stamps each TemplateExercise's exerciseName; must use the
+            // returned template, not finalTemplate.
+            val templateWithSnapshots = stampTemplateExerciseSnapshots(finalTemplate)
+
+            repository.createTemplate(templateWithSnapshots)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

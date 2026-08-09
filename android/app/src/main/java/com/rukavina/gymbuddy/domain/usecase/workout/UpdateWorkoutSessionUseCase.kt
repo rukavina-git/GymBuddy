@@ -20,7 +20,7 @@ class UpdateWorkoutSessionUseCase @Inject constructor(
             // Validate
             require(workoutSession.id.isNotBlank()) { "Workout session ID cannot be blank" }
             require(workoutSession.durationSeconds >= 0) { "Duration must be non-negative" }
-            require(workoutSession.date > 0) { "Invalid workout session date" }
+            require(workoutSession.startedAt > 0) { "Invalid workout session start time" }
 
             // Validates sets and stamps each PerformedExercise's exercise
             // snapshot; must use the returned session, not the original.

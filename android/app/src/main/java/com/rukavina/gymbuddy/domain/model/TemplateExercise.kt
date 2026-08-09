@@ -26,6 +26,22 @@ data class TemplateExercise(
     val exerciseId: String,
 
     /**
+     * Snapshot of Exercise.name at the time this template exercise was
+     * created or last updated. Written once (or re-stamped on update), and
+     * never rewritten by an unrelated library refresh or exercise rename.
+     */
+    val exerciseName: String,
+
+    /**
+     * Snapshot of Exercise.trackingType at the time this template exercise
+     * was created or last updated. Written once (or re-stamped on update),
+     * same rule as exerciseName. Determines which planned measurement
+     * (plannedReps, plannedDurationSeconds, plannedDistanceMeters) the
+     * display and set editor should use.
+     */
+    val exerciseTrackingType: ExerciseTrackingType,
+
+    /**
      * Planned/target number of sets for this exercise.
      * Must be greater than 0.
      * Examples: 3, 4, 5
@@ -34,10 +50,12 @@ data class TemplateExercise(
 
     /**
      * Planned/target number of repetitions per set.
-     * Must be greater than 0.
+     * Null when the exercise's tracking type has no rep target (e.g. a
+     * DURATION exercise like a plank), in which case plannedDurationSeconds
+     * carries the target instead.
      * Examples: 8, 10, 12, 15
      */
-    val plannedReps: Int,
+    val plannedReps: Int? = null,
 
     /**
      * Order/position of this exercise in the template (0-indexed).
@@ -61,6 +79,24 @@ data class TemplateExercise(
      * - High intensity: 30-45 seconds
      */
     val restSeconds: Int? = null,
+
+    /**
+     * Planned/target duration in seconds for this exercise (e.g. a 60s plank).
+     * Mirrors WorkoutSet.durationSeconds. Null when not applicable.
+     */
+    val plannedDurationSeconds: Int? = null,
+
+    /**
+     * Planned/target distance in meters for this exercise (e.g. a 2000m row).
+     * Mirrors WorkoutSet.distanceMeters. Null when not applicable.
+     */
+    val plannedDistanceMeters: Float? = null,
+
+    /**
+     * Planned/target weight in kilograms for this exercise.
+     * Mirrors WorkoutSet.weightKg. Null when not applicable or not planned.
+     */
+    val plannedWeightKg: Float? = null,
 
     /**
      * Optional notes/instructions for this exercise in the template.

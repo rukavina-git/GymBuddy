@@ -7,6 +7,7 @@ import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.entity.TemplateExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateVersionEntity
 import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -115,13 +116,25 @@ class WorkoutTemplateSeeder @Inject constructor(
                         id = exerciseJson.getString("id"),
                         templateId = templateId,
                         exerciseId = exerciseJson.getString("exerciseId"),
+                        exerciseName = exerciseJson.getString("exerciseName"),
+                        exerciseTrackingType = ExerciseTrackingType.valueOf(
+                            exerciseJson.getString("exerciseTrackingType")
+                        ),
                         plannedSets = exerciseJson.getInt("plannedSets"),
-                        // Some entries (e.g. timed holds like Plank) carry plannedDurationSeconds
-                        // instead of plannedReps. That column lands in Group H; until then we
-                        // just default plannedReps to 0 and ignore plannedDurationSeconds.
-                        plannedReps = exerciseJson.optInt("plannedReps"),
+                        // Some entries (e.g. timed holds like Plank) carry
+                        // plannedDurationSeconds instead of plannedReps.
+                        plannedReps = if (exerciseJson.has("plannedReps")) {
+                            exerciseJson.getInt("plannedReps")
+                        } else {
+                            null
+                        },
                         orderIndex = exerciseJson.getInt("orderIndex"),
                         restSeconds = exerciseJson.optInt("restSeconds").takeIf { it > 0 },
+                        plannedDurationSeconds = if (exerciseJson.has("plannedDurationSeconds")) {
+                            exerciseJson.getInt("plannedDurationSeconds")
+                        } else {
+                            null
+                        },
                         notes = exerciseJson.optString("notes").takeIf { it.isNotEmpty() }
                     )
                 )

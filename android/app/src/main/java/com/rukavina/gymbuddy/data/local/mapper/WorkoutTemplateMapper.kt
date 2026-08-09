@@ -33,10 +33,15 @@ object WorkoutTemplateMapper {
                 id = exercise.id,
                 templateId = template.id,
                 exerciseId = exercise.exerciseId,
+                exerciseName = exercise.exerciseName,
+                exerciseTrackingType = exercise.exerciseTrackingType,
                 plannedSets = exercise.plannedSets,
                 plannedReps = exercise.plannedReps,
                 orderIndex = exercise.orderIndex,
                 restSeconds = exercise.restSeconds,
+                plannedDurationSeconds = exercise.plannedDurationSeconds,
+                plannedDistanceMeters = exercise.plannedDistanceMeters,
+                plannedWeightKg = exercise.plannedWeightKg,
                 notes = exercise.notes
             )
         }
@@ -58,10 +63,15 @@ object WorkoutTemplateMapper {
                 TemplateExercise(
                     id = entity.id,
                     exerciseId = entity.exerciseId,
+                    exerciseName = entity.exerciseName,
+                    exerciseTrackingType = entity.exerciseTrackingType,
                     plannedSets = entity.plannedSets,
                     plannedReps = entity.plannedReps,
                     orderIndex = entity.orderIndex,
                     restSeconds = entity.restSeconds,
+                    plannedDurationSeconds = entity.plannedDurationSeconds,
+                    plannedDistanceMeters = entity.plannedDistanceMeters,
+                    plannedWeightKg = entity.plannedWeightKg,
                     notes = entity.notes
                 )
             }
@@ -102,10 +112,15 @@ object WorkoutTemplateMapper {
             id = templateExercise.id,
             templateId = templateId,
             exerciseId = templateExercise.exerciseId,
+            exerciseName = templateExercise.exerciseName,
+            exerciseTrackingType = templateExercise.exerciseTrackingType,
             plannedSets = templateExercise.plannedSets,
             plannedReps = templateExercise.plannedReps,
             orderIndex = templateExercise.orderIndex,
             restSeconds = templateExercise.restSeconds,
+            plannedDurationSeconds = templateExercise.plannedDurationSeconds,
+            plannedDistanceMeters = templateExercise.plannedDistanceMeters,
+            plannedWeightKg = templateExercise.plannedWeightKg,
             notes = templateExercise.notes
         )
     }

@@ -232,8 +232,8 @@ fun WorkoutSessionItem(
 ) {
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
-    val date = remember(workoutSession.date) { dateFormat.format(Date(workoutSession.date)) }
-    val time = remember(workoutSession.date) { timeFormat.format(Date(workoutSession.date)) }
+    val date = remember(workoutSession.startedAt) { dateFormat.format(Date(workoutSession.startedAt)) }
+    val time = remember(workoutSession.startedAt) { timeFormat.format(Date(workoutSession.startedAt)) }
 
     // Format duration as HH:MM:SS
     val hours = workoutSession.durationSeconds / 3600
@@ -298,7 +298,7 @@ fun WorkoutSessionFormDialog(
 ) {
     val calendar = remember {
         Calendar.getInstance().apply {
-            timeInMillis = workoutSession?.date ?: System.currentTimeMillis()
+            timeInMillis = workoutSession?.startedAt ?: System.currentTimeMillis()
         }
     }
 
@@ -524,9 +524,13 @@ fun WorkoutSessionFormDialog(
                         onSave(
                             WorkoutSession(
                                 id = workoutSession?.id ?: generateWorkoutSessionId(),
-                                date = cal.timeInMillis,
+                                startedAt = cal.timeInMillis,
+                                endedAt = workoutSession?.endedAt,
                                 durationSeconds = totalSeconds,
                                 title = title,
+                                notes = workoutSession?.notes,
+                                templateId = workoutSession?.templateId,
+                                templateTitle = workoutSession?.templateTitle,
                                 performedExercises = performedExercises
                             )
                         )
@@ -703,6 +707,8 @@ fun ExerciseEditDialog(
         val id: String,
         val weight: String,
         val reps: String,
+        val duration: String,
+        val distance: String,
         val orderIndex: Int
     )
 
@@ -714,6 +720,8 @@ fun ExerciseEditDialog(
                         id = set.id,
                         weight = set.weightKg?.takeIf { it != 0f }?.toString() ?: "",
                         reps = set.reps?.takeIf { it != 0 }?.toString() ?: "",
+                        duration = set.durationSeconds?.takeIf { it != 0 }?.toString() ?: "",
+                        distance = set.distanceMeters?.takeIf { it != 0f }?.toString() ?: "",
                         orderIndex = set.orderIndex
                     )
                 }
@@ -723,6 +731,8 @@ fun ExerciseEditDialog(
                         id = generateSetId(),
                         weight = "",
                         reps = "",
+                        duration = "",
+                        distance = "",
                         orderIndex = 0
                     )
                 )
@@ -735,6 +745,7 @@ fun ExerciseEditDialog(
     val selectedExercise = remember(selectedExerciseId, availableExercises) {
         availableExercises.find { it.id == selectedExerciseId }
     }
+    val trackingType = selectedExercise?.trackingType ?: ExerciseTrackingType.WEIGHT_REPS
 
     val filteredExercises = remember(availableExercises, exerciseSearchQuery) {
         if (exerciseSearchQuery.isBlank()) {
@@ -832,6 +843,8 @@ fun ExerciseEditDialog(
                                 id = generateSetId(),
                                 weight = workoutSets.lastOrNull()?.weight ?: "",
                                 reps = workoutSets.lastOrNull()?.reps ?: "",
+                                duration = workoutSets.lastOrNull()?.duration ?: "",
+                                distance = workoutSets.lastOrNull()?.distance ?: "",
                                 orderIndex = workoutSets.size
                             )
                         }) {
@@ -858,31 +871,64 @@ fun ExerciseEditDialog(
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.width(30.dp)
                                 )
-                                OutlinedTextField(
-                                    value = set.reps,
-                                    onValueChange = { newReps ->
-                                        val validated = InputValidation.validateReps(newReps)
-                                        workoutSets = workoutSets.mapIndexed { i, s ->
-                                            if (i == index) s.copy(reps = validated) else s
-                                        }
-                                    },
-                                    label = { Text("Reps") },
-                                    modifier = Modifier.weight(1f),
-                                    singleLine = true
-                                )
-                                OutlinedTextField(
-                                    value = set.weight,
-                                    onValueChange = { newWeight ->
-                                        InputValidation.validateWeight(newWeight)?.let { validated ->
+                                if (SetTrackingFields.showsReps(trackingType)) {
+                                    OutlinedTextField(
+                                        value = set.reps,
+                                        onValueChange = { newReps ->
+                                            val validated = InputValidation.validateReps(newReps)
                                             workoutSets = workoutSets.mapIndexed { i, s ->
-                                                if (i == index) s.copy(weight = validated) else s
+                                                if (i == index) s.copy(reps = validated) else s
                                             }
-                                        }
-                                    },
-                                    label = { Text("kg") },
-                                    modifier = Modifier.weight(1f),
-                                    singleLine = true
-                                )
+                                        },
+                                        label = { Text("Reps") },
+                                        modifier = Modifier.weight(1f),
+                                        singleLine = true
+                                    )
+                                }
+                                if (SetTrackingFields.showsWeight(trackingType)) {
+                                    OutlinedTextField(
+                                        value = set.weight,
+                                        onValueChange = { newWeight ->
+                                            InputValidation.validateWeight(newWeight)?.let { validated ->
+                                                workoutSets = workoutSets.mapIndexed { i, s ->
+                                                    if (i == index) s.copy(weight = validated) else s
+                                                }
+                                            }
+                                        },
+                                        label = { Text("kg") },
+                                        modifier = Modifier.weight(1f),
+                                        singleLine = true
+                                    )
+                                }
+                                if (SetTrackingFields.showsDuration(trackingType)) {
+                                    OutlinedTextField(
+                                        value = set.duration,
+                                        onValueChange = { newDuration ->
+                                            val validated = InputValidation.validateDuration(newDuration)
+                                            workoutSets = workoutSets.mapIndexed { i, s ->
+                                                if (i == index) s.copy(duration = validated) else s
+                                            }
+                                        },
+                                        label = { Text("Duration (s)") },
+                                        modifier = Modifier.weight(1f),
+                                        singleLine = true
+                                    )
+                                }
+                                if (SetTrackingFields.showsDistance(trackingType)) {
+                                    OutlinedTextField(
+                                        value = set.distance,
+                                        onValueChange = { newDistance ->
+                                            InputValidation.validateDistance(newDistance)?.let { validated ->
+                                                workoutSets = workoutSets.mapIndexed { i, s ->
+                                                    if (i == index) s.copy(distance = validated) else s
+                                                }
+                                            }
+                                        },
+                                        label = { Text("Distance (m)") },
+                                        modifier = Modifier.weight(1f),
+                                        singleLine = true
+                                    )
+                                }
                                 IconButton(
                                     onClick = {
                                         workoutSets = workoutSets.filterIndexed { i, _ -> i != index }
@@ -907,14 +953,36 @@ fun ExerciseEditDialog(
             TextButton(
                 onClick = {
                     if (selectedExerciseId.isNotBlank() && workoutSets.isNotEmpty()) {
-                        // Convert UI sets to domain model, filtering out empty sets
+                        // Convert UI sets to domain model, filtering out empty sets.
+                        // Which fields count depends on the exercise's tracking type,
+                        // mirroring WorkoutSetValidator.
                         val domainSets = workoutSets
-                            .filter { it.reps.isNotBlank() || it.weight.isNotBlank() }
+                            .filter {
+                                SetTrackingFields.isFilled(trackingType, it.reps, it.duration, it.distance)
+                            }
                             .mapIndexed { index, uiSet ->
                                 WorkoutSet(
                                     id = uiSet.id,
-                                    weightKg = uiSet.weight.toFloatOrNull(),
-                                    reps = uiSet.reps.toIntOrNull(),
+                                    weightKg = if (SetTrackingFields.showsWeight(trackingType)) {
+                                        uiSet.weight.toFloatOrNull()
+                                    } else {
+                                        null
+                                    },
+                                    reps = if (SetTrackingFields.showsReps(trackingType)) {
+                                        uiSet.reps.toIntOrNull()
+                                    } else {
+                                        null
+                                    },
+                                    durationSeconds = if (SetTrackingFields.showsDuration(trackingType)) {
+                                        uiSet.duration.toIntOrNull()
+                                    } else {
+                                        null
+                                    },
+                                    distanceMeters = if (SetTrackingFields.showsDistance(trackingType)) {
+                                        uiSet.distance.toFloatOrNull()
+                                    } else {
+                                        null
+                                    },
                                     isCompleted = true,
                                     orderIndex = index
                                 )
@@ -923,9 +991,10 @@ fun ExerciseEditDialog(
                         if (domainSets.isNotEmpty()) {
                             // orderIndex is a placeholder - the caller re-stamps it based on
                             // final position in the performed exercises list. The exercise
-                            // snapshot fields (name/category/trackingType/primaryMuscles) are
-                            // placeholders too - ValidateWorkoutSessionSetsUseCase resolves
-                            // the real Exercise and stamps them before this is persisted.
+                            // snapshot fields (name/category/primaryMuscles) are placeholders
+                            // too - ValidateWorkoutSessionSetsUseCase resolves the real
+                            // Exercise and stamps them before this is persisted.
+                            // exerciseTrackingType is already the real, resolved value.
                             onSave(
                                 PerformedExercise(
                                     id = existingExercise?.id ?: generatePerformedExerciseId(),
@@ -933,7 +1002,7 @@ fun ExerciseEditDialog(
                                     orderIndex = existingExercise?.orderIndex ?: 0,
                                     exerciseName = "",
                                     exerciseCategory = ExerciseCategory.STRENGTH,
-                                    exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
+                                    exerciseTrackingType = trackingType,
                                     exercisePrimaryMuscles = emptyList(),
                                     sets = domainSets
                                 )
@@ -941,7 +1010,8 @@ fun ExerciseEditDialog(
                         }
                     }
                 },
-                enabled = selectedExerciseId.isNotBlank() && workoutSets.any { it.reps.isNotBlank() || it.weight.isNotBlank() }
+                enabled = selectedExerciseId.isNotBlank() &&
+                    workoutSets.any { SetTrackingFields.isFilled(trackingType, it.reps, it.duration, it.distance) }
             ) {
                 Text("Save")
             }

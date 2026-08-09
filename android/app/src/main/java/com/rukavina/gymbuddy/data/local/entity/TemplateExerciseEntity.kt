@@ -5,10 +5,18 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
+
 /**
  * Room entity for TemplateExercise table.
  * Has foreign key relationship with WorkoutTemplate (cascade delete).
  * Has reference to Exercise (no cascade - exercises can exist independently).
+ *
+ * exerciseId is a soft reference to the exercises table, not a foreign key:
+ * it must tolerate the referenced exercise being re-seeded, deprecated, or
+ * (for a custom exercise) deleted entirely. exerciseName is a snapshot of
+ * Exercise.name written once at creation (or re-stamped on update) and
+ * never rewritten by an unrelated library refresh or exercise rename.
  *
  * Indices are created on:
  * - templateId: For fast lookup of all exercises in a template
@@ -51,14 +59,25 @@ data class TemplateExerciseEntity(
     val exerciseId: String,
 
     /**
+     * Snapshot of Exercise.name. See class KDoc.
+     */
+    val exerciseName: String,
+
+    /**
+     * Snapshot of Exercise.trackingType. Same write-once rule as exerciseName.
+     */
+    val exerciseTrackingType: ExerciseTrackingType,
+
+    /**
      * Planned number of sets for this exercise.
      */
     val plannedSets: Int,
 
     /**
      * Planned number of repetitions per set.
+     * Null when the exercise's tracking type has no rep target.
      */
-    val plannedReps: Int,
+    val plannedReps: Int?,
 
     /**
      * Order/position of this exercise in the template (0-indexed).
@@ -71,6 +90,24 @@ data class TemplateExerciseEntity(
      * Null if no specific rest time is defined.
      */
     val restSeconds: Int?,
+
+    /**
+     * Planned/target duration in seconds (e.g. a 60s plank). Mirrors
+     * WorkoutSetEntity.durationSeconds. Null when not applicable.
+     */
+    val plannedDurationSeconds: Int? = null,
+
+    /**
+     * Planned/target distance in meters (e.g. a 2000m row). Mirrors
+     * WorkoutSetEntity.distanceMeters. Null when not applicable.
+     */
+    val plannedDistanceMeters: Float? = null,
+
+    /**
+     * Planned/target weight in kilograms. Mirrors WorkoutSetEntity.weightKg.
+     * Null when not applicable or not planned.
+     */
+    val plannedWeightKg: Float? = null,
 
     /**
      * Optional notes/instructions for this exercise.
