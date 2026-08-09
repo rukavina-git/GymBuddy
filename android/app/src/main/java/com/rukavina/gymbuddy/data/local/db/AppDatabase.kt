@@ -19,13 +19,13 @@ import com.rukavina.gymbuddy.data.local.entity.ExerciseVersionEntity
 import com.rukavina.gymbuddy.data.local.entity.PerformedExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateVersionEntity
+import com.rukavina.gymbuddy.data.local.entity.UserProfileEntity
 import com.rukavina.gymbuddy.data.local.entity.WorkoutSessionEntity
 import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
-import com.rukavina.gymbuddy.domain.model.UserProfile
 
 @Database(
     entities = [
-        UserProfile::class,
+        UserProfileEntity::class,
         ExerciseEntity::class,
         ExerciseVersionEntity::class,
         TemplateVersionEntity::class,

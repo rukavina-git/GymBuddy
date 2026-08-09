@@ -6,6 +6,10 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 android {
     namespace = "com.rukavina.gymbuddy"
     compileSdk = libs.versions.compileSdk.get().toInt()
