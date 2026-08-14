@@ -22,6 +22,9 @@ import com.rukavina.gymbuddy.domain.model.MuscleGroup
  *
  * Those four snapshot columns are written once at creation and never
  * updated afterward.
+ *
+ * No updatedAt/deletedAt/revision/syncState columns - a child of the
+ * WorkoutSession aggregate, governed by the parent's sync metadata.
  */
 @Entity(
     tableName = "performed_exercises",

@@ -5,7 +5,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -20,6 +22,7 @@ class AppPreferencesRepository @Inject constructor(
 ) {
     private object PreferencesKeys {
         val SHOW_QUOTE_OF_THE_DAY = booleanPreferencesKey("show_quote_of_the_day")
+        val PREFERRED_UNITS = stringPreferencesKey("preferred_units")
     }
 
     val showQuoteOfTheDay: Flow<Boolean> = context.dataStore.data
@@ -30,6 +33,29 @@ class AppPreferencesRepository @Inject constructor(
     suspend fun setShowQuoteOfTheDay(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_QUOTE_OF_THE_DAY] = enabled
+        }
+    }
+
+    /**
+     * Display units are a device preference, not account data: the same
+     * account on two devices can reasonably want different units, and the
+     * underlying stored measurements are always metric regardless of this
+     * setting - see UserProfile.weight/height/targetWeight.
+     */
+    val preferredUnits: Flow<PreferredUnits> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.PREFERRED_UNITS]?.let {
+                try {
+                    PreferredUnits.valueOf(it)
+                } catch (e: IllegalArgumentException) {
+                    PreferredUnits.METRIC
+                }
+            } ?: PreferredUnits.METRIC
+        }
+
+    suspend fun setPreferredUnits(units: PreferredUnits) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.PREFERRED_UNITS] = units.name
         }
     }
 }

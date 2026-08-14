@@ -23,6 +23,10 @@ import kotlinx.coroutines.flow.Flow
  * the primary query still projects exactly WorkoutTemplateEntity's own
  * columns (via `wt.*`), so the @Relation-based exercise fetch on
  * WorkoutTemplateWithExercises is unaffected by the join.
+ *
+ * Every read query also excludes deletedAt IS NOT NULL rows (tombstoned
+ * CUSTOM templates), including the detail lookup by id - see ExerciseDao
+ * for why deleted rows are excluded even there, unlike hidden/deprecated.
  */
 @Dao
 interface WorkoutTemplateDao {
@@ -38,7 +42,7 @@ interface WorkoutTemplateDao {
         """
         SELECT wt.* FROM workout_templates wt
         LEFT JOIN user_template_state s ON s.templateId = wt.id
-        WHERE COALESCE(s.isHidden, 0) = 0 AND wt.deprecated = 0
+        WHERE COALESCE(s.isHidden, 0) = 0 AND wt.deprecated = 0 AND wt.deletedAt IS NULL
         ORDER BY wt.title ASC
         """
     )
@@ -46,22 +50,22 @@ interface WorkoutTemplateDao {
 
     /**
      * Get all workout templates including hidden ones.
-     * Useful for settings/management screens.
+     * Useful for settings/management screens. Still excludes deleted ones.
      */
     @Transaction
-    @Query("SELECT * FROM workout_templates WHERE deprecated = 0 ORDER BY title ASC")
+    @Query("SELECT * FROM workout_templates WHERE deprecated = 0 AND deletedAt IS NULL ORDER BY title ASC")
     fun getAllTemplatesIncludingHidden(): Flow<List<WorkoutTemplateWithExercises>>
 
     /**
      * Get a single template by ID with its exercises.
      * Not filtered by hidden or deprecated - a detail lookup must resolve
-     * regardless of either status.
+     * regardless of either status - but excludes deleted rows.
      *
      * @param id The template ID to search for
      * @return The template with exercises, or null if not found
      */
     @Transaction
-    @Query("SELECT * FROM workout_templates WHERE id = :id")
+    @Query("SELECT * FROM workout_templates WHERE id = :id AND deletedAt IS NULL")
     suspend fun getTemplateById(id: String): WorkoutTemplateWithExercises?
 
     /**
@@ -77,7 +81,7 @@ interface WorkoutTemplateDao {
         """
         SELECT wt.* FROM workout_templates wt
         LEFT JOIN user_template_state s ON s.templateId = wt.id
-        WHERE COALESCE(s.isHidden, 0) = 0 AND wt.title LIKE '%' || :query || '%' AND wt.deprecated = 0
+        WHERE COALESCE(s.isHidden, 0) = 0 AND wt.title LIKE '%' || :query || '%' AND wt.deprecated = 0 AND wt.deletedAt IS NULL
         ORDER BY wt.title ASC
         """
     )
@@ -128,13 +132,17 @@ interface WorkoutTemplateDao {
     suspend fun updateTemplateExercise(exercise: TemplateExerciseEntity)
 
     /**
-     * Delete a template by ID.
-     * Template exercises will be cascade deleted due to foreign key constraint.
+     * Tombstone a template by ID instead of removing the row, so a future
+     * sync engine has something to push. Since this is an UPDATE rather
+     * than a DELETE, the cascade-delete foreign key on template_exercises
+     * does not fire - its rows stay in place, governed by the now-
+     * tombstoned parent, exactly like the "child governed by parent" rule
+     * for other aggregates.
      *
      * @param id The template ID to delete
      */
-    @Query("DELETE FROM workout_templates WHERE id = :id")
-    suspend fun deleteTemplate(id: String)
+    @Query("UPDATE workout_templates SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun deleteTemplate(id: String, deletedAt: Long, updatedAt: Long)
 
     /**
      * Delete all template exercises for a specific template.
@@ -165,7 +173,7 @@ interface WorkoutTemplateDao {
     /**
      * Get all hidden templates. Requires an overlay row marking the
      * template hidden, so orphaned overlay rows (template no longer
-     * exists) never appear here.
+     * exists) never appear here. Excludes deleted templates.
      * Useful for a "restore hidden templates" feature.
      */
     @Transaction
@@ -173,7 +181,7 @@ interface WorkoutTemplateDao {
         """
         SELECT wt.* FROM workout_templates wt
         INNER JOIN user_template_state s ON s.templateId = wt.id
-        WHERE s.isHidden = 1 AND wt.deprecated = 0
+        WHERE s.isHidden = 1 AND wt.deprecated = 0 AND wt.deletedAt IS NULL
         ORDER BY wt.title ASC
         """
     )
@@ -184,7 +192,7 @@ interface WorkoutTemplateDao {
      * Useful for management screens.
      */
     @Transaction
-    @Query("SELECT * FROM workout_templates WHERE source = 'DEFAULT' AND deprecated = 0 ORDER BY title ASC")
+    @Query("SELECT * FROM workout_templates WHERE source = 'DEFAULT' AND deprecated = 0 AND deletedAt IS NULL ORDER BY title ASC")
     fun getDefaultTemplates(): Flow<List<WorkoutTemplateWithExercises>>
 
     /**
@@ -195,7 +203,7 @@ interface WorkoutTemplateDao {
         """
         SELECT wt.* FROM workout_templates wt
         LEFT JOIN user_template_state s ON s.templateId = wt.id
-        WHERE wt.source = 'CUSTOM' AND COALESCE(s.isHidden, 0) = 0 AND wt.deprecated = 0
+        WHERE wt.source = 'CUSTOM' AND COALESCE(s.isHidden, 0) = 0 AND wt.deprecated = 0 AND wt.deletedAt IS NULL
         ORDER BY wt.title ASC
         """
     )

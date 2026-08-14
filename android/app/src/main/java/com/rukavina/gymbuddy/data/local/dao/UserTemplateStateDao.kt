@@ -23,17 +23,19 @@ interface UserTemplateStateDao {
     /**
      * Set the hidden flag for a template, creating the sparse overlay row
      * if the user has never expressed an opinion about this template before.
+     * updatedAt is supplied by the caller (from the injected Clock) since
+     * a Room DAO can't take constructor-injected dependencies.
      */
     @Transaction
-    suspend fun setHidden(templateId: String, hidden: Boolean) {
+    suspend fun setHidden(templateId: String, hidden: Boolean, updatedAt: Long) {
         val current = getState(templateId) ?: UserTemplateStateEntity(templateId = templateId)
-        upsert(current.copy(isHidden = hidden))
+        upsert(current.copy(isHidden = hidden, updatedAt = updatedAt))
     }
 
     /**
      * Unhide every template that currently has an overlay row marking it
      * hidden. Templates with no overlay row are already not hidden.
      */
-    @Query("UPDATE user_template_state SET isHidden = 0 WHERE isHidden = 1")
-    suspend fun unhideAll()
+    @Query("UPDATE user_template_state SET isHidden = 0, updatedAt = :updatedAt WHERE isHidden = 1")
+    suspend fun unhideAll(updatedAt: Long)
 }

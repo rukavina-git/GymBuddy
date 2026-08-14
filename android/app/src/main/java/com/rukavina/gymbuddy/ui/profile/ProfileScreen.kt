@@ -181,6 +181,8 @@ fun ProfileScreen(
                     SettingsSection {
                         val weightUnit = UnitConverter.getWeightUnitLabel(uiState.preferredUnits)
                         val heightUnit = UnitConverter.getHeightUnitLabel(uiState.preferredUnits)
+                        val displayWeight = UnitConverter.weightToDisplayUnit(uiState.weight, uiState.preferredUnits)
+                        val displayTargetWeight = UnitConverter.weightToDisplayUnit(uiState.targetWeight, uiState.preferredUnits)
 
                         ProfileInfoItem(
                             icon = Icons.Default.Person,
@@ -194,23 +196,24 @@ fun ProfileScreen(
                         ProfileInfoItem(
                             icon = Icons.Default.MonitorWeight,
                             label = "Weight",
-                            value = if (uiState.weight.isNotBlank()) "${uiState.weight} $weightUnit" else "Not set",
+                            value = if (displayWeight.isNotBlank()) "$displayWeight $weightUnit" else "Not set",
                             onClick = {
                                 bottomNavController?.navigate(NavRoutes.EditWeight)
                             }
                         )
 
+                        val heightCm = uiState.height
                         ProfileInfoItem(
                             icon = Icons.Default.MonitorWeight,
                             label = "Height",
-                            value = if (uiState.height.isNotBlank()) {
+                            value = if (heightCm != null) {
                                 if (uiState.preferredUnits == PreferredUnits.IMPERIAL) {
-                                    val totalInches = uiState.height.toFloatOrNull() ?: 0f
+                                    val totalInches = UnitConverter.cmToInches(heightCm)
                                     val feet = (totalInches / 12).toInt()
                                     val inches = kotlin.math.round(totalInches % 12).toInt()
                                     "$feet'$inches\""
                                 } else {
-                                    "${uiState.height} $heightUnit"
+                                    "${UnitConverter.heightToDisplayUnit(heightCm, uiState.preferredUnits)} $heightUnit"
                                 }
                             } else "Not set",
                             onClick = {
@@ -221,7 +224,7 @@ fun ProfileScreen(
                         ProfileInfoItem(
                             icon = Icons.Default.FitnessCenter,
                             label = "Target Weight",
-                            value = if (uiState.targetWeight.isNotBlank()) "${uiState.targetWeight} $weightUnit" else "Not set",
+                            value = if (displayTargetWeight.isNotBlank()) "$displayTargetWeight $weightUnit" else "Not set",
                             onClick = {
                                 bottomNavController?.navigate(NavRoutes.EditTargetWeight)
                             }

@@ -22,6 +22,9 @@ import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
  * - templateId: For fast lookup of all exercises in a template
  * - exerciseId: For fast lookup of which templates use a specific exercise
  * - orderIndex: For efficient ordering of exercises within a template
+ *
+ * No updatedAt/deletedAt/revision/syncState columns - a child of the
+ * WorkoutTemplate aggregate, governed by the parent's sync metadata.
  */
 @Entity(
     tableName = "template_exercises",

@@ -41,7 +41,7 @@ import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
         UserExerciseStateEntity::class,
         UserTemplateStateEntity::class
     ],
-    version = 23,
+    version = 25,
     exportSchema = false
 )
 @TypeConverters(MuscleGroupConverter::class, ProfileEnumConverters::class, ExerciseConverters::class)

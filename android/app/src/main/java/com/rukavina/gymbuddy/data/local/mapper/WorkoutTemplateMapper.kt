@@ -26,7 +26,11 @@ object WorkoutTemplateMapper {
             source = template.source,
             ownerId = template.ownerId,
             derivedFromId = template.derivedFromId,
-            deprecated = template.deprecated
+            deprecated = template.deprecated,
+            updatedAt = template.updatedAt,
+            deletedAt = template.deletedAt,
+            revision = template.revision,
+            syncState = template.syncState
         )
 
         val exerciseEntities = template.templateExercises.map { exercise ->
@@ -84,7 +88,11 @@ object WorkoutTemplateMapper {
             source = templateWithExercises.template.source,
             ownerId = templateWithExercises.template.ownerId,
             derivedFromId = templateWithExercises.template.derivedFromId,
-            deprecated = templateWithExercises.template.deprecated
+            deprecated = templateWithExercises.template.deprecated,
+            updatedAt = templateWithExercises.template.updatedAt,
+            deletedAt = templateWithExercises.template.deletedAt,
+            revision = templateWithExercises.template.revision,
+            syncState = templateWithExercises.template.syncState
         )
     }
 

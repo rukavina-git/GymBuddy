@@ -192,16 +192,15 @@ fun WorkoutTemplateScreen(
                 template = editingTemplate,
                 availableExercises = uiState.availableExercises,
                 onDismiss = { showCreateEditDialog = false },
-                onSave = { template ->
-                    if (editingTemplate != null) {
-                        viewModel.updateTemplate(template)
+                onSave = { draft ->
+                    val existing = editingTemplate
+                    if (existing != null) {
+                        viewModel.updateTemplate(existing, draft)
                     } else {
-                        viewModel.createTemplate(template)
+                        viewModel.createTemplate(draft)
                     }
                     showCreateEditDialog = false
-                },
-                generateExerciseId = viewModel::newTemplateExerciseId,
-                generateTemplateId = viewModel::newTemplateId
+                }
             )
         }
 
@@ -396,7 +395,7 @@ fun WorkoutTemplateItem(
                     .forEach { templateExercise ->
                         val exerciseName = templateExercise.exerciseName.ifBlank { "Unknown" }
                         Text(
-                            text = "• $exerciseName: ${templateExercise.plannedSets}x${formatPlannedTarget(templateExercise)}",
+                            text = "• $exerciseName: ${templateExercise.plannedSets} sets × ${formatPlannedTarget(templateExercise)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -441,14 +440,28 @@ fun WorkoutTemplateFormDialog(
     template: WorkoutTemplate?,
     availableExercises: List<Exercise>,
     onDismiss: () -> Unit,
-    onSave: (WorkoutTemplate) -> Unit,
-    generateExerciseId: () -> String,
-    generateTemplateId: () -> String
+    onSave: (WorkoutTemplateDraft) -> Unit
 ) {
     // Form state
     var title by remember { mutableStateOf(template?.title ?: "") }
+    var nextLocalKey by remember { mutableIntStateOf(template?.templateExercises?.size ?: 0) }
     var templateExercises by remember {
-        mutableStateOf(template?.templateExercises ?: emptyList())
+        mutableStateOf(
+            template?.templateExercises?.mapIndexed { index, ex ->
+                TemplateExerciseDraft(
+                    localKey = index,
+                    existingId = ex.id,
+                    exerciseId = ex.exerciseId,
+                    exerciseName = ex.exerciseName,
+                    exerciseTrackingType = ex.exerciseTrackingType,
+                    plannedSets = ex.plannedSets,
+                    plannedReps = ex.plannedReps,
+                    orderIndex = ex.orderIndex,
+                    restSeconds = ex.restSeconds,
+                    notes = ex.notes
+                )
+            } ?: emptyList()
+        )
     }
     var isTitleEditing by remember { mutableStateOf(template == null) } // Auto-edit for new templates
 
@@ -457,7 +470,7 @@ fun WorkoutTemplateFormDialog(
     var editingExerciseIndex by remember { mutableStateOf<Int?>(null) }
     var showExerciseConfig by remember { mutableStateOf(false) }
     var pendingExerciseId by remember { mutableStateOf<String?>(null) }
-    var exerciseToDelete by remember { mutableStateOf<TemplateExercise?>(null) }
+    var exerciseToDelete by remember { mutableStateOf<TemplateExerciseDraft?>(null) }
 
     // Create exercise map for lookups
     val exerciseMap = remember(availableExercises) {
@@ -523,24 +536,29 @@ fun WorkoutTemplateFormDialog(
                     ) {
                         items(
                             items = templateExercises.sortedBy { it.orderIndex },
-                            key = { it.id }
+                            key = { it.localKey }
                         ) { exercise ->
                             TemplateExerciseListItem(
-                                templateExercise = exercise,
                                 exerciseName = exercise.exerciseName.ifBlank { "Unknown" },
+                                exerciseTrackingType = exercise.exerciseTrackingType,
+                                plannedSets = exercise.plannedSets,
+                                plannedReps = exercise.plannedReps,
+                                plannedDurationSeconds = null,
+                                plannedDistanceMeters = null,
+                                restSeconds = exercise.restSeconds,
                                 position = templateExercises.indexOf(exercise),
                                 totalCount = templateExercises.size,
                                 onMoveUp = {
                                     templateExercises = reorderExercise(
                                         templateExercises,
-                                        exercise.id,
+                                        exercise.localKey,
                                         -1
                                     )
                                 },
                                 onMoveDown = {
                                     templateExercises = reorderExercise(
                                         templateExercises,
-                                        exercise.id,
+                                        exercise.localKey,
                                         1
                                     )
                                 },
@@ -571,14 +589,9 @@ fun WorkoutTemplateFormDialog(
             TextButton(
                 onClick = {
                     onSave(
-                        WorkoutTemplate(
-                            id = template?.id ?: generateTemplateId(),
+                        WorkoutTemplateDraft(
                             title = title,
-                            templateExercises = templateExercises,
-                            source = template?.source ?: EntitySource.CUSTOM,
-                            ownerId = template?.ownerId,
-                            derivedFromId = template?.derivedFromId,
-                            deprecated = template?.deprecated ?: false
+                            exercises = templateExercises.sortedBy { it.orderIndex }
                         )
                     )
                 },
@@ -643,13 +656,17 @@ fun WorkoutTemplateFormDialog(
                         } else ex
                     }
                 } else {
-                    // Add new. exerciseName/exerciseTrackingType are placeholders
-                    // here - StampTemplateExerciseSnapshotsUseCase resolves the
-                    // real Exercise and stamps them before this is persisted.
-                    val newExercise = TemplateExercise(
-                        id = generateExerciseId(),
+                    // Add new. No id is minted here - the ViewModel does that
+                    // with its IdGenerator. exerciseName is the resolved
+                    // display name, used only for this in-progress list -
+                    // StampTemplateExerciseSnapshotsUseCase resolves the real
+                    // Exercise and stamps the actual snapshot (including
+                    // exerciseTrackingType) before this is persisted.
+                    val newExercise = TemplateExerciseDraft(
+                        localKey = nextLocalKey++,
+                        existingId = null,
                         exerciseId = pendingExerciseId!!,
-                        exerciseName = "",
+                        exerciseName = exerciseMap[pendingExerciseId]?.name ?: "",
                         exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
                         plannedSets = sets,
                         plannedReps = reps,
@@ -677,7 +694,7 @@ fun WorkoutTemplateFormDialog(
                 TextButton(
                     onClick = {
                         templateExercises = templateExercises
-                            .filter { it.id != exercise.id }
+                            .filter { it.localKey != exercise.localKey }
                             .mapIndexed { index, ex ->
                                 ex.copy(orderIndex = index)
                             }
@@ -758,7 +775,7 @@ fun WorkoutTemplateViewDialog(
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Text(
-                                    text = "${templateExercise.plannedSets} sets x ${formatPlannedTarget(templateExercise)}",
+                                    text = "${templateExercise.plannedSets} sets × ${formatPlannedTarget(templateExercise)}",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -805,19 +822,19 @@ fun WorkoutTemplateViewDialog(
 }
 
 /**
- * Helper function for reordering exercises in a template.
- * @param exercises The current list of template exercises
- * @param exerciseId The ID of the exercise to move
+ * Helper function for reordering exercise drafts in a template being edited.
+ * @param exercises The current list of template exercise drafts
+ * @param localKey The Compose-only list key of the draft to move
  * @param direction -1 for up, +1 for down
  * @return Updated list with reordered exercises and updated orderIndex values
  */
 private fun reorderExercise(
-    exercises: List<TemplateExercise>,
-    exerciseId: String,
+    exercises: List<TemplateExerciseDraft>,
+    localKey: Int,
     direction: Int
-): List<TemplateExercise> {
+): List<TemplateExerciseDraft> {
     val sorted = exercises.sortedBy { it.orderIndex }
-    val currentIndex = sorted.indexOfFirst { it.id == exerciseId }
+    val currentIndex = sorted.indexOfFirst { it.localKey == localKey }
     val newIndex = (currentIndex + direction).coerceIn(0, sorted.size - 1)
 
     if (currentIndex == newIndex) return exercises
@@ -832,20 +849,37 @@ private fun reorderExercise(
 }
 
 /**
- * Formats a TemplateExercise's planned target measurement, branching on
- * its exerciseTrackingType so the right field (reps, duration, distance)
- * is shown instead of a hardcoded "reps" that reads "null" for exercises
- * with no rep target (e.g. a DURATION exercise like Plank).
+ * Formats a planned target measurement, branching on exerciseTrackingType
+ * so the right field (reps, duration, distance) is shown instead of a
+ * hardcoded "reps" that reads "null" for exercises with no rep target
+ * (e.g. a DURATION exercise like Plank).
  */
-internal fun formatPlannedTarget(templateExercise: TemplateExercise): String {
-    return when (templateExercise.exerciseTrackingType) {
+internal fun formatPlannedTarget(
+    exerciseTrackingType: ExerciseTrackingType,
+    plannedReps: Int?,
+    plannedDurationSeconds: Int?,
+    plannedDistanceMeters: Float?
+): String {
+    return when (exerciseTrackingType) {
         ExerciseTrackingType.WEIGHT_REPS, ExerciseTrackingType.REPS_ONLY ->
-            templateExercise.plannedReps?.toString() ?: "-"
+            plannedReps?.toString() ?: "-"
 
         ExerciseTrackingType.DURATION, ExerciseTrackingType.WEIGHT_DURATION ->
-            templateExercise.plannedDurationSeconds?.let { "${it}s" } ?: "-"
+            plannedDurationSeconds?.let { "${it}s" } ?: "-"
 
         ExerciseTrackingType.DISTANCE_DURATION, ExerciseTrackingType.WEIGHT_DISTANCE ->
-            templateExercise.plannedDistanceMeters?.let { "${it.toInt()}m" } ?: "-"
+            plannedDistanceMeters?.let { "${it.toInt()}m" } ?: "-"
     }
 }
+
+/**
+ * Convenience overload for a real TemplateExercise (loaded from the
+ * database) - see the primitive overload above for the formatting rules.
+ */
+internal fun formatPlannedTarget(templateExercise: TemplateExercise): String =
+    formatPlannedTarget(
+        templateExercise.exerciseTrackingType,
+        templateExercise.plannedReps,
+        templateExercise.plannedDurationSeconds,
+        templateExercise.plannedDistanceMeters
+    )

@@ -30,7 +30,11 @@ object ExerciseMapper {
             source = exercise.source,
             ownerId = exercise.ownerId,
             derivedFromId = exercise.derivedFromId,
-            deprecated = exercise.deprecated
+            deprecated = exercise.deprecated,
+            updatedAt = exercise.updatedAt,
+            deletedAt = exercise.deletedAt,
+            revision = exercise.revision,
+            syncState = exercise.syncState
         )
     }
 
@@ -56,7 +60,11 @@ object ExerciseMapper {
             source = entity.source,
             ownerId = entity.ownerId,
             derivedFromId = entity.derivedFromId,
-            deprecated = entity.deprecated
+            deprecated = entity.deprecated,
+            updatedAt = entity.updatedAt,
+            deletedAt = entity.deletedAt,
+            revision = entity.revision,
+            syncState = entity.syncState
         )
     }
 

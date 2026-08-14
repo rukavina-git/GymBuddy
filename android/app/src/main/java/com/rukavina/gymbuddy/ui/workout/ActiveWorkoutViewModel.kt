@@ -2,7 +2,7 @@ package com.rukavina.gymbuddy.ui.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
+import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
@@ -11,7 +11,6 @@ import com.rukavina.gymbuddy.domain.model.PerformedExercise
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
-import com.rukavina.gymbuddy.data.repository.UserProfileRepository
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.utils.UnitConverter
@@ -50,7 +49,8 @@ data class ActiveExercise(
     val exerciseTrackingType: ExerciseTrackingType,
     val sets: List<WorkoutSet>,
     val plannedSets: Int,
-    val plannedReps: Int?
+    val plannedReps: Int?,
+    val restSeconds: Int?
 )
 
 /**
@@ -79,7 +79,7 @@ data class ActiveWorkoutUiState(
 class ActiveWorkoutViewModel @Inject constructor(
     private val createWorkoutSessionUseCase: CreateWorkoutSessionUseCase,
     private val getAllExercisesIncludingHiddenUseCase: GetAllExercisesIncludingHiddenUseCase,
-    private val userProfileRepository: UserProfileRepository,
+    private val appPreferencesRepository: AppPreferencesRepository,
     private val idGenerator: IdGenerator
 ) : ViewModel() {
 
@@ -95,18 +95,13 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /**
-     * Load user's preferred units from their profile.
+     * Load the user's preferred display units - a device preference, not
+     * account data.
      */
     private fun loadUserPreferences() {
         viewModelScope.launch {
-            val uid = FirebaseAuth.getInstance().currentUser?.uid
-            uid?.let {
-                val profile = userProfileRepository.getProfile(it)
-                profile?.let { p ->
-                    _uiState.update { state ->
-                        state.copy(preferredUnits = p.preferredUnits)
-                    }
-                }
+            appPreferencesRepository.preferredUnits.collect { units ->
+                _uiState.update { state -> state.copy(preferredUnits = units) }
             }
         }
     }
@@ -160,7 +155,8 @@ class ActiveWorkoutViewModel @Inject constructor(
                         exerciseTrackingType = exerciseTrackingType,
                         sets = sets,
                         plannedSets = templateExercise.plannedSets,
-                        plannedReps = templateExercise.plannedReps
+                        plannedReps = templateExercise.plannedReps,
+                        restSeconds = templateExercise.restSeconds
                     )
                 }
 

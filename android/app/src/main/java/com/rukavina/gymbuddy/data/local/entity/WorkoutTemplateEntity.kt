@@ -3,6 +3,7 @@ package com.rukavina.gymbuddy.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.rukavina.gymbuddy.domain.model.EntitySource
+import com.rukavina.gymbuddy.domain.model.SyncState
 
 /**
  * Room entity for WorkoutTemplate table.
@@ -47,5 +48,9 @@ data class WorkoutTemplateEntity(
      * appear in lists, search, or filters. Existing references to it
      * remain resolvable. See docs/adr/0002-deprecation-over-deletion.md.
      */
-    val deprecated: Boolean = false
+    val deprecated: Boolean = false,
+    val updatedAt: Long = 0L,
+    val deletedAt: Long? = null,
+    val revision: Int = 0,
+    val syncState: SyncState = SyncState.PENDING
 )

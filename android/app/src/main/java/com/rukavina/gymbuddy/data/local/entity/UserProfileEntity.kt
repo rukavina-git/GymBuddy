@@ -17,7 +17,10 @@ data class UserProfileEntity(
     val fitnessGoal: FitnessGoal? = null,
     val activityLevel: ActivityLevel? = null,
     val targetWeight: Float? = null,
-    val preferredUnits: PreferredUnits = PreferredUnits.METRIC,
     val joinedDate: Long,
-    val bio: String? = null
+    val bio: String? = null,
+    val updatedAt: Long = 0L,
+    val deletedAt: Long? = null,
+    val revision: Int = 0,
+    val syncState: SyncState = SyncState.PENDING
 )

@@ -402,6 +402,14 @@ fun ExerciseCard(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        // Prescriptive guidance only - there is no rest timer in v1.
+                        exercise.restSeconds?.let { rest ->
+                            Text(
+                                text = "Rest ${rest}s",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 

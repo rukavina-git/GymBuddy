@@ -23,6 +23,7 @@ import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.ExerciseType
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
+import com.rukavina.gymbuddy.ui.exercise.components.displayLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +41,7 @@ fun ExerciseWizardDialog(
     var difficulty by remember { mutableStateOf(exercise?.difficulty ?: DifficultyLevel.BEGINNER) }
     var category by remember { mutableStateOf(exercise?.category ?: ExerciseCategory.STRENGTH) }
     var exerciseType by remember { mutableStateOf(exercise?.exerciseType ?: ExerciseType.COMPOUND) }
+    var trackingType by remember { mutableStateOf(exercise?.trackingType ?: ExerciseTrackingType.WEIGHT_REPS) }
     var primaryMuscles by remember { mutableStateOf(exercise?.primaryMuscles ?: emptyList()) }
     var secondaryMuscles by remember { mutableStateOf(exercise?.secondaryMuscles ?: emptyList()) }
     var equipmentNeeded by remember { mutableStateOf(exercise?.equipmentNeeded ?: listOf(Equipment.BODYWEIGHT)) }
@@ -112,7 +114,9 @@ fun ExerciseWizardDialog(
                             category = category,
                             onCategoryChange = { category = it },
                             exerciseType = exerciseType,
-                            onExerciseTypeChange = { exerciseType = it }
+                            onExerciseTypeChange = { exerciseType = it },
+                            trackingType = trackingType,
+                            onTrackingTypeChange = { trackingType = it }
                         )
                         2 -> MusclesEquipmentStep(
                             primaryMuscles = primaryMuscles,
@@ -182,7 +186,7 @@ fun ExerciseWizardDialog(
                                         equipmentNeeded = equipmentNeeded,
                                         category = category,
                                         exerciseType = exerciseType,
-                                        trackingType = exercise?.trackingType ?: ExerciseTrackingType.WEIGHT_REPS,
+                                        trackingType = trackingType,
                                         videoUrl = videoUrl.ifBlank { null },
                                         thumbnailUrl = thumbnailUrl.ifBlank { null },
                                         source = exercise?.source ?: EntitySource.CUSTOM,
@@ -255,6 +259,7 @@ fun BasicInfoStep(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClassificationStep(
     difficulty: DifficultyLevel,
@@ -262,7 +267,9 @@ fun ClassificationStep(
     category: ExerciseCategory,
     onCategoryChange: (ExerciseCategory) -> Unit,
     exerciseType: ExerciseType,
-    onExerciseTypeChange: (ExerciseType) -> Unit
+    onExerciseTypeChange: (ExerciseType) -> Unit,
+    trackingType: ExerciseTrackingType,
+    onTrackingTypeChange: (ExerciseTrackingType) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -330,6 +337,49 @@ fun ClassificationStep(
                         label = { Text(type.name) },
                         modifier = Modifier.weight(1f)
                     )
+                }
+            }
+        }
+
+        // Tracking Type - an override, not a required choice: default
+        // (Weight and reps) covers ~90% of exercises, so this is shown as
+        // a single current-selection field with a dropdown to change it,
+        // not six equal-weight buttons.
+        var trackingTypeExpanded by remember { mutableStateOf(false) }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "Tracking Type",
+                style = MaterialTheme.typography.labelLarge
+            )
+            ExposedDropdownMenuBox(
+                expanded = trackingTypeExpanded,
+                onExpandedChange = { trackingTypeExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = trackingType.displayLabel(),
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = trackingTypeExpanded)
+                    },
+                    supportingText = { Text("Most exercises use Weight and reps - change only if this one is different") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = trackingTypeExpanded,
+                    onDismissRequest = { trackingTypeExpanded = false }
+                ) {
+                    ExerciseTrackingType.entries.forEach { type ->
+                        DropdownMenuItem(
+                            text = { Text(type.displayLabel()) },
+                            onClick = {
+                                onTrackingTypeChange(type)
+                                trackingTypeExpanded = false
+                            }
+                        )
+                    }
                 }
             }
         }

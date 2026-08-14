@@ -69,5 +69,27 @@ data class WorkoutSession(
      * Multiple performed exercises can reference the same Exercise template.
      * Order in the list represents the sequence in which exercises were performed.
      */
-    val performedExercises: List<PerformedExercise>
+    val performedExercises: List<PerformedExercise>,
+
+    /**
+     * When this row last changed locally, in epoch ms. Set from the
+     * injected Clock at write time - see Exercise.updatedAt.
+     */
+    val updatedAt: Long = 0L,
+
+    /**
+     * Tombstone: non-null means this session is deleted. A delete sets
+     * this and bumps updatedAt instead of removing the row.
+     */
+    val deletedAt: Long? = null,
+
+    /**
+     * Server-assigned revision number. Stays 0 until a backend exists.
+     */
+    val revision: Int = 0,
+
+    /**
+     * Local-only bookkeeping for the future sync engine - see SyncState.
+     */
+    val syncState: SyncState = SyncState.PENDING
 )

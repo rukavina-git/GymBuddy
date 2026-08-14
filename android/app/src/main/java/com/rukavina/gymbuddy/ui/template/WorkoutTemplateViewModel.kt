@@ -3,6 +3,8 @@ package com.rukavina.gymbuddy.ui.template
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rukavina.gymbuddy.domain.id.IdGenerator
+import com.rukavina.gymbuddy.domain.model.EntitySource
+import com.rukavina.gymbuddy.domain.model.TemplateExercise
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesUseCase
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
@@ -151,11 +153,14 @@ class WorkoutTemplateViewModel @Inject constructor(
     }
 
     /**
-     * Create a new workout template.
+     * Create a new workout template from user input collected by
+     * WorkoutTemplateFormDialog. Mints every id with IdGenerator - the
+     * dialog only ever relays ids that already existed.
      */
-    fun createTemplate(template: WorkoutTemplate) {
+    fun createTemplate(draft: WorkoutTemplateDraft) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+            val template = buildTemplate(existing = null, draft = draft)
             createWorkoutTemplateUseCase(template)
                 .onSuccess {
                     _uiState.update {
@@ -178,11 +183,16 @@ class WorkoutTemplateViewModel @Inject constructor(
     }
 
     /**
-     * Update an existing workout template.
+     * Update an existing workout template from user input collected by
+     * WorkoutTemplateFormDialog. Preserves the template's own id, source,
+     * ownerId and derivedFromId, and every existingId the draft carries
+     * forward for its exercises; mints fresh ids for anything added during
+     * this edit.
      */
-    fun updateTemplate(template: WorkoutTemplate) {
+    fun updateTemplate(existing: WorkoutTemplate, draft: WorkoutTemplateDraft) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+            val template = buildTemplate(existing = existing, draft = draft)
             updateWorkoutTemplateUseCase(template)
                 .onSuccess {
                     _uiState.update {
@@ -202,6 +212,39 @@ class WorkoutTemplateViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    /**
+     * Construct the real WorkoutTemplate/TemplateExercise entities from
+     * user input, minting an id for anything the draft didn't already
+     * have. This is the only place in this flow that mints domain
+     * identity - WorkoutTemplateScreen's dialogs only ever relay ids they
+     * were already given.
+     */
+    private fun buildTemplate(existing: WorkoutTemplate?, draft: WorkoutTemplateDraft): WorkoutTemplate {
+        val exercises = draft.exercises.map { exerciseDraft ->
+            TemplateExercise(
+                id = exerciseDraft.existingId ?: idGenerator.newId(),
+                exerciseId = exerciseDraft.exerciseId,
+                exerciseName = exerciseDraft.exerciseName,
+                exerciseTrackingType = exerciseDraft.exerciseTrackingType,
+                plannedSets = exerciseDraft.plannedSets,
+                plannedReps = exerciseDraft.plannedReps,
+                orderIndex = exerciseDraft.orderIndex,
+                restSeconds = exerciseDraft.restSeconds,
+                notes = exerciseDraft.notes
+            )
+        }
+
+        return WorkoutTemplate(
+            id = existing?.id ?: idGenerator.newId(),
+            title = draft.title,
+            templateExercises = exercises,
+            source = existing?.source ?: EntitySource.CUSTOM,
+            ownerId = existing?.ownerId,
+            derivedFromId = existing?.derivedFromId,
+            deprecated = existing?.deprecated ?: false
+        )
     }
 
     /**
@@ -245,16 +288,6 @@ class WorkoutTemplateViewModel @Inject constructor(
     fun clearSuccess() {
         _uiState.update { it.copy(successMessage = null) }
     }
-
-    /**
-     * Generate a new id for a template exercise being created in the UI.
-     */
-    fun newTemplateExerciseId(): String = idGenerator.newId()
-
-    /**
-     * Generate a new id for a workout template being created in the UI.
-     */
-    fun newTemplateId(): String = idGenerator.newId()
 
     /**
      * Hide a default workout template.

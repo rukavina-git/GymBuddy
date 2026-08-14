@@ -7,6 +7,7 @@ import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.Clock
 import javax.inject.Inject
 
 /**
@@ -16,7 +17,8 @@ import javax.inject.Inject
  */
 class ExerciseRepositoryImpl @Inject constructor(
     private val exerciseDao: ExerciseDao,
-    private val userExerciseStateDao: UserExerciseStateDao
+    private val userExerciseStateDao: UserExerciseStateDao,
+    private val clock: Clock
 ) : ExerciseRepository {
 
     override fun getAllExercises(): Flow<List<Exercise>> {
@@ -31,28 +33,29 @@ class ExerciseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun createExercise(exercise: Exercise) {
-        val entity = ExerciseMapper.toEntity(exercise)
+        val entity = ExerciseMapper.toEntity(exercise).copy(updatedAt = clock.millis())
         exerciseDao.insertExercise(entity)
         // TODO: Sync with remote API when online
     }
 
     override suspend fun updateExercise(exercise: Exercise) {
-        val entity = ExerciseMapper.toEntity(exercise)
+        val entity = ExerciseMapper.toEntity(exercise).copy(updatedAt = clock.millis())
         exerciseDao.updateExercise(entity)
         // TODO: Sync with remote API when online
     }
 
     override suspend fun deleteExercise(id: String) {
-        exerciseDao.deleteExercise(id)
+        val now = clock.millis()
+        exerciseDao.deleteExercise(id, deletedAt = now, updatedAt = now)
         // TODO: Sync deletion with remote API when online
     }
 
     override suspend fun hideExercise(id: String) {
-        userExerciseStateDao.setHidden(id, true)
+        userExerciseStateDao.setHidden(id, true, clock.millis())
     }
 
     override suspend fun unhideExercise(id: String) {
-        userExerciseStateDao.setHidden(id, false)
+        userExerciseStateDao.setHidden(id, false, clock.millis())
     }
 
     override fun getHiddenExercises(): Flow<List<Exercise>> {
@@ -62,7 +65,7 @@ class ExerciseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun unhideAllExercises() {
-        userExerciseStateDao.unhideAll()
+        userExerciseStateDao.unhideAll(clock.millis())
     }
 
     override suspend fun getExerciseNote(exerciseId: String): String? {
@@ -70,7 +73,7 @@ class ExerciseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateExerciseNote(exerciseId: String, note: String?) {
-        userExerciseStateDao.setNote(exerciseId, note)
+        userExerciseStateDao.setNote(exerciseId, note, clock.millis())
     }
 
     override fun searchExercises(query: String): Flow<List<Exercise>> {

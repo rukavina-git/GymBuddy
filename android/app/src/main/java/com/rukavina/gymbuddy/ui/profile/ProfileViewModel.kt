@@ -4,13 +4,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.model.UserProfile
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
 import com.rukavina.gymbuddy.domain.model.ActivityLevel
 import com.rukavina.gymbuddy.domain.model.FitnessGoal
 import com.rukavina.gymbuddy.domain.model.Gender
-import com.rukavina.gymbuddy.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,9 +26,17 @@ import javax.inject.Inject
 
 private const val TAG = "ProfileViewModel"
 
+/**
+ * Weight/height/targetWeight in ProfileUiState are always metric (kg/cm) -
+ * matching UserProfile storage. Display-unit conversion happens only in
+ * ProfileScreen and the Edit*Screen composables, which already take
+ * preferredUnits and convert at their own render/parse boundary. This
+ * ViewModel never converts between metric and display units.
+ */
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val repository: UserProfileRepository
+    private val repository: UserProfileRepository,
+    private val appPreferencesRepository: AppPreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -44,6 +52,11 @@ class ProfileViewModel @Inject constructor(
 
     init {
         loadProfile()
+        viewModelScope.launch {
+            appPreferencesRepository.preferredUnits.collect { units ->
+                _uiState.value = _uiState.value.copy(preferredUnits = units)
+            }
+        }
     }
 
     fun refreshProfile() {
@@ -79,18 +92,16 @@ class ProfileViewModel @Inject constructor(
                 Log.d(TAG, "Loaded profile: $profile")
                 profile?.let { p ->
                     Log.d(TAG, "Profile imageUrl from DB: ${p.profileImageUrl}")
-                    // Convert from metric (database storage) to user's preferred display units
                     _uiState.value = _uiState.value.copy(
                         name = p.name,
                         email = p.email.ifBlank { firebaseEmail },
                         birthDate = p.birthDate,
-                        weight = UnitConverter.weightToDisplayUnit(p.weight, p.preferredUnits),
-                        height = UnitConverter.heightToDisplayUnit(p.height, p.preferredUnits),
-                        targetWeight = UnitConverter.weightToDisplayUnit(p.targetWeight, p.preferredUnits),
+                        weight = p.weight,
+                        height = p.height,
+                        targetWeight = p.targetWeight,
                         gender = p.gender,
                         fitnessGoal = p.fitnessGoal,
                         activityLevel = p.activityLevel,
-                        preferredUnits = p.preferredUnits,
                         bio = p.bio ?: "",
                         profileImageUri = p.profileImageUrl
                     )
@@ -112,9 +123,9 @@ class ProfileViewModel @Inject constructor(
     fun onFieldChanged(field: ProfileField, value: String) {
         _uiState.value = when (field) {
             ProfileField.Name -> _uiState.value.copy(name = value)
-            ProfileField.Weight -> _uiState.value.copy(weight = value)
-            ProfileField.Height -> _uiState.value.copy(height = value)
-            ProfileField.TargetWeight -> _uiState.value.copy(targetWeight = value)
+            ProfileField.Weight -> _uiState.value.copy(weight = value.toFloatOrNull())
+            ProfileField.Height -> _uiState.value.copy(height = value.toFloatOrNull())
+            ProfileField.TargetWeight -> _uiState.value.copy(targetWeight = value.toFloatOrNull())
             ProfileField.Bio -> _uiState.value.copy(bio = value)
             else -> _uiState.value
         }
@@ -132,23 +143,6 @@ class ProfileViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(activityLevel = level)
     }
 
-    fun onPreferredUnitsChanged(units: PreferredUnits) {
-        val currentState = _uiState.value
-        val oldUnits = currentState.preferredUnits
-
-        // Convert currently displayed values from old units to new units
-        val currentWeightInMetric = UnitConverter.weightToMetric(currentState.weight, oldUnits)
-        val currentHeightInMetric = UnitConverter.heightToMetric(currentState.height, oldUnits)
-        val currentTargetWeightInMetric = UnitConverter.weightToMetric(currentState.targetWeight, oldUnits)
-
-        _uiState.value = currentState.copy(
-            preferredUnits = units,
-            weight = UnitConverter.weightToDisplayUnit(currentWeightInMetric, units),
-            height = UnitConverter.heightToDisplayUnit(currentHeightInMetric, units),
-            targetWeight = UnitConverter.weightToDisplayUnit(currentTargetWeightInMetric, units)
-        )
-    }
-
     fun onSaveClick() {
         Log.d(TAG, "onSaveClick called")
         viewModelScope.launch {
@@ -164,10 +158,9 @@ class ProfileViewModel @Inject constructor(
                     _uiState.value = currentState
                 }
 
-                // Convert from display units to metric for database storage
-                val weightInKg = UnitConverter.weightToMetric(currentState.weight, currentState.preferredUnits)
-                val heightInCm = UnitConverter.heightToMetric(currentState.height, currentState.preferredUnits)
-                val targetWeightInKg = UnitConverter.weightToMetric(currentState.targetWeight, currentState.preferredUnits)
+                // joinedDate must not be clobbered on every save - read the
+                // existing profile first, same as saveProfileToDatabase.
+                val existingProfile = repository.getProfile(userId)
 
                 val profile = UserProfile(
                     uid = userId,
@@ -175,14 +168,13 @@ class ProfileViewModel @Inject constructor(
                     email = currentState.email,
                     profileImageUrl = currentState.profileImageUri,
                     birthDate = currentState.birthDate,
-                    weight = weightInKg,
-                    height = heightInCm,
-                    targetWeight = targetWeightInKg,
+                    weight = currentState.weight,
+                    height = currentState.height,
+                    targetWeight = currentState.targetWeight,
                     gender = currentState.gender,
                     fitnessGoal = currentState.fitnessGoal,
                     activityLevel = currentState.activityLevel,
-                    preferredUnits = currentState.preferredUnits,
-                    joinedDate = System.currentTimeMillis(), // TODO: Store actual join date
+                    joinedDate = existingProfile?.joinedDate ?: System.currentTimeMillis(),
                     bio = currentState.bio.ifBlank { null }
                 )
                 Log.d(TAG, "Saving profile with imageUrl: ${profile.profileImageUrl}")
@@ -241,23 +233,17 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun onWeightSaved(weightKg: Float) {
-        // Weight is always saved in kg from EditWeightScreen, convert to display units
-        val displayWeight = UnitConverter.weightToDisplayUnit(weightKg, _uiState.value.preferredUnits)
-        _uiState.value = _uiState.value.copy(weight = displayWeight)
+        _uiState.value = _uiState.value.copy(weight = weightKg)
         saveProfileToDatabase()
     }
 
     fun onHeightSaved(heightCm: Float) {
-        // Height is always saved in cm from EditHeightScreen, convert to display units
-        val displayHeight = UnitConverter.heightToDisplayUnit(heightCm, _uiState.value.preferredUnits)
-        _uiState.value = _uiState.value.copy(height = displayHeight)
+        _uiState.value = _uiState.value.copy(height = heightCm)
         saveProfileToDatabase()
     }
 
     fun onTargetWeightSaved(weightKg: Float) {
-        // Weight is always saved in kg from EditTargetWeightScreen, convert to display units
-        val displayWeight = UnitConverter.weightToDisplayUnit(weightKg, _uiState.value.preferredUnits)
-        _uiState.value = _uiState.value.copy(targetWeight = displayWeight)
+        _uiState.value = _uiState.value.copy(targetWeight = weightKg)
         saveProfileToDatabase()
     }
 
@@ -277,21 +263,9 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun onPreferredUnitsSaved(units: PreferredUnits) {
-        val currentState = _uiState.value
-        val oldUnits = currentState.preferredUnits
-
-        // Convert currently displayed values from old units to new units
-        val currentWeightInMetric = UnitConverter.weightToMetric(currentState.weight, oldUnits)
-        val currentHeightInMetric = UnitConverter.heightToMetric(currentState.height, oldUnits)
-        val currentTargetWeightInMetric = UnitConverter.weightToMetric(currentState.targetWeight, oldUnits)
-
-        _uiState.value = currentState.copy(
-            preferredUnits = units,
-            weight = UnitConverter.weightToDisplayUnit(currentWeightInMetric, units),
-            height = UnitConverter.heightToDisplayUnit(currentHeightInMetric, units),
-            targetWeight = UnitConverter.weightToDisplayUnit(currentTargetWeightInMetric, units)
-        )
-        saveProfileToDatabase()
+        viewModelScope.launch {
+            appPreferencesRepository.setPreferredUnits(units)
+        }
     }
 
     private fun saveProfileToDatabase() {
@@ -299,13 +273,9 @@ class ProfileViewModel @Inject constructor(
             uid?.let { userId ->
                 val currentState = _uiState.value
 
-                // Check if profile exists in database first
+                // Check if profile exists in database first, so joinedDate
+                // isn't clobbered on every field save.
                 val existingProfile = repository.getProfile(userId)
-
-                // Convert from display units to metric for database storage
-                val weightInKg = UnitConverter.weightToMetric(currentState.weight, currentState.preferredUnits)
-                val heightInCm = UnitConverter.heightToMetric(currentState.height, currentState.preferredUnits)
-                val targetWeightInKg = UnitConverter.weightToMetric(currentState.targetWeight, currentState.preferredUnits)
 
                 val profile = UserProfile(
                     uid = userId,
@@ -313,13 +283,12 @@ class ProfileViewModel @Inject constructor(
                     email = currentState.email,
                     profileImageUrl = currentState.profileImageUri,
                     birthDate = currentState.birthDate,
-                    weight = weightInKg,
-                    height = heightInCm,
-                    targetWeight = targetWeightInKg,
+                    weight = currentState.weight,
+                    height = currentState.height,
+                    targetWeight = currentState.targetWeight,
                     gender = currentState.gender,
                     fitnessGoal = currentState.fitnessGoal,
                     activityLevel = currentState.activityLevel,
-                    preferredUnits = currentState.preferredUnits,
                     joinedDate = existingProfile?.joinedDate ?: System.currentTimeMillis(),
                     bio = currentState.bio.ifBlank { null }
                 )
