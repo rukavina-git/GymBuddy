@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Period
@@ -36,7 +37,8 @@ private const val TAG = "ProfileViewModel"
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val repository: UserProfileRepository,
-    private val appPreferencesRepository: AppPreferencesRepository
+    private val appPreferencesRepository: AppPreferencesRepository,
+    private val clock: Clock
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -174,7 +176,7 @@ class ProfileViewModel @Inject constructor(
                     gender = currentState.gender,
                     fitnessGoal = currentState.fitnessGoal,
                     activityLevel = currentState.activityLevel,
-                    joinedDate = existingProfile?.joinedDate ?: System.currentTimeMillis(),
+                    joinedDate = existingProfile?.joinedDate ?: clock.millis(),
                     bio = currentState.bio.ifBlank { null }
                 )
                 Log.d(TAG, "Saving profile with imageUrl: ${profile.profileImageUrl}")
@@ -289,7 +291,7 @@ class ProfileViewModel @Inject constructor(
                     gender = currentState.gender,
                     fitnessGoal = currentState.fitnessGoal,
                     activityLevel = currentState.activityLevel,
-                    joinedDate = existingProfile?.joinedDate ?: System.currentTimeMillis(),
+                    joinedDate = existingProfile?.joinedDate ?: clock.millis(),
                     bio = currentState.bio.ifBlank { null }
                 )
                 repository.saveProfile(profile)
