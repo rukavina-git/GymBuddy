@@ -90,26 +90,29 @@ object AppModule {
     @Singleton
     fun provideExerciseRepository(
         exerciseDao: ExerciseDao,
-        userExerciseStateDao: UserExerciseStateDao
+        userExerciseStateDao: UserExerciseStateDao,
+        clock: Clock
     ): ExerciseRepository {
-        return ExerciseRepositoryImpl(exerciseDao, userExerciseStateDao)
+        return ExerciseRepositoryImpl(exerciseDao, userExerciseStateDao, clock)
     }
 
     @Provides
     @Singleton
     fun provideWorkoutSessionRepository(
-        workoutSessionDao: WorkoutSessionDao
+        workoutSessionDao: WorkoutSessionDao,
+        clock: Clock
     ): WorkoutSessionRepository {
-        return WorkoutSessionRepositoryImpl(workoutSessionDao)
+        return WorkoutSessionRepositoryImpl(workoutSessionDao, clock)
     }
 
     @Provides
     @Singleton
     fun provideWorkoutTemplateRepository(
         workoutTemplateDao: WorkoutTemplateDao,
-        userTemplateStateDao: UserTemplateStateDao
+        userTemplateStateDao: UserTemplateStateDao,
+        clock: Clock
     ): WorkoutTemplateRepository {
-        return WorkoutTemplateRepositoryImpl(workoutTemplateDao, userTemplateStateDao)
+        return WorkoutTemplateRepositoryImpl(workoutTemplateDao, userTemplateStateDao, clock)
     }
 
     @Provides

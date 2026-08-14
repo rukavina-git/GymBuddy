@@ -6,6 +6,7 @@ import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.Clock
 import javax.inject.Inject
 
 /**
@@ -14,7 +15,8 @@ import javax.inject.Inject
  * Can be extended to sync with remote API in the future.
  */
 class WorkoutSessionRepositoryImpl @Inject constructor(
-    private val workoutSessionDao: WorkoutSessionDao
+    private val workoutSessionDao: WorkoutSessionDao,
+    private val clock: Clock
 ) : WorkoutSessionRepository {
 
     override fun getAllWorkoutSessions(): Flow<List<WorkoutSession>> {
@@ -46,7 +48,7 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     override suspend fun createWorkoutSession(workoutSession: WorkoutSession) {
         requireStampedSnapshots(workoutSession)
         val (workoutSessionEntity, performedExerciseEntities, workoutSetEntities) = WorkoutSessionMapper.toEntities(workoutSession)
-        workoutSessionDao.insertWorkoutSession(workoutSessionEntity)
+        workoutSessionDao.insertWorkoutSession(workoutSessionEntity.copy(updatedAt = clock.millis()))
         workoutSessionDao.insertPerformedExercises(performedExerciseEntities)
         workoutSessionDao.insertWorkoutSets(workoutSetEntities)
         // TODO: Sync with remote API when online
@@ -55,7 +57,7 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     override suspend fun updateWorkoutSession(workoutSession: WorkoutSession) {
         requireStampedSnapshots(workoutSession)
         val (workoutSessionEntity, performedExerciseEntities, workoutSetEntities) = WorkoutSessionMapper.toEntities(workoutSession)
-        workoutSessionDao.updateWorkoutSession(workoutSessionEntity)
+        workoutSessionDao.updateWorkoutSession(workoutSessionEntity.copy(updatedAt = clock.millis()))
         workoutSessionDao.deletePerformedExercisesByWorkoutSessionId(workoutSession.id)
         workoutSessionDao.insertPerformedExercises(performedExerciseEntities)
         workoutSessionDao.insertWorkoutSets(workoutSetEntities)
@@ -63,7 +65,8 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteWorkoutSession(id: String) {
-        workoutSessionDao.deleteWorkoutSession(id)
+        val now = clock.millis()
+        workoutSessionDao.deleteWorkoutSession(id, deletedAt = now, updatedAt = now)
         // TODO: Sync deletion with remote API when online
     }
 

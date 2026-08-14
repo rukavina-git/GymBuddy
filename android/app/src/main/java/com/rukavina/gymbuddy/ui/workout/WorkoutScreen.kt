@@ -19,12 +19,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rukavina.gymbuddy.domain.model.Exercise
-import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
-import com.rukavina.gymbuddy.domain.model.PerformedExercise
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
-import com.rukavina.gymbuddy.domain.model.WorkoutSet
 import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
+import com.rukavina.gymbuddy.utils.UnitConverter
 import com.rukavina.gymbuddy.utils.validation.InputValidation
 import com.rukavina.gymbuddy.utils.validation.ValidationConstants
 import java.text.SimpleDateFormat
@@ -201,12 +200,14 @@ fun WorkoutScreen(
             WorkoutSessionFormDialog(
                 workoutSession = editingWorkoutSession,
                 availableExercises = exerciseUiState.exercises,
+                preferredUnits = uiState.preferredUnits,
                 onDismiss = { showDialog = false },
-                onSave = { workoutSession ->
-                    if (editingWorkoutSession != null) {
-                        viewModel.updateWorkoutSession(workoutSession)
+                onSave = { draft ->
+                    val existing = editingWorkoutSession
+                    if (existing != null) {
+                        viewModel.updateWorkoutSession(existing, draft)
                     } else {
-                        viewModel.createWorkoutSession(workoutSession)
+                        viewModel.createWorkoutSession(draft)
                     }
                     showDialog = false
                 },
@@ -216,10 +217,7 @@ fun WorkoutScreen(
                         showDialog = false
                         editingWorkoutSession = null
                     }
-                } else null,
-                generatePerformedExerciseId = viewModel::newPerformedExerciseId,
-                generateSetId = viewModel::newWorkoutSetId,
-                generateWorkoutSessionId = viewModel::newWorkoutSessionId
+                } else null
             )
         }
     }
@@ -289,12 +287,10 @@ fun WorkoutSessionItem(
 fun WorkoutSessionFormDialog(
     workoutSession: WorkoutSession?,
     availableExercises: List<Exercise>,
+    preferredUnits: PreferredUnits,
     onDismiss: () -> Unit,
-    onSave: (WorkoutSession) -> Unit,
-    onDelete: (() -> Unit)? = null,
-    generatePerformedExerciseId: () -> String,
-    generateSetId: () -> String,
-    generateWorkoutSessionId: () -> String
+    onSave: (WorkoutSessionDraft) -> Unit,
+    onDelete: (() -> Unit)? = null
 ) {
     val calendar = remember {
         Calendar.getInstance().apply {
@@ -314,7 +310,27 @@ fun WorkoutSessionFormDialog(
     var selectedHour by remember { mutableStateOf(calendar.get(Calendar.HOUR_OF_DAY)) }
     var selectedMinute by remember { mutableStateOf(calendar.get(Calendar.MINUTE)) }
     var performedExercises by remember {
-        mutableStateOf<List<PerformedExercise>>(workoutSession?.performedExercises ?: emptyList())
+        mutableStateOf(
+            workoutSession?.performedExercises?.map { pe ->
+                PerformedExerciseDraft(
+                    existingId = pe.id,
+                    exerciseId = pe.exerciseId,
+                    exerciseName = pe.exerciseName,
+                    exerciseTrackingType = pe.exerciseTrackingType,
+                    orderIndex = pe.orderIndex,
+                    sets = pe.sets.map { set ->
+                        WorkoutSetDraft(
+                            existingId = set.id,
+                            weightKg = set.weightKg,
+                            reps = set.reps,
+                            durationSeconds = set.durationSeconds,
+                            distanceMeters = set.distanceMeters,
+                            orderIndex = set.orderIndex
+                        )
+                    }
+                )
+            } ?: emptyList()
+        )
     }
     var showExercisePicker by remember { mutableStateOf(false) }
     var editingExerciseIndex by remember { mutableStateOf<Int?>(null) }
@@ -522,8 +538,7 @@ fun WorkoutSessionFormDialog(
                         }
 
                         onSave(
-                            WorkoutSession(
-                                id = workoutSession?.id ?: generateWorkoutSessionId(),
+                            WorkoutSessionDraft(
                                 startedAt = cal.timeInMillis,
                                 endedAt = workoutSession?.endedAt,
                                 durationSeconds = totalSeconds,
@@ -561,6 +576,7 @@ fun WorkoutSessionFormDialog(
         ExerciseEditDialog(
             availableExercises = availableExercises,
             existingExercise = editingExerciseIndex?.let { performedExercises[it] },
+            preferredUnits = preferredUnits,
             onDismiss = {
                 showExercisePicker = false
                 editingExerciseIndex = null
@@ -575,9 +591,7 @@ fun WorkoutSessionFormDialog(
                 }.mapIndexed { index, ex -> ex.copy(orderIndex = index) }
                 showExercisePicker = false
                 editingExerciseIndex = null
-            },
-            generatePerformedExerciseId = generatePerformedExerciseId,
-            generateSetId = generateSetId
+            }
         )
     }
 
@@ -693,18 +707,17 @@ fun WorkoutSessionFormDialog(
 @Composable
 fun ExerciseEditDialog(
     availableExercises: List<Exercise>,
-    existingExercise: PerformedExercise?,
+    existingExercise: PerformedExerciseDraft?,
+    preferredUnits: PreferredUnits,
     onDismiss: () -> Unit,
-    onSave: (PerformedExercise) -> Unit,
-    generatePerformedExerciseId: () -> String,
-    generateSetId: () -> String
+    onSave: (PerformedExerciseDraft) -> Unit
 ) {
     var selectedExerciseId by remember { mutableStateOf(existingExercise?.exerciseId ?: "") }
 
     // For new exercises, create sets with placeholder values that will be shown as empty
     // For existing exercises, use their actual values
     data class UiWorkoutSet(
-        val id: String,
+        val existingId: String?,
         val weight: String,
         val reps: String,
         val duration: String,
@@ -717,8 +730,9 @@ fun ExerciseEditDialog(
             if (existingExercise != null) {
                 existingExercise.sets.map { set ->
                     UiWorkoutSet(
-                        id = set.id,
-                        weight = set.weightKg?.takeIf { it != 0f }?.toString() ?: "",
+                        existingId = set.existingId,
+                        weight = set.weightKg?.takeIf { it != 0f }
+                            ?.let { UnitConverter.weightToDisplayUnit(it, preferredUnits) } ?: "",
                         reps = set.reps?.takeIf { it != 0 }?.toString() ?: "",
                         duration = set.durationSeconds?.takeIf { it != 0 }?.toString() ?: "",
                         distance = set.distanceMeters?.takeIf { it != 0f }?.toString() ?: "",
@@ -728,7 +742,7 @@ fun ExerciseEditDialog(
             } else {
                 listOf(
                     UiWorkoutSet(
-                        id = generateSetId(),
+                        existingId = null,
                         weight = "",
                         reps = "",
                         duration = "",
@@ -840,7 +854,7 @@ fun ExerciseEditDialog(
                         Text("Sets (${workoutSets.size})", style = MaterialTheme.typography.titleSmall)
                         IconButton(onClick = {
                             workoutSets = workoutSets + UiWorkoutSet(
-                                id = generateSetId(),
+                                existingId = null,
                                 weight = workoutSets.lastOrNull()?.weight ?: "",
                                 reps = workoutSets.lastOrNull()?.reps ?: "",
                                 duration = workoutSets.lastOrNull()?.duration ?: "",
@@ -895,7 +909,7 @@ fun ExerciseEditDialog(
                                                 }
                                             }
                                         },
-                                        label = { Text("kg") },
+                                        label = { Text(UnitConverter.getWeightUnitLabel(preferredUnits)) },
                                         modifier = Modifier.weight(1f),
                                         singleLine = true
                                     )
@@ -953,18 +967,18 @@ fun ExerciseEditDialog(
             TextButton(
                 onClick = {
                     if (selectedExerciseId.isNotBlank() && workoutSets.isNotEmpty()) {
-                        // Convert UI sets to domain model, filtering out empty sets.
+                        // Convert UI sets to draft sets, filtering out empty sets.
                         // Which fields count depends on the exercise's tracking type,
                         // mirroring WorkoutSetValidator.
-                        val domainSets = workoutSets
+                        val draftSets = workoutSets
                             .filter {
                                 SetTrackingFields.isFilled(trackingType, it.reps, it.duration, it.distance)
                             }
                             .mapIndexed { index, uiSet ->
-                                WorkoutSet(
-                                    id = uiSet.id,
+                                WorkoutSetDraft(
+                                    existingId = uiSet.existingId,
                                     weightKg = if (SetTrackingFields.showsWeight(trackingType)) {
-                                        uiSet.weight.toFloatOrNull()
+                                        UnitConverter.weightToMetric(uiSet.weight, preferredUnits)
                                     } else {
                                         null
                                     },
@@ -983,28 +997,27 @@ fun ExerciseEditDialog(
                                     } else {
                                         null
                                     },
-                                    isCompleted = true,
                                     orderIndex = index
                                 )
                             }
 
-                        if (domainSets.isNotEmpty()) {
+                        if (draftSets.isNotEmpty()) {
                             // orderIndex is a placeholder - the caller re-stamps it based on
-                            // final position in the performed exercises list. The exercise
-                            // snapshot fields (name/category/primaryMuscles) are placeholders
-                            // too - ValidateWorkoutSessionSetsUseCase resolves the real
-                            // Exercise and stamps them before this is persisted.
-                            // exerciseTrackingType is already the real, resolved value.
+                            // final position in the performed exercises list. exerciseName is
+                            // the resolved display name, used only for the in-progress list in
+                            // WorkoutSessionFormDialog - ValidateWorkoutSessionSetsUseCase
+                            // resolves the real Exercise and stamps the actual snapshot
+                            // (name/category/primaryMuscles) before this is persisted.
+                            // exerciseTrackingType is already the real, resolved value. No id
+                            // is minted here - the ViewModel does that with its IdGenerator.
                             onSave(
-                                PerformedExercise(
-                                    id = existingExercise?.id ?: generatePerformedExerciseId(),
+                                PerformedExerciseDraft(
+                                    existingId = existingExercise?.existingId,
                                     exerciseId = selectedExerciseId,
-                                    orderIndex = existingExercise?.orderIndex ?: 0,
-                                    exerciseName = "",
-                                    exerciseCategory = ExerciseCategory.STRENGTH,
+                                    exerciseName = selectedExercise?.name ?: "",
                                     exerciseTrackingType = trackingType,
-                                    exercisePrimaryMuscles = emptyList(),
-                                    sets = domainSets
+                                    orderIndex = existingExercise?.orderIndex ?: 0,
+                                    sets = draftSets
                                 )
                             )
                         }

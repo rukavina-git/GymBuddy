@@ -54,5 +54,27 @@ data class WorkoutTemplate(
      * appear in lists, search, or filters. Existing references to it
      * remain resolvable. See docs/adr/0002-deprecation-over-deletion.md.
      */
-    val deprecated: Boolean = false
+    val deprecated: Boolean = false,
+
+    /**
+     * When this row last changed locally, in epoch ms. Set from the
+     * injected Clock at write time - see Exercise.updatedAt.
+     */
+    val updatedAt: Long = 0L,
+
+    /**
+     * Tombstone: non-null means this template is deleted. A delete sets
+     * this and bumps updatedAt instead of removing the row.
+     */
+    val deletedAt: Long? = null,
+
+    /**
+     * Server-assigned revision number. Stays 0 until a backend exists.
+     */
+    val revision: Int = 0,
+
+    /**
+     * Local-only bookkeeping for the future sync engine - see SyncState.
+     */
+    val syncState: SyncState = SyncState.PENDING
 )

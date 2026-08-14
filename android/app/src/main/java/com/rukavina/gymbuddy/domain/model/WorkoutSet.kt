@@ -4,6 +4,9 @@ package com.rukavina.gymbuddy.domain.model
  * Domain model representing a single set within a performed exercise.
  * Which measurements are populated depends on the exercise's
  * ExerciseTrackingType; see domain/validation/WorkoutSetValidator.kt.
+ *
+ * No updatedAt/deletedAt/revision/syncState of its own - a child of the
+ * WorkoutSession aggregate, governed by the parent's sync metadata.
  */
 data class WorkoutSet(
     /**

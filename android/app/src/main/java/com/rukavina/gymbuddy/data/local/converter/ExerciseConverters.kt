@@ -7,6 +7,7 @@ import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.ExerciseType
+import com.rukavina.gymbuddy.domain.model.SyncState
 
 /**
  * Type converters for Exercise-related enums and lists.
@@ -124,6 +125,23 @@ class ExerciseConverters {
         return value?.let {
             try {
                 EntitySource.valueOf(it)
+            } catch (e: IllegalArgumentException) {
+                null
+            }
+        }
+    }
+
+    // SyncState Converters (shared by every user-owned entity)
+    @TypeConverter
+    fun fromSyncState(value: SyncState?): String? {
+        return value?.name
+    }
+
+    @TypeConverter
+    fun toSyncState(value: String?): SyncState? {
+        return value?.let {
+            try {
+                SyncState.valueOf(it)
             } catch (e: IllegalArgumentException) {
                 null
             }

@@ -15,6 +15,13 @@ import kotlinx.coroutines.flow.Flow
 /**
  * Data Access Object for WorkoutSession and PerformedExercise operations.
  * Handles queries for both tables due to their relationship.
+ *
+ * Every WorkoutSession read query excludes deletedAt IS NOT NULL rows,
+ * including the detail lookup by id - see ExerciseDao for why deleted
+ * rows are excluded even there, unlike hidden/deprecated. PerformedExercise
+ * and WorkoutSet have no deletedAt of their own (children of the
+ * WorkoutSession aggregate) and are only ever fetched for a session id
+ * already known to be live, so they need no filter of their own.
  */
 @Dao
 interface WorkoutSessionDao {
@@ -22,13 +29,13 @@ interface WorkoutSessionDao {
      * Get all workout sessions.
      * Ordered by startedAt descending (most recent first).
      */
-    @Query("SELECT * FROM workout_sessions ORDER BY startedAt DESC")
+    @Query("SELECT * FROM workout_sessions WHERE deletedAt IS NULL ORDER BY startedAt DESC")
     fun getAllWorkoutSessions(): Flow<List<WorkoutSessionEntity>>
 
     /**
      * Get a single workout session by ID.
      */
-    @Query("SELECT * FROM workout_sessions WHERE id = :id")
+    @Query("SELECT * FROM workout_sessions WHERE id = :id AND deletedAt IS NULL")
     suspend fun getWorkoutSessionById(id: String): WorkoutSessionEntity?
 
     /**
@@ -36,7 +43,7 @@ interface WorkoutSessionDao {
      * @param startDate Unix timestamp in milliseconds
      * @param endDate Unix timestamp in milliseconds
      */
-    @Query("SELECT * FROM workout_sessions WHERE startedAt BETWEEN :startDate AND :endDate ORDER BY startedAt DESC")
+    @Query("SELECT * FROM workout_sessions WHERE startedAt BETWEEN :startDate AND :endDate AND deletedAt IS NULL ORDER BY startedAt DESC")
     fun getWorkoutSessionsByDateRange(startDate: Long, endDate: Long): Flow<List<WorkoutSessionEntity>>
 
     /**
@@ -71,11 +78,14 @@ interface WorkoutSessionDao {
     suspend fun updatePerformedExercise(exercise: PerformedExerciseEntity)
 
     /**
-     * Delete a workout session by ID.
-     * Performed exercises will be cascade deleted due to foreign key.
+     * Tombstone a workout session by ID instead of removing the row, so a
+     * future sync engine has something to push. Since this is an UPDATE
+     * rather than a DELETE, the cascade-delete foreign key on
+     * performed_exercises does not fire - its rows (and their sets) stay
+     * in place, governed by the now-tombstoned parent.
      */
-    @Query("DELETE FROM workout_sessions WHERE id = :id")
-    suspend fun deleteWorkoutSession(id: String)
+    @Query("UPDATE workout_sessions SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun deleteWorkoutSession(id: String, deletedAt: Long, updatedAt: Long)
 
     /**
      * Delete performed exercises for a workout session.

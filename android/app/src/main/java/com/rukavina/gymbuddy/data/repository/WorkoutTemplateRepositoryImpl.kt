@@ -7,6 +7,7 @@ import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.repository.WorkoutTemplateRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.Clock
 import javax.inject.Inject
 
 /**
@@ -18,7 +19,8 @@ import javax.inject.Inject
  */
 class WorkoutTemplateRepositoryImpl @Inject constructor(
     private val workoutTemplateDao: WorkoutTemplateDao,
-    private val userTemplateStateDao: UserTemplateStateDao
+    private val userTemplateStateDao: UserTemplateStateDao,
+    private val clock: Clock
 ) : WorkoutTemplateRepository {
 
     override fun getAllTemplates(): Flow<List<WorkoutTemplate>> {
@@ -41,28 +43,29 @@ class WorkoutTemplateRepositoryImpl @Inject constructor(
     override suspend fun createTemplate(template: WorkoutTemplate) {
         requireStampedSnapshots(template)
         val (templateEntity, exerciseEntities) = WorkoutTemplateMapper.toEntities(template)
-        workoutTemplateDao.insertTemplateWithExercises(templateEntity, exerciseEntities)
+        workoutTemplateDao.insertTemplateWithExercises(templateEntity.copy(updatedAt = clock.millis()), exerciseEntities)
         // TODO: Sync with remote API when online
     }
 
     override suspend fun updateTemplate(template: WorkoutTemplate) {
         requireStampedSnapshots(template)
         val (templateEntity, exerciseEntities) = WorkoutTemplateMapper.toEntities(template)
-        workoutTemplateDao.updateTemplateWithExercises(templateEntity, exerciseEntities)
+        workoutTemplateDao.updateTemplateWithExercises(templateEntity.copy(updatedAt = clock.millis()), exerciseEntities)
         // TODO: Sync with remote API when online
     }
 
     override suspend fun deleteTemplate(id: String) {
-        workoutTemplateDao.deleteTemplate(id)
+        val now = clock.millis()
+        workoutTemplateDao.deleteTemplate(id, deletedAt = now, updatedAt = now)
         // TODO: Sync deletion with remote API when online
     }
 
     override suspend fun hideTemplate(id: String) {
-        userTemplateStateDao.setHidden(id, true)
+        userTemplateStateDao.setHidden(id, true, clock.millis())
     }
 
     override suspend fun unhideTemplate(id: String) {
-        userTemplateStateDao.setHidden(id, false)
+        userTemplateStateDao.setHidden(id, false, clock.millis())
     }
 
     override fun getHiddenTemplates(): Flow<List<WorkoutTemplate>> {

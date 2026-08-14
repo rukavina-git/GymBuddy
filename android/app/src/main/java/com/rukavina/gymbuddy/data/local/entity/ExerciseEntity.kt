@@ -12,6 +12,7 @@ import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.ExerciseType
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
+import com.rukavina.gymbuddy.domain.model.SyncState
 
 /**
  * Room entity for Exercise table.
@@ -38,5 +39,9 @@ data class ExerciseEntity(
     val source: EntitySource,
     val ownerId: String?,
     val derivedFromId: String?,
-    val deprecated: Boolean = false
+    val deprecated: Boolean = false,
+    val updatedAt: Long = 0L,
+    val deletedAt: Long? = null,
+    val revision: Int = 0,
+    val syncState: SyncState = SyncState.PENDING
 )

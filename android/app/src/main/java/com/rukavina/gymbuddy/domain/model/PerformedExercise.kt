@@ -8,6 +8,11 @@ package com.rukavina.gymbuddy.domain.model
  * weight and rep counts.
  *
  * Independent of persistence layer - can be mapped to Room entities or server DTOs.
+ *
+ * No updatedAt/deletedAt/revision/syncState of its own - this is a child
+ * of the WorkoutSession aggregate, and the parent's sync metadata governs
+ * the whole tree. A tombstoned WorkoutSession implicitly tombstones every
+ * PerformedExercise (and WorkoutSet) under it.
  */
 data class PerformedExercise(
     /**

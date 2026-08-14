@@ -35,6 +35,7 @@ class ExerciseFormState(initialExercise: Exercise? = null) {
     var difficulty by mutableStateOf(initialExercise?.difficulty ?: DifficultyLevel.BEGINNER)
     var category by mutableStateOf(initialExercise?.category ?: ExerciseCategory.STRENGTH)
     var exerciseType by mutableStateOf(initialExercise?.exerciseType ?: ExerciseType.COMPOUND)
+    var trackingType by mutableStateOf(initialExercise?.trackingType ?: ExerciseTrackingType.WEIGHT_REPS)
     var primaryMuscles by mutableStateOf(initialExercise?.primaryMuscles ?: emptyList<MuscleGroup>())
     var secondaryMuscles by mutableStateOf(initialExercise?.secondaryMuscles ?: emptyList<MuscleGroup>())
     var equipmentNeeded by mutableStateOf(initialExercise?.equipmentNeeded ?: emptyList<Equipment>())
@@ -113,7 +114,7 @@ class ExerciseFormState(initialExercise: Exercise? = null) {
             equipmentNeeded = equipmentNeeded,
             category = category,
             exerciseType = exerciseType,
-            trackingType = initialExercise?.trackingType ?: ExerciseTrackingType.WEIGHT_REPS,
+            trackingType = trackingType,
             videoUrl = videoUrl.trim().ifBlank { null },
             thumbnailUrl = thumbnailUrl.trim().ifBlank { null },
             source = initialExercise?.source ?: EntitySource.CUSTOM,

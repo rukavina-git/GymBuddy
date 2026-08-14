@@ -24,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.rukavina.gymbuddy.domain.model.TemplateExercise
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 
 /**
  * List item component for displaying and managing an exercise within a template.
@@ -32,8 +32,13 @@ import com.rukavina.gymbuddy.domain.model.TemplateExercise
  */
 @Composable
 fun TemplateExerciseListItem(
-    templateExercise: TemplateExercise,
     exerciseName: String,
+    exerciseTrackingType: ExerciseTrackingType,
+    plannedSets: Int,
+    plannedReps: Int?,
+    plannedDurationSeconds: Int?,
+    plannedDistanceMeters: Float?,
+    restSeconds: Int?,
     position: Int,
     totalCount: Int,
     onMoveUp: () -> Unit,
@@ -64,13 +69,13 @@ fun TemplateExerciseListItem(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${templateExercise.plannedSets} sets × ${formatPlannedTarget(templateExercise)}",
+                    text = "$plannedSets sets × ${formatPlannedTarget(exerciseTrackingType, plannedReps, plannedDurationSeconds, plannedDistanceMeters)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (templateExercise.restSeconds != null) {
+                if (restSeconds != null) {
                     Text(
-                        text = "Rest: ${templateExercise.restSeconds}s",
+                        text = "Rest: ${restSeconds}s",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary
                     )

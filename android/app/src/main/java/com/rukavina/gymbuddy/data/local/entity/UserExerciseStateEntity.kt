@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.rukavina.gymbuddy.domain.model.SyncState
 
 /**
  * Per-user overlay state for an Exercise: hidden/favorite flags, a personal
@@ -29,6 +30,10 @@ import androidx.room.PrimaryKey
  * same thing, so there is nothing to gain from ever deleting one, and it
  * keeps the write path a single upsert instead of an upsert-or-delete
  * branch.
+ *
+ * Gets updatedAt/revision/syncState like other user-owned rows, but no
+ * deletedAt - there is no delete operation to tombstone, per the upsert-
+ * only design above.
  */
 @Entity(tableName = "user_exercise_state")
 data class UserExerciseStateEntity(
@@ -37,5 +42,8 @@ data class UserExerciseStateEntity(
     val isHidden: Boolean = false,
     val isFavorite: Boolean = false,
     val note: String? = null,
-    val defaultRestSeconds: Int? = null
+    val defaultRestSeconds: Int? = null,
+    val updatedAt: Long = 0L,
+    val revision: Int = 0,
+    val syncState: SyncState = SyncState.PENDING
 )

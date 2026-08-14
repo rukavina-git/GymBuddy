@@ -2,14 +2,13 @@ package com.rukavina.gymbuddy.ui.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
+import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.PerformedExercise
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
-import com.rukavina.gymbuddy.data.repository.UserProfileRepository
 import com.rukavina.gymbuddy.domain.model.WorkoutSet
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.DeleteWorkoutSessionUseCase
@@ -39,7 +38,7 @@ class WorkoutSessionViewModel @Inject constructor(
     private val createWorkoutSessionUseCase: CreateWorkoutSessionUseCase,
     private val updateWorkoutSessionUseCase: UpdateWorkoutSessionUseCase,
     private val deleteWorkoutSessionUseCase: DeleteWorkoutSessionUseCase,
-    private val userProfileRepository: UserProfileRepository,
+    private val appPreferencesRepository: AppPreferencesRepository,
     private val idGenerator: IdGenerator
 ) : ViewModel() {
 
@@ -51,16 +50,14 @@ class WorkoutSessionViewModel @Inject constructor(
         loadUserPreferences()
     }
 
+    /**
+     * Load the user's preferred display units - a device preference, not
+     * account data.
+     */
     private fun loadUserPreferences() {
         viewModelScope.launch {
-            val uid = FirebaseAuth.getInstance().currentUser?.uid
-            uid?.let {
-                val profile = userProfileRepository.getProfile(it)
-                profile?.let { p ->
-                    _uiState.update { state ->
-                        state.copy(preferredUnits = p.preferredUnits)
-                    }
-                }
+            appPreferencesRepository.preferredUnits.collect { units ->
+                _uiState.update { state -> state.copy(preferredUnits = units) }
             }
         }
     }
@@ -160,11 +157,14 @@ class WorkoutSessionViewModel @Inject constructor(
     }
 
     /**
-     * Create a new workout session.
+     * Create a new workout session from user input collected by
+     * WorkoutSessionFormDialog. Mints every id with IdGenerator - the
+     * dialog only ever relays ids that already existed.
      */
-    fun createWorkoutSession(workoutSession: WorkoutSession) {
+    fun createWorkoutSession(draft: WorkoutSessionDraft) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+            val workoutSession = buildWorkoutSession(existingId = null, draft = draft)
             createWorkoutSessionUseCase(workoutSession)
                 .onSuccess {
                     _uiState.update {
@@ -187,11 +187,15 @@ class WorkoutSessionViewModel @Inject constructor(
     }
 
     /**
-     * Update an existing workout session.
+     * Update an existing workout session from user input collected by
+     * WorkoutSessionFormDialog. Preserves the session's own id and every
+     * existingId the draft carries forward; mints fresh ids for anything
+     * added during this edit.
      */
-    fun updateWorkoutSession(workoutSession: WorkoutSession) {
+    fun updateWorkoutSession(existing: WorkoutSession, draft: WorkoutSessionDraft) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+            val workoutSession = buildWorkoutSession(existingId = existing.id, draft = draft)
             updateWorkoutSessionUseCase(workoutSession)
                 .onSuccess {
                     _uiState.update {
@@ -211,6 +215,54 @@ class WorkoutSessionViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    /**
+     * Construct the real WorkoutSession/PerformedExercise/WorkoutSet
+     * entities from user input, minting an id for anything the draft
+     * didn't already have. This is the only place in this flow that mints
+     * domain identity - WorkoutScreen's dialogs only ever relay ids they
+     * were already given.
+     */
+    private fun buildWorkoutSession(existingId: String?, draft: WorkoutSessionDraft): WorkoutSession {
+        val performedExercises = draft.performedExercises.map { peDraft ->
+            // exerciseName is the resolved display name from the dialog;
+            // exerciseCategory/exercisePrimaryMuscles are placeholders -
+            // ValidateWorkoutSessionSetsUseCase resolves the real Exercise
+            // and stamps the actual snapshot before this is persisted.
+            PerformedExercise(
+                id = peDraft.existingId ?: idGenerator.newId(),
+                exerciseId = peDraft.exerciseId,
+                orderIndex = peDraft.orderIndex,
+                exerciseName = peDraft.exerciseName,
+                exerciseCategory = ExerciseCategory.STRENGTH,
+                exerciseTrackingType = peDraft.exerciseTrackingType,
+                exercisePrimaryMuscles = emptyList(),
+                sets = peDraft.sets.map { setDraft ->
+                    WorkoutSet(
+                        id = setDraft.existingId ?: idGenerator.newId(),
+                        weightKg = setDraft.weightKg,
+                        reps = setDraft.reps,
+                        durationSeconds = setDraft.durationSeconds,
+                        distanceMeters = setDraft.distanceMeters,
+                        isCompleted = true,
+                        orderIndex = setDraft.orderIndex
+                    )
+                }
+            )
+        }
+
+        return WorkoutSession(
+            id = existingId ?: idGenerator.newId(),
+            startedAt = draft.startedAt,
+            endedAt = draft.endedAt,
+            durationSeconds = draft.durationSeconds,
+            title = draft.title,
+            notes = draft.notes,
+            templateId = draft.templateId,
+            templateTitle = draft.templateTitle,
+            performedExercises = performedExercises
+        )
     }
 
     /**
@@ -254,21 +306,6 @@ class WorkoutSessionViewModel @Inject constructor(
     fun clearSuccess() {
         _uiState.update { it.copy(successMessage = null) }
     }
-
-    /**
-     * Generate a new id for a performed exercise being created in the UI.
-     */
-    fun newPerformedExerciseId(): String = idGenerator.newId()
-
-    /**
-     * Generate a new id for a workout set being created in the UI.
-     */
-    fun newWorkoutSetId(): String = idGenerator.newId()
-
-    /**
-     * Generate a new id for a workout session being created in the UI.
-     */
-    fun newWorkoutSessionId(): String = idGenerator.newId()
 
     /**
      * Change the sort order for workout sessions.

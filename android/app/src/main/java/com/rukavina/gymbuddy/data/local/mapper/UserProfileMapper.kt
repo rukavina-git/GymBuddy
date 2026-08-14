@@ -23,9 +23,12 @@ object UserProfileMapper {
         fitnessGoal = userProfile.fitnessGoal,
         activityLevel = userProfile.activityLevel,
         targetWeight = userProfile.targetWeight,
-        preferredUnits = userProfile.preferredUnits,
         joinedDate = userProfile.joinedDate,
-        bio = userProfile.bio
+        bio = userProfile.bio,
+        updatedAt = userProfile.updatedAt,
+        deletedAt = userProfile.deletedAt,
+        revision = userProfile.revision,
+        syncState = userProfile.syncState
     )
 
     /**
@@ -43,8 +46,11 @@ object UserProfileMapper {
         fitnessGoal = entity.fitnessGoal,
         activityLevel = entity.activityLevel,
         targetWeight = entity.targetWeight,
-        preferredUnits = entity.preferredUnits,
         joinedDate = entity.joinedDate,
-        bio = entity.bio
+        bio = entity.bio,
+        updatedAt = entity.updatedAt,
+        deletedAt = entity.deletedAt,
+        revision = entity.revision,
+        syncState = entity.syncState
     )
 }

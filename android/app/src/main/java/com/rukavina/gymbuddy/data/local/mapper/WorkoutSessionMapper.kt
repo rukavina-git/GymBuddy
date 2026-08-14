@@ -26,7 +26,11 @@ object WorkoutSessionMapper {
             title = workoutSession.title,
             notes = workoutSession.notes,
             templateId = workoutSession.templateId,
-            templateTitle = workoutSession.templateTitle
+            templateTitle = workoutSession.templateTitle,
+            updatedAt = workoutSession.updatedAt,
+            deletedAt = workoutSession.deletedAt,
+            revision = workoutSession.revision,
+            syncState = workoutSession.syncState
         )
 
         val performedExerciseEntities = mutableListOf<PerformedExerciseEntity>()
@@ -116,7 +120,11 @@ object WorkoutSessionMapper {
             notes = workoutSessionEntity.notes,
             templateId = workoutSessionEntity.templateId,
             templateTitle = workoutSessionEntity.templateTitle,
-            performedExercises = performedExercises
+            performedExercises = performedExercises,
+            updatedAt = workoutSessionEntity.updatedAt,
+            deletedAt = workoutSessionEntity.deletedAt,
+            revision = workoutSessionEntity.revision,
+            syncState = workoutSessionEntity.syncState
         )
     }
 

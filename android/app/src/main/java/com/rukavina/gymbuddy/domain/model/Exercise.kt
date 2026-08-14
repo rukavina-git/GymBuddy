@@ -113,5 +113,34 @@ data class Exercise(
      * appear in lists, search, or filters. Existing references to it
      * remain resolvable. See docs/adr/0002-deprecation-over-deletion.md.
      */
-    val deprecated: Boolean = false
+    val deprecated: Boolean = false,
+
+    /**
+     * When this row last changed locally, in epoch ms. Set from the
+     * injected Clock at write time, not System.currentTimeMillis() -
+     * server-assigned once a backend exists.
+     *
+     * Meaningful for CUSTOM (user-owned) rows; DEFAULT rows are
+     * versioned by bulk pull instead, not by this column.
+     */
+    val updatedAt: Long = 0L,
+
+    /**
+     * Tombstone: non-null means this row is deleted. A delete sets this
+     * and bumps updatedAt instead of removing the row, so a future sync
+     * engine has something to push.
+     */
+    val deletedAt: Long? = null,
+
+    /**
+     * Server-assigned revision number. Stays 0 until a backend exists to
+     * assign it - never incremented locally.
+     */
+    val revision: Int = 0,
+
+    /**
+     * Local-only bookkeeping for the future sync engine - see SyncState.
+     * Never sent to or received from a server.
+     */
+    val syncState: SyncState = SyncState.PENDING
 )

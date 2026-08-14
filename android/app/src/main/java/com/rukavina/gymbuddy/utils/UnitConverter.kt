@@ -24,14 +24,30 @@ object UnitConverter {
     fun inchesToCm(inches: Float): Float = inches * CM_TO_INCHES_FACTOR
 
     /**
+     * Format a value with a fixed number of decimals, then trim trailing
+     * zeros (and a trailing decimal point) so "20.00" reads as "20" and
+     * "22.0500" reads as "22.05". Rounding here is display-only - the
+     * underlying stored value is never touched.
+     */
+    private fun formatTrimmed(value: Float, decimals: Int): String {
+        val formatted = String.format("%.${decimals}f", value)
+        return if (formatted.contains('.')) {
+            formatted.trimEnd('0').trimEnd('.')
+        } else {
+            formatted
+        }
+    }
+
+    /**
      * Convert weight from metric (kg) to user's preferred units
      */
     fun weightToDisplayUnit(kg: Float?, preferredUnits: PreferredUnits): String {
         if (kg == null) return ""
-        return when (preferredUnits) {
-            PreferredUnits.METRIC -> String.format("%.1f", kg)
-            PreferredUnits.IMPERIAL -> String.format("%.1f", kgToLbs(kg))
+        val value = when (preferredUnits) {
+            PreferredUnits.METRIC -> kg
+            PreferredUnits.IMPERIAL -> kgToLbs(kg)
         }
+        return formatTrimmed(value, 2)
     }
 
     /**
@@ -39,10 +55,11 @@ object UnitConverter {
      */
     fun heightToDisplayUnit(cm: Float?, preferredUnits: PreferredUnits): String {
         if (cm == null) return ""
-        return when (preferredUnits) {
-            PreferredUnits.METRIC -> String.format("%.0f", cm)
-            PreferredUnits.IMPERIAL -> String.format("%.1f", cmToInches(cm))
+        val value = when (preferredUnits) {
+            PreferredUnits.METRIC -> cm
+            PreferredUnits.IMPERIAL -> cmToInches(cm)
         }
+        return formatTrimmed(value, 2)
     }
 
     /**

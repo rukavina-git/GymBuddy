@@ -5,15 +5,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.ExerciseType
 import com.rukavina.gymbuddy.ui.exercise.ExerciseFormState
 
@@ -24,6 +26,7 @@ import com.rukavina.gymbuddy.ui.exercise.ExerciseFormState
  * @param formState Form state holder containing all form data
  * @param modifier Modifier for the root component
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseFormDetails(
     formState: ExerciseFormState,
@@ -103,6 +106,49 @@ fun ExerciseFormDetails(
                         label = { Text(type.name) },
                         modifier = Modifier.weight(1f)
                     )
+                }
+            }
+        }
+
+        // Tracking Type - an override, not a required choice: default
+        // (Weight and reps) covers ~90% of exercises, so this is shown as
+        // a single current-selection field with a dropdown to change it,
+        // not six equal-weight buttons.
+        var trackingTypeExpanded by remember { mutableStateOf(false) }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "Tracking Type",
+                style = MaterialTheme.typography.labelLarge
+            )
+            ExposedDropdownMenuBox(
+                expanded = trackingTypeExpanded,
+                onExpandedChange = { trackingTypeExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = formState.trackingType.displayLabel(),
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = trackingTypeExpanded)
+                    },
+                    supportingText = { Text("Most exercises use Weight and reps - change only if this one is different") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = trackingTypeExpanded,
+                    onDismissRequest = { trackingTypeExpanded = false }
+                ) {
+                    ExerciseTrackingType.entries.forEach { type ->
+                        DropdownMenuItem(
+                            text = { Text(type.displayLabel()) },
+                            onClick = {
+                                formState.trackingType = type
+                                trackingTypeExpanded = false
+                            }
+                        )
+                    }
                 }
             }
         }

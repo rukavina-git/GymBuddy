@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.rukavina.gymbuddy.domain.model.SyncState
 
 /**
  * Room entity for WorkoutSession table.
@@ -23,5 +24,9 @@ data class WorkoutSessionEntity(
     val title: String,
     val notes: String? = null,
     val templateId: String? = null,
-    val templateTitle: String? = null
+    val templateTitle: String? = null,
+    val updatedAt: Long = 0L,
+    val deletedAt: Long? = null,
+    val revision: Int = 0,
+    val syncState: SyncState = SyncState.PENDING
 )

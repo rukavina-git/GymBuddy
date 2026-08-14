@@ -11,6 +11,9 @@ import com.rukavina.gymbuddy.domain.model.SetType
 /**
  * Room entity for WorkoutSet table.
  * Has foreign key relationship with PerformedExercise (cascade delete).
+ *
+ * No updatedAt/deletedAt/revision/syncState columns - a child of the
+ * WorkoutSession aggregate, governed by the parent's sync metadata.
  */
 @Entity(
     tableName = "workout_sets",

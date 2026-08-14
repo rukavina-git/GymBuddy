@@ -12,6 +12,11 @@ package com.rukavina.gymbuddy.domain.model
  * - Overhead Press: 3 sets x 10 reps, 60 seconds rest
  *
  * Independent of persistence layer - can be mapped to Room entities or server DTOs.
+ *
+ * No updatedAt/deletedAt/revision/syncState of its own - a child of the
+ * WorkoutTemplate aggregate, governed by the parent's sync metadata. A
+ * tombstoned WorkoutTemplate implicitly tombstones every TemplateExercise
+ * under it.
  */
 data class TemplateExercise(
     /**

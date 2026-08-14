@@ -23,11 +23,13 @@ interface UserExerciseStateDao {
     /**
      * Set the hidden flag for an exercise, creating the sparse overlay row
      * if the user has never expressed an opinion about this exercise before.
+     * updatedAt is supplied by the caller (from the injected Clock) since
+     * a Room DAO can't take constructor-injected dependencies.
      */
     @Transaction
-    suspend fun setHidden(exerciseId: String, hidden: Boolean) {
+    suspend fun setHidden(exerciseId: String, hidden: Boolean, updatedAt: Long) {
         val current = getState(exerciseId) ?: UserExerciseStateEntity(exerciseId = exerciseId)
-        upsert(current.copy(isHidden = hidden))
+        upsert(current.copy(isHidden = hidden, updatedAt = updatedAt))
     }
 
     /**
@@ -35,15 +37,15 @@ interface UserExerciseStateDao {
      * row if none exists yet.
      */
     @Transaction
-    suspend fun setNote(exerciseId: String, note: String?) {
+    suspend fun setNote(exerciseId: String, note: String?, updatedAt: Long) {
         val current = getState(exerciseId) ?: UserExerciseStateEntity(exerciseId = exerciseId)
-        upsert(current.copy(note = note))
+        upsert(current.copy(note = note, updatedAt = updatedAt))
     }
 
     /**
      * Unhide every exercise that currently has an overlay row marking it
      * hidden. Exercises with no overlay row are already not hidden.
      */
-    @Query("UPDATE user_exercise_state SET isHidden = 0 WHERE isHidden = 1")
-    suspend fun unhideAll()
+    @Query("UPDATE user_exercise_state SET isHidden = 0, updatedAt = :updatedAt WHERE isHidden = 1")
+    suspend fun unhideAll(updatedAt: Long)
 }
