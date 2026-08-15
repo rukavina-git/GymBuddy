@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: gymbuddy
+      POSTGRES_USER: gymbuddy
+      POSTGRES_PASSWORD: gymbuddy
+    ports:
+      - "5432:5432"
+    volumes:
+      - gymbuddy-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U gymbuddy -d gymbuddy" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ../backend
+    ports:
+      - "8080:8080"
+    environment:
+      # The only Postgres connection info the app is given - no
+      # provider-specific host/port/db config anywhere else.
+      DATABASE_URL: jdbc:postgresql://db:5432/gymbuddy?user=gymbuddy&password=gymbuddy
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  gymbuddy-db-data:

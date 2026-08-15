@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: gymbuddy-backend
+
+  datasource:
+    # The only way this app talks to Postgres. No separate host/port/db
+    # properties anywhere - keeps the app portable across hosts.
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/gymbuddy?user=gymbuddy&password=gymbuddy}
+
+  flyway:
+    # Migrations land in a later group; declared as a dependency now,
+    # switched on when there's something to migrate.
+    enabled: false
+
+  jpa:
+    open-in-view: false
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+# Placeholders wired up in later groups (auth, sync).
+gymbuddy:
+  firebase:
+    project-id: ${FIREBASE_PROJECT_ID:gymbuddy-local}
+    credentials-path: ${FIREBASE_CREDENTIALS_PATH:firebase-service-account.json}
+  sync:
+    tombstone-retention-days: ${TOMBSTONE_RETENTION_DAYS:90}
+    pull-page-size-default: ${PULL_PAGE_SIZE_DEFAULT:200}
+    pull-page-size-max: ${PULL_PAGE_SIZE_MAX:500}
