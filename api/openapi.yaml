@@ -1,0 +1,988 @@
+openapi: 3.1.0
+info:
+  title: GymBuddy API
+  version: 1.0.0
+  description: |
+    Offline-first sync API for GymBuddy.
+
+    Clients hold a full local copy of the user's data and queue local
+    writes in an outbox. Sync is push-then-pull, never concurrent.
+
+    Invariants:
+      - The server assigns every updatedAt and revision. Clients never do.
+      - The server resolves all conflicts. Clients never merge.
+      - Whatever the server returns is authoritative and overwrites local.
+      - Workout sessions and templates sync as whole aggregates.
+      - Storage is metric everywhere: kg, cm, metres.
+  contact:
+    name: Ivan Karlo Rukavina
+    email: ivankarlo.rukavina@gmail.com
+
+servers:
+  - url: https://api.gymbuddy.app
+    description: Production
+  - url: http://localhost:8080
+    description: Local development
+
+security:
+  - firebaseAuth: [ ]
+
+tags:
+  - name: Sync
+    description: Push-then-pull sync of a client's local data with the server.
+
+paths:
+  /v1/sync/push:
+    post:
+      tags: [ Sync ]
+      summary: Push local changes
+      description: |
+        Sends locally-created and locally-modified entities. Each array is
+        applied independently; ordering between arrays is not significant.
+
+        Every entity is applied in its own transaction and receives its own
+        result, so one rejected entity does not block the rest of the batch.
+
+        Idempotent by entity id. Re-pushing an entity the server has already
+        applied returns the existing result rather than duplicating it.
+      operationId: pushChanges
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushRequest'
+      responses:
+        '200':
+          description: Batch processed. Inspect per-entity results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+
+  /v1/sync/pull:
+    get:
+      tags: [ Sync ]
+      summary: Pull changes since a cursor
+      description: |
+        Returns entities changed since the given cursor. Omit the cursor for
+        a full initial sync.
+
+        Clients must persist nextCursor only after the entire page has been
+        committed locally. If hasMore is true, call again with the returned
+        cursor until it is false.
+      operationId: pullChanges
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Opaque token from a previous pull. Clients must treat this as
+            an opaque string: never parse it, construct it, or compare two
+            cursors for ordering. Omit for a full initial sync.
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 200
+            maximum: 500
+      responses:
+        '200':
+          description: Changes since the cursor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PullResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '410': { $ref: '#/components/responses/CursorExpired' }
+
+components:
+  securitySchemes:
+    firebaseAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Firebase ID token. Verified server-side against Google's JWKS.
+
+  schemas:
+    PushRequest:
+      type: object
+      description: |
+        Each array carries entities of one type. All are optional; omit or
+        send empty for types with no pending changes.
+      properties:
+        workoutSessions:
+          type: array
+          items: { $ref: '#/components/schemas/WorkoutSession' }
+        exercises:
+          type: array
+          description: Custom exercises only. Default exercises are server-owned.
+          items: { $ref: '#/components/schemas/Exercise' }
+        workoutTemplates:
+          type: array
+          items: { $ref: '#/components/schemas/WorkoutTemplate' }
+        userExerciseStates:
+          type: array
+          items: { $ref: '#/components/schemas/UserExerciseState' }
+        userTemplateStates:
+          type: array
+          items: { $ref: '#/components/schemas/UserTemplateState' }
+        userProfile:
+          $ref: '#/components/schemas/UserProfile'
+
+    PushResponse:
+      type: object
+      required: [ results ]
+      properties:
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/MutationResult' }
+
+    MutationResult:
+      type: object
+      required: [ entityType, entityId, status ]
+      properties:
+        entityType:
+          $ref: '#/components/schemas/EntityType'
+        entityId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [ APPLIED, CONFLICT, INVALID, FORBIDDEN ]
+          description: |
+            APPLIED   accepted; updatedAt and revision are authoritative
+            CONFLICT  server state was newer; discard local and take server's
+            INVALID   failed validation; drop from outbox, do not retry
+            FORBIDDEN not owned by the caller; drop from outbox
+        updatedAt:
+          type: integer
+          format: int64
+          description: Server-assigned. Present when status is APPLIED.
+        revision:
+          type: integer
+          description: Server-assigned. Present when status is APPLIED.
+        reason:
+          type: string
+          description: Present when status is not APPLIED.
+
+    PullResponse:
+      type: object
+      required: [ nextCursor, hasMore ]
+      description: |
+        Changed entities since the cursor. Deletions arrive as entities with
+        a non-null deletedAt, not as a separate list.
+      properties:
+        workoutSessions:
+          type: array
+          items: { $ref: '#/components/schemas/WorkoutSession' }
+        exercises:
+          type: array
+          items: { $ref: '#/components/schemas/Exercise' }
+        workoutTemplates:
+          type: array
+          items: { $ref: '#/components/schemas/WorkoutTemplate' }
+        userExerciseStates:
+          type: array
+          items: { $ref: '#/components/schemas/UserExerciseState' }
+        userTemplateStates:
+          type: array
+          items: { $ref: '#/components/schemas/UserTemplateState' }
+        userProfile:
+          $ref: '#/components/schemas/UserProfile'
+        nextCursor:
+          type: string
+          description: Persist only after committing this page locally.
+        hasMore:
+          type: boolean
+
+    EntityType:
+      type: string
+      enum:
+        - WORKOUT_SESSION
+        - EXERCISE
+        - WORKOUT_TEMPLATE
+        - USER_EXERCISE_STATE
+        - USER_TEMPLATE_STATE
+        - USER_PROFILE
+
+    WorkoutSession:
+      type: object
+      description: |
+        A completed or in-progress workout. Syncs as a whole aggregate
+        together with its performed exercises and sets - there is no
+        separate sync path for a child row.
+      required:
+        - id
+        - startedAt
+        - durationSeconds
+        - title
+        - performedExercises
+        - updatedAt
+        - revision
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated UUIDv7. Doubles as the sync idempotency key.
+        startedAt:
+          type: integer
+          format: int64
+          description: Epoch milliseconds when the session started.
+        endedAt:
+          type: [integer, "null"]
+          format: int64
+          description: Epoch milliseconds when the session ended. Null means the session is still in progress.
+        durationSeconds:
+          type: integer
+          format: int32
+          description: |
+            Total duration of the session, in seconds. Deliberately not
+            derived from endedAt - startedAt: elapsed wall-clock time
+            includes rest/idle time and the user may edit the duration
+            independently of when the session actually started or ended.
+        title:
+          type: string
+          description: Session title, e.g. a template name or "Workout".
+        notes:
+          type: [string, "null"]
+          description: Per-session commentary, e.g. "felt strong today" or "shoulder was tight".
+        templateId:
+          type: [string, "null"]
+          format: uuid
+          description: |
+            Soft reference to WorkoutTemplate.id this session was started
+            from - not a foreign key, must tolerate the referenced template
+            being deleted. Provenance only; use templateTitle for display.
+        templateTitle:
+          type: [string, "null"]
+          description: |
+            Snapshot of WorkoutTemplate.title at the time this session was
+            started. Written once and never updated, so a later rename or
+            deletion of the template does not rewrite history. Null if this
+            session wasn't started from a template.
+        performedExercises:
+          type: array
+          description: |
+            Exercises performed during this session. Order reflects the
+            sequence in which they were performed.
+          items: { $ref: '#/components/schemas/PerformedExercise' }
+        updatedAt:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Server-assigned last-change time, epoch milliseconds. Clients must not set this.
+        deletedAt:
+          type: [integer, "null"]
+          format: int64
+          readOnly: true
+          description: |
+            Server-assigned tombstone time, epoch milliseconds. Non-null
+            means this session is deleted. Clients must not set this.
+        revision:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Server-assigned revision number. Clients must not set this.
+
+    PerformedExercise:
+      type: object
+      description: |
+        One exercise performed within a WorkoutSession, with the sets
+        recorded for it. A child of the WorkoutSession aggregate: it has no
+        sync metadata of its own, and a tombstoned session implicitly
+        tombstones every performed exercise (and set) under it.
+      required:
+        - id
+        - exerciseId
+        - orderIndex
+        - exerciseName
+        - exerciseCategory
+        - exerciseTrackingType
+        - exercisePrimaryMuscles
+        - sets
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated UUIDv7 for this performed-exercise instance.
+        exerciseId:
+          type: string
+          format: uuid
+          description: |
+            Soft reference to Exercise.id - not a foreign key. The
+            exercises table can be re-seeded, or the referenced exercise
+            deprecated or (if custom) deleted entirely. History must remain
+            readable even when this id no longer resolves; use the
+            exerciseName/exerciseCategory/exerciseTrackingType/
+            exercisePrimaryMuscles snapshot fields below for display, not a
+            live lookup.
+        orderIndex:
+          type: integer
+          format: int32
+          description: Position of this exercise within the session (0-indexed).
+        exerciseName:
+          type: string
+          description: |
+            Snapshot of Exercise.name at the time this exercise was
+            performed. Written once at creation and never updated - a later
+            rename must not rewrite history.
+        exerciseCategory:
+          allOf:
+            - $ref: '#/components/schemas/ExerciseCategory'
+          description: Snapshot of Exercise.category at the time this exercise was performed. Written once and never updated.
+        exerciseTrackingType:
+          allOf:
+            - $ref: '#/components/schemas/ExerciseTrackingType'
+          description: Snapshot of Exercise.trackingType at the time this exercise was performed. Written once and never updated.
+        exercisePrimaryMuscles:
+          type: array
+          description: Snapshot of Exercise.primaryMuscles at the time this exercise was performed. Written once and never updated.
+          items: { $ref: '#/components/schemas/MuscleGroup' }
+        sets:
+          type: array
+          description: |
+            Sets performed for this exercise. Order reflects the sequence
+            in which they were performed.
+          items: { $ref: '#/components/schemas/WorkoutSet' }
+        supersetGroup:
+          type: [integer, "null"]
+          format: int32
+          description: |
+            Groups exercises performed together in the same session (e.g. a
+            superset). Exercises sharing a non-null value are performed
+            together. Stored and round-tripped only - no UI or logic yet.
+
+    WorkoutSet:
+      type: object
+      description: |
+        A single set within a PerformedExercise. Which measurements are
+        populated depends on the exercise's tracking type. A child of the
+        WorkoutSession aggregate; carries no sync metadata of its own.
+      required:
+        - id
+        - setType
+        - isCompleted
+        - orderIndex
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated UUIDv7 for this set.
+        weightKg:
+          type: [number, "null"]
+          format: float
+          description: Weight used for this set, in kilograms (kg). Null when not tracked for this set's exercise, or not yet entered.
+        reps:
+          type: [integer, "null"]
+          format: int32
+          description: Repetitions performed in this set. Null when not tracked for this set's exercise, or not yet entered.
+        durationSeconds:
+          type: [integer, "null"]
+          format: int32
+          description: Duration of this set in seconds (e.g. planks, timed holds, cardio). Null when not tracked for this set's exercise, or not yet entered.
+        distanceMeters:
+          type: [number, "null"]
+          format: float
+          description: Distance covered during this set, in metres. Null when not tracked for this set's exercise, or not yet entered.
+        setType:
+          allOf:
+            - $ref: '#/components/schemas/SetType'
+          description: Role this set plays within the exercise (warmup, working, drop, failure).
+        isCompleted:
+          type: boolean
+          description: |
+            Whether the user has finished performing this set. An
+            in-progress set (false) may have every measurement null - the
+            row exists but hasn't been filled in yet.
+        restTakenSeconds:
+          type: [integer, "null"]
+          format: int32
+          description: Rest actually taken after this set, in seconds. Distinct from the template's planned rest time.
+        orderIndex:
+          type: integer
+          format: int32
+          description: Order of this set within the exercise (0-indexed).
+
+    Exercise:
+      type: object
+      description: |
+        The blueprint/definition of an exercise (e.g. "Bench Press"), not a
+        performed instance. Bundled/default exercises are server-owned;
+        custom exercises are owned by the user who created them.
+      required:
+        - id
+        - name
+        - primaryMuscles
+        - secondaryMuscles
+        - instructions
+        - tips
+        - difficulty
+        - equipmentNeeded
+        - category
+        - exerciseType
+        - trackingType
+        - source
+        - deprecated
+        - updatedAt
+        - revision
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated (CUSTOM) or server-generated (DEFAULT) UUIDv7.
+        name:
+          type: string
+          description: Name of the exercise, e.g. "Bench Press", "Barbell Squat".
+        primaryMuscles:
+          type: array
+          description: Primary muscle groups targeted by this exercise. Can include multiple, e.g. for compound movements.
+          items: { $ref: '#/components/schemas/MuscleGroup' }
+        secondaryMuscles:
+          type: array
+          description: Secondary muscle groups engaged to assist, but not the main focus.
+          items: { $ref: '#/components/schemas/MuscleGroup' }
+        description:
+          type: [string, "null"]
+          description: Detailed description of how to perform the exercise - form cues, breathing tips, general guidance.
+        instructions:
+          type: array
+          description: Step-by-step instructions for performing the exercise, one string per step.
+          items: { type: string }
+        tips:
+          type: array
+          description: Key tips for performing the exercise correctly - helpful hints and safety advice.
+          items: { type: string }
+        difficulty:
+          $ref: '#/components/schemas/DifficultyLevel'
+        equipmentNeeded:
+          type: array
+          description: Equipment required to perform this exercise. Can include multiple items, e.g. barbell + bench.
+          items: { $ref: '#/components/schemas/Equipment' }
+        category:
+          $ref: '#/components/schemas/ExerciseCategory'
+        exerciseType:
+          $ref: '#/components/schemas/ExerciseType'
+        trackingType:
+          $ref: '#/components/schemas/ExerciseTrackingType'
+        videoUrl:
+          type: [string, "null"]
+          format: uri
+          description: URL to an external video demonstration (e.g. YouTube).
+        thumbnailUrl:
+          type: [string, "null"]
+          format: uri
+          description: URL to a thumbnail image of the exercise, for preview in lists and cards.
+        source:
+          allOf:
+            - $ref: '#/components/schemas/EntitySource'
+          description: Whether this is a default/bundled (or server-provided) exercise, or one the user created.
+        ownerId:
+          type: [string, "null"]
+          description: Firebase UID of the creator, for CUSTOM exercises. Null for DEFAULT rows.
+        derivedFromId:
+          type: [string, "null"]
+          format: uuid
+          description: |
+            Id of the DEFAULT exercise this one was duplicated from, for a
+            future "duplicate and edit" action on a default entry. Not used
+            yet.
+        deprecated:
+          type: boolean
+          description: |
+            Whether this exercise has been superseded and should no longer
+            appear in lists, search, or filters. Existing references to it
+            remain resolvable.
+        updatedAt:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Server-assigned last-change time, epoch milliseconds. Clients must not set this.
+        deletedAt:
+          type: [integer, "null"]
+          format: int64
+          readOnly: true
+          description: |
+            Server-assigned tombstone time, epoch milliseconds. Non-null
+            means this row is deleted. Clients must not set this.
+        revision:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Server-assigned revision number. Clients must not set this.
+
+    WorkoutTemplate:
+      type: object
+      description: |
+        A reusable blueprint of planned exercises (sets/reps/rest) that a
+        workout session can be started from. Unlike WorkoutSession, carries
+        no actual performance data. Syncs as a whole aggregate together with
+        its template exercises.
+      required:
+        - id
+        - title
+        - templateExercises
+        - source
+        - deprecated
+        - updatedAt
+        - revision
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated (CUSTOM) or server-generated (DEFAULT) UUIDv7.
+        title:
+          type: string
+          description: User-defined title, e.g. "Push Day", "Leg Day", "Full Body".
+        templateExercises:
+          type: array
+          description: |
+            Exercises planned in this template with their target sets/reps.
+            Order reflects the planned sequence of exercises.
+          items: { $ref: '#/components/schemas/TemplateExercise' }
+        source:
+          allOf:
+            - $ref: '#/components/schemas/EntitySource'
+          description: |
+            Whether this is a default/bundled (or server-provided) template,
+            or one the user created. Default templates cannot be edited or
+            deleted, only hidden.
+        ownerId:
+          type: [string, "null"]
+          description: Firebase UID of the creator, for CUSTOM templates. Null for DEFAULT rows.
+        derivedFromId:
+          type: [string, "null"]
+          format: uuid
+          description: |
+            Id of the DEFAULT template this one was duplicated from, for a
+            future "duplicate and edit" action on a default entry. Not used
+            yet.
+        deprecated:
+          type: boolean
+          description: |
+            Whether this template has been superseded and should no longer
+            appear in lists, search, or filters. Existing references to it
+            remain resolvable.
+        updatedAt:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Server-assigned last-change time, epoch milliseconds. Clients must not set this.
+        deletedAt:
+          type: [integer, "null"]
+          format: int64
+          readOnly: true
+          description: |
+            Server-assigned tombstone time, epoch milliseconds. Non-null
+            means this template is deleted. Clients must not set this.
+        revision:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Server-assigned revision number. Clients must not set this.
+
+    TemplateExercise:
+      type: object
+      description: |
+        A planned exercise within a WorkoutTemplate: target sets/reps/rest,
+        no performance data. A child of the WorkoutTemplate aggregate; no
+        sync metadata of its own.
+      required:
+        - id
+        - exerciseId
+        - exerciseName
+        - exerciseTrackingType
+        - plannedSets
+        - orderIndex
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated UUIDv7 for this template-exercise instance.
+        exerciseId:
+          type: string
+          format: uuid
+          description: Reference to Exercise.id this template exercise is based on.
+        exerciseName:
+          type: string
+          description: |
+            Snapshot of Exercise.name at the time this template exercise
+            was created or last updated. Written once (or re-stamped on
+            update), and never rewritten by an unrelated library refresh or
+            exercise rename.
+        exerciseTrackingType:
+          allOf:
+            - $ref: '#/components/schemas/ExerciseTrackingType'
+          description: |
+            Snapshot of Exercise.trackingType at the time this template
+            exercise was created or last updated - same rule as
+            exerciseName. Determines which planned measurement
+            (plannedReps, plannedDurationSeconds, plannedDistanceMeters)
+            the display and set editor should use.
+        plannedSets:
+          type: integer
+          format: int32
+          description: Planned/target number of sets for this exercise. Must be greater than 0.
+        plannedReps:
+          type: [integer, "null"]
+          format: int32
+          description: |
+            Planned/target number of repetitions per set. Null when the
+            exercise's tracking type has no rep target (e.g. a DURATION
+            exercise like a plank), in which case plannedDurationSeconds
+            carries the target instead.
+        orderIndex:
+          type: integer
+          format: int32
+          description: Position of this exercise in the template (0-indexed).
+        restSeconds:
+          type: [integer, "null"]
+          format: int32
+          description: Planned rest time in seconds between sets. Null if no specific rest time is defined.
+        plannedDurationSeconds:
+          type: [integer, "null"]
+          format: int32
+          description: Planned/target duration in seconds for this exercise (e.g. a 60s plank). Mirrors WorkoutSet.durationSeconds. Null when not applicable.
+        plannedDistanceMeters:
+          type: [number, "null"]
+          format: float
+          description: Planned/target distance in metres for this exercise (e.g. a 2000m row). Mirrors WorkoutSet.distanceMeters. Null when not applicable.
+        plannedWeightKg:
+          type: [number, "null"]
+          format: float
+          description: Planned/target weight in kilograms (kg) for this exercise. Mirrors WorkoutSet.weightKg. Null when not applicable or not planned.
+        notes:
+          type: [string, "null"]
+          description: |
+            Optional notes/instructions for this exercise in the template -
+            form cues, intensity guidelines, tempo instructions, etc.
+
+    UserExerciseState:
+      type: object
+      description: |
+        Per-user overlay state for an Exercise: hidden/favorite flags, a
+        personal note, and a preferred default rest time. Kept separate
+        from Exercise so a reference-data refresh never clobbers user
+        preferences. Sparse: a row exists only once the user has expressed
+        an opinion about the exercise. Upsert-only - there is no delete
+        operation, so unlike other user-owned rows this has no deletedAt.
+      required:
+        - exerciseId
+        - isHidden
+        - isFavorite
+        - updatedAt
+        - revision
+      properties:
+        exerciseId:
+          type: string
+          format: uuid
+          description: |
+            Soft reference to Exercise.id, and the primary key of this
+            overlay row - not a foreign key. A row is left in place if the
+            referenced exercise is later removed; the preference simply
+            resumes if an exercise with that id reappears.
+        isHidden:
+          type: boolean
+          description: Whether the user has hidden this exercise from lists, search, and filters.
+        isFavorite:
+          type: boolean
+          description: Whether the user has favorited this exercise.
+        note:
+          type: [string, "null"]
+          description: Personal note the user has attached to this exercise.
+        defaultRestSeconds:
+          type: [integer, "null"]
+          format: int32
+          description: User's preferred default rest time in seconds for this exercise.
+        updatedAt:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Server-assigned last-change time, epoch milliseconds. Clients must not set this.
+        revision:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Server-assigned revision number. Clients must not set this.
+
+    UserTemplateState:
+      type: object
+      description: |
+        Per-user overlay state for a WorkoutTemplate: hidden/favorite
+        flags. Same sparse, upsert-only, soft-reference design as
+        UserExerciseState, applied to templates instead of exercises - see
+        its description for the full rationale. No deletedAt, for the same
+        reason.
+      required:
+        - templateId
+        - isHidden
+        - isFavorite
+        - updatedAt
+        - revision
+      properties:
+        templateId:
+          type: string
+          format: uuid
+          description: |
+            Soft reference to WorkoutTemplate.id, and the primary key of
+            this overlay row - not a foreign key. A row is left in place if
+            the referenced template is later removed.
+        isHidden:
+          type: boolean
+          description: Whether the user has hidden this template from lists, search, and filters.
+        isFavorite:
+          type: boolean
+          description: Whether the user has favorited this template.
+        updatedAt:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Server-assigned last-change time, epoch milliseconds. Clients must not set this.
+        revision:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Server-assigned revision number. Clients must not set this.
+
+    UserProfile:
+      type: object
+      description: |
+        The user's profile: identity, optional physical stats, and fitness
+        preferences. Device-local display preferences (e.g. preferred
+        units) are not part of this resource and are never transmitted.
+      required:
+        - uid
+        - name
+        - email
+        - joinedDate
+        - updatedAt
+        - revision
+      properties:
+        uid:
+          type: string
+          description: Firebase UID. Primary key; matches the authenticated caller.
+        name:
+          type: string
+          description: Display name.
+        email:
+          type: string
+          format: email
+        profileImageUrl:
+          type: [string, "null"]
+          format: uri
+          description: URL to the user's profile image.
+        birthDate:
+          type: [integer, "null"]
+          format: int64
+          description: Date of birth, epoch milliseconds.
+        weight:
+          type: [number, "null"]
+          format: float
+          description: Current body weight, in kilograms (kg).
+        height:
+          type: [number, "null"]
+          format: float
+          description: Height, in centimetres (cm).
+        gender:
+          oneOf:
+            - $ref: '#/components/schemas/Gender'
+            - type: 'null'
+        fitnessGoal:
+          oneOf:
+            - $ref: '#/components/schemas/FitnessGoal'
+            - type: 'null'
+        activityLevel:
+          oneOf:
+            - $ref: '#/components/schemas/ActivityLevel'
+            - type: 'null'
+        targetWeight:
+          type: [number, "null"]
+          format: float
+          description: Goal body weight, in kilograms (kg).
+        joinedDate:
+          type: integer
+          format: int64
+          description: Date the user joined, epoch milliseconds.
+        bio:
+          type: [string, "null"]
+          description: Free-text profile bio.
+        updatedAt:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Server-assigned last-change time, epoch milliseconds. Clients must not set this.
+        deletedAt:
+          type: [integer, "null"]
+          format: int64
+          readOnly: true
+          description: |
+            Server-assigned tombstone time, epoch milliseconds. Non-null
+            means this profile is deleted. Clients must not set this.
+        revision:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Server-assigned revision number. Clients must not set this.
+
+    Error:
+      type: object
+      description: Standard error body returned for all non-2xx responses.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Stable machine-readable error identifier, e.g. "VALIDATION_FAILED".
+        message:
+          type: string
+          description: Human-readable explanation. Safe to log, but not guaranteed stable across releases - match on code, not message.
+        details:
+          type: [object, "null"]
+          additionalProperties: true
+          description: Optional structured context for the error. Shape varies by code.
+
+    ExerciseTrackingType:
+      type: string
+      description: |
+        Which measurements a set of this exercise records. WEIGHT_REPS is
+        the default and covers the large majority of exercises; the others
+        exist for bodyweight, timed, and cardio-style movements.
+      enum:
+        - WEIGHT_REPS
+        - REPS_ONLY
+        - WEIGHT_DURATION
+        - DURATION
+        - DISTANCE_DURATION
+        - WEIGHT_DISTANCE
+
+    SetType:
+      type: string
+      description: Role a set plays within an exercise, used to weight it differently in volume calculations.
+      enum:
+        - WARMUP
+        - WORKING
+        - DROP
+        - FAILURE
+
+    EntitySource:
+      type: string
+      description: Whether a reference-data row (Exercise, WorkoutTemplate) was bundled/server-provided, or created by the user.
+      enum:
+        - DEFAULT
+        - CUSTOM
+
+    ExerciseCategory:
+      type: string
+      description: General category of an exercise, classifying it by training modality.
+      enum:
+        - STRENGTH
+        - CARDIO
+        - FLEXIBILITY
+        - PLYOMETRIC
+        - OLYMPIC_LIFTING
+        - STRONGMAN
+        - CALISTHENICS
+
+    MuscleGroup:
+      type: string
+      description: Major muscle group targeted by an exercise, used for primary/secondary muscle classification.
+      enum:
+        - CHEST
+        - BACK
+        - LEGS
+        - SHOULDERS
+        - ARMS
+        - CORE
+        - OTHER
+
+    Equipment:
+      type: string
+      description: Equipment needed for an exercise, used to filter exercises by what's available.
+      enum:
+        - BARBELL
+        - DUMBBELL
+        - KETTLEBELL
+        - CABLE
+        - MACHINE
+        - BODYWEIGHT
+        - RESISTANCE_BAND
+        - EZ_BAR
+        - TRAP_BAR
+        - PULL_UP_BAR
+        - BENCH
+        - MEDICINE_BALL
+        - SUSPENSION_TRAINER
+        - SMITH_MACHINE
+
+    DifficultyLevel:
+      type: string
+      description: Difficulty level of an exercise, to help users pick exercises suited to their experience.
+      enum:
+        - BEGINNER
+        - INTERMEDIATE
+        - ADVANCED
+
+    ExerciseType:
+      type: string
+      description: Whether an exercise is compound (multi-joint, multiple muscle groups) or isolation (single-joint, one muscle group).
+      enum:
+        - COMPOUND
+        - ISOLATION
+
+    Gender:
+      type: string
+      description: User's gender, as self-reported.
+      enum:
+        - MALE
+        - FEMALE
+        - OTHER
+        - PREFER_NOT_TO_SAY
+
+    FitnessGoal:
+      type: string
+      description: User's primary fitness goal.
+      enum:
+        - BUILD_MUSCLE
+        - LOSE_WEIGHT
+        - MAINTAIN
+        - GENERAL_FITNESS
+        - IMPROVE_ENDURANCE
+
+    ActivityLevel:
+      type: string
+      description: |
+        User's self-reported activity level: SEDENTARY (little to no
+        exercise), LIGHTLY_ACTIVE (1-3 days/week), MODERATELY_ACTIVE
+        (3-5 days/week), VERY_ACTIVE (6-7 days/week), ATHLETE (intense
+        training daily).
+      enum:
+        - SEDENTARY
+        - LIGHTLY_ACTIVE
+        - MODERATELY_ACTIVE
+        - VERY_ACTIVE
+        - ATHLETE
+
+  responses:
+    BadRequest:
+      description: Malformed request or failed validation
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthenticated:
+      description: Missing, expired, or invalid token
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    CursorExpired:
+      description: |
+        Cursor predates the tombstone retention window (90 days). The client
+        must discard all local user data and perform a full resync.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
