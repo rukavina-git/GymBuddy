@@ -3,17 +3,36 @@ info:
   title: GymBuddy API
   version: 1.0.0
   description: |
-    Offline-first sync API for GymBuddy.
+    GymBuddy is offline-first: every client holds a full local replica of
+    the user's data and queues writes in a local outbox. The UI reads and
+    writes that replica directly and never awaits a network call - sync
+    with the server happens separately, on its own schedule, as
+    push-then-pull (never concurrent).
 
-    Clients hold a full local copy of the user's data and queue local
-    writes in an outbox. Sync is push-then-pull, never concurrent.
+    This is why there are no per-entity CRUD endpoints. The outbox is the
+    only write path, for every client, online or offline; a second "live"
+    write endpoint would give the server two places to enforce the same
+    change-log and revision invariants, which is exactly the kind of
+    drift that produces unreconcilable data. Writes go through
+    `/v1/sync/push`, always. Conflict resolution is server-authoritative:
+    the server decides who wins, stamps `updatedAt` and `revision`, and
+    whatever it returns overwrites the client's local copy. Clients never
+    merge. Workout sessions and workout templates sync as whole
+    aggregates together with their children (performed exercises, sets,
+    template exercises) - there is no independent sync path for a child
+    row, and a tombstoned parent implicitly tombstones everything under
+    it.
 
-    Invariants:
-      - The server assigns every updatedAt and revision. Clients never do.
-      - The server resolves all conflicts. Clients never merge.
-      - Whatever the server returns is authoritative and overwrites local.
-      - Workout sessions and templates sync as whole aggregates.
-      - Storage is metric everywhere: kg, cm, metres.
+    The pull cursor returned by `/v1/sync/pull` is an opaque token.
+    Clients must never parse it, construct one, or compare two cursors
+    for ordering - treat it as a black box to be stored and replayed.
+    Reference data (default exercises and workout templates) has its own
+    read-only endpoints under `/v1/reference`, versioned independently so
+    clients can cheaply check whether their bundled copy is stale.
+
+    Storage is metric everywhere: kilograms, centimetres, metres. Unit
+    conversion for display is a client-side concern and never happens on
+    the wire.
   contact:
     name: Ivan Karlo Rukavina
     email: ivankarlo.rukavina@gmail.com
@@ -30,6 +49,14 @@ security:
 tags:
   - name: Sync
     description: Push-then-pull sync of a client's local data with the server.
+  - name: Reference
+    description: |
+      Read-only default exercise and workout template libraries. Server-
+      owned; clients cannot write to these through this API.
+  - name: Account
+    description: Authenticated user profile bootstrap and account deletion.
+  - name: System
+    description: Operational endpoints not scoped to a user.
 
 paths:
   /v1/sync/push:
@@ -45,6 +72,14 @@ paths:
 
         Idempotent by entity id. Re-pushing an entity the server has already
         applied returns the existing result rather than duplicating it.
+
+        Inspect every result before clearing the outbox entry it came from:
+        APPLIED means the client must overwrite its local updatedAt and
+        revision with the server-assigned values returned here. CONFLICT
+        means the server held a newer version - discard the local change
+        entirely and take whatever the next pull returns instead of
+        retrying it. INVALID and FORBIDDEN mean the entity must be dropped
+        from the outbox without retrying.
       operationId: pushChanges
       requestBody:
         required: true
@@ -52,6 +87,93 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PushRequest'
+            example:
+              workoutSessions:
+                - id: 018f5e9a-7c3d-7abc-8b2e-1a2b3c4d5e6f
+                  startedAt: 1732628400000
+                  endedAt: 1732631580000
+                  durationSeconds: 3180
+                  title: Push Day
+                  notes: Felt strong today
+                  templateId: 019fe506-35d6-75b5-a3cf-3bd2184cad28
+                  templateTitle: Chest & Triceps
+                  performedExercises:
+                    - id: 018f5e9a-8d4e-7bcd-9c3f-2b3c4d5e6f70
+                      exerciseId: 019fe506-359a-7601-92f2-f441cf1dae33
+                      orderIndex: 0
+                      exerciseName: Barbell Bench Press
+                      exerciseCategory: STRENGTH
+                      exerciseTrackingType: WEIGHT_REPS
+                      exercisePrimaryMuscles: [ CHEST ]
+                      sets:
+                        - id: 018f5e9a-8e10-7011-8f21-5e6f70819203
+                          weightKg: 60
+                          reps: 8
+                          setType: WARMUP
+                          isCompleted: true
+                          restTakenSeconds: 60
+                          orderIndex: 0
+                        - id: 018f5e9a-8e10-7222-9032-6f7081920314
+                          weightKg: 80
+                          reps: 6
+                          setType: WORKING
+                          isCompleted: true
+                          restTakenSeconds: 120
+                          orderIndex: 1
+                        - id: 018f5e9a-8e10-7433-a143-708192031425
+                          weightKg: 80
+                          reps: 5
+                          setType: WORKING
+                          isCompleted: true
+                          restTakenSeconds: 120
+                          orderIndex: 2
+                    - id: 018f5e9a-9e5f-7cde-ad40-3c4d5e6f7081
+                      exerciseId: 019fe506-359b-7a6f-82f9-90f196c28c0a
+                      orderIndex: 1
+                      exerciseName: Barbell Back Squat
+                      exerciseCategory: STRENGTH
+                      exerciseTrackingType: WEIGHT_REPS
+                      exercisePrimaryMuscles: [ LEGS ]
+                      sets:
+                        - id: 018f5e9a-9f60-7544-b254-819203142536
+                          weightKg: 100
+                          reps: 5
+                          setType: WORKING
+                          isCompleted: true
+                          restTakenSeconds: 150
+                          orderIndex: 0
+                        - id: 018f5e9a-9f60-7655-c365-920314253647
+                          weightKg: 100
+                          reps: 5
+                          setType: WORKING
+                          isCompleted: true
+                          restTakenSeconds: 150
+                          orderIndex: 1
+              exercises:
+                - id: 018f5e9a-a16a-7def-be51-4d5e6f708192
+                  name: Cable Lateral Raise (Behind Back)
+                  primaryMuscles: [ SHOULDERS ]
+                  secondaryMuscles: [ ]
+                  description: A cable variation of the lateral raise, routed behind the back for constant tension through the full range of motion.
+                  instructions:
+                    - Stand sideways to a low cable pulley
+                    - Grip the handle with the far hand, arm across the body
+                    - Raise the arm out to the side to shoulder height
+                    - Lower with control
+                  tips:
+                    - Keep a slight bend in the elbow
+                    - Lead with the elbow, not the hand
+                  difficulty: INTERMEDIATE
+                  equipmentNeeded: [ CABLE ]
+                  category: STRENGTH
+                  exerciseType: ISOLATION
+                  trackingType: WEIGHT_REPS
+                  videoUrl: null
+                  thumbnailUrl: null
+                  source: CUSTOM
+                  ownerId: 8Kj3mNpQR5X9YbZ2LtWvAeHc3Fg1
+                  derivedFromId: null
+                  deprecated: false
       responses:
         '200':
           description: Batch processed. Inspect per-entity results.
@@ -59,8 +181,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PushResponse'
+              example:
+                results:
+                  - entityType: WORKOUT_SESSION
+                    entityId: 018f5e9a-7c3d-7abc-8b2e-1a2b3c4d5e6f
+                    status: APPLIED
+                    updatedAt: 1732631605123
+                    revision: 1
+                  - entityType: EXERCISE
+                    entityId: 018f5e9a-a16a-7def-be51-4d5e6f708192
+                    status: CONFLICT
+                    reason: Server has a newer revision of this exercise, pushed from another device.
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
 
   /v1/sync/pull:
     get:
@@ -70,9 +205,23 @@ paths:
         Returns entities changed since the given cursor. Omit the cursor for
         a full initial sync.
 
-        Clients must persist nextCursor only after the entire page has been
-        committed locally. If hasMore is true, call again with the returned
-        cursor until it is false.
+        Pulling is a loop, not a single call: commit the page to local
+        storage, persist nextCursor, then call again with that cursor if
+        hasMore is true. Repeat until hasMore is false.
+
+        The order matters. nextCursor must be persisted only after the
+        page it came with has been committed locally - never before, and
+        never together in a way that could commit one without the other.
+        If the app is killed between persisting the cursor and committing
+        the page, the next pull resumes from a cursor that already thinks
+        this page was seen, and the data in it is silently lost. Persisting
+        after commit means a crash just repeats the page - safe, because
+        push/pull application is idempotent.
+
+        A 410 means the cursor predates the tombstone retention window
+        (deletions are only kept for 90 days) and can no longer be resumed
+        from. The client must discard all local data for this user and
+        start over by calling pull again with no cursor.
       operationId: pullChanges
       parameters:
         - name: cursor
@@ -98,8 +247,178 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PullResponse'
+              example:
+                exercises:
+                  - id: 018f5e9a-a16a-7def-be51-4d5e6f708192
+                    name: Cable Lateral Raise (Behind Back)
+                    primaryMuscles: [ SHOULDERS ]
+                    secondaryMuscles: [ ]
+                    description: A cable variation of the lateral raise, routed behind the back for constant tension through the full range of motion.
+                    instructions:
+                      - Stand sideways to a low cable pulley
+                      - Grip the handle with the far hand, arm across the body
+                      - Raise the arm out to the side to shoulder height
+                      - Lower with control
+                    tips:
+                      - Keep a slight bend in the elbow
+                      - Lead with the elbow, not the hand
+                    difficulty: INTERMEDIATE
+                    equipmentNeeded: [ CABLE ]
+                    category: STRENGTH
+                    exerciseType: ISOLATION
+                    trackingType: WEIGHT_REPS
+                    videoUrl: null
+                    thumbnailUrl: null
+                    source: CUSTOM
+                    ownerId: 8Kj3mNpQR5X9YbZ2LtWvAeHc3Fg1
+                    derivedFromId: null
+                    deprecated: false
+                    updatedAt: 1732631605123
+                    deletedAt: null
+                    revision: 1
+                workoutTemplates:
+                  - id: 019fe506-4210-7a3b-9c44-1a2b3c4d5e6f
+                    title: Old Push Day
+                    templateExercises: [ ]
+                    source: CUSTOM
+                    ownerId: 8Kj3mNpQR5X9YbZ2LtWvAeHc3Fg1
+                    derivedFromId: null
+                    deprecated: false
+                    updatedAt: 1732631700000
+                    deletedAt: 1732631700000
+                    revision: 3
+                nextCursor: eyJ0IjoxNzMyNjMxNzAwMDAwLCJpZCI6IjAxOWZlNTA2LTQyMTAtN2EzYi05YzQ0LTFhMmIzYzRkNWU2ZiJ9
+                hasMore: true
         '401': { $ref: '#/components/responses/Unauthenticated' }
         '410': { $ref: '#/components/responses/CursorExpired' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /v1/health:
+    get:
+      tags: [ System ]
+      summary: Liveness probe
+      description: |
+        Answers "is the process alive", not "is everything working". Must
+        not touch the database or any downstream dependency - a healthy
+        response here says nothing about data availability. Unauthenticated.
+      operationId: getHealth
+      security: [ ]
+      responses:
+        '200':
+          description: Process is up.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthStatus' }
+
+  /v1/me:
+    get:
+      tags: [ Account ]
+      summary: Authenticated bootstrap
+      description: |
+        Returns the caller's profile, both reference library versions, and
+        the server's current time in one call, so a client can initialize
+        a session without a chain of requests.
+
+        There is deliberately no PUT here: the profile is written through
+        the same outbox as every other entity, via /v1/sync/push. A second
+        write path for the profile would mean two places to maintain the
+        change-log and revision invariants.
+      operationId: getMe
+      responses:
+        '200':
+          description: Bootstrap payload for the authenticated caller.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeResponse' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /v1/account:
+    delete:
+      tags: [ Account ]
+      summary: Delete account
+      description: |
+        Permanently deletes the caller's account: all synced data, and the
+        underlying Firebase Auth user. Irreversible, with no grace period
+        or recovery window.
+
+        Firebase requires a recent credential for sensitive operations
+        like deleting a user. Clients must re-authenticate the user
+        immediately before calling this endpoint - a token from an
+        already-stale session will be rejected.
+
+        Required by App Store Review Guideline 5.1.1(v) (account deletion
+        must be offered in-app) and GDPR Article 17 (right to erasure).
+      operationId: deleteAccount
+      responses:
+        '204':
+          description: Account and all associated data deleted.
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /v1/reference/version:
+    get:
+      tags: [ Reference ]
+      summary: Current reference library versions
+      description: |
+        Cheap check for whether the client's bundled default exercise and
+        workout template libraries are stale, without downloading either
+        library. Compare against the versions the client last stored (or
+        against MeResponse) before deciding to call
+        /v1/reference/exercises or /v1/reference/templates.
+      operationId: getReferenceVersion
+      responses:
+        '200':
+          description: Current library versions.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReferenceVersion' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /v1/reference/exercises:
+    get:
+      tags: [ Reference ]
+      summary: Default exercise library
+      description: |
+        The full server-owned default exercise library, including
+        deprecated entries. Clients need deprecated exercises to resolve
+        existing references (e.g. a past workout session that used one)
+        and are responsible for filtering them out of browsing and search
+        themselves - the server does not do this filtering.
+
+        This is read-only. Custom exercises are user-owned and sync
+        through /v1/sync/push and /v1/sync/pull like any other entity.
+      operationId: getReferenceExercises
+      responses:
+        '200':
+          description: The full default exercise library, with its version.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExerciseLibraryResponse' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /v1/reference/templates:
+    get:
+      tags: [ Reference ]
+      summary: Default workout template library
+      description: |
+        The full server-owned default workout template library, including
+        deprecated entries - same rationale as /v1/reference/exercises.
+        Read-only; custom templates sync through /v1/sync/push and
+        /v1/sync/pull.
+      operationId: getReferenceTemplates
+      responses:
+        '200':
+          description: The full default workout template library, with its version.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TemplateLibraryResponse' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
 
 components:
   securitySchemes:
@@ -210,6 +529,76 @@ components:
         - USER_EXERCISE_STATE
         - USER_TEMPLATE_STATE
         - USER_PROFILE
+
+    HealthStatus:
+      type: object
+      description: Liveness only. A 200 here means the process is up - it says nothing about the database or downstream dependencies.
+      required: [ status ]
+      properties:
+        status:
+          type: string
+          enum: [ UP ]
+
+    MeResponse:
+      type: object
+      description: Authenticated bootstrap payload - everything a client needs to initialize a session in one call.
+      required:
+        - profile
+        - exerciseLibraryVersion
+        - templateLibraryVersion
+        - serverTime
+      properties:
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+        exerciseLibraryVersion:
+          type: integer
+          description: Current server-side default exercise library version. Compare against the client's bundled version to decide whether to call /v1/reference/exercises.
+        templateLibraryVersion:
+          type: integer
+          description: Current server-side default workout template library version. Compare against the client's bundled version to decide whether to call /v1/reference/templates.
+        serverTime:
+          type: integer
+          format: int64
+          description: Server's current time, epoch milliseconds. Compare against the client's local clock to detect and report clock skew.
+
+    ReferenceVersion:
+      type: object
+      required: [ exerciseLibraryVersion, templateLibraryVersion ]
+      properties:
+        exerciseLibraryVersion:
+          type: integer
+        templateLibraryVersion:
+          type: integer
+
+    ExerciseLibraryResponse:
+      type: object
+      description: |
+        The full default exercise library. Includes deprecated entries -
+        clients need them to resolve existing references (e.g. in past
+        workout sessions) and must filter deprecated exercises out of
+        browsing/search themselves.
+      required: [ version, exercises ]
+      properties:
+        version:
+          type: integer
+          description: Matches exerciseLibraryVersion from /v1/reference/version at the time of this response.
+        exercises:
+          type: array
+          items: { $ref: '#/components/schemas/Exercise' }
+
+    TemplateLibraryResponse:
+      type: object
+      description: |
+        The full default workout template library. Includes deprecated
+        entries, for the same reason as ExerciseLibraryResponse.
+      required: [ version, templates ]
+      properties:
+        version:
+          type: integer
+          description: Matches templateLibraryVersion from /v1/reference/version at the time of this response.
+        templates:
+          type: array
+          items: { $ref: '#/components/schemas/WorkoutTemplate' }
 
     WorkoutSession:
       type: object
@@ -833,19 +1222,34 @@ components:
       type: object
       description: Standard error body returned for all non-2xx responses.
       required:
-        - code
+        - error
         - message
+        - traceId
       properties:
-        code:
+        error:
           type: string
-          description: Stable machine-readable error identifier, e.g. "VALIDATION_FAILED".
+          description: |
+            Stable machine-readable error identifier. Match on this field,
+            never on message.
+          enum:
+            - UNAUTHENTICATED
+            - FORBIDDEN
+            - VALIDATION_FAILED
+            - CURSOR_EXPIRED
+            - RATE_LIMITED
+            - INTERNAL
         message:
           type: string
-          description: Human-readable explanation. Safe to log, but not guaranteed stable across releases - match on code, not message.
+          description: Human-readable explanation. Safe to log, but not guaranteed stable across releases - match on error, not message.
         details:
           type: [object, "null"]
           additionalProperties: true
-          description: Optional structured context for the error. Shape varies by code.
+          description: |
+            Optional structured context. Shape varies by error code, e.g.
+            field-level validation failures for VALIDATION_FAILED.
+        traceId:
+          type: string
+          description: Correlates this error to server-side logs. Include it when reporting issues.
 
     ExerciseTrackingType:
       type: string
@@ -970,19 +1374,40 @@ components:
 
   responses:
     BadRequest:
-      description: Malformed request or failed validation
+      description: Malformed request or failed validation. error is VALIDATION_FAILED.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
     Unauthenticated:
-      description: Missing, expired, or invalid token
+      description: Missing, expired, or invalid token. error is UNAUTHENTICATED.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Authenticated, but not permitted to perform this action. error is FORBIDDEN.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
     CursorExpired:
       description: |
-        Cursor predates the tombstone retention window (90 days). The client
-        must discard all local user data and perform a full resync.
+        Cursor predates the tombstone retention window (90 days). error is
+        CURSOR_EXPIRED. The client must discard all local user data and
+        perform a full resync (call pull again with no cursor).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RateLimited:
+      description: Too many requests. error is RATE_LIMITED. Respect Retry-After before retrying.
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    InternalError:
+      description: Unexpected server failure. error is INTERNAL. Include traceId when reporting.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
