@@ -8,9 +8,7 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/gymbuddy?user=gymbuddy&password=gymbuddy}
 
   flyway:
-    # Migrations land in a later group; declared as a dependency now,
-    # switched on when there's something to migrate.
-    enabled: false
+    enabled: true
 
   jpa:
     open-in-view: false
