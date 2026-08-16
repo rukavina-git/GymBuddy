@@ -68,4 +68,7 @@ paste it into `application.yml` or any other tracked file.
 
 Sync retention/page-size limits and the in-memory rate limiter's
 capacity/refill rate are externalised in `application.yml` with local
-defaults; the sync ones are ready to be wired up in a later group.
+defaults. `gymbuddy.sync.read-only` (`SYNC_READ_ONLY`) is wired up
+(Group F: it makes `POST /v1/sync/push` reject every request with 503
+while pull keeps working); tombstone-retention-days and the pull
+page-size limits remain placeholders for Group G.

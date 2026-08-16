@@ -1,6 +1,7 @@
 package com.rukavina.gymbuddy.persistence
 
 import com.rukavina.gymbuddy.api.dto.UserProfileDto
+import com.rukavina.gymbuddy.api.dto.UserProfileSyncDto
 import com.rukavina.gymbuddy.domain.ActivityLevel
 import com.rukavina.gymbuddy.domain.FitnessGoal
 import com.rukavina.gymbuddy.domain.Gender
@@ -59,6 +60,43 @@ class UserProfileRepository(private val jdbcTemplate: NamedParameterJdbcTemplate
             .addValue("now", now)
         val rowsAffected = jdbcTemplate.update(sql, params)
         return rowsAffected > 0
+    }
+
+    /**
+     * ProfileSyncService's update path. There is no insertForSync
+     * counterpart: FirebaseAuthenticationFilter's just-in-time
+     * provisioning (ensureProfile, via insertIfAbsent above) guarantees
+     * a user_profile row exists before any authenticated request
+     * reaches sync/push, so the row this updates always pre-exists -
+     * ProfileSyncService's RevisionChecker.Insert branch is unreachable
+     * in practice but left in place for defensiveness.
+     */
+    fun updateForSync(uid: String, dto: UserProfileSyncDto, newRevision: Int, now: Long) {
+        val sql = """
+            UPDATE user_profile
+            SET name = :name, email = :email, profile_image_url = :profileImageUrl, birth_date = :birthDate,
+                weight = :weight, height = :height, gender = :gender, fitness_goal = :fitnessGoal,
+                activity_level = :activityLevel, target_weight = :targetWeight, joined_date = :joinedDate,
+                bio = :bio, updated_at = :now, revision = :newRevision
+            WHERE uid = :uid
+        """.trimIndent()
+        val params = MapSqlParameterSource()
+            .addValue("uid", uid)
+            .addValue("name", dto.name)
+            .addValue("email", dto.email)
+            .addValue("profileImageUrl", dto.profileImageUrl)
+            .addValue("birthDate", dto.birthDate)
+            .addValue("weight", dto.weight)
+            .addValue("height", dto.height)
+            .addValue("gender", dto.gender?.name)
+            .addValue("fitnessGoal", dto.fitnessGoal?.name)
+            .addValue("activityLevel", dto.activityLevel?.name)
+            .addValue("targetWeight", dto.targetWeight)
+            .addValue("joinedDate", dto.joinedDate)
+            .addValue("bio", dto.bio)
+            .addValue("now", now)
+            .addValue("newRevision", newRevision)
+        jdbcTemplate.update(sql, params)
     }
 
     private fun mapRow(rs: ResultSet): UserProfileDto = UserProfileDto(

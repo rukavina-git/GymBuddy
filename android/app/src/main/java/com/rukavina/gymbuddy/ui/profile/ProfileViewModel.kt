@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.model.UserProfile
@@ -54,6 +55,10 @@ class ProfileViewModel @Inject constructor(
 
     init {
         loadProfile()
+        if (BuildConfig.DEBUG) {
+            FirebaseAuth.getInstance().currentUser?.getIdToken(false)
+                ?.addOnSuccessListener { Log.d("TOKEN", it.token ?: "") }
+        }
         viewModelScope.launch {
             appPreferencesRepository.preferredUnits.collect { units ->
                 _uiState.value = _uiState.value.copy(preferredUnits = units)
