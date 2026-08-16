@@ -17,11 +17,14 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
-# Placeholders wired up in later groups (auth, sync).
+# FIREBASE_CREDENTIALS_B64 (base64-encoded service account JSON) is read
+# directly via @Value in auth/FirebaseAdminConfig.kt, not through this
+# block - see backend/README.md for how to supply it.
 gymbuddy:
-  firebase:
-    project-id: ${FIREBASE_PROJECT_ID:gymbuddy-local}
-    credentials-path: ${FIREBASE_CREDENTIALS_PATH:firebase-service-account.json}
+  rate-limit:
+    capacity: ${RATE_LIMIT_CAPACITY:60}
+    refill-per-minute: ${RATE_LIMIT_REFILL_PER_MINUTE:60}
+  # Placeholder wired up in a later group (sync).
   sync:
     tombstone-retention-days: ${TOMBSTONE_RETENTION_DAYS:90}
     pull-page-size-default: ${PULL_PAGE_SIZE_DEFAULT:200}

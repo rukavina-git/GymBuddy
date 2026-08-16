@@ -24,6 +24,11 @@ services:
       # The only Postgres connection info the app is given - no
       # provider-specific host/port/db config anywhere else.
       DATABASE_URL: jdbc:postgresql://db:5432/gymbuddy?user=gymbuddy&password=gymbuddy
+      # Base64-encoded Firebase service account JSON - no key file on
+      # disk anywhere. Must come from the calling shell's environment;
+      # compose refuses to start with a clear message when it is unset.
+      # See backend/README.md for how to supply it locally and in prod.
+      FIREBASE_CREDENTIALS_B64: ${FIREBASE_CREDENTIALS_B64:?must be set}
     depends_on:
       db:
         condition: service_healthy
