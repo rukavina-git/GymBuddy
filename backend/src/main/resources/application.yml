@@ -24,8 +24,13 @@ gymbuddy:
   rate-limit:
     capacity: ${RATE_LIMIT_CAPACITY:60}
     refill-per-minute: ${RATE_LIMIT_REFILL_PER_MINUTE:60}
-  # Placeholder wired up in a later group (sync).
   sync:
+    # Placeholder wired up in a later group (pull/retention - Group G).
     tombstone-retention-days: ${TOMBSTONE_RETENTION_DAYS:90}
     pull-page-size-default: ${PULL_PAGE_SIZE_DEFAULT:200}
     pull-page-size-max: ${PULL_PAGE_SIZE_MAX:500}
+    # Safeguard: when true, POST /v1/sync/push rejects every request
+    # with 503 without touching the database. Pull is unaffected. Flip
+    # this on in production if sync misbehaves, to stop writes without
+    # taking the whole service down.
+    read-only: ${SYNC_READ_ONLY:false}

@@ -15,8 +15,13 @@ info:
     change-log and revision invariants, which is exactly the kind of
     drift that produces unreconcilable data. Writes go through
     `/v1/sync/push`, always. Conflict resolution is server-authoritative:
-    the server decides who wins, stamps `updatedAt` and `revision`, and
-    whatever it returns overwrites the client's local copy. Clients never
+    the server decides who wins and stamps `updatedAt` and `revision`.
+    On a win, push's own response carries those values back and the
+    client overwrites its local copy with them directly. On a loss
+    (`CONFLICT`), push returns no entity data at all - there is nothing
+    to overwrite with yet. The client discards its local change and
+    picks up the winning version from the next `/v1/sync/pull`, the only
+    path a full entity ever travels back to a client. Clients never
     merge. Workout sessions and workout templates sync as whole
     aggregates together with their children (performed exercises, sets,
     template exercises) - there is no independent sync path for a child
@@ -64,8 +69,18 @@ paths:
       tags: [ Sync ]
       summary: Push local changes
       description: |
-        Sends locally-created and locally-modified entities. Each array is
-        applied independently; ordering between arrays is not significant.
+        Sends locally-created, locally-modified, and locally-deleted
+        entities. Each array is applied independently; ordering between
+        arrays is not significant.
+
+        A deletion is not a separate operation: it is an ordinary entity
+        push with deletedAt set to any non-null value. The server treats
+        this exactly like any other field change - same revision check,
+        same idempotency rule - and stamps its own deletedAt on write;
+        the value the client sends is only a signal, never stored
+        verbatim. This does not apply to userProfile (account deletion
+        is a separate, dedicated endpoint) or to userExerciseStates/
+        userTemplateStates, which have no deletedAt at all.
 
         Every entity is applied in its own transaction and receives its own
         result, so one rejected entity does not block the rest of the batch.
@@ -74,12 +89,24 @@ paths:
         applied returns the existing result rather than duplicating it.
 
         Inspect every result before clearing the outbox entry it came from:
-        APPLIED means the client must overwrite its local updatedAt and
-        revision with the server-assigned values returned here. CONFLICT
-        means the server held a newer version - discard the local change
-        entirely and take whatever the next pull returns instead of
-        retrying it. INVALID and FORBIDDEN mean the entity must be dropped
-        from the outbox without retrying.
+
+          APPLIED   overwrite the local updatedAt and revision with the
+                    server-assigned values returned here, then clear the
+                    outbox entry.
+          CONFLICT  the server held a newer version. This result carries
+                    no entity data - updatedAt and revision are both
+                    null - so there is nothing here to overwrite local
+                    state with. Discard the local change, clear the
+                    outbox entry, and wait for the next pull to deliver
+                    the winning version; do not retry this push.
+          INVALID   the entity fails validation and can never succeed as
+                    sent - clear the outbox entry without retrying.
+          FORBIDDEN the entity is not owned by the caller - clear the
+                    outbox entry without retrying.
+          ERROR     an unexpected server-side failure while processing
+                    this entity - not the client's fault and not a
+                    verdict on the data. Leave the outbox entry in place
+                    and retry the push later; do not discard it.
       operationId: pushChanges
       requestBody:
         required: true
@@ -470,15 +497,31 @@ components:
           $ref: '#/components/schemas/EntityType'
         entityId:
           type: string
-          format: uuid
+          description: |
+            Not always a UUID: USER_PROFILE's id is the caller's Firebase
+            uid, a provider-issued string, not a UUID.
         status:
           type: string
-          enum: [ APPLIED, CONFLICT, INVALID, FORBIDDEN ]
+          enum: [ APPLIED, CONFLICT, INVALID, FORBIDDEN, ERROR ]
           description: |
-            APPLIED   accepted; updatedAt and revision are authoritative
-            CONFLICT  server state was newer; discard local and take server's
-            INVALID   failed validation; drop from outbox, do not retry
-            FORBIDDEN not owned by the caller; drop from outbox
+            APPLIED   accepted; updatedAt and revision are authoritative.
+                      Client action: overwrite local updatedAt/revision
+                      with these values, then clear the outbox entry.
+            CONFLICT  server state was newer; server wins. No entity data
+                      is returned here - updatedAt and revision are null -
+                      pull is the only path a full entity travels back to
+                      a client. Client action: discard the local change,
+                      clear the outbox entry, and wait for the next pull
+                      to deliver the winning version; do not retry.
+            INVALID   failed validation; this entity can never succeed as
+                      sent. Client action: clear the outbox entry, do not
+                      retry.
+            FORBIDDEN not owned by the caller. Client action: clear the
+                      outbox entry, do not retry.
+            ERROR     an unexpected server-side failure processing this
+                      one entity - not a verdict on the data, and not the
+                      client's fault. Client action: leave the outbox
+                      entry in place and retry later; never discard it.
         updatedAt:
           type: integer
           format: int64
@@ -669,10 +712,14 @@ components:
         deletedAt:
           type: [integer, "null"]
           format: int64
-          readOnly: true
           description: |
-            Server-assigned tombstone time, epoch milliseconds. Non-null
-            means this session is deleted. Clients must not set this.
+            Tombstone time, epoch milliseconds; non-null means this
+            session is deleted. On push, this is the client's delete
+            signal, not a timestamp the server trusts: set it to any
+            non-null value to delete the session, leave it null
+            otherwise. The server always stamps its own current time on
+            write and ignores the value sent - what comes back from pull
+            is the authoritative deletedAt.
         revision:
           type: integer
           format: int32
@@ -895,10 +942,16 @@ components:
         deletedAt:
           type: [integer, "null"]
           format: int64
-          readOnly: true
           description: |
-            Server-assigned tombstone time, epoch milliseconds. Non-null
-            means this row is deleted. Clients must not set this.
+            Tombstone time, epoch milliseconds; non-null means this row
+            is deleted. On push, this is the client's delete signal, not
+            a timestamp the server trusts: set it to any non-null value
+            to delete the row, leave it null otherwise. The server
+            always stamps its own current time on write and ignores the
+            value sent - what comes back from pull is the authoritative
+            deletedAt. Deleting a DEFAULT exercise this way is rejected
+            the same as any other write to one (FORBIDDEN) - only CUSTOM
+            rows can be deleted.
         revision:
           type: integer
           format: int32
@@ -965,10 +1018,16 @@ components:
         deletedAt:
           type: [integer, "null"]
           format: int64
-          readOnly: true
           description: |
-            Server-assigned tombstone time, epoch milliseconds. Non-null
-            means this template is deleted. Clients must not set this.
+            Tombstone time, epoch milliseconds; non-null means this
+            template is deleted. On push, this is the client's delete
+            signal, not a timestamp the server trusts: set it to any
+            non-null value to delete the template, leave it null
+            otherwise. The server always stamps its own current time on
+            write and ignores the value sent - what comes back from pull
+            is the authoritative deletedAt. Deleting a DEFAULT template
+            this way is rejected the same as any other write to one
+            (FORBIDDEN) - only CUSTOM templates can be deleted.
         revision:
           type: integer
           format: int32
