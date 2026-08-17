@@ -5,6 +5,7 @@ plugins {
     kotlin("plugin.spring") version "2.1.21"
     kotlin("plugin.jpa") version "2.1.21"
     jacoco
+    id("org.owasp.dependencycheck") version "13.0.0"
 }
 
 group = "com.rukavina"
@@ -86,6 +87,31 @@ val jacocoExcludes = listOf(
     "com/rukavina/gymbuddy/**/*Config$*.class",
     "com/rukavina/gymbuddy/GymBuddyApplication.class",
 )
+
+// OWASP dependency-check - see android/app/build.gradle.kts for the full
+// rationale (same setup, mirrored here). Run via
+// `./gradlew dependencyCheckAnalyze` (this module has no subprojects, so
+// unlike android there's no :app to target).
+dependencyCheck {
+    formats = listOf("HTML", "SARIF")
+    data.directory = "$rootDir/dependency-check-data"
+    // Only assign when a real key exists: nvd.apiKey defaults to an empty
+    // string, not null, so assigning `null` here wouldn't clear it back
+    // to "no key" - it would leave the empty-string default in place.
+    // That distinction turns out not to matter in practice, though:
+    // verified locally (no key vs. a well-formed-but-fake key) that
+    // dependency-check-gradle 13.0.0 does NOT fall back to unauthenticated
+    // NVD access when no key is configured - it fails immediately with
+    // "Invalid API Key, length of 0", vs. a real rejection message
+    // ("Invalid API Key: 0000-****-0000") once a key is actually present.
+    // An upstream issue independently confirms the unauthenticated path is
+    // effectively non-functional at this version too - it doesn't fail
+    // fast, it grinds through NIST's rate limit until the download breaks
+    // partway through (github.com/dependency-check/DependencyCheck#8298).
+    // Bottom line: NVD_API_KEY is not an optional speed optimization for
+    // this workflow, it is required for it to complete at all.
+    System.getenv("NVD_API_KEY")?.takeIf { it.isNotBlank() }?.let { nvd.apiKey = it }
+}
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)

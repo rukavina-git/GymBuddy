@@ -10,12 +10,28 @@ on:
 jobs:
   backend:
     name: Backend
+    permissions:
+      contents: read
+      security-events: write
     uses: ./.github/workflows/_owasp.yml
     with:
       module-path: backend
+      java-version: '21'
+    secrets:
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
   android:
     name: Android
+    permissions:
+      contents: read
+      security-events: write
     uses: ./.github/workflows/_owasp.yml
     with:
       module-path: android
+      java-version: '17'
+      gradle-task: ':app:dependencyCheckAnalyze'
+      report-dir: 'app/build/reports'
+      secret-file-path: 'app/src/google-services.json'
+    secrets:
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      secret-file-content: ${{ secrets.GOOGLE_SERVICES_JSON }}

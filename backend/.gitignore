@@ -14,3 +14,6 @@ build/
 # Firebase service account key - a real credential, never commit it.
 firebase-service-account.json
 *firebase-adminsdk*.json
+
+# OWASP dependency-check's local NVD database cache (gigabytes, never commit)
+/dependency-check-data/
