@@ -31,6 +31,9 @@ kizitonwoseCalendar = "2.10.1"
 material3 = "1.4.0"
 googleServices = "4.5.0"
 googleidVersion = "1.2.0"
+kotlinxCoroutinesTest = "1.10.2"
+turbine = "1.2.0"
+robolectric = "4.15.1"
 
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
@@ -76,6 +79,9 @@ hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", ve
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 kizitonwose-calendar-compose = { module = "com.kizitonwose.calendar:compose", version.ref = "kizitonwoseCalendar" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -44,6 +44,12 @@ android {
         viewBinding = true
         buildConfig = true
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -97,6 +103,14 @@ dependencies {
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.room.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    // Robolectric provides a Context for the ViewModel/repository tests
+    // that need one - Room's in-memory builder and AppPreferencesRepository's
+    // DataStore both require a real Context, not something fakeable without
+    // a mocking framework or a production-code refactor. See
+    // src/test/resources/robolectric.properties for the pinned SDK level.
+    testImplementation(libs.robolectric)
     androidTestImplementation(libs.testExtJunit)
     androidTestImplementation(libs.espressoCore)
     androidTestImplementation(libs.ui.test.junit)
@@ -140,9 +154,33 @@ val jacocoExcludes = listOf(
     "**/*Binding.class",
     "**/*Binding$*.class",
     "**/BR.class",
-    // Compose UI - no unit tests exercise this package; including it
-    // would make the coverage percentage meaningless.
-    "**/ui/**"
+    "**/ui/**/*Screen*.*",
+    "**/ui/**/*Dialog*.*",
+    "**/ui/**/*Card*.*",
+    "**/ui/**/*BottomSheet*.*",
+    "**/ui/components/**",
+    "**/*PasswordTextField*.*",
+    "**/*ProfileTextField*.*",
+    "**/*SettingsComponents*.*",
+    "**/*TemplateExerciseListItem*.*",
+    "**/*ExerciseFilterContent*.*",
+    "**/*ExerciseFormAdvanced*.*",
+    "**/*ExerciseFormDetails*.*",
+    "**/*ExerciseFormRequiredFields*.*",
+    "**/ui/theme/**",
+    "**/*MainActivity*.*",
+    "**/*Application*.*",
+    // Room type converters - one-liners asserting an enum has a name;
+    // seeders - proven correct on every fresh install, not by a unit test;
+    // navigation route constants - a plain `object` of string literals,
+    // nothing to assert beyond "the string is the string". None of these
+    // are unit-tested by design, same rationale as the Compose UI excludes
+    // above. Kept in lockstep with
+    // .github/actions/coverage-exclusions/action.yml's android_patterns -
+    // see that file for why this matters.
+    "**/data/local/converter/**",
+    "**/data/local/seeder/**",
+    "**/NavRoutes*.*"
 )
 
 tasks.register<JacocoReport>("jacocoTestReport") {

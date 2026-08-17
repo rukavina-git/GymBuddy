@@ -137,11 +137,13 @@ class ActiveWorkoutViewModel @Inject constructor(
                     val exerciseTrackingType = exerciseMap[templateExercise.exerciseId]?.trackingType
                         ?: ExerciseTrackingType.WEIGHT_REPS
 
-                    // Create individual sets for this exercise with unique IDs
+                    // Create individual sets for this exercise with unique IDs.
+                    // (1..plannedSets) already yields 1-based positions - do
+                    // not add 1 again, or the first set displays as "Set 2".
                     val sets = (1..templateExercise.plannedSets).mapIndexed { setIndex, setNumber ->
                         WorkoutSet(
                             id = "${workoutId}_ex${exerciseIndex}_set${setIndex}",
-                            setNumber = setNumber + 1,
+                            setNumber = setNumber,
                             reps = "",
                             weight = "",
                             notes = ""
@@ -160,11 +162,18 @@ class ActiveWorkoutViewModel @Inject constructor(
                     )
                 }
 
-            // Reset state completely when starting new workout
+            // Reset state completely when starting new workout, except
+            // preferredUnits: that's loaded once from loadUserPreferences()'s
+            // long-lived collector in init, which won't necessarily re-emit
+            // just because a new workout started - resetting it here would
+            // silently drop back to METRIC display/conversion for the rest
+            // of the session even when the user's actual preference is
+            // IMPERIAL.
             _uiState.value = ActiveWorkoutUiState(
                 workoutTitle = template.title,
                 workoutStartTime = System.currentTimeMillis(),
                 exercises = activeExercises,
+                preferredUnits = _uiState.value.preferredUnits,
                 isTimerRunning = true,
                 workoutSaved = false,
                 isLoading = false,
@@ -453,7 +462,11 @@ class ActiveWorkoutViewModel @Inject constructor(
             workoutDiscarded = true,
             isTimerRunning = false,
             exercises = emptyList(),
-            elapsedSeconds = 0L
+            elapsedSeconds = 0L,
+            // See startWorkoutFromTemplate - not preserving this would
+            // silently drop back to METRIC until the next real preference
+            // change re-emits from loadUserPreferences()'s collector.
+            preferredUnits = _uiState.value.preferredUnits
         )
     }
 
