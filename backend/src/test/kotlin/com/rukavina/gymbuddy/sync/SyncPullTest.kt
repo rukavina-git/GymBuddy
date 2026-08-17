@@ -222,17 +222,35 @@ class SyncPullTest : AbstractPostgresIntegrationTest() {
     // 8. an expired cursor returns 410 with CURSOR_EXPIRED.
 
     @Test
-    fun `a cursor older than the oldest retained change_log row for this user returns 410 CURSOR_EXPIRED`() {
+    fun `a cursor older than the retention watermark for this user returns 410 CURSOR_EXPIRED`() {
         val uid = newUid("expired")
-        val first = pushExercise(uid)
-        val afterFirst = pull(uid)
-        pushExercise(uid) // ensures the user has a change_log row newer than the one we're about to delete
+        pushExercise(uid)
+        val afterFirst = pull(uid) // cursor sits right after the first push, before the second
 
-        // Nothing prunes change_log yet (Group H doesn't exist) - simulate
-        // what retention will eventually do so the 410 path is exercised now.
+        val second = pushExercise(uid)
+
+        // Group H's TombstoneRetentionService is what actually produces
+        // this state (see TombstoneRetentionServiceTest for the full,
+        // job-driven version); simulated directly here to pin down
+        // isCursorExpired's boundary against sync_retention_watermark in
+        // isolation. Pruning the SECOND (newer) push - something
+        // afterFirst's cursor hasn't seen yet - and advancing the
+        // watermark to match is what makes afterFirst legitimately stale;
+        // pruning the first, already-seen push would not (see
+        // ChangeLogReader.isCursorExpired's header for why that
+        // distinction matters).
+        val prunedSeq = jdbcTemplate.queryForObject(
+            "SELECT seq FROM change_log WHERE user_id = :uid AND entity_id = :entityId",
+            mapOf("uid" to uid, "entityId" to second.entityId),
+            Long::class.java,
+        )!!
         jdbcTemplate.update(
             "DELETE FROM change_log WHERE user_id = :uid AND entity_id = :entityId",
-            mapOf("uid" to uid, "entityId" to first.entityId),
+            mapOf("uid" to uid, "entityId" to second.entityId),
+        )
+        jdbcTemplate.update(
+            "INSERT INTO sync_retention_watermark (user_id, retention_floor_seq, updated_at) VALUES (:uid, :seq, :now)",
+            mapOf("uid" to uid, "seq" to prunedSeq, "now" to System.currentTimeMillis()),
         )
 
         mockMvc.perform(

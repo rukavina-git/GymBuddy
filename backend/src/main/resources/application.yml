@@ -25,8 +25,14 @@ gymbuddy:
     capacity: ${RATE_LIMIT_CAPACITY:60}
     refill-per-minute: ${RATE_LIMIT_REFILL_PER_MINUTE:60}
   sync:
-    # Placeholder wired up in a later group (pull/retention - Group G).
+    # How long a tombstoned entity is kept before TombstoneRetentionService
+    # hard-deletes it and its change_log rows (Group H). Configuration, not
+    # a constant, specifically so tests can shorten it - see
+    # TombstoneRetentionServiceTest.
     tombstone-retention-days: ${TOMBSTONE_RETENTION_DAYS:90}
+    # When the daily retention job runs (TombstoneRetentionScheduler).
+    # Standard cron, seconds-first (Spring's @Scheduled format).
+    retention-cron: ${RETENTION_CRON:0 0 3 * * *}
     pull-page-size-default: ${PULL_PAGE_SIZE_DEFAULT:200}
     pull-page-size-max: ${PULL_PAGE_SIZE_MAX:500}
     # Safeguard: when true, POST /v1/sync/push rejects every request

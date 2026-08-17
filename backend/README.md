@@ -66,9 +66,13 @@ paste it into `application.yml` or any other tracked file.
 
 ## Config placeholders
 
-Sync retention/page-size limits and the in-memory rate limiter's
-capacity/refill rate are externalised in `application.yml` with local
-defaults. `gymbuddy.sync.read-only` (`SYNC_READ_ONLY`) is wired up
-(Group F: it makes `POST /v1/sync/push` reject every request with 503
-while pull keeps working); tombstone-retention-days and the pull
-page-size limits remain placeholders for Group G.
+Sync config and the in-memory rate limiter's capacity/refill rate are
+externalised in `application.yml` with local defaults - all now wired
+up. `gymbuddy.sync.read-only` (`SYNC_READ_ONLY`, Group F) makes `POST
+/v1/sync/push` reject every request with 503 while pull keeps working.
+`pull-page-size-default`/`pull-page-size-max` (Group G) bound `GET
+/v1/sync/pull`'s `limit` query param. `tombstone-retention-days`
+(`TOMBSTONE_RETENTION_DAYS`, Group H) is the window
+`TombstoneRetentionService` prunes tombstones past, and
+`retention-cron` (`RETENTION_CRON`) is when its daily scheduled run
+fires - see `TombstoneRetentionScheduler`.

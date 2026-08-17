@@ -65,65 +65,42 @@ class ChangeLogReader(private val jdbcTemplate: NamedParameterJdbcTemplate) {
     }
 
     /**
-     * Point 5: a cursor is expired when it predates the oldest
-     * change_log row this user currently has - i.e. something between
-     * the cursor's position and that oldest row was pruned (Group H,
-     * not yet implemented) and can never be replayed. Deliberately
-     * per-user, not a table-wide MIN(seq): seq is one global BIGSERIAL
-     * shared by every user, so a per-user gap in the raw numbers is
-     * normal (other users' activity fills it) and proves nothing on its
-     * own - only a gap in THIS user's own oldest-surviving-row position
-     * is meaningful. A user with no change_log rows at all has nothing
-     * to be behind on, so no cursor can be expired for them.
+     * Point 5 (Group G), closed properly by Group H's watermark: a
+     * cursor is expired when it predates retention_floor_seq -
+     * sync_retention_watermark's record of the highest change_log.seq
+     * TombstoneRetentionService has ever deleted for this user (see
+     * that table's migration comment and TombstoneRetentionService).
+     * No watermark row means retention has never touched this user's
+     * data, so nothing can be expired for them.
      *
-     * cursorSeq <= 0 is exempted unconditionally - not just an
-     * optimisation. Every legitimately-issued Cursor.Delta.seq other
-     * than 0 corresponds to an actual row this user once had (a delta
-     * page's own max seq, or a completed full sync's currentMaxSeq via
-     * ChangeLogReader.currentMaxSeq), so "MIN(seq for user) now exceeds
-     * it" can only mean that specific row was pruned. The single
-     * exception: SyncPullOrchestrator hands a user with zero change_log
-     * rows the value 0 as their full-sync terminal cursor - not a real
-     * row, just "nothing yet". The very first change that user EVER
-     * makes necessarily gets a seq greater than 0 (BIGSERIAL starts at
-     * 1), so comparing MIN(seq for user) against a 0 baseline would
-     * always look like a gap - the user's oldest row is trivially
-     * "later than" a cursor issued before they had any row at all.
-     * That's not pruning, it's just their first activity; a plain
-     * seq > 0 query already returns 100% of it, so there is nothing to
-     * protect against here. (A negative cursorSeq can only reach this
-     * method via a malformed/adversarial Cursor.Delta - CursorCodec's
-     * own encode() never produces one, and a genuine full-sync
-     * continuation is a distinct Cursor.FullSync that never reaches
-     * isCursorExpired at all. The <= 0 guard, rather than == 0, just
-     * gives that case the same harmless "seq > N returns everything"
-     * treatment instead of a spurious 410.)
+     * This used to infer "oldest retained" from MIN(seq) over
+     * change_log's current contents, which was an unsound proxy: once
+     * pruning is real, removing even an already-seen row can make
+     * MIN(seq) jump past a fully-caught-up cursor and flag it expired
+     * for no reason - not a corner case for this app, since a user who
+     * doesn't log a workout for 90 days is routine, not exceptional.
+     * The stored watermark only ever advances past a seq the retention
+     * job has actually deleted, so that false positive is gone: a
+     * cursor sitting anywhere at or after the watermark is guaranteed
+     * safe, regardless of what gaps exist in what currently remains.
      *
-     * TODO(Group H): this infers "oldest retained" from MIN(seq) over
-     * change_log's current contents, which is only a proxy and is known
-     * to over-trigger once real pruning exists. If retention removes
-     * even an ALREADY-SEEN row - e.g. a long-dormant user's rows 5,6,7
-     * age out, but they made one recent edit at row 8 that's still
-     * within the window - MIN(seq for user) jumps to 8, and a fully
-     * caught-up cursor of 7 reads as "7 < 8" and gets flagged expired,
-     * even though nothing the client hasn't already seen was lost. This
-     * is not a rare shape for this app specifically: a user who doesn't
-     * log a workout for 90 days is normal, not exceptional, so this
-     * would force routine unnecessary full resyncs, not just handle a
-     * corner case. Group H (the retention job) must close this: add a
-     * per-user watermark (a column, or a small table keyed on user_id)
-     * recording the oldest seq retention still GUARANTEES is intact for
-     * that user, written by the retention job at prune time - not
-     * inferred here. isCursorExpired then becomes a direct comparison
-     * against that stored watermark instead of MIN(seq) over whatever
-     * happens to remain in change_log, and the false-positive above
-     * goes away because the watermark only advances past a row the
-     * pruning job is certain no still-valid cursor could still need.
+     * cursorSeq <= 0 is still exempted explicitly, defensively: a
+     * legitimately-issued Cursor.Delta.seq of exactly 0 is
+     * SyncPullOrchestrator's "nothing synced yet" full-sync terminal
+     * cursor for a user with no change_log rows, which the missing-
+     * watermark-row check above already handles correctly on its own
+     * (retention has nothing to have pruned for such a user). A
+     * negative cursorSeq can only reach this method via a malformed or
+     * adversarial Cursor.Delta - CursorCodec's own encode() never
+     * produces one, and genuine full-sync continuation is a distinct
+     * Cursor.FullSync that never reaches isCursorExpired at all. The
+     * guard just gives that case the same harmless "seq > N returns
+     * everything" treatment as 0 instead of a spurious 410.
      */
     fun isCursorExpired(userId: String, cursorSeq: Long): Boolean {
         if (cursorSeq <= 0) return false
-        val oldestRetainedSeq = oldestSeqForUser(userId) ?: return false
-        return cursorSeq < oldestRetainedSeq
+        val retentionFloorSeq = retentionFloorSeqForUser(userId) ?: return false
+        return cursorSeq < retentionFloorSeq
     }
 
     /** The cursor a completed full sync hands back, so the client can move to ordinary delta pulls from here. Null if the user has no change_log rows yet. */
@@ -134,10 +111,10 @@ class ChangeLogReader(private val jdbcTemplate: NamedParameterJdbcTemplate) {
         }.firstOrNull()
     }
 
-    private fun oldestSeqForUser(userId: String): Long? {
-        val sql = "SELECT MIN(seq) AS value FROM change_log WHERE user_id = :userId"
+    private fun retentionFloorSeqForUser(userId: String): Long? {
+        val sql = "SELECT retention_floor_seq FROM sync_retention_watermark WHERE user_id = :userId"
         return jdbcTemplate.query(sql, MapSqlParameterSource("userId", userId)) { rs, _ ->
-            rs.getLong("value").takeUnless { rs.wasNull() }
+            rs.getLong("retention_floor_seq")
         }.firstOrNull()
     }
 }
