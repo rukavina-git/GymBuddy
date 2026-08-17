@@ -77,6 +77,14 @@ runs:
           'app/src/main/java/**/di/**'
           'app/src/main/java/**/GymBuddyApplication.kt'
           'app/src/main/java/**/MainActivity.kt'
+          # Room type converters (one-liners asserting an enum has a name),
+          # seeders (proven correct on every fresh install, not by a unit
+          # test), and navigation route constants (a plain `object` of
+          # string literals) - not unit-tested by design, same rationale
+          # as the Compose UI patterns above.
+          'app/src/main/java/**/data/local/converter/**'
+          'app/src/main/java/**/data/local/seeder/**'
+          'app/src/main/java/**/navigation/NavRoutes.kt'
         )
 
         join_by_comma() {

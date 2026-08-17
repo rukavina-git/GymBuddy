@@ -48,4 +48,52 @@ class UnitConverterTest {
         val parsed = UnitConverter.heightToMetric("70.87", PreferredUnits.IMPERIAL)
         assertEquals(70.87f * 2.54f, parsed!!, 0.0001f)
     }
+
+    // The round trip that matters in practice: a user typing into an
+    // IMPERIAL-mode field (ActiveWorkoutViewModel.saveWorkout, the Edit*
+    // Screens) goes through weightToMetric/heightToMetric for storage, then
+    // back through weightToDisplayUnit/heightToDisplayUnit to redisplay -
+    // never through kgToLbs/lbsToKg directly. If those two conversions
+    // don't invert each other, the user sees their own input silently
+    // drift on every save/reload.
+
+    @Test
+    fun `weight typed in imperial round-trips back to the same displayed value after storage`() {
+        val typedLbs = "185"
+
+        val storedKg = UnitConverter.weightToMetric(typedLbs, PreferredUnits.IMPERIAL)
+        val redisplayedLbs = UnitConverter.weightToDisplayUnit(storedKg, PreferredUnits.IMPERIAL)
+
+        assertEquals(typedLbs, redisplayedLbs)
+    }
+
+    @Test
+    fun `weight typed in metric round-trips back to the same displayed value after storage`() {
+        val typedKg = "82.5"
+
+        val storedKg = UnitConverter.weightToMetric(typedKg, PreferredUnits.METRIC)
+        val redisplayedKg = UnitConverter.weightToDisplayUnit(storedKg, PreferredUnits.METRIC)
+
+        assertEquals(typedKg, redisplayedKg)
+    }
+
+    @Test
+    fun `height typed in imperial round-trips back to the same displayed value after storage`() {
+        val typedInches = "70.87"
+
+        val storedCm = UnitConverter.heightToMetric(typedInches, PreferredUnits.IMPERIAL)
+        val redisplayedInches = UnitConverter.heightToDisplayUnit(storedCm, PreferredUnits.IMPERIAL)
+
+        assertEquals(typedInches, redisplayedInches)
+    }
+
+    @Test
+    fun `a value stored in one unit and redisplayed in the other converts, not just reformats`() {
+        // 100 kg stored, then the user flips their preference to imperial.
+        val storedKg = 100f
+
+        val displayedLbs = UnitConverter.weightToDisplayUnit(storedKg, PreferredUnits.IMPERIAL)
+
+        assertEquals("220.46", displayedLbs)
+    }
 }
