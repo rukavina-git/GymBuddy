@@ -119,6 +119,91 @@ class SyncPushTest : AbstractPostgresIntegrationTest() {
         assertEquals("Original", storedTitle)
     }
 
+    /**
+     * CONFLICT is proven for WorkoutSession above via the shared
+     * RevisionChecker, but each of these four services independently
+     * wires that check up to its own repository lookup and its own
+     * DTO's revision field - a mistake in that wiring (e.g. comparing
+     * against the wrong stored revision, or never reaching the check at
+     * all) is exactly what a per-type-service split can hide unless
+     * every type is exercised, not just one representative.
+     */
+    @Test
+    fun `workout template stale revision with different content returns CONFLICT and does not apply`() {
+        val uid = newUid("template-stale")
+        val template = SyncTestFixtures.workoutTemplate(title = "Original")
+        push(uid, PushRequestDto(workoutTemplates = listOf(template)))
+
+        val stale = template.copy(title = "A different edit", revision = 0)
+        val result = push(uid, PushRequestDto(workoutTemplates = listOf(stale))).results.single()
+
+        assertEquals(SyncStatus.CONFLICT, result.status)
+        assertNotNull(result.reason)
+        val storedTitle = jdbcTemplate.queryForObject(
+            "SELECT title FROM workout_templates WHERE id = :id::uuid",
+            mapOf("id" to template.id),
+            String::class.java,
+        )
+        assertEquals("Original", storedTitle)
+    }
+
+    @Test
+    fun `user exercise state stale revision with different content returns CONFLICT and does not apply`() {
+        val uid = newUid("exercise-state-stale")
+        val state = SyncTestFixtures.userExerciseState().copy(defaultRestSeconds = 60)
+        push(uid, PushRequestDto(userExerciseStates = listOf(state)))
+
+        val stale = state.copy(defaultRestSeconds = 999, revision = 0)
+        val result = push(uid, PushRequestDto(userExerciseStates = listOf(stale))).results.single()
+
+        assertEquals(SyncStatus.CONFLICT, result.status)
+        assertNotNull(result.reason)
+        val storedRest = jdbcTemplate.queryForObject(
+            "SELECT default_rest_seconds FROM user_exercise_state WHERE owner_id = :uid AND exercise_id = :id::uuid",
+            mapOf("uid" to uid, "id" to state.exerciseId),
+            Int::class.java,
+        )
+        assertEquals(60, storedRest)
+    }
+
+    @Test
+    fun `user template state stale revision with different content returns CONFLICT and does not apply`() {
+        val uid = newUid("template-state-stale")
+        val state = SyncTestFixtures.userTemplateState().copy(isFavorite = true)
+        push(uid, PushRequestDto(userTemplateStates = listOf(state)))
+
+        val stale = state.copy(isFavorite = false, revision = 0)
+        val result = push(uid, PushRequestDto(userTemplateStates = listOf(stale))).results.single()
+
+        assertEquals(SyncStatus.CONFLICT, result.status)
+        assertNotNull(result.reason)
+        val storedFavorite = jdbcTemplate.queryForObject(
+            "SELECT is_favorite FROM user_template_state WHERE owner_id = :uid AND template_id = :id::uuid",
+            mapOf("uid" to uid, "id" to state.templateId),
+            Boolean::class.java,
+        )
+        assertEquals(true, storedFavorite)
+    }
+
+    @Test
+    fun `user profile stale revision with different content returns CONFLICT and does not apply`() {
+        val uid = newUid("profile-stale")
+        val profile = SyncTestFixtures.userProfile(name = "Original")
+        push(uid, PushRequestDto(userProfile = profile))
+
+        val stale = profile.copy(name = "A different edit", revision = 0)
+        val result = push(uid, PushRequestDto(userProfile = stale)).results.single()
+
+        assertEquals(SyncStatus.CONFLICT, result.status)
+        assertNotNull(result.reason)
+        val storedName = jdbcTemplate.queryForObject(
+            "SELECT name FROM user_profile WHERE uid = :uid",
+            mapOf("uid" to uid),
+            String::class.java,
+        )
+        assertEquals("Original", storedName)
+    }
+
     // 3. idempotent replay
 
     @Test
@@ -235,6 +320,67 @@ class SyncPushTest : AbstractPostgresIntegrationTest() {
             Int::class.java,
         )
         assertEquals(1, setCountAfterUpdate)
+    }
+
+    @Test
+    fun `aggregate replacement removes a whole performed exercise absent from the payload, not just its sets`() {
+        val uid = newUid("aggregate-replace-whole-child")
+        val keep = SyncTestFixtures.performedExercise(orderIndex = 0)
+        val drop = SyncTestFixtures.performedExercise(orderIndex = 1)
+        val session = SyncTestFixtures.workoutSession(performedExercises = listOf(keep, drop), revision = 0)
+        push(uid, PushRequestDto(workoutSessions = listOf(session)))
+
+        val countAfterCreate = jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM performed_exercises WHERE workout_session_id = :id::uuid",
+            mapOf("id" to session.id),
+            Int::class.java,
+        )
+        assertEquals(2, countAfterCreate)
+
+        val update = session.copy(performedExercises = listOf(keep), revision = 1)
+        val response = push(uid, PushRequestDto(workoutSessions = listOf(update)))
+        assertEquals(SyncStatus.APPLIED, response.results.single().status)
+
+        val remainingIds = jdbcTemplate.queryForList(
+            "SELECT id FROM performed_exercises WHERE workout_session_id = :id::uuid",
+            mapOf("id" to session.id),
+            String::class.java,
+        )
+        assertEquals(listOf(keep.id), remainingIds, "the dropped performed exercise - and its sets, via cascade - must be gone entirely")
+
+        val setsForDropped = jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM workout_sets WHERE performed_exercise_id = :id::uuid",
+            mapOf("id" to drop.id),
+            Int::class.java,
+        )
+        assertEquals(0, setsForDropped)
+    }
+
+    @Test
+    fun `aggregate replacement removes a template exercise absent from the payload`() {
+        val uid = newUid("template-aggregate-replace")
+        val keep = SyncTestFixtures.templateExercise(orderIndex = 0)
+        val drop = SyncTestFixtures.templateExercise(orderIndex = 1)
+        val template = SyncTestFixtures.workoutTemplate(templateExercises = listOf(keep, drop), revision = 0)
+        push(uid, PushRequestDto(workoutTemplates = listOf(template)))
+
+        val countAfterCreate = jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM template_exercises WHERE template_id = :id::uuid",
+            mapOf("id" to template.id),
+            Int::class.java,
+        )
+        assertEquals(2, countAfterCreate)
+
+        val update = template.copy(templateExercises = listOf(keep), revision = 1)
+        val response = push(uid, PushRequestDto(workoutTemplates = listOf(update)))
+        assertEquals(SyncStatus.APPLIED, response.results.single().status)
+
+        val remainingIds = jdbcTemplate.queryForList(
+            "SELECT id FROM template_exercises WHERE template_id = :id::uuid",
+            mapOf("id" to template.id),
+            String::class.java,
+        )
+        assertEquals(listOf(keep.id), remainingIds, "the dropped template exercise must be gone entirely")
     }
 
     // 8. exactly one change_log row per applied entity, none for rejected

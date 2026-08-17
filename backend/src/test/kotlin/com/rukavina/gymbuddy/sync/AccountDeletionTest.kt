@@ -9,6 +9,7 @@ import com.rukavina.gymbuddy.auth.testsupport.TestSecurityConfig
 import com.rukavina.gymbuddy.testsupport.AbstractPostgresIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.mockito.BDDMockito.willThrow
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -135,6 +136,25 @@ class AccountDeletionTest : AbstractPostgresIntegrationTest() {
             .andExpect(status().isNoContent)
 
         verify(firebaseUserDeleter).deleteUser(uid)
+    }
+
+    @Test
+    fun `a Firebase failure after the database delete still succeeds the request, with the data already gone`() {
+        val uid = newUid("firebase-fails-after-db-success")
+        pushFullSetOf(uid)
+        willThrow(RuntimeException("simulated Firebase outage")).given(firebaseUserDeleter).deleteUser(uid)
+
+        // Per AccountDeletionService's header: this is deliberately not a
+        // 500. The data guarantee (GDPR/App Store) already holds by the
+        // time Firebase is even called - failing the request here would
+        // suggest to the caller that their data might still exist, which
+        // is false, and rolling back to "fix" a transient Firebase outage
+        // would resurrect data the caller was just told is gone.
+        mockMvc.perform(delete("/v1/account").header("Authorization", "Bearer ${bearerToken(uid)}"))
+            .andExpect(status().isNoContent)
+
+        val afterTarget = rowCounts(uid)
+        assertTrue(afterTarget.values.all { it == 0 }, "the database delete must have committed despite the later Firebase failure, got: $afterTarget")
     }
 
     private fun assertTrue(condition: Boolean, message: String) {

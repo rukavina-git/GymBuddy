@@ -23,6 +23,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * End-to-end coverage of GET /v1/sync/pull against a real Postgres
@@ -180,43 +185,85 @@ class SyncPullTest : AbstractPostgresIntegrationTest() {
 
     // 7. a write concurrent with pagination is not lost.
 
+    /**
+     * Genuinely concurrent, not two sequential calls on one thread: a
+     * CountDownLatch start gate (the same pattern SyncPushTest's
+     * concurrent-pushes test uses) releases a pagination-walk thread and
+     * a push thread at the same instant, so the DB/servlet layer - not
+     * this test - decides how they actually interleave. change_log.seq
+     * is assigned at insert time (Group F), so wherever the concurrent
+     * push's row actually lands relative to the walk's in-flight
+     * requests, it gets a seq no earlier than the walk's own starting
+     * cursor: either the walk's later pages pick it up directly, or it
+     * arrives too late for the walk and is still waiting on the walk's
+     * own final cursor afterwards. Both are legitimate outcomes of real
+     * concurrency; only losing or duplicating it would be a bug.
+     */
     @Test
-    fun `an entity pushed in between two page fetches is not lost`() {
+    fun `a write genuinely concurrent with an in-flight pagination walk is not lost`() {
         val uid = newUid("concurrent-write")
         val baseline = pull(uid)
+        val firstBatch = (1..6).map { pushExercise(uid) }
+        assertEquals(6, firstBatch.size)
 
-        val firstBatch = (1..4).map { pushExercise(uid) }
-        assertEquals(4, firstBatch.size)
+        val ready = CountDownLatch(2)
+        val start = CountDownLatch(1)
+        val done = CountDownLatch(2)
+        val pool = Executors.newFixedThreadPool(2)
 
-        // First page of a limit=2 walk over the first batch.
-        val page1 = pull(uid, cursor = baseline.nextCursor, limit = 2)
-        assertEquals(2, page1.exercises.size)
-        assertTrue(page1.hasMore, "4 pushed entities at limit=2 must not fit on one page")
+        val walkSeen = mutableListOf<String>()
+        val walkPageCount = AtomicInteger(0)
+        val walkFinalCursor = AtomicReference<String>()
+        val pushedConcurrentId = AtomicReference<String>()
 
-        // A write lands strictly between fetching page 1 and page 2 - this is
-        // the scenario the design notes call out: change_log.seq is
-        // assigned at insert time, so this new row gets a seq higher than
-        // anything already scanned, landing safely in a later page rather
-        // than being silently skipped by the in-flight pagination.
-        val concurrentExercise = pushExercise(uid)
+        try {
+            pool.submit {
+                ready.countDown()
+                start.await()
+                try {
+                    var cursor = baseline.nextCursor
+                    var hasMore = true
+                    while (hasMore) {
+                        val page = pull(uid, cursor = cursor, limit = 2)
+                        walkPageCount.incrementAndGet()
+                        walkSeen += page.exercises.map { it.id }
+                        cursor = page.nextCursor
+                        hasMore = page.hasMore
+                    }
+                    walkFinalCursor.set(cursor)
+                } finally {
+                    done.countDown()
+                }
+            }
+            pool.submit {
+                ready.countDown()
+                start.await()
+                try {
+                    pushedConcurrentId.set(pushExercise(uid).entityId)
+                } finally {
+                    done.countDown()
+                }
+            }
 
-        val remaining = mutableListOf<String>()
-        var cursor = page1.nextCursor
-        var hasMore = page1.hasMore
-        var pagesAfterFirst = 0
-        while (hasMore) {
-            val page = pull(uid, cursor = cursor, limit = 2)
-            pagesAfterFirst++
-            remaining += page.exercises.map { it.id }
-            cursor = page.nextCursor
-            hasMore = page.hasMore
+            ready.await(10, TimeUnit.SECONDS)
+            start.countDown()
+            assertTrue(done.await(20, TimeUnit.SECONDS), "both the pagination walk and the concurrent push should finish within 20s")
+        } finally {
+            pool.shutdown()
         }
 
-        assertTrue(pagesAfterFirst >= 2, "must fetch at least 2 more pages to also exercise a real boundary after the concurrent write")
-        val allSeen = page1.exercises.map { it.id } + remaining
-        val expectedIds = (firstBatch.map { it.entityId } + concurrentExercise.entityId).toSet()
-        assertEquals(expectedIds, allSeen.toSet(), "the concurrently-pushed entity must appear exactly once, nothing else missing or duplicated")
-        assertEquals(allSeen.size, allSeen.toSet().size, "no duplicates across the walk")
+        assertTrue(walkPageCount.get() >= 3, "6 entities at limit=2 must take at least 3 requests - a single-page result would not exercise a real boundary")
+
+        // One more pull from the walk's own final cursor: catches the
+        // concurrent push if it landed after the walk had already
+        // finished scanning. If it landed inside the walk instead, this
+        // returns nothing new - either way the union below is complete.
+        val catchUp = pull(uid, cursor = walkFinalCursor.get())
+        val allSeen = walkSeen + catchUp.exercises.map { it.id }
+
+        val expectedIds = (firstBatch.map { it.entityId } + pushedConcurrentId.get()).toSet()
+        assertEquals(expectedIds, allSeen.toSet(), "every entity - including the concurrently-pushed one - must appear, and nothing extra")
+        assertEquals(allSeen.size, allSeen.toSet().size, "no entity delivered twice across the walk plus catch-up")
     }
 
     // 8. an expired cursor returns 410 with CURSOR_EXPIRED.

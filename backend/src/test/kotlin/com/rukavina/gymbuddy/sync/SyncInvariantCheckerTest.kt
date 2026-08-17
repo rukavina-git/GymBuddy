@@ -87,6 +87,52 @@ class SyncInvariantCheckerTest : AbstractPostgresIntegrationTest() {
         assertTrue(violations.any { it.rule == "synced_entity_has_change_log_row" && it.detail.contains(session.id) })
     }
 
+    @Test
+    fun `flags a change_log row that references an entity which no longer exists`() {
+        val uid = "invariant-dangling-${System.nanoTime()}"
+        val exercise = SyncTestFixtures.exercise()
+        push(uid, PushRequestDto(exercises = listOf(exercise)))
+
+        // Simulates the state Group H's retention job must never produce
+        // (see TombstoneRetentionService: it always deletes an entity's
+        // change_log rows in the same transaction as the entity itself) -
+        // here forced directly, since retention deleting only one side is
+        // exactly the bug this rule exists to catch.
+        jdbcTemplate.update(
+            "DELETE FROM exercises WHERE id = :id::uuid",
+            mapOf("id" to exercise.id),
+        )
+
+        val violations = invariantChecker.check().filter { violationConcernsUid(it, uid, exercise.id) }
+        assertTrue(violations.any { it.rule == "change_log_row_references_existing_entity" && it.detail.contains(exercise.id) })
+    }
+
+    @Test
+    fun `flags an entity at revision 0 that still has a change_log row`() {
+        val uid = "invariant-revision-zero-${System.nanoTime()}"
+        val exercise = SyncTestFixtures.exercise()
+        push(uid, PushRequestDto(exercises = listOf(exercise)))
+
+        // A correctly-applied push never leaves this state (revision is
+        // always >= 1 the moment a change_log row exists for an entity -
+        // see ChangeLogWriter/RevisionChecker) - forced directly here to
+        // exercise the rule that would catch it if that ever regressed.
+        jdbcTemplate.update(
+            "UPDATE exercises SET revision = 0 WHERE id = :id::uuid",
+            mapOf("id" to exercise.id),
+        )
+
+        val violations = invariantChecker.check().filter { violationConcernsUid(it, uid, exercise.id) }
+        assertTrue(violations.any { it.rule == "no_revision_zero_entity_has_change_log_row" && it.detail.contains(exercise.id) })
+    }
+
+    // no_orphaned_aggregate_child isn't exercised here: real FK CASCADE
+    // constraints (see V1's file header) make an orphaned
+    // performed_exercises/workout_sets/template_exercises row impossible
+    // to create through SQL at all, short of dropping the constraint -
+    // this rule is a defensive backstop for a state the schema itself
+    // already prevents, not a reachable one to simulate.
+
     /**
      * The Testcontainers instance is shared across the whole test class
      * (see AbstractPostgresIntegrationTest), so other test classes'

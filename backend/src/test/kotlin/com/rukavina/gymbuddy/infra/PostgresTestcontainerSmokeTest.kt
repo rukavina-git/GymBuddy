@@ -1,12 +1,21 @@
 package com.rukavina.gymbuddy.infra
 
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.sql.DriverManager
 
+/**
+ * The one Testcontainers test that doesn't extend
+ * AbstractPostgresIntegrationTest (it's testing the container mechanism
+ * itself, not a Spring context against it), so it needs @Tag("testcontainers")
+ * applied directly rather than inherited - see that class's doc for why
+ * every other Testcontainers test doesn't repeat this.
+ */
+@Tag("testcontainers")
 @Testcontainers
 class PostgresTestcontainerSmokeTest {
 

@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "2.1.21"
     kotlin("plugin.spring") version "2.1.21"
     kotlin("plugin.jpa") version "2.1.21"
+    jacoco
 }
 
 group = "com.rukavina"
@@ -56,4 +57,46 @@ tasks.withType<Test> {
     // API_VERSION or the Docker CLI's DOCKER_API_VERSION - to pin a version and
     // skip negotiation.
     environment("api.version", "1.44")
+}
+
+// JaCoCo coverage reporting for the test task, mirroring android/app's
+// setup: XML at the path SonarQube expects, plus HTML, no CSV.
+//
+// toolVersion is left unset deliberately, same reasoning as android/app:
+// Gradle 9.7's bundled default already supports this module's JDK 21
+// class files (jvmToolchain(21) above), and pinning a guessed version
+// risks a dependency that doesn't resolve. Bump explicitly if a
+// specific version is ever needed.
+//
+// Unlike android/app there is no Hilt/data-binding/R-class/Compose-UI
+// bucket to exclude here - this module has no compile-time code
+// generation at all (no kapt/ksp, no annotation processors that emit
+// classes). The only exclusion category that actually applies is
+// configuration classes: every @Configuration class in this codebase
+// happens to be named *Config (see auth/SecurityConfig,
+// auth/FirebaseAdminConfig, config/OpenApiConfig, config/TransactionConfig),
+// plus the @SpringBootApplication entry point, which is bootstrap
+// wiring with no logic of its own.
+val jacocoExcludes = listOf(
+    "com/rukavina/gymbuddy/**/*Config.class",
+    "com/rukavina/gymbuddy/**/*Config$*.class",
+    "com/rukavina/gymbuddy/GymBuddyApplication.class",
+)
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml"))
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/test/html"))
+        csv.required.set(false)
+    }
+    classDirectories.setFrom(
+        classDirectories.files.map { fileTree(it) { exclude(jacocoExcludes) } },
+    )
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
 }
