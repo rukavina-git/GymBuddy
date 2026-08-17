@@ -7,14 +7,29 @@ on:
       - 'android/**'
       - '.github/workflows/android-build.yml'
       - '.github/workflows/_gradle-test.yml'
+      - '.github/workflows/_sonar.yml'
+      - '.github/actions/coverage-exclusions/**'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'android/**'
       - '.github/workflows/android-build.yml'
       - '.github/workflows/_gradle-test.yml'
+      - '.github/workflows/_sonar.yml'
+      - '.github/actions/coverage-exclusions/**'
 
 jobs:
+  exclusions:
+    name: Resolve coverage exclusions
+    runs-on: ubuntu-latest
+    outputs:
+      android: ${{ steps.exclusions.outputs.android }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - id: exclusions
+        uses: ./.github/actions/coverage-exclusions
+
   test:
     name: Test
     uses: ./.github/workflows/_gradle-test.yml
@@ -24,9 +39,25 @@ jobs:
       # No plain `test` task on an Android application module - only
       # variant-specific ones.
       gradle-task: testDebugUnitTest jacocoTestReport
+      coverage-report-dir: android/app/build/reports/jacoco/test
       secret-file-path: app/src/google-services.json
     secrets:
       secret-file-content: ${{ secrets.GOOGLE_SERVICES_JSON }}
+
+  sonar:
+    name: Sonar
+    needs: [ test, exclusions ]
+    uses: ./.github/workflows/_sonar.yml
+    with:
+      module-path: android
+      sonar-project-key: rukavina-git_GymBuddy-android
+      sources-path: app/src/main
+      tests-path: app/src/test
+      coverage-report-dir: android/app/build/reports/jacoco/test
+      java-binaries-path: app/build/intermediates/built_in_kotlinc
+      coverage-exclusions: ${{ needs.exclusions.outputs.android }}
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build-apk:
     name: Build debug APK

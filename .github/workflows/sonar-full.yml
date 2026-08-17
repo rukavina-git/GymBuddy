@@ -43,6 +43,10 @@ jobs:
         working-directory: android
         run: ./gradlew testDebugUnitTest jacocoTestReport --stacktrace
 
+      - name: Resolve coverage exclusions
+        id: exclusions
+        uses: ./.github/actions/coverage-exclusions
+
       - name: SonarCloud scan (whole codebase)
         uses: SonarSource/sonarqube-scan-action@v5
         env:
@@ -55,6 +59,7 @@ jobs:
             -Dsonar.tests=backend/src/test,android/app/src/test
             -Dsonar.coverage.jacoco.xmlReportPaths=backend/build/reports/jacoco/test/jacocoTestReport.xml,android/app/build/reports/jacoco/test/jacocoTestReport.xml
             -Dsonar.java.binaries=backend/build/classes,android/app/build/intermediates/built_in_kotlinc
+            -Dsonar.coverage.exclusions=${{ steps.exclusions.outputs.backend-root }},${{ steps.exclusions.outputs.android-root }}
           # No -Dsonar.qualitygate.wait - report only, same as the
           # per-module analysis; this workflow exists to widen what gets
           # scanned, not to add a second blocking gate.
