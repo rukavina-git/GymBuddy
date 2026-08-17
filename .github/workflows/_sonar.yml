@@ -1,0 +1,73 @@
+name: (reusable) Sonar analysis
+
+# Scans one module and points Sonar at the JaCoCo report a prior
+# _gradle-test.yml job already produced (downloaded by artifact name,
+# not regenerated here - no second test run just to get coverage).
+#
+# rukavina-git is a SonarCloud organisation key (self-hosted SonarQube
+# has no such concept), so this targets SonarCloud via the unified
+# SonarSource scanner action, which defaults to sonarcloud.io once
+# sonar.organization is set - no SONAR_HOST_URL needed unless that ever
+# changes to a self-hosted instance.
+
+on:
+  workflow_call:
+    inputs:
+      module-path:
+        description: "Directory of the module being analysed, e.g. 'backend'. Also the artifact-name suffix _gradle-test.yml uploaded the JaCoCo report under."
+        required: true
+        type: string
+      sonar-project-key:
+        required: true
+        type: string
+      sources-path:
+        description: "sonar.sources, relative to module-path."
+        required: false
+        type: string
+        default: 'src/main'
+      tests-path:
+        description: "sonar.tests, relative to module-path."
+        required: false
+        type: string
+        default: 'src/test'
+    secrets:
+      SONAR_TOKEN:
+        required: true
+
+jobs:
+  sonar:
+    name: Sonar (${{ inputs.module-path }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Sonar's blame/new-code data needs real history - a shallow
+          # checkout would attribute every line to the checkout commit.
+          fetch-depth: 0
+
+      - name: Download JaCoCo report
+        uses: actions/download-artifact@v4
+        with:
+          name: jacoco-report-${{ inputs.module-path }}
+          path: ${{ inputs.module-path }}/build/reports/jacoco/test
+
+      - name: SonarCloud scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: ${{ inputs.module-path }}
+          args: >
+            -Dsonar.organization=rukavina-git
+            -Dsonar.projectKey=${{ inputs.sonar-project-key }}
+            -Dsonar.sources=${{ inputs.sources-path }}
+            -Dsonar.tests=${{ inputs.tests-path }}
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
+            -Dsonar.java.binaries=build/classes
+            -Dsonar.projectBaseDir=${{ inputs.module-path }}
+          # No -Dsonar.qualitygate.wait, deliberately: a failing gate
+          # must show on the dashboard and any PR check annotation
+          # without failing this job. Coverage below target is a
+          # warning surfaced there, not something that blocks a merge
+          # from this workflow.

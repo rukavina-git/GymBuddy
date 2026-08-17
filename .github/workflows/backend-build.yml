@@ -1,0 +1,35 @@
+name: Backend Build
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-build.yml'
+      - '.github/workflows/_gradle-test.yml'
+      - '.github/workflows/_sonar.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-build.yml'
+      - '.github/workflows/_gradle-test.yml'
+      - '.github/workflows/_sonar.yml'
+
+jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/_gradle-test.yml
+    with:
+      module-path: backend
+      java-version: '21'
+
+  sonar:
+    name: Sonar
+    needs: test
+    uses: ./.github/workflows/_sonar.yml
+    with:
+      module-path: backend
+      sonar-project-key: rukavina-git_GymBuddy
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

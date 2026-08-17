@@ -1,0 +1,127 @@
+name: (reusable) Gradle test + JaCoCo
+
+# Runs a Gradle module's test suite with coverage and uploads the JaCoCo
+# report as an artifact. One file for how tests run, regardless of
+# which module calls it (backend-build.yml, android-build.yml, and
+# whatever iOS's caller ends up being later, if it grows a JVM/Gradle
+# component - otherwise iOS gets its own equivalent reusable file
+# without touching this one).
+#
+# gradle-task defaults to the backend's own task name. Android has no
+# plain `test` lifecycle task (application modules only get
+# variant-specific ones), so android-build.yml overrides this to
+# `testDebugUnitTest jacocoTestReport`.
+#
+# secret-file-path/secret-file-content let a caller drop one
+# secret-sourced file into the module directory before the build runs -
+# android's google-services.json today, plausibly an iOS
+# GoogleService-Info.plist later. A reusable workflow's job is a fresh
+# runner with its own checkout, so this can't be done as a prior step
+# in the caller; it has to live here, gated on the input being set so
+# backend (which needs no such file) pays nothing for it.
+
+on:
+  workflow_call:
+    inputs:
+      module-path:
+        description: "Directory of the Gradle module to test, e.g. 'backend'."
+        required: true
+        type: string
+      java-version:
+        description: "JDK version for setup-java / Gradle's launching JVM (jvmToolchain provisions the module's actual target regardless)."
+        required: false
+        type: string
+        default: '21'
+      gradle-task:
+        description: "Gradle task(s) to run. Must produce build/reports/jacoco/test/jacocoTestReport.xml."
+        required: false
+        type: string
+        default: 'test jacocoTestReport'
+      secret-file-path:
+        description: "Optional path, relative to module-path, to write secret-file-content to before building. Leave empty to skip."
+        required: false
+        type: string
+        default: ''
+    secrets:
+      secret-file-content:
+        required: false
+
+jobs:
+  test:
+    name: Test (${{ inputs.module-path }})
+    # ubuntu-latest ships Docker, which is what Testcontainers-backed
+    # backend tests need for their real-Postgres suite - no separate
+    # "start Docker" step required.
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.module-path }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ inputs.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ inputs.java-version }}
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          # Scoped to this module's own Gradle files, so backend and
+          # android don't share (and can't cross-invalidate) each
+          # other's cache entries.
+          key: ${{ runner.os }}-gradle-${{ inputs.module-path }}-${{ hashFiles(format('{0}/**/*.gradle*', inputs.module-path), format('{0}/gradle/wrapper/gradle-wrapper.properties', inputs.module-path), format('{0}/gradle/libs.versions.toml', inputs.module-path)) }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-${{ inputs.module-path }}-
+
+      - name: Write ${{ inputs.secret-file-path }} from secret
+        if: inputs.secret-file-path != ''
+        env:
+          FILE_CONTENT: ${{ secrets.secret-file-content }}
+        run: printf '%s' "$FILE_CONTENT" > "${{ inputs.secret-file-path }}"
+
+      - name: Run tests with coverage
+        # FIREBASE_CREDENTIALS_B64 is deliberately NOT set here. Every
+        # test that boots a Spring context activates the "test" profile
+        # (see AbstractPostgresIntegrationTest's @ActiveProfiles), under
+        # which FirebaseAdminConfig / FirebaseTokenVerifier /
+        # FirebaseAdminUserDeleter are all @Profile("!test") and
+        # therefore never registered - the @Value binding that would
+        # need FIREBASE_CREDENTIALS_B64 is never evaluated.
+        # FirebaseAdminConfigTest exercises FirebaseAdminConfig's
+        # decoding logic directly with hand-built credential strings, not
+        # the env var, and hand-crafts its own JWTs against a local test
+        # key pair rather than calling Firebase. Verified by running the
+        # full backend suite locally with the variable unset - see the
+        # Group J report for the fuller reasoning. If this ever stops
+        # being true (a future test boots a non-"test" profile context),
+        # the right fix is adding @ActiveProfiles("test") to that test,
+        # not adding a credential here.
+        run: ./gradlew ${{ inputs.gradle-task }} --stacktrace
+
+      - name: Upload JaCoCo report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report-${{ inputs.module-path }}
+          path: |
+            ${{ inputs.module-path }}/build/reports/jacoco/test/jacocoTestReport.xml
+            ${{ inputs.module-path }}/build/reports/jacoco/test/html
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ inputs.module-path }}
+          path: ${{ inputs.module-path }}/build/test-results/**/*.xml
+          retention-days: 14
+          if-no-files-found: warn

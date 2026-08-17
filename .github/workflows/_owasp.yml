@@ -1,0 +1,76 @@
+name: (reusable) OWASP dependency-check
+
+# Scans one module's dependencies for known CVEs and uploads the report.
+# Not on the default push/PR path (see owasp.yml) - a fresh NVD sync
+# alone takes 10+ minutes, on top of the scan itself.
+#
+# NVD API key: recent dependency-check versions need one for the NVD
+# database sync to run at a usable speed - NIST throttles anonymous API
+# access hard enough that an unauthenticated first sync can take
+# significantly longer than the 10-minute figure above, or fail
+# outright under rate limiting. Request a key at
+# https://nvd.nist.gov/developers/request-an-api-key, then add it as
+# the NVD_API_KEY secret (repo or org level: Settings -> Secrets and
+# variables -> Actions). Without it this workflow still runs, just
+# slower and less reliably - it does not fail silently, but don't
+# expect a clean 10-minute run until the key is added.
+
+on:
+  workflow_call:
+    inputs:
+      module-path:
+        description: "Directory of the module to scan, e.g. 'backend' or 'android'."
+        required: true
+        type: string
+    secrets:
+      NVD_API_KEY:
+        required: false
+
+jobs:
+  owasp:
+    name: OWASP dependency-check (${{ inputs.module-path }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache NVD database
+        uses: actions/cache@v4
+        with:
+          # Pinned via --data below (passed through `args`) rather than
+          # trusting the action's own default data directory, so this
+          # cache path is guaranteed to be the one actually populated
+          # regardless of the underlying dependency-check-action version.
+          path: ${{ github.workspace }}/dependency-check-data
+          # No hashFiles input here on purpose: the NVD feed is external
+          # and time-based, not a function of this repo's own files: a
+          # fixed key plus restore-keys just reuses yesterday's sync and
+          # lets dependency-check fetch the (small) delta.
+          key: nvd-db-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            nvd-db-${{ runner.os }}-
+
+      - name: OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: gymbuddy-${{ inputs.module-path }}
+          path: ${{ inputs.module-path }}
+          format: 'HTML,XML'
+          # --nvdApiKey is only appended when the secret is actually set:
+          # passing an empty string as the flag's value is not the same
+          # as omitting the flag, and risks the CLI rejecting it as a
+          # malformed key rather than just falling back to unauthenticated
+          # access.
+          args: >
+            --data ${{ github.workspace }}/dependency-check-data
+            --out reports
+            ${{ secrets.NVD_API_KEY != '' && format('--nvdApiKey {0}', secrets.NVD_API_KEY) || '' }}
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: owasp-report-${{ inputs.module-path }}
+          path: reports/
+          retention-days: 14
+          if-no-files-found: error

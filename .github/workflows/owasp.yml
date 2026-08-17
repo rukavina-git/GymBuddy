@@ -1,0 +1,26 @@
+name: OWASP Dependency Check
+
+# Manual only: a fresh NVD sync alone can take 10+ minutes (see
+# _owasp.yml), so this doesn't run on every push/PR. Two independent
+# jobs, one per module, so a flagged vulnerability is attributable to
+# backend or android at a glance rather than one combined report.
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  backend:
+    name: Backend
+    uses: ./.github/workflows/_owasp.yml
+    with:
+      module-path: backend
+    secrets:
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+
+  android:
+    name: Android
+    uses: ./.github/workflows/_owasp.yml
+    with:
+      module-path: android
+    secrets:
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
