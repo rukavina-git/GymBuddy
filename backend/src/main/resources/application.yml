@@ -4,8 +4,11 @@ spring:
 
   datasource:
     # The only way this app talks to Postgres. No separate host/port/db
-    # properties anywhere - keeps the app portable across hosts.
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/gymbuddy?user=gymbuddy&password=gymbuddy}
+    # properties anywhere - keeps the app portable across hosts. The
+    # password is the one exception, split out below so it's never
+    # embedded in a URL that could get logged or committed.
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/gymbuddy?user=gymbuddy}
+    password: ${DB_PASSWORD:local}
 
   flyway:
     enabled: true

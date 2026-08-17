@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: gymbuddy
       POSTGRES_USER: gymbuddy
-      POSTGRES_PASSWORD: gymbuddy
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-local}
     ports:
       - "5432:5432"
     volumes:
@@ -22,8 +22,12 @@ services:
       - "8080:8080"
     environment:
       # The only Postgres connection info the app is given - no
-      # provider-specific host/port/db config anywhere else.
-      DATABASE_URL: jdbc:postgresql://db:5432/gymbuddy?user=gymbuddy&password=gymbuddy
+      # provider-specific host/port/db config anywhere else. Password is
+      # separate (DB_PASSWORD below), matching application.yml, so it's
+      # never embedded in this URL.
+      DATABASE_URL: jdbc:postgresql://db:5432/gymbuddy?user=gymbuddy
+      # Read from docker/.env (gitignored) - see docker/.env.example.
+      DB_PASSWORD: ${DB_PASSWORD:-local}
       # Base64-encoded Firebase service account JSON - no key file on
       # disk anywhere. Must come from the calling shell's environment;
       # compose refuses to start with a clear message when it is unset.
