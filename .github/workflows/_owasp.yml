@@ -1,40 +1,37 @@
 name: (reusable) OWASP dependency-check
 
-# Scans one module's dependencies for known CVEs and uploads the report.
-# Not on the default push/PR path (see owasp.yml) - a scan still takes a
-# few minutes on top of the checkout, on top of not wanting a third-party
-# CVE feed's noise on every PR.
+# Scans one module's resolved Gradle dependency graph for known CVEs via
+# the org.owasp:dependency-check-gradle plugin, applied directly in each
+# module's own build file (see the `dependencyCheck { }` block in
+# backend/build.gradle.kts and android/app/build.gradle.kts) - not the
+# standalone dependency-check CLI action this used to call.
 #
-# Uses dependency-check/Dependency-Check_Action. Its Docker image
-# (owasp/dependency-check-action) is rebuilt nightly by the
-# dependency-check org with a fresh NVD/hosted-suppressions/RetireJS
-# database baked in - see github.com/dependency-check/DependencyCheck_Builder,
-# which does its own NVD sync (with its own API key) once for everyone,
-# rather than every consumer of the action syncing separately. The
-# action's entrypoint hardcodes --noupdate unconditionally - that isn't
-# something this workflow's inputs can override, and it isn't a bug: the
-# image is meant to be scanned against as shipped, not synced again on
-# every run. Consequences that matter here:
-#   - No NVD_API_KEY is needed or accepted by this workflow. Passing one
-#     would be inert anyway, since --noupdate blocks any update
-#     regardless of whether a key is present - and there is nowhere
-#     correct to plug one in without fighting the action's own hardcoded
-#     args (see below).
-#   - Do NOT point --data at an external or cached directory. That
-#     redirects dependency-check away from the image's baked-in database
-#     to an empty one it can never populate (the update that would fill
-#     it is the thing --noupdate blocks) - a scan that reports zero
-#     vulnerabilities because it never had any data, not because there
-#     were none. Let it use the image's own default data directory by
-#     not passing --data at all.
-#   - Freshness is bounded by that nightly build cadence: current as of
-#     last night's build, not same-day. Confirmed the image was pushed
-#     within the last 24h as of writing this - if that cadence ever
-#     stalls (upstream pipeline goes quiet), this scan goes stale
-#     silently, since a Docker pull of a tag that hasn't moved isn't a
-#     failure. Worth an occasional manual spot-check of
-#     hub.docker.com/r/owasp/dependency-check-action/tags if a scan ever
-#     looks suspiciously clean.
+# The CLI action scanned the checked-out *source tree* for jar/aar files
+# sitting on disk - correct for a pre-built artifact directory, useless
+# for a Gradle project, where resolved dependencies live in
+# ~/.gradle/caches, not the working directory. It reported "Dependencies
+# Scanned: 1" for both modules because of this, not because either module
+# genuinely has one dependency. The Gradle plugin runs inside the build
+# and walks the actual resolved configuration, so it sees everything
+# Gradle sees - confirmed locally via `./gradlew :app:dependencies`
+# (android) and `./gradlew dependencies` (backend) against
+# debugRuntimeClasspath/runtimeClasspath: 510 and 296 distinct resolved
+# artifacts respectively, not 1.
+#
+# This also means a real NVD sync happens on every run now (autoUpdate
+# defaults to true in both build files - deliberately left unset there
+# rather than forced, since core's own freshness check already skips
+# redundant re-downloads on a warm cache).
+#
+# NVD_API_KEY is REQUIRED, not just a speed optimization: verified
+# locally that dependency-check-gradle 13.0.0 does not fall back to
+# unauthenticated NVD access when no key is configured - it fails
+# immediately ("Invalid API Key, length of 0") rather than doing a
+# slower anonymous sync. Request a key at
+# https://nvd.nist.gov/developers/request-an-api-key (free, near-
+# instant), then add it as the NVD_API_KEY secret (repo or org level:
+# Settings -> Secrets and variables -> Actions) before running this
+# workflow - it cannot succeed without one.
 
 on:
   workflow_call:
@@ -43,39 +40,110 @@ on:
         description: "Directory of the module to scan, e.g. 'backend' or 'android'."
         required: true
         type: string
+      java-version:
+        description: "JDK version to run Gradle with."
+        required: false
+        type: string
+        default: '21'
+      gradle-task:
+        description: "The dependencyCheckAnalyze task to run. Differs per module: android applies the plugin to :app (the only subproject with a real dependency graph), backend applies it at the root."
+        required: false
+        type: string
+        default: 'dependencyCheckAnalyze'
+      report-dir:
+        description: "Directory the reports land in, relative to module-path. Defaults to the plugin's own default (build/reports); android overrides to app/build/reports since the plugin runs in :app there."
+        required: false
+        type: string
+        default: 'build/reports'
+      secret-file-path:
+        description: "Optional path, relative to module-path, to write secret-file-content to before running (android's google-services.json - AGP's google-services plugin wants it present even just to configure the project). Leave empty to skip."
+        required: false
+        type: string
+        default: ''
+    secrets:
+      NVD_API_KEY:
+        required: false
+      secret-file-content:
+        required: false
 
 jobs:
   owasp:
     name: OWASP dependency-check (${{ inputs.module-path }})
     runs-on: ubuntu-latest
+    # Needed to publish the SARIF report to the repo's Security tab -
+    # granted here for self-documentation, but it's the calling job's own
+    # `permissions:` (see owasp.yml) that actually has to grant it, since
+    # a reusable workflow can only narrow what its caller allows, never
+    # widen it.
+    permissions:
+      contents: read
+      security-events: write
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.module-path }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: OWASP Dependency-Check
-        uses: dependency-check/Dependency-Check_Action@main
+      - name: Set up JDK ${{ inputs.java-version }}
+        uses: actions/setup-java@v4
         with:
-          project: gymbuddy-${{ inputs.module-path }}
-          path: ${{ inputs.module-path }}
-          # ALL, not "HTML,XML": the action passes this input through as
-          # a single --format value verbatim, and the underlying CLI
-          # takes --format multiple times (or ALL) for multiple formats,
-          # not a comma-separated list - a comma-joined value is just one
-          # invalid format name to it.
-          format: 'ALL'
+          distribution: 'temurin'
+          java-version: ${{ inputs.java-version }}
 
-      # The action's own `out` input (default 'reports', not overridden
-      # here) becomes --out /github/workspace/reports inside the
-      # container. /github/workspace is a bind-mount of this job's
-      # $GITHUB_WORKSPACE, and actions/upload-artifact resolves a
-      # relative path against that same workspace root - so reports/
-      # below and the container's /github/workspace/reports are the same
-      # directory on disk.
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-owasp-${{ inputs.module-path }}-${{ hashFiles(format('{0}/**/*.gradle*', inputs.module-path)) }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-owasp-${{ inputs.module-path }}-
+
+      - name: Cache NVD database
+        uses: actions/cache@v4
+        with:
+          # Must match the dependencyCheck { data.directory = ... } set
+          # in this module's build file, or this cache silently caches
+          # nothing dependency-check actually reads.
+          path: ${{ inputs.module-path }}/dependency-check-data
+          # No hashFiles input here on purpose: the NVD feed is external
+          # and time-based, not a function of this repo's own files - a
+          # fixed key plus restore-keys just reuses the most recent sync
+          # and lets dependency-check's autoUpdate fetch the (small)
+          # delta, rather than a cold full sync on every run.
+          key: nvd-db-${{ inputs.module-path }}-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            nvd-db-${{ inputs.module-path }}-${{ runner.os }}-
+
+      - name: Write ${{ inputs.secret-file-path }} from secret
+        if: inputs.secret-file-path != ''
+        env:
+          FILE_CONTENT: ${{ secrets.secret-file-content }}
+        run: printf '%s' "$FILE_CONTENT" > "${{ inputs.secret-file-path }}"
+
+      - name: OWASP Dependency-Check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: ./gradlew ${{ inputs.gradle-task }} --stacktrace
+
+      - name: Upload SARIF to the Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ${{ inputs.module-path }}/${{ inputs.report-dir }}/dependency-check-report.sarif
+          category: dependency-check-${{ inputs.module-path }}
+
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: owasp-report-${{ inputs.module-path }}
-          path: reports/
+          path: |
+            ${{ inputs.module-path }}/${{ inputs.report-dir }}/dependency-check-report.html
+            ${{ inputs.module-path }}/${{ inputs.report-dir }}/dependency-check-report.sarif
           retention-days: 14
           if-no-files-found: error
