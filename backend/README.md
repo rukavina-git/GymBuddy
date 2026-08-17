@@ -27,7 +27,7 @@ Spring Boot (Kotlin) + PostgreSQL. Implements the contract in
 
 Local run without Docker:
 
-    DATABASE_URL="jdbc:postgresql://localhost:5432/gymbuddy?user=gymbuddy&password=gymbuddy" ./gradlew bootRun
+    DATABASE_URL="jdbc:postgresql://localhost:5432/gymbuddy?user=gymbuddy" DB_PASSWORD=local ./gradlew bootRun
 
 ## Firebase credentials
 
