@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.testsupport
 
+import org.junit.jupiter.api.Tag
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -26,6 +27,14 @@ private object SharedPostgres : PostgreSQLContainer<Nothing>("postgres:16-alpine
     }
 }
 
+/**
+ * @Tag("testcontainers") here, not repeated on every subclass: JUnit5
+ * aggregates tags from the whole class hierarchy (see the Gradle user
+ * guide's tagging section), so every test extending this base is tagged
+ * consistently by construction - nothing to remember to add per class,
+ * and no risk of a new test quietly going untagged.
+ */
+@Tag("testcontainers")
 @ActiveProfiles("test")
 abstract class AbstractPostgresIntegrationTest {
 
