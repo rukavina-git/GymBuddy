@@ -6,15 +6,31 @@ on:
     paths:
       - 'android/**'
       - '.github/workflows/android-build.yml'
+      - '.github/workflows/_gradle-test.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'android/**'
       - '.github/workflows/android-build.yml'
+      - '.github/workflows/_gradle-test.yml'
 
 jobs:
-  build:
-    name: Build Android App
+  test:
+    name: Test
+    uses: ./.github/workflows/_gradle-test.yml
+    with:
+      module-path: android
+      java-version: '17'
+      # No plain `test` task on an Android application module - only
+      # variant-specific ones.
+      gradle-task: testDebugUnitTest jacocoTestReport
+      secret-file-path: app/src/google-services.json
+    secrets:
+      secret-file-content: ${{ secrets.GOOGLE_SERVICES_JSON }}
+
+  build-apk:
+    name: Build debug APK
+    needs: test
     runs-on: ubuntu-latest
 
     defaults:
@@ -37,17 +53,14 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties', 'android/gradle/libs.versions.toml') }}
+          key: ${{ runner.os }}-gradle-android-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties', 'android/gradle/libs.versions.toml') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
+            ${{ runner.os }}-gradle-android-
 
       - name: Create google-services.json
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: printf '%s' "$GOOGLE_SERVICES_JSON" > app/src/google-services.json
-
-      - name: Run unit tests
-        run: ./gradlew testDebugUnitTest --stacktrace
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace

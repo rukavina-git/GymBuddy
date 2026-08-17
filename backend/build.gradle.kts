@@ -44,6 +44,10 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    // Parses the committed api/openapi.yaml for OpenApiSpecDriftTest.
+    // Version comes from the Spring Boot BOM (io.spring.dependency-management),
+    // same as jackson-module-kotlin above - no need to pin one here.
+    testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

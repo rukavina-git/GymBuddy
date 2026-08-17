@@ -1,0 +1,60 @@
+name: Sonar Full Analysis
+
+# Manual only: a whole-codebase scan across both modules, not scoped to
+# what changed - the counterpart to backend-build.yml's per-PR
+# incremental analysis. Report only, same as every other Sonar run
+# here: no quality gate wait, so this can never fail the run on its own.
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  sonar:
+    name: Whole-codebase scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Both JDKs installed up front so Gradle's jvmToolchain resolution
+      # (backend targets 21, android targets 17) never has to provision
+      # one at build time - see backend/build.gradle.kts and android's
+      # equivalent for why the two differ.
+      - name: Set up JDKs 21 and 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: |
+            21
+            17
+
+      - name: Create android/app/src/google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/src/google-services.json
+
+      - name: Backend tests + coverage
+        working-directory: backend
+        run: ./gradlew test jacocoTestReport --stacktrace
+
+      - name: Android tests + coverage
+        working-directory: android
+        run: ./gradlew testDebugUnitTest jacocoTestReport --stacktrace
+
+      - name: SonarCloud scan (whole codebase)
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=rukavina-git
+            -Dsonar.projectKey=rukavina-git_GymBuddy
+            -Dsonar.sources=backend/src/main,android/app/src/main
+            -Dsonar.tests=backend/src/test,android/app/src/test
+            -Dsonar.coverage.jacoco.xmlReportPaths=backend/build/reports/jacoco/test/jacocoTestReport.xml,android/app/build/reports/jacoco/test/jacocoTestReport.xml
+            -Dsonar.java.binaries=backend/build/classes,android/app/build/intermediates/built_in_kotlinc
+          # No -Dsonar.qualitygate.wait - report only, same as the
+          # per-module analysis; this workflow exists to widen what gets
+          # scanned, not to add a second blocking gate.
