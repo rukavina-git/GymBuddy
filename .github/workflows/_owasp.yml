@@ -1,19 +1,40 @@
 name: (reusable) OWASP dependency-check
 
 # Scans one module's dependencies for known CVEs and uploads the report.
-# Not on the default push/PR path (see owasp.yml) - a fresh NVD sync
-# alone takes 10+ minutes, on top of the scan itself.
+# Not on the default push/PR path (see owasp.yml) - a scan still takes a
+# few minutes on top of the checkout, on top of not wanting a third-party
+# CVE feed's noise on every PR.
 #
-# NVD API key: recent dependency-check versions need one for the NVD
-# database sync to run at a usable speed - NIST throttles anonymous API
-# access hard enough that an unauthenticated first sync can take
-# significantly longer than the 10-minute figure above, or fail
-# outright under rate limiting. Request a key at
-# https://nvd.nist.gov/developers/request-an-api-key, then add it as
-# the NVD_API_KEY secret (repo or org level: Settings -> Secrets and
-# variables -> Actions). Without it this workflow still runs, just
-# slower and less reliably - it does not fail silently, but don't
-# expect a clean 10-minute run until the key is added.
+# Uses dependency-check/Dependency-Check_Action. Its Docker image
+# (owasp/dependency-check-action) is rebuilt nightly by the
+# dependency-check org with a fresh NVD/hosted-suppressions/RetireJS
+# database baked in - see github.com/dependency-check/DependencyCheck_Builder,
+# which does its own NVD sync (with its own API key) once for everyone,
+# rather than every consumer of the action syncing separately. The
+# action's entrypoint hardcodes --noupdate unconditionally - that isn't
+# something this workflow's inputs can override, and it isn't a bug: the
+# image is meant to be scanned against as shipped, not synced again on
+# every run. Consequences that matter here:
+#   - No NVD_API_KEY is needed or accepted by this workflow. Passing one
+#     would be inert anyway, since --noupdate blocks any update
+#     regardless of whether a key is present - and there is nowhere
+#     correct to plug one in without fighting the action's own hardcoded
+#     args (see below).
+#   - Do NOT point --data at an external or cached directory. That
+#     redirects dependency-check away from the image's baked-in database
+#     to an empty one it can never populate (the update that would fill
+#     it is the thing --noupdate blocks) - a scan that reports zero
+#     vulnerabilities because it never had any data, not because there
+#     were none. Let it use the image's own default data directory by
+#     not passing --data at all.
+#   - Freshness is bounded by that nightly build cadence: current as of
+#     last night's build, not same-day. Confirmed the image was pushed
+#     within the last 24h as of writing this - if that cadence ever
+#     stalls (upstream pipeline goes quiet), this scan goes stale
+#     silently, since a Docker pull of a tag that hasn't moved isn't a
+#     failure. Worth an occasional manual spot-check of
+#     hub.docker.com/r/owasp/dependency-check-action/tags if a scan ever
+#     looks suspiciously clean.
 
 on:
   workflow_call:
@@ -22,9 +43,6 @@ on:
         description: "Directory of the module to scan, e.g. 'backend' or 'android'."
         required: true
         type: string
-    secrets:
-      NVD_API_KEY:
-        required: false
 
 jobs:
   owasp:
@@ -34,38 +52,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache NVD database
-        uses: actions/cache@v4
-        with:
-          # Pinned via --data below (passed through `args`) rather than
-          # trusting the action's own default data directory, so this
-          # cache path is guaranteed to be the one actually populated
-          # regardless of the underlying dependency-check-action version.
-          path: ${{ github.workspace }}/dependency-check-data
-          # No hashFiles input here on purpose: the NVD feed is external
-          # and time-based, not a function of this repo's own files: a
-          # fixed key plus restore-keys just reuses yesterday's sync and
-          # lets dependency-check fetch the (small) delta.
-          key: nvd-db-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: |
-            nvd-db-${{ runner.os }}-
-
       - name: OWASP Dependency-Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
           project: gymbuddy-${{ inputs.module-path }}
           path: ${{ inputs.module-path }}
-          format: 'HTML,XML'
-          # --nvdApiKey is only appended when the secret is actually set:
-          # passing an empty string as the flag's value is not the same
-          # as omitting the flag, and risks the CLI rejecting it as a
-          # malformed key rather than just falling back to unauthenticated
-          # access.
-          args: >
-            --data ${{ github.workspace }}/dependency-check-data
-            --out reports
-            ${{ secrets.NVD_API_KEY != '' && format('--nvdApiKey {0}', secrets.NVD_API_KEY) || '' }}
+          # ALL, not "HTML,XML": the action passes this input through as
+          # a single --format value verbatim, and the underlying CLI
+          # takes --format multiple times (or ALL) for multiple formats,
+          # not a comma-separated list - a comma-joined value is just one
+          # invalid format name to it.
+          format: 'ALL'
 
+      # The action's own `out` input (default 'reports', not overridden
+      # here) becomes --out /github/workspace/reports inside the
+      # container. /github/workspace is a bind-mount of this job's
+      # $GITHUB_WORKSPACE, and actions/upload-artifact resolves a
+      # relative path against that same workspace root - so reports/
+      # below and the container's /github/workspace/reports are the same
+      # directory on disk.
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
