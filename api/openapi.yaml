@@ -249,6 +249,22 @@ paths:
         (deletions are only kept for 90 days) and can no longer be resumed
         from. The client must discard all local data for this user and
         start over by calling pull again with no cursor.
+
+        This is evaluated against what this account actually still has on
+        record, not a blanket age limit on the cursor value itself: a
+        cursor that has nothing new to deliver never expires merely from
+        going unused, no matter how long it sits - only cursors that
+        would need to replay a deletion that has since been pruned are
+        rejected. An account that rarely syncs is not penalised for it.
+
+        A 400 means the cursor string itself couldn't be decoded - it
+        wasn't produced by a previous pull, or was corrupted in storage.
+        This is not the same as 410: a malformed cursor's position is
+        unknown, not just old, so there's nothing to compare it against.
+        Treat it the same way as a 410 in practice - discard local data
+        and start over - but the two are logged and reported separately
+        since they indicate different failures (client-side corruption
+        vs. server-side retention).
       operationId: pullChanges
       parameters:
         - name: cursor
@@ -314,8 +330,9 @@ paths:
                     updatedAt: 1732631700000
                     deletedAt: 1732631700000
                     revision: 3
-                nextCursor: eyJ0IjoxNzMyNjMxNzAwMDAwLCJpZCI6IjAxOWZlNTA2LTQyMTAtN2EzYi05YzQ0LTFhMmIzYzRkNWU2ZiJ9
+                nextCursor: eyJ2IjoxLCJtb2RlIjoiREVMVEEiLCJzZXEiOjI0NX0
                 hasMore: true
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthenticated' }
         '410': { $ref: '#/components/responses/CursorExpired' }
         '429': { $ref: '#/components/responses/RateLimited' }
@@ -538,7 +555,16 @@ components:
       required: [ nextCursor, hasMore ]
       description: |
         Changed entities since the cursor. Deletions arrive as entities with
-        a non-null deletedAt, not as a separate list.
+        a non-null deletedAt, not as a separate list - one code path handles
+        both a create/update and a delete.
+
+        limit bounds how many change_log rows the server scans per page,
+        not how many entities come back. An entity changed several times
+        since the cursor collapses to one entry here, but still counts as
+        several against limit - so a page can legitimately contain fewer
+        entities than limit, or even zero, while hasMore is still true.
+        Never infer "nothing left" from a short or empty page; only
+        hasMore says that.
       properties:
         workoutSessions:
           type: array
@@ -1449,7 +1475,9 @@ components:
           schema: { $ref: '#/components/schemas/Error' }
     CursorExpired:
       description: |
-        Cursor predates the tombstone retention window (90 days). error is
+        Cursor predates the tombstone retention window (90 days): a
+        deletion the client hasn't seen yet has been pruned from this
+        account's retained history and can no longer be replayed. error is
         CURSOR_EXPIRED. The client must discard all local user data and
         perform a full resync (call pull again with no cursor).
       content:

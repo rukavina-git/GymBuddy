@@ -1,6 +1,8 @@
 package com.rukavina.gymbuddy.api
 
 import com.rukavina.gymbuddy.api.dto.ErrorDto
+import com.rukavina.gymbuddy.sync.CursorDecodeException
+import com.rukavina.gymbuddy.sync.CursorExpiredException
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -23,6 +25,30 @@ import java.util.UUID
 class GlobalExceptionHandler {
 
     private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
+
+    @ExceptionHandler(CursorDecodeException::class)
+    fun handleCursorDecode(ex: CursorDecodeException, request: HttpServletRequest): ResponseEntity<ErrorDto> {
+        val traceId = UUID.randomUUID().toString()
+        logger.debug("400 VALIDATION_FAILED [traceId={}] {} {}: {}", traceId, request.method, request.requestURI, ex.message)
+        val body = ErrorDto(error = "VALIDATION_FAILED", message = "Malformed cursor.", traceId = traceId)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+    }
+
+    @ExceptionHandler(CursorExpiredException::class)
+    fun handleCursorExpired(ex: CursorExpiredException, request: HttpServletRequest): ResponseEntity<ErrorDto> {
+        val traceId = UUID.randomUUID().toString()
+        logger.info("410 CURSOR_EXPIRED [traceId={}] {} {}: {}", traceId, request.method, request.requestURI, ex.message)
+        val body = ErrorDto(
+            error = "CURSOR_EXPIRED",
+            message = "Cursor predates the retained change log. Discard local data and perform a full sync.",
+            traceId = traceId,
+        )
+        return ResponseEntity.status(HttpStatus.GONE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+    }
 
     @ExceptionHandler(Exception::class)
     fun handleUnexpected(ex: Exception, request: HttpServletRequest): ResponseEntity<ErrorDto> {
