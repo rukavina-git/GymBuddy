@@ -33,10 +33,14 @@ on:
         type: string
         default: '21'
       gradle-task:
-        description: "Gradle task(s) to run. Must produce build/reports/jacoco/test/jacocoTestReport.xml."
+        description: "Gradle task(s) to run. Must produce a jacocoTestReport.xml under coverage-report-dir."
         required: false
         type: string
         default: 'test jacocoTestReport'
+      coverage-report-dir:
+        description: "Directory containing jacocoTestReport.xml (and its html/ report), relative to the repo root and including the module path, e.g. 'backend/build/reports/jacoco/test'. Differs per module because the JaCoCo task lives in different subprojects (backend is single-module; android's is in the app module)."
+        required: true
+        type: string
       secret-file-path:
         description: "Optional path, relative to module-path, to write secret-file-content to before building. Leave empty to skip."
         required: false
@@ -112,8 +116,8 @@ jobs:
         with:
           name: jacoco-report-${{ inputs.module-path }}
           path: |
-            ${{ inputs.module-path }}/build/reports/jacoco/test/jacocoTestReport.xml
-            ${{ inputs.module-path }}/build/reports/jacoco/test/html
+            ${{ inputs.coverage-report-dir }}/jacocoTestReport.xml
+            ${{ inputs.coverage-report-dir }}/html
           retention-days: 14
           if-no-files-found: error
 

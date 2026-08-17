@@ -30,6 +30,20 @@ on:
         required: false
         type: string
         default: 'src/test'
+      coverage-report-dir:
+        description: "Directory to download the JaCoCo report into, relative to the repo root and including the module path, e.g. 'backend/build/reports/jacoco/test'. Must be the same coverage-report-dir the _gradle-test.yml job for this module used, since the artifact name is derived from module-path and the two need to agree on where the report ends up."
+        required: true
+        type: string
+      java-binaries-path:
+        description: "sonar.java.binaries, relative to module-path."
+        required: false
+        type: string
+        default: 'build/classes'
+      coverage-exclusions:
+        description: "sonar.coverage.exclusions: comma-separated patterns, relative to module-path, for files exempt from coverage expectations. These are still analysed for bugs/smells (sonar.exclusions, untouched, is the knob for skipping analysis entirely) - this only stops a file's lines from counting toward the coverage gate."
+        required: false
+        type: string
+        default: ''
     secrets:
       SONAR_TOKEN:
         required: true
@@ -50,7 +64,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: jacoco-report-${{ inputs.module-path }}
-          path: ${{ inputs.module-path }}/build/reports/jacoco/test
+          path: ${{ inputs.coverage-report-dir }}
+
+      - name: Resolve coverage report path relative to module
+        id: coverage
+        env:
+          COVERAGE_REPORT_DIR: ${{ inputs.coverage-report-dir }}
+          MODULE_PATH: ${{ inputs.module-path }}
+        run: echo "relative-dir=${COVERAGE_REPORT_DIR#"$MODULE_PATH"/}" >> "$GITHUB_OUTPUT"
 
       - name: SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@v5
@@ -63,8 +84,9 @@ jobs:
             -Dsonar.projectKey=${{ inputs.sonar-project-key }}
             -Dsonar.sources=${{ inputs.sources-path }}
             -Dsonar.tests=${{ inputs.tests-path }}
-            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
-            -Dsonar.java.binaries=build/classes
+            -Dsonar.coverage.jacoco.xmlReportPaths=${{ steps.coverage.outputs.relative-dir }}/jacocoTestReport.xml
+            -Dsonar.java.binaries=${{ inputs.java-binaries-path }}
+            -Dsonar.coverage.exclusions=${{ inputs.coverage-exclusions }}
             -Dsonar.projectBaseDir=${{ inputs.module-path }}
           # No -Dsonar.qualitygate.wait, deliberately: a failing gate
           # must show on the dashboard and any PR check annotation

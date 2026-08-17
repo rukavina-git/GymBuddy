@@ -1,0 +1,92 @@
+name: Coverage exclusions
+description: >
+  Single source of truth for sonar.coverage.exclusions patterns, so the
+  per-module Sonar jobs (backend-build.yml, android-build.yml, via
+  _sonar.yml) and the whole-codebase scan (sonar-full.yml) can't drift
+  apart. These mark files as exempt from coverage expectations (they're
+  still scanned for bugs/smells via sonar.exclusions, which is untouched) -
+  code that's not unit-tested by design, not "code nobody got round to
+  testing yet". Real gaps like Android ViewModels or backend DTOs with
+  actual transform logic must stay out of these lists.
+  Emits each module's patterns twice: once relative to the module
+  directory (what _sonar.yml's projectBaseDir=module-path needs) and
+  once relative to the repo root (what sonar-full.yml, which never
+  overrides projectBaseDir, needs).
+
+outputs:
+  backend:
+    description: "Backend sonar.coverage.exclusions, relative to backend/."
+    value: ${{ steps.compute.outputs.backend }}
+  backend-root:
+    description: "Backend sonar.coverage.exclusions, relative to the repo root."
+    value: ${{ steps.compute.outputs.backend-root }}
+  android:
+    description: "Android sonar.coverage.exclusions, relative to android/."
+    value: ${{ steps.compute.outputs.android }}
+  android-root:
+    description: "Android sonar.coverage.exclusions, relative to the repo root."
+    value: ${{ steps.compute.outputs.android-root }}
+
+runs:
+  using: composite
+  steps:
+    - id: compute
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        # Mirrors backend/build.gradle.kts's jacocoExcludes (*Config.class,
+        # GymBuddyApplication.class - no annotation-processor-generated
+        # code exists in this module), plus the DTOs in api/dto that are
+        # pure data holders with no logic. SyncDtos.kt is deliberately
+        # NOT here: its forComparison() extension functions carry real
+        # normalisation logic and have no tests today.
+        backend_patterns=(
+          '**/*Config.kt'
+          '**/GymBuddyApplication.kt'
+          '**/api/dto/ErrorDto.kt'
+          '**/api/dto/ProfileDtos.kt'
+          '**/api/dto/PullDtos.kt'
+          '**/api/dto/ReferenceDtos.kt'
+        )
+
+        # Mirrors the *intent* of android/app/build.gradle.kts's
+        # jacocoExcludes (generated code, Compose UI), but NOT its literal
+        # "**/ui/**" glob - that also sweeps up ui/**/*ViewModel.kt, and
+        # ViewModels are plain, device-free-testable classes that must
+        # stay counted. Screens/dialogs/bottom sheets are caught by name;
+        # the rest of ui/components (and the few composables that live
+        # next to their screen instead of under components/) are listed
+        # explicitly. ui/exercise/components/TrackingTypeLabel.kt is a
+        # plain `when` mapping function, not a composable, so it's
+        # deliberately left out and stays counted.
+        android_patterns=(
+          'app/src/main/java/**/*Screen.kt'
+          'app/src/main/java/**/*Dialog.kt'
+          'app/src/main/java/**/*BottomSheet.kt'
+          'app/src/main/java/**/ui/components/**'
+          'app/src/main/java/**/PasswordTextField.kt'
+          'app/src/main/java/**/ProfileTextField.kt'
+          'app/src/main/java/**/SettingsComponents.kt'
+          'app/src/main/java/**/TemplateExerciseListItem.kt'
+          'app/src/main/java/**/ExerciseFilterContent.kt'
+          'app/src/main/java/**/ExerciseFormAdvanced.kt'
+          'app/src/main/java/**/ExerciseFormDetails.kt'
+          'app/src/main/java/**/ExerciseFormRequiredFields.kt'
+          'app/src/main/java/**/ui/theme/**'
+          'app/src/main/java/**/di/**'
+          'app/src/main/java/**/GymBuddyApplication.kt'
+          'app/src/main/java/**/MainActivity.kt'
+        )
+
+        join_by_comma() {
+          local IFS=','
+          echo "$*"
+        }
+
+        {
+          echo "backend=$(join_by_comma "${backend_patterns[@]}")"
+          echo "android=$(join_by_comma "${android_patterns[@]}")"
+          echo "backend-root=$(join_by_comma "${backend_patterns[@]/#/backend/}")"
+          echo "android-root=$(join_by_comma "${android_patterns[@]/#/android/}")"
+        } >> "$GITHUB_OUTPUT"
