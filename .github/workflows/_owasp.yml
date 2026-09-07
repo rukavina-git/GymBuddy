@@ -51,10 +51,10 @@ on:
         type: string
         default: 'dependencyCheckAnalyze'
       report-dir:
-        description: "Directory the reports land in, relative to module-path. Defaults to the plugin's own default (build/reports); android overrides to app/build/reports since the plugin runs in :app there."
+        description: "Directory the reports land in, relative to module-path. Defaults to the plugin's own default (build/reports/dependency-check - the DependencyCheckExtension.outputDirectory convention is reporting.baseDirectory.dir('dependency-check'), not build/reports itself); android overrides to app/build/reports/dependency-check since the plugin runs in :app there."
         required: false
         type: string
-        default: 'build/reports'
+        default: 'build/reports/dependency-check'
       secret-file-path:
         description: "Optional path, relative to module-path, to write secret-file-content to before running (android's google-services.json - AGP's google-services plugin wants it present even just to configure the project). Leave empty to skip."
         required: false
@@ -85,16 +85,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK ${{ inputs.java-version }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: ${{ inputs.java-version }}
 
       - name: Cache Gradle dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.gradle/caches
@@ -104,7 +104,7 @@ jobs:
             ${{ runner.os }}-gradle-owasp-${{ inputs.module-path }}-
 
       - name: Cache NVD database
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           # Must match the dependencyCheck { data.directory = ... } set
           # in this module's build file, or this cache silently caches
@@ -130,6 +130,12 @@ jobs:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: ./gradlew ${{ inputs.gradle-task }} --stacktrace
 
+      - name: List OWASP report directory
+        if: always()
+        run: |
+          echo "Listing ${{ inputs.report-dir }} (relative to ${{ inputs.module-path }}):"
+          find "${{ inputs.report-dir }}" -type f 2>/dev/null || echo "(directory does not exist - scan likely failed before writing reports)"
+
       - name: Upload SARIF to the Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@v4
@@ -139,7 +145,7 @@ jobs:
 
       - name: Upload report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: owasp-report-${{ inputs.module-path }}
           path: |
