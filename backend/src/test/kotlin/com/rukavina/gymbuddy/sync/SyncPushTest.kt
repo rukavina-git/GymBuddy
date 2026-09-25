@@ -70,6 +70,13 @@ class SyncPushTest : AbstractPostgresIntegrationTest() {
             Int::class.java,
         )!!
 
+    private fun userChangeLogCount(userId: String): Int =
+        jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM change_log WHERE user_id = :userId",
+            mapOf("userId" to userId),
+            Int::class.java,
+        )!!
+
     private fun changeLogOperations(userId: String, entityId: String): List<String> =
         jdbcTemplate.queryForList(
             "SELECT operation FROM change_log WHERE user_id = :userId AND entity_id = :entityId ORDER BY seq",
@@ -239,6 +246,38 @@ class SyncPushTest : AbstractPostgresIntegrationTest() {
         assertEquals(SyncStatus.APPLIED, response.results[2].status)
     }
 
+    // Group F exit criterion, literally: one request, three outcomes
+
+    @Test
+    fun `one push with a new, a stale and a malformed entity returns APPLIED, CONFLICT and INVALID`() {
+        val uid = newUid("three-outcomes")
+        val existing = SyncTestFixtures.workoutSession(title = "Already on server", revision = 0)
+        push(uid, PushRequestDto(workoutSessions = listOf(existing)))
+        val changeLogBefore = userChangeLogCount(uid)
+
+        val brandNew = SyncTestFixtures.workoutSession(title = "Brand new")
+        val stale = existing.copy(title = "Edited against an old revision", revision = 0)
+        val malformed = SyncTestFixtures.workoutSession(title = " ")
+
+        val response = push(uid, PushRequestDto(workoutSessions = listOf(brandNew, stale, malformed)))
+
+        assertEquals(3, response.results.size)
+        val byId = response.results.associateBy { it.entityId }
+        assertEquals(SyncStatus.APPLIED, byId.getValue(brandNew.id).status)
+        assertEquals(1, byId.getValue(brandNew.id).revision)
+        assertEquals(SyncStatus.CONFLICT, byId.getValue(existing.id).status)
+        assertEquals(SyncStatus.INVALID, byId.getValue(malformed.id).status)
+        assertEquals(
+            mapOf(SyncStatus.APPLIED to 1, SyncStatus.CONFLICT to 1, SyncStatus.INVALID to 1),
+            response.results.groupingBy { it.status }.eachCount(),
+        )
+
+        assertEquals(changeLogBefore + 1, userChangeLogCount(uid), "only the applied entity may add a change_log row")
+        assertEquals(1, changeLogCount(uid, brandNew.id))
+        assertEquals(1, changeLogCount(uid, existing.id), "still just the original create")
+        assertEquals(0, changeLogCount(uid, malformed.id))
+    }
+
     // 5. ownership
 
     @Test
@@ -260,6 +299,110 @@ class SyncPushTest : AbstractPostgresIntegrationTest() {
             String::class.java,
         )
         assertEquals(owner, storedOwner)
+    }
+
+    /**
+     * Same guard, but ExerciseSyncService and WorkoutTemplateSyncService
+     * each wire their own `stored.ownerId != uid` check - the session
+     * test above proves nothing about either of them.
+     */
+    @Test
+    fun `pushing another user's custom exercise returns FORBIDDEN and leaves the owner's row untouched`() {
+        val owner = newUid("exercise-owner")
+        val intruder = newUid("exercise-intruder")
+        val exercise = SyncTestFixtures.exercise(name = "Owner's Curl", revision = 0)
+        push(owner, PushRequestDto(exercises = listOf(exercise)))
+
+        val attempt = exercise.copy(name = "Hijacked", revision = 1)
+        val result = push(intruder, PushRequestDto(exercises = listOf(attempt))).results.single()
+
+        assertEquals(SyncStatus.FORBIDDEN, result.status)
+        val stored = jdbcTemplate.queryForMap(
+            "SELECT owner_id, name, revision, deleted_at FROM exercises WHERE id = :id::uuid",
+            mapOf("id" to exercise.id),
+        )
+        assertEquals(owner, stored["owner_id"])
+        assertEquals("Owner's Curl", stored["name"])
+        assertEquals(1, stored["revision"])
+        assertEquals(null, stored["deleted_at"])
+        assertEquals(1, changeLogCount(owner, exercise.id))
+        assertEquals(0, changeLogCount(intruder, exercise.id))
+    }
+
+    @Test
+    fun `deleting another user's custom exercise returns FORBIDDEN and leaves the owner's row untouched`() {
+        val owner = newUid("exercise-delete-owner")
+        val intruder = newUid("exercise-delete-intruder")
+        val exercise = SyncTestFixtures.exercise(revision = 0)
+        push(owner, PushRequestDto(exercises = listOf(exercise)))
+
+        val attempt = exercise.copy(revision = 1, deletedAt = 1L)
+        val result = push(intruder, PushRequestDto(exercises = listOf(attempt))).results.single()
+
+        assertEquals(SyncStatus.FORBIDDEN, result.status)
+        val deletedAt = jdbcTemplate.queryForObject(
+            "SELECT deleted_at FROM exercises WHERE id = :id::uuid",
+            mapOf("id" to exercise.id),
+            Long::class.java,
+        )
+        assertEquals(null, deletedAt)
+        assertEquals(listOf("UPSERT"), changeLogOperations(owner, exercise.id))
+    }
+
+    @Test
+    fun `pushing another user's workout template returns FORBIDDEN and leaves the owner's aggregate untouched`() {
+        val owner = newUid("template-owner")
+        val intruder = newUid("template-intruder")
+        val ownersChild = SyncTestFixtures.templateExercise(orderIndex = 0)
+        val template = SyncTestFixtures.workoutTemplate(title = "Owner's Template", templateExercises = listOf(ownersChild), revision = 0)
+        push(owner, PushRequestDto(workoutTemplates = listOf(template)))
+
+        // Replacing the children is the most damaging thing an intruder
+        // could do to an aggregate - make sure the guard fires before
+        // replaceChildren does.
+        val attempt = template.copy(
+            title = "Hijacked",
+            templateExercises = listOf(SyncTestFixtures.templateExercise(orderIndex = 0)),
+            revision = 1,
+        )
+        val result = push(intruder, PushRequestDto(workoutTemplates = listOf(attempt))).results.single()
+
+        assertEquals(SyncStatus.FORBIDDEN, result.status)
+        val stored = jdbcTemplate.queryForMap(
+            "SELECT owner_id, title, revision FROM workout_templates WHERE id = :id::uuid",
+            mapOf("id" to template.id),
+        )
+        assertEquals(owner, stored["owner_id"])
+        assertEquals("Owner's Template", stored["title"])
+        assertEquals(1, stored["revision"])
+        val childIds = jdbcTemplate.queryForList(
+            "SELECT id::text FROM template_exercises WHERE template_id = :id::uuid",
+            mapOf("id" to template.id),
+            String::class.java,
+        )
+        assertEquals(listOf(ownersChild.id), childIds)
+        assertEquals(1, changeLogCount(owner, template.id))
+        assertEquals(0, changeLogCount(intruder, template.id))
+    }
+
+    @Test
+    fun `deleting another user's workout template returns FORBIDDEN and leaves the owner's row untouched`() {
+        val owner = newUid("template-delete-owner")
+        val intruder = newUid("template-delete-intruder")
+        val template = SyncTestFixtures.workoutTemplate(revision = 0)
+        push(owner, PushRequestDto(workoutTemplates = listOf(template)))
+
+        val attempt = template.copy(revision = 1, deletedAt = 1L)
+        val result = push(intruder, PushRequestDto(workoutTemplates = listOf(attempt))).results.single()
+
+        assertEquals(SyncStatus.FORBIDDEN, result.status)
+        val deletedAt = jdbcTemplate.queryForObject(
+            "SELECT deleted_at FROM workout_templates WHERE id = :id::uuid",
+            mapOf("id" to template.id),
+            Long::class.java,
+        )
+        assertEquals(null, deletedAt)
+        assertEquals(listOf("UPSERT"), changeLogOperations(owner, template.id))
     }
 
     @Test
