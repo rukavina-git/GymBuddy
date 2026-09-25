@@ -1,0 +1,63 @@
+name: API Client Codegen
+
+# Contract-breakage tripwire: generates the Kotlin (Retrofit2 + Moshi)
+# client from api/openapi.yaml and compiles it. Nothing is committed -
+# the output lives only on the runner. Spectral lint (api-docs.yml)
+# proves the spec is well-formed; this proves it still produces Kotlin
+# that compiles, before the Android sync engine ever depends on it.
+#
+# Separate from api-docs.yml because that workflow only runs on push to
+# main (it deploys Pages); this one must also gate pull requests.
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-client-codegen.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-client-codegen.yml'
+
+jobs:
+  codegen:
+    name: Generate and compile Kotlin client
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: api/package-lock.json
+
+      # openapi-generator-cli is a Node wrapper around a JVM jar. The
+      # generated project's Gradle 8.x wrapper can't launch on anything
+      # newer than 24, so pin 21 to match the backend.
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install dependencies
+        working-directory: api
+        # --ignore-scripts: package lifecycle scripts (pre/postinstall)
+        # don't get to run arbitrary code during install.
+        run: npm ci --ignore-scripts
+
+      - name: Generate Kotlin client
+        working-directory: api
+        run: npm run generate:kotlin
+
+      - name: Compile generated client
+        working-directory: android/generated-client
+        run: sh ./gradlew compileKotlin --no-daemon --stacktrace
