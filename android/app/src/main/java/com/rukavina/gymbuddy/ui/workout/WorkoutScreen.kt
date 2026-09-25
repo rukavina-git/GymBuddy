@@ -87,7 +87,11 @@ fun WorkoutScreen(
                 }
             }
 
-            Box(modifier = Modifier.fillMaxSize()) {
+            androidx.compose.material3.pulltorefresh.PullToRefreshBox(
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = { viewModel.refresh() },
+                modifier = Modifier.fillMaxSize()
+            ) {
                 when {
                     uiState.isLoading -> {
                     CircularProgressIndicator(

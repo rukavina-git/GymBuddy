@@ -10,6 +10,7 @@ import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.model.TemplateExercise
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
+import com.rukavina.gymbuddy.domain.sync.RecordingSyncRequester
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.ValidateWorkoutSessionSetsUseCase
@@ -115,7 +116,8 @@ class ActiveWorkoutViewModelTest {
             createWorkoutSessionUseCase = CreateWorkoutSessionUseCase(
                 sessionRepo,
                 idGenerator,
-                ValidateWorkoutSessionSetsUseCase(exerciseRepo)
+                ValidateWorkoutSessionSetsUseCase(exerciseRepo),
+                RecordingSyncRequester()
             ),
             getAllExercisesIncludingHiddenUseCase = GetAllExercisesIncludingHiddenUseCase(exerciseRepo),
             appPreferencesRepository = appPreferencesRepository,
@@ -249,7 +251,8 @@ class ActiveWorkoutViewModelTest {
             createWorkoutSessionUseCase = CreateWorkoutSessionUseCase(
                 sessionRepo,
                 idGenerator,
-                ValidateWorkoutSessionSetsUseCase(FakeExerciseRepository(emptyList()))
+                ValidateWorkoutSessionSetsUseCase(FakeExerciseRepository(emptyList())),
+                RecordingSyncRequester()
             ),
             getAllExercisesIncludingHiddenUseCase = GetAllExercisesIncludingHiddenUseCase(
                 FakeExerciseRepository(listOf(benchPress))
@@ -468,7 +471,8 @@ class ActiveWorkoutViewModelTest {
             createWorkoutSessionUseCase = CreateWorkoutSessionUseCase(
                 sessionRepo,
                 FixedIdGenerator((0..20).map { "id-$it" }),
-                ValidateWorkoutSessionSetsUseCase(FakeExerciseRepository(listOf(benchPress)))
+                ValidateWorkoutSessionSetsUseCase(FakeExerciseRepository(listOf(benchPress))),
+                RecordingSyncRequester()
             ),
             getAllExercisesIncludingHiddenUseCase = GetAllExercisesIncludingHiddenUseCase(
                 FakeExerciseRepository(listOf(benchPress))

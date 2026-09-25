@@ -70,5 +70,10 @@ data class WorkoutSessionUiState(
      * Current sort order for workout sessions.
      * Default is most recent first.
      */
-    val sortOrder: WorkoutSessionSortOrder = WorkoutSessionSortOrder.DATE_NEWEST_FIRST
+    val sortOrder: WorkoutSessionSortOrder = WorkoutSessionSortOrder.DATE_NEWEST_FIRST,
+
+    /**
+     * True while a pull-to-refresh sync is running.
+     */
+    val isRefreshing: Boolean = false
 )

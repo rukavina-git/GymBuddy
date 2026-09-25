@@ -3,6 +3,8 @@ package com.rukavina.gymbuddy.domain.usecase.workout
 import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
+import com.rukavina.gymbuddy.domain.sync.SyncReason
+import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import javax.inject.Inject
 
 /**
@@ -12,7 +14,8 @@ import javax.inject.Inject
 class CreateWorkoutSessionUseCase @Inject constructor(
     private val repository: WorkoutSessionRepository,
     private val idGenerator: IdGenerator,
-    private val validateWorkoutSessionSets: ValidateWorkoutSessionSetsUseCase
+    private val validateWorkoutSessionSets: ValidateWorkoutSessionSetsUseCase,
+    private val syncRequester: SyncRequester
 ) {
     /**
      * Create a new workout session with performed exercises.
@@ -48,6 +51,11 @@ class CreateWorkoutSessionUseCase @Inject constructor(
             val sessionWithSnapshots = validateWorkoutSessionSets(finalWorkoutSession)
 
             repository.createWorkoutSession(sessionWithSnapshots)
+            // A finished workout is the one local write worth syncing
+            // straight away; every other write waits for the next trigger.
+            if (sessionWithSnapshots.endedAt != null) {
+                syncRequester.requestSync(SyncReason.SESSION_COMPLETED)
+            }
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

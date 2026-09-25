@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.rukavina.gymbuddy.domain.sync.SyncReason
+import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import javax.inject.Inject
 
 /**
@@ -39,7 +41,8 @@ class WorkoutSessionViewModel @Inject constructor(
     private val updateWorkoutSessionUseCase: UpdateWorkoutSessionUseCase,
     private val deleteWorkoutSessionUseCase: DeleteWorkoutSessionUseCase,
     private val appPreferencesRepository: AppPreferencesRepository,
-    private val idGenerator: IdGenerator
+    private val idGenerator: IdGenerator,
+    private val syncRequester: SyncRequester
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkoutSessionUiState())
@@ -58,6 +61,25 @@ class WorkoutSessionViewModel @Inject constructor(
         viewModelScope.launch {
             appPreferencesRepository.preferredUnits.collect { units ->
                 _uiState.update { state -> state.copy(preferredUnits = units) }
+            }
+        }
+    }
+
+    /**
+     * Pull-to-refresh: runs a full sync and waits for it. The list itself
+     * updates through the Room flow; this only drives the indicator and
+     * reports a failure.
+     */
+    fun refresh() {
+        if (_uiState.value.isRefreshing) return
+        _uiState.update { it.copy(isRefreshing = true) }
+        viewModelScope.launch {
+            val synced = syncRequester.syncNow(SyncReason.MANUAL)
+            _uiState.update {
+                it.copy(
+                    isRefreshing = false,
+                    errorMessage = if (synced) it.errorMessage else "Couldn't sync. Check your connection and try again."
+                )
             }
         }
     }

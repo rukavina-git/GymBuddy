@@ -13,6 +13,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
+import com.rukavina.gymbuddy.data.sync.LogoutCoordinator
+import com.rukavina.gymbuddy.data.sync.LogoutResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +43,7 @@ data class SettingsUiState(
 class SettingsViewModel @Inject constructor(
     private val repository: UserProfileRepository,
     private val database: AppDatabase,
+    private val logoutCoordinator: LogoutCoordinator,
     @ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -108,11 +111,41 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    private val _logoutState = MutableStateFlow<LogoutUiState>(LogoutUiState.Idle)
+    val logoutState: StateFlow<LogoutUiState> = _logoutState
+
+    /**
+     * Pushes anything unsynced first (the before-logout sync). If the
+     * push fails, nothing happens until the user confirms the warning
+     * via [confirmLogoutAndDelete].
+     */
     fun logout() {
-        FirebaseAuth.getInstance().signOut()
+        if (_logoutState.value == LogoutUiState.Flushing) return
+        _logoutState.value = LogoutUiState.Flushing
         viewModelScope.launch {
-            _logoutEvent.emit(Unit)
+            when (val result = logoutCoordinator.requestLogout()) {
+                LogoutResult.LoggedOut -> finishLogout()
+                is LogoutResult.UnsyncedChanges ->
+                    _logoutState.value = LogoutUiState.UnsyncedWarning(unsyncedChangeLines(result.pendingByType))
+            }
         }
+    }
+
+    /** "Log out and delete": discard the unsynced changes and sign out. */
+    fun confirmLogoutAndDelete() {
+        viewModelScope.launch {
+            logoutCoordinator.logOutAndDelete()
+            finishLogout()
+        }
+    }
+
+    fun cancelLogout() {
+        _logoutState.value = LogoutUiState.Idle
+    }
+
+    private suspend fun finishLogout() {
+        _logoutState.value = LogoutUiState.Idle
+        _logoutEvent.emit(Unit)
     }
 
     /**

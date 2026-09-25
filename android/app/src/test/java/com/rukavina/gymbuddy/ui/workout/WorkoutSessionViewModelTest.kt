@@ -9,6 +9,7 @@ import com.rukavina.gymbuddy.domain.model.ExerciseType
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.model.TemplateExercise
+import com.rukavina.gymbuddy.domain.sync.RecordingSyncRequester
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.DeleteWorkoutSessionUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.GetAllWorkoutSessionsUseCase
@@ -50,18 +51,20 @@ class WorkoutSessionViewModelTest {
     private fun buildViewModel(
         exerciseRepo: FakeExerciseRepository = FakeExerciseRepository(listOf(benchPress)),
         sessionRepo: FakeWorkoutSessionRepository = FakeWorkoutSessionRepository(),
-        idGenerator: FixedIdGenerator = FixedIdGenerator((0..20).map { "id-$it" })
+        idGenerator: FixedIdGenerator = FixedIdGenerator((0..20).map { "id-$it" }),
+        syncRequester: RecordingSyncRequester = RecordingSyncRequester()
     ): WorkoutSessionViewModel {
         val validate = ValidateWorkoutSessionSetsUseCase(exerciseRepo)
         return WorkoutSessionViewModel(
             getAllWorkoutSessionsUseCase = GetAllWorkoutSessionsUseCase(sessionRepo),
             getWorkoutSessionByIdUseCase = GetWorkoutSessionByIdUseCase(sessionRepo),
             getWorkoutSessionsByDateRangeUseCase = GetWorkoutSessionsByDateRangeUseCase(sessionRepo),
-            createWorkoutSessionUseCase = CreateWorkoutSessionUseCase(sessionRepo, idGenerator, validate),
+            createWorkoutSessionUseCase = CreateWorkoutSessionUseCase(sessionRepo, idGenerator, validate, RecordingSyncRequester()),
             updateWorkoutSessionUseCase = UpdateWorkoutSessionUseCase(sessionRepo, validate),
             deleteWorkoutSessionUseCase = DeleteWorkoutSessionUseCase(sessionRepo),
             appPreferencesRepository = AppPreferencesRepository(testPreferencesDataStore()),
-            idGenerator = idGenerator
+            idGenerator = idGenerator,
+            syncRequester = syncRequester
         )
     }
 

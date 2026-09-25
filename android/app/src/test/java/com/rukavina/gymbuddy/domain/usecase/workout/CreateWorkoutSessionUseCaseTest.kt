@@ -9,6 +9,8 @@ import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import com.rukavina.gymbuddy.domain.model.PerformedExercise
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.model.WorkoutSet
+import com.rukavina.gymbuddy.domain.sync.RecordingSyncRequester
+import com.rukavina.gymbuddy.domain.sync.SyncReason
 import com.rukavina.gymbuddy.testutil.FakeExerciseRepository
 import com.rukavina.gymbuddy.testutil.FakeWorkoutSessionRepository
 import com.rukavina.gymbuddy.testutil.FixedIdGenerator
@@ -67,9 +69,10 @@ class CreateWorkoutSessionUseCaseTest {
     private fun buildUseCase(
         idGenerator: FixedIdGenerator = FixedIdGenerator("session-id", "pe-id"),
         exerciseRepo: FakeExerciseRepository = FakeExerciseRepository(listOf(exercise)),
-        sessionRepo: FakeWorkoutSessionRepository = FakeWorkoutSessionRepository()
+        sessionRepo: FakeWorkoutSessionRepository = FakeWorkoutSessionRepository(),
+        syncRequester: RecordingSyncRequester = RecordingSyncRequester()
     ) = Triple(
-        CreateWorkoutSessionUseCase(sessionRepo, idGenerator, ValidateWorkoutSessionSetsUseCase(exerciseRepo)),
+        CreateWorkoutSessionUseCase(sessionRepo, idGenerator, ValidateWorkoutSessionSetsUseCase(exerciseRepo), syncRequester),
         sessionRepo,
         idGenerator
     )
@@ -161,5 +164,38 @@ class CreateWorkoutSessionUseCaseTest {
         assertEquals("reps is required", result.exceptionOrNull()?.message)
         assertTrue(sessionRepo.created.isEmpty())
         assertNull(sessionRepo.getWorkoutSessionById("session-id"))
+    }
+
+    // Scenario 11: the session-completed sync trigger.
+
+    @Test
+    fun `completing a session requests a SESSION_COMPLETED sync`() = runBlocking {
+        val syncRequester = RecordingSyncRequester()
+        val (useCase, _, _) = buildUseCase(syncRequester = syncRequester)
+
+        useCase(session().copy(endedAt = 2_000L))
+
+        assertEquals(listOf(SyncReason.SESSION_COMPLETED), syncRequester.requested)
+    }
+
+    @Test
+    fun `saving a session that isn't finished does not request a sync`() = runBlocking {
+        val syncRequester = RecordingSyncRequester()
+        val (useCase, _, _) = buildUseCase(syncRequester = syncRequester)
+
+        useCase(session().copy(endedAt = null))
+
+        assertTrue(syncRequester.requested.isEmpty())
+    }
+
+    @Test
+    fun `a session that fails to save does not request a sync`() = runBlocking {
+        val syncRequester = RecordingSyncRequester()
+        val (useCase, _, _) = buildUseCase(syncRequester = syncRequester)
+
+        val result = useCase(session(durationSeconds = -1).copy(endedAt = 2_000L))
+
+        assertTrue(result.isFailure)
+        assertTrue(syncRequester.requested.isEmpty())
     }
 }

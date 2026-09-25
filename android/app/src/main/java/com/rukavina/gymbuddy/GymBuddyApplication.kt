@@ -1,14 +1,22 @@
 package com.rukavina.gymbuddy
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import android.util.Log
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
+import com.google.firebase.FirebaseApp
 import com.rukavina.gymbuddy.data.local.seeder.ExerciseSeeder
 import com.rukavina.gymbuddy.data.local.seeder.WorkoutTemplateSeeder
+import com.rukavina.gymbuddy.data.sync.FirebaseAuthSession
+import com.rukavina.gymbuddy.data.sync.SyncScheduler
+import com.rukavina.gymbuddy.data.sync.SyncTriggers
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +26,7 @@ import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 @HiltAndroidApp
-class GymBuddyApplication : Application(), SingletonImageLoader.Factory {
+class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configuration.Provider {
 
     @Inject
     lateinit var exerciseSeeder: ExerciseSeeder
@@ -26,11 +34,31 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory {
     @Inject
     lateinit var workoutTemplateSeeder: WorkoutTemplateSeeder
 
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject
+    lateinit var syncScheduler: SyncScheduler
+
+    @Inject
+    lateinit var authSession: FirebaseAuthSession
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
     override fun onCreate() {
         super.onCreate()
         Log.d("AppInfo", "Gym Buddy Application starting...")
+
+        SyncTriggers.observeForeground(ProcessLifecycleOwner.get().lifecycle, syncScheduler)
+        SyncTriggers.observeNetwork(this, syncScheduler)
+        SyncTriggers.schedulePeriodic(WorkManager.getInstance(this))
+        // Always true in the app (google-services initialises Firebase at
+        // startup); false only where Firebase isn't configured, e.g.
+        // Robolectric tests booting this Application.
+        if (FirebaseApp.getApps(this).isNotEmpty()) authSession.observeSignIn(syncScheduler)
 
         // Seed default exercises and templates on app startup
         applicationScope.launch {

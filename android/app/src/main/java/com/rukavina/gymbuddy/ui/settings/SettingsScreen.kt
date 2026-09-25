@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteForever
@@ -282,6 +283,17 @@ fun SettingsScreen(
             modifier = Modifier.align(Alignment.BottomCenter)
         )
 
+        val logoutState by viewModel.logoutState.collectAsState()
+        when (val state = logoutState) {
+            LogoutUiState.Flushing -> SyncingBeforeLogoutDialog()
+            is LogoutUiState.UnsyncedWarning -> UnsyncedChangesDialog(
+                lines = state.lines,
+                onConfirm = { viewModel.confirmLogoutAndDelete() },
+                onDismiss = { viewModel.cancelLogout() }
+            )
+            LogoutUiState.Idle -> Unit
+        }
+
         // Logout confirmation dialog
         if (showLogoutDialog) {
             LogoutConfirmationDialog(
@@ -402,6 +414,56 @@ private fun LogoutConfirmationDialog(
                 )
             ) {
                 Text("Log Out")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun SyncingBeforeLogoutDialog() {
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text("Log Out") },
+        text = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.width(16.dp))
+                Text("Syncing your latest changes…")
+            }
+        },
+        confirmButton = {}
+    )
+}
+
+@Composable
+private fun UnsyncedChangesDialog(
+    lines: List<String>,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Unsynced changes") },
+        text = {
+            Column {
+                Text("These changes couldn't be synced and will be deleted from this device if you log out now:")
+                Spacer(modifier = Modifier.height(8.dp))
+                lines.forEach { Text("• $it") }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Connect to the internet and try again to keep them.")
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Log out and delete")
             }
         },
         dismissButton = {
