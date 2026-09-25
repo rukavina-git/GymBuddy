@@ -130,3 +130,10 @@ tasks.jacocoTestReport {
 tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
+
+// Serves the real backend for the Android sync engine's end-to-end
+// tests, with test-key token verification instead of Firebase. See
+// src/test/kotlin/e2e/gymbuddy/E2eBackendApplication.kt.
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootTestRun") {
+    mainClass.set("e2e.gymbuddy.E2eBackendApplicationKt")
+}
