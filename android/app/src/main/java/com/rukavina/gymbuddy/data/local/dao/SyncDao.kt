@@ -180,9 +180,11 @@ interface SyncDao {
     suspend fun wipeMeta()
 
     /**
-     * Removes everything that belongs to the signed-in user, leaving the
-     * DEFAULT reference library (and its version rows) in place. Session
-     * and template children go via their ON DELETE CASCADE foreign keys.
+     * Removes everything that belongs to the signed-in user, plus the
+     * outbox and cursor, leaving the DEFAULT reference library (and its
+     * version rows) in place. Session and template children go via their
+     * ON DELETE CASCADE foreign keys. The discarded-change log is left
+     * alone; logout clears it separately.
      */
     @Transaction
     suspend fun wipeLocalUserData() {
@@ -193,7 +195,6 @@ interface SyncDao {
         wipeTemplateStates()
         wipeProfiles()
         wipeOutbox()
-        wipeLog()
         wipeMeta()
     }
 }
