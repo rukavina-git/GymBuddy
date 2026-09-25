@@ -141,7 +141,7 @@ interface WorkoutTemplateDao {
      *
      * @param id The template ID to delete
      */
-    @Query("UPDATE workout_templates SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE id = :id")
+    @Query("UPDATE workout_templates SET deletedAt = :deletedAt, updatedAt = :updatedAt, syncState = 'PENDING' WHERE id = :id")
     suspend fun deleteTemplate(id: String, deletedAt: Long, updatedAt: Long)
 
     /**
@@ -244,4 +244,12 @@ interface WorkoutTemplateDao {
         deleteTemplateExercisesByTemplateId(template.id)
         insertTemplateExercises(exercises)
     }
+
+    /**
+     * The stored revision, tombstoned rows included - the base every
+     * local write keeps, so a push tells the server which server version
+     * the edit was made against. Null when the row doesn't exist yet.
+     */
+    @Query("SELECT revision FROM workout_templates WHERE id = :id")
+    suspend fun getRevision(id: String): Int?
 }

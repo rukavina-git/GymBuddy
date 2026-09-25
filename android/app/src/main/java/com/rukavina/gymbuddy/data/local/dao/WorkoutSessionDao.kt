@@ -84,7 +84,7 @@ interface WorkoutSessionDao {
      * performed_exercises does not fire - its rows (and their sets) stay
      * in place, governed by the now-tombstoned parent.
      */
-    @Query("UPDATE workout_sessions SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE id = :id")
+    @Query("UPDATE workout_sessions SET deletedAt = :deletedAt, updatedAt = :updatedAt, syncState = 'PENDING' WHERE id = :id")
     suspend fun deleteWorkoutSession(id: String, deletedAt: Long, updatedAt: Long)
 
     /**
@@ -184,4 +184,12 @@ interface WorkoutSessionDao {
         insertPerformedExercise(exercise)
         insertWorkoutSets(sets)
     }
+
+    /**
+     * The stored revision, tombstoned rows included - the base every
+     * local write keeps, so a push tells the server which server version
+     * the edit was made against. Null when the row doesn't exist yet.
+     */
+    @Query("SELECT revision FROM workout_sessions WHERE id = :id")
+    suspend fun getRevision(id: String): Int?
 }

@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.rukavina.gymbuddy.data.local.entity.UserTemplateStateEntity
+import com.rukavina.gymbuddy.domain.model.SyncState
 
 /**
  * DAO for per-user WorkoutTemplate overlay state (user_template_state).
@@ -29,13 +30,16 @@ interface UserTemplateStateDao {
     @Transaction
     suspend fun setHidden(templateId: String, hidden: Boolean, updatedAt: Long) {
         val current = getState(templateId) ?: UserTemplateStateEntity(templateId = templateId)
-        upsert(current.copy(isHidden = hidden, updatedAt = updatedAt))
+        upsert(current.copy(isHidden = hidden, updatedAt = updatedAt, syncState = SyncState.PENDING))
     }
 
     /**
      * Unhide every template that currently has an overlay row marking it
      * hidden. Templates with no overlay row are already not hidden.
      */
-    @Query("UPDATE user_template_state SET isHidden = 0, updatedAt = :updatedAt WHERE isHidden = 1")
+    @Query("SELECT templateId FROM user_template_state WHERE isHidden = 1")
+    suspend fun getHiddenIds(): List<String>
+
+    @Query("UPDATE user_template_state SET isHidden = 0, updatedAt = :updatedAt, syncState = 'PENDING' WHERE isHidden = 1")
     suspend fun unhideAll(updatedAt: Long)
 }

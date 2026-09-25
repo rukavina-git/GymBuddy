@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.repository
 
 import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
+import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
@@ -35,7 +36,7 @@ class ExerciseRepositoryImplTest {
         db = Room.inMemoryDatabaseBuilder(org.robolectric.RuntimeEnvironment.getApplication(), AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        repository = ExerciseRepositoryImpl(db.exerciseDao(), db.userExerciseStateDao(), fixedClock)
+        repository = ExerciseRepositoryImpl(db.exerciseDao(), db.userExerciseStateDao(), OutboxRecorder(db, fixedClock), fixedClock)
     }
 
     @After
@@ -127,7 +128,7 @@ class ExerciseRepositoryImplTest {
         repository.createExercise(exercise("ex-1"))
 
         val laterClock = Clock.fixed(fixedClock.instant().plusSeconds(3600), ZoneOffset.UTC)
-        val laterRepository = ExerciseRepositoryImpl(db.exerciseDao(), db.userExerciseStateDao(), laterClock)
+        val laterRepository = ExerciseRepositoryImpl(db.exerciseDao(), db.userExerciseStateDao(), OutboxRecorder(db, laterClock), laterClock)
         laterRepository.updateExercise(exercise("ex-1", name = "Bench Press (edited)"))
 
         val read = repository.getExerciseById("ex-1")!!

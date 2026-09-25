@@ -1,7 +1,11 @@
 package com.rukavina.gymbuddy.data.repository
 
 import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
+import com.rukavina.gymbuddy.data.local.entity.OutboxOperation
+import com.rukavina.gymbuddy.data.local.entity.SyncEntityType
 import com.rukavina.gymbuddy.data.local.mapper.WorkoutSessionMapper
+import com.rukavina.gymbuddy.data.sync.OutboxRecorder
+import com.rukavina.gymbuddy.domain.model.SyncState
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
 import kotlinx.coroutines.flow.Flow
@@ -10,12 +14,17 @@ import java.time.Clock
 import javax.inject.Inject
 
 /**
- * Implementation of WorkoutSessionRepository.
- * Currently uses only local Room database.
- * Can be extended to sync with remote API in the future.
+ * Implementation of WorkoutSessionRepository over the local Room
+ * database. Every write goes through [OutboxRecorder], which queues the
+ * session for the sync engine in the same transaction.
+ *
+ * A write keeps the stored revision rather than whatever the caller's
+ * domain object carries: the revision is the server version this edit
+ * is based on, and a stale in-memory copy must not roll it back.
  */
 class WorkoutSessionRepositoryImpl @Inject constructor(
     private val workoutSessionDao: WorkoutSessionDao,
+    private val outbox: OutboxRecorder,
     private val clock: Clock
 ) : WorkoutSessionRepository {
 
@@ -48,26 +57,35 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     override suspend fun createWorkoutSession(workoutSession: WorkoutSession) {
         requireStampedSnapshots(workoutSession)
         val (workoutSessionEntity, performedExerciseEntities, workoutSetEntities) = WorkoutSessionMapper.toEntities(workoutSession)
-        workoutSessionDao.insertWorkoutSession(workoutSessionEntity.copy(updatedAt = clock.millis()))
-        workoutSessionDao.insertPerformedExercises(performedExerciseEntities)
-        workoutSessionDao.insertWorkoutSets(workoutSetEntities)
-        // TODO: Sync with remote API when online
+        outbox.record(SyncEntityType.WORKOUT_SESSION, workoutSession.id) {
+            val revision = workoutSessionDao.getRevision(workoutSession.id) ?: 0
+            workoutSessionDao.insertWorkoutSession(
+                workoutSessionEntity.copy(updatedAt = clock.millis(), revision = revision, syncState = SyncState.PENDING)
+            )
+            workoutSessionDao.insertPerformedExercises(performedExerciseEntities)
+            workoutSessionDao.insertWorkoutSets(workoutSetEntities)
+        }
     }
 
     override suspend fun updateWorkoutSession(workoutSession: WorkoutSession) {
         requireStampedSnapshots(workoutSession)
         val (workoutSessionEntity, performedExerciseEntities, workoutSetEntities) = WorkoutSessionMapper.toEntities(workoutSession)
-        workoutSessionDao.updateWorkoutSession(workoutSessionEntity.copy(updatedAt = clock.millis()))
-        workoutSessionDao.deletePerformedExercisesByWorkoutSessionId(workoutSession.id)
-        workoutSessionDao.insertPerformedExercises(performedExerciseEntities)
-        workoutSessionDao.insertWorkoutSets(workoutSetEntities)
-        // TODO: Sync with remote API when online
+        outbox.record(SyncEntityType.WORKOUT_SESSION, workoutSession.id) {
+            val revision = workoutSessionDao.getRevision(workoutSession.id) ?: 0
+            workoutSessionDao.updateWorkoutSession(
+                workoutSessionEntity.copy(updatedAt = clock.millis(), revision = revision, syncState = SyncState.PENDING)
+            )
+            workoutSessionDao.deletePerformedExercisesByWorkoutSessionId(workoutSession.id)
+            workoutSessionDao.insertPerformedExercises(performedExerciseEntities)
+            workoutSessionDao.insertWorkoutSets(workoutSetEntities)
+        }
     }
 
     override suspend fun deleteWorkoutSession(id: String) {
         val now = clock.millis()
-        workoutSessionDao.deleteWorkoutSession(id, deletedAt = now, updatedAt = now)
-        // TODO: Sync deletion with remote API when online
+        outbox.record(SyncEntityType.WORKOUT_SESSION, id, OutboxOperation.DELETE) {
+            workoutSessionDao.deleteWorkoutSession(id, deletedAt = now, updatedAt = now)
+        }
     }
 
     /**

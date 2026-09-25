@@ -11,6 +11,7 @@ import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
 import com.rukavina.gymbuddy.data.local.dao.TemplateVersionDao
 import com.rukavina.gymbuddy.data.local.dao.UserExerciseStateDao
 import com.rukavina.gymbuddy.data.local.dao.UserProfileDao
+import com.rukavina.gymbuddy.data.local.dao.SyncDao
 import com.rukavina.gymbuddy.data.local.dao.UserTemplateStateDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
@@ -18,6 +19,7 @@ import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutSessionRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutTemplateRepositoryImpl
+import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.id.Uuid7Generator
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
@@ -89,24 +91,31 @@ object AppModule {
         return database.userTemplateStateDao()
     }
 
+    @Provides
+    fun provideSyncDao(database: AppDatabase): SyncDao {
+        return database.syncDao()
+    }
+
     // Repositories
     @Provides
     @Singleton
     fun provideExerciseRepository(
         exerciseDao: ExerciseDao,
         userExerciseStateDao: UserExerciseStateDao,
+        outbox: OutboxRecorder,
         clock: Clock
     ): ExerciseRepository {
-        return ExerciseRepositoryImpl(exerciseDao, userExerciseStateDao, clock)
+        return ExerciseRepositoryImpl(exerciseDao, userExerciseStateDao, outbox, clock)
     }
 
     @Provides
     @Singleton
     fun provideWorkoutSessionRepository(
         workoutSessionDao: WorkoutSessionDao,
+        outbox: OutboxRecorder,
         clock: Clock
     ): WorkoutSessionRepository {
-        return WorkoutSessionRepositoryImpl(workoutSessionDao, clock)
+        return WorkoutSessionRepositoryImpl(workoutSessionDao, outbox, clock)
     }
 
     @Provides
@@ -114,9 +123,10 @@ object AppModule {
     fun provideWorkoutTemplateRepository(
         workoutTemplateDao: WorkoutTemplateDao,
         userTemplateStateDao: UserTemplateStateDao,
+        outbox: OutboxRecorder,
         clock: Clock
     ): WorkoutTemplateRepository {
-        return WorkoutTemplateRepositoryImpl(workoutTemplateDao, userTemplateStateDao, clock)
+        return WorkoutTemplateRepositoryImpl(workoutTemplateDao, userTemplateStateDao, outbox, clock)
     }
 
     @Provides

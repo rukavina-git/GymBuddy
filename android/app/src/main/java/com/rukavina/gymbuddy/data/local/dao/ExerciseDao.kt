@@ -81,7 +81,7 @@ interface ExerciseDao {
      * sync engine has something to push. Only meaningful for CUSTOM rows -
      * DEFAULT rows are reference data, replaced wholesale by the seeder.
      */
-    @Query("UPDATE exercises SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE id = :id")
+    @Query("UPDATE exercises SET deletedAt = :deletedAt, updatedAt = :updatedAt, syncState = 'PENDING' WHERE id = :id")
     suspend fun deleteExercise(id: String, deletedAt: Long, updatedAt: Long)
 
     /**
@@ -213,4 +213,12 @@ interface ExerciseDao {
         """
     )
     fun getHiddenExercises(): Flow<List<ExerciseEntity>>
+
+    /**
+     * The stored revision, tombstoned rows included - the base every
+     * local write keeps, so a push tells the server which server version
+     * the edit was made against. Null when the row doesn't exist yet.
+     */
+    @Query("SELECT revision FROM exercises WHERE id = :id")
+    suspend fun getRevision(id: String): Int?
 }

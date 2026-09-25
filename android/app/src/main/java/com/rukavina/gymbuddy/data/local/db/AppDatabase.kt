@@ -13,12 +13,16 @@ import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
 import com.rukavina.gymbuddy.data.local.dao.TemplateVersionDao
 import com.rukavina.gymbuddy.data.local.dao.UserExerciseStateDao
 import com.rukavina.gymbuddy.data.local.dao.UserProfileDao
+import com.rukavina.gymbuddy.data.local.dao.SyncDao
 import com.rukavina.gymbuddy.data.local.dao.UserTemplateStateDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.entity.ExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.ExerciseVersionEntity
+import com.rukavina.gymbuddy.data.local.entity.OutboxEntryEntity
 import com.rukavina.gymbuddy.data.local.entity.PerformedExerciseEntity
+import com.rukavina.gymbuddy.data.local.entity.SyncLogEntity
+import com.rukavina.gymbuddy.data.local.entity.SyncMetaEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateVersionEntity
 import com.rukavina.gymbuddy.data.local.entity.UserExerciseStateEntity
@@ -39,9 +43,12 @@ import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
         TemplateExerciseEntity::class,
         com.rukavina.gymbuddy.data.local.entity.WorkoutSetEntity::class,
         UserExerciseStateEntity::class,
-        UserTemplateStateEntity::class
+        UserTemplateStateEntity::class,
+        OutboxEntryEntity::class,
+        SyncLogEntity::class,
+        SyncMetaEntity::class
     ],
-    version = 25,
+    version = 26,
     exportSchema = false
 )
 @TypeConverters(MuscleGroupConverter::class, ProfileEnumConverters::class, ExerciseConverters::class)
@@ -55,6 +62,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun workoutTemplateDao(): WorkoutTemplateDao
     abstract fun userExerciseStateDao(): UserExerciseStateDao
     abstract fun userTemplateStateDao(): UserTemplateStateDao
+    abstract fun syncDao(): SyncDao
 
     companion object {
         @Volatile

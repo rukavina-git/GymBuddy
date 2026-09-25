@@ -2,7 +2,12 @@ package com.rukavina.gymbuddy.data.repository
 
 import com.rukavina.gymbuddy.data.local.dao.UserTemplateStateDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
+import com.rukavina.gymbuddy.data.local.entity.OutboxOperation
+import com.rukavina.gymbuddy.data.local.entity.SyncEntityType
 import com.rukavina.gymbuddy.data.local.mapper.WorkoutTemplateMapper
+import com.rukavina.gymbuddy.data.sync.OutboxRecorder
+import com.rukavina.gymbuddy.domain.model.EntitySource
+import com.rukavina.gymbuddy.domain.model.SyncState
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.repository.WorkoutTemplateRepository
 import kotlinx.coroutines.flow.Flow
@@ -11,15 +16,14 @@ import java.time.Clock
 import javax.inject.Inject
 
 /**
- * Implementation of WorkoutTemplateRepository.
- * Currently uses only local Room database.
- * Can be extended to sync with remote API in the future.
- *
- * Follows the same pattern as WorkoutSessionRepositoryImpl for consistency.
+ * Implementation of WorkoutTemplateRepository over the local Room
+ * database. Same outbox and revision rules as WorkoutSessionRepositoryImpl;
+ * DEFAULT templates are never queued (see ExerciseRepositoryImpl).
  */
 class WorkoutTemplateRepositoryImpl @Inject constructor(
     private val workoutTemplateDao: WorkoutTemplateDao,
     private val userTemplateStateDao: UserTemplateStateDao,
+    private val outbox: OutboxRecorder,
     private val clock: Clock
 ) : WorkoutTemplateRepository {
 
@@ -43,29 +47,47 @@ class WorkoutTemplateRepositoryImpl @Inject constructor(
     override suspend fun createTemplate(template: WorkoutTemplate) {
         requireStampedSnapshots(template)
         val (templateEntity, exerciseEntities) = WorkoutTemplateMapper.toEntities(template)
-        workoutTemplateDao.insertTemplateWithExercises(templateEntity.copy(updatedAt = clock.millis()), exerciseEntities)
-        // TODO: Sync with remote API when online
+        writeTemplate(template) {
+            workoutTemplateDao.insertTemplateWithExercises(templateEntity.copy(updatedAt = clock.millis(), revision = it, syncState = SyncState.PENDING), exerciseEntities)
+        }
     }
 
     override suspend fun updateTemplate(template: WorkoutTemplate) {
         requireStampedSnapshots(template)
         val (templateEntity, exerciseEntities) = WorkoutTemplateMapper.toEntities(template)
-        workoutTemplateDao.updateTemplateWithExercises(templateEntity.copy(updatedAt = clock.millis()), exerciseEntities)
-        // TODO: Sync with remote API when online
+        writeTemplate(template) {
+            workoutTemplateDao.updateTemplateWithExercises(templateEntity.copy(updatedAt = clock.millis(), revision = it, syncState = SyncState.PENDING), exerciseEntities)
+        }
+    }
+
+    /** Runs [write] with the stored revision, queued for sync unless the template is DEFAULT. */
+    private suspend fun writeTemplate(template: WorkoutTemplate, write: suspend (revision: Int) -> Unit) {
+        if (template.source == EntitySource.DEFAULT) {
+            write(workoutTemplateDao.getRevision(template.id) ?: 0)
+            return
+        }
+        outbox.record(SyncEntityType.WORKOUT_TEMPLATE, template.id) {
+            write(workoutTemplateDao.getRevision(template.id) ?: 0)
+        }
     }
 
     override suspend fun deleteTemplate(id: String) {
         val now = clock.millis()
-        workoutTemplateDao.deleteTemplate(id, deletedAt = now, updatedAt = now)
-        // TODO: Sync deletion with remote API when online
+        outbox.record(SyncEntityType.WORKOUT_TEMPLATE, id, OutboxOperation.DELETE) {
+            workoutTemplateDao.deleteTemplate(id, deletedAt = now, updatedAt = now)
+        }
     }
 
     override suspend fun hideTemplate(id: String) {
-        userTemplateStateDao.setHidden(id, true, clock.millis())
+        outbox.record(SyncEntityType.USER_TEMPLATE_STATE, id) {
+            userTemplateStateDao.setHidden(id, true, clock.millis())
+        }
     }
 
     override suspend fun unhideTemplate(id: String) {
-        userTemplateStateDao.setHidden(id, false, clock.millis())
+        outbox.record(SyncEntityType.USER_TEMPLATE_STATE, id) {
+            userTemplateStateDao.setHidden(id, false, clock.millis())
+        }
     }
 
     override fun getHiddenTemplates(): Flow<List<WorkoutTemplate>> {

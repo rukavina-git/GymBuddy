@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.rukavina.gymbuddy.data.local.entity.UserExerciseStateEntity
+import com.rukavina.gymbuddy.domain.model.SyncState
 
 /**
  * DAO for per-user Exercise overlay state (user_exercise_state).
@@ -29,7 +30,7 @@ interface UserExerciseStateDao {
     @Transaction
     suspend fun setHidden(exerciseId: String, hidden: Boolean, updatedAt: Long) {
         val current = getState(exerciseId) ?: UserExerciseStateEntity(exerciseId = exerciseId)
-        upsert(current.copy(isHidden = hidden, updatedAt = updatedAt))
+        upsert(current.copy(isHidden = hidden, updatedAt = updatedAt, syncState = SyncState.PENDING))
     }
 
     /**
@@ -39,13 +40,16 @@ interface UserExerciseStateDao {
     @Transaction
     suspend fun setNote(exerciseId: String, note: String?, updatedAt: Long) {
         val current = getState(exerciseId) ?: UserExerciseStateEntity(exerciseId = exerciseId)
-        upsert(current.copy(note = note, updatedAt = updatedAt))
+        upsert(current.copy(note = note, updatedAt = updatedAt, syncState = SyncState.PENDING))
     }
 
     /**
      * Unhide every exercise that currently has an overlay row marking it
      * hidden. Exercises with no overlay row are already not hidden.
      */
-    @Query("UPDATE user_exercise_state SET isHidden = 0, updatedAt = :updatedAt WHERE isHidden = 1")
+    @Query("SELECT exerciseId FROM user_exercise_state WHERE isHidden = 1")
+    suspend fun getHiddenIds(): List<String>
+
+    @Query("UPDATE user_exercise_state SET isHidden = 0, updatedAt = :updatedAt, syncState = 'PENDING' WHERE isHidden = 1")
     suspend fun unhideAll(updatedAt: Long)
 }

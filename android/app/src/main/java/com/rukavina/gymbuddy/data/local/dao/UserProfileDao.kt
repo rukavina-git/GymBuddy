@@ -15,4 +15,8 @@ interface UserProfileDao {
     @Query("SELECT * FROM user_profile WHERE uid = :uid AND deletedAt IS NULL LIMIT 1")
     suspend fun getUserProfile(uid: String): UserProfileEntity?
 
+    /** Stored revision, tombstoned row included. See WorkoutSessionDao.getRevision. */
+    @Query("SELECT revision FROM user_profile WHERE uid = :uid")
+    suspend fun getRevision(uid: String): Int?
+
 }

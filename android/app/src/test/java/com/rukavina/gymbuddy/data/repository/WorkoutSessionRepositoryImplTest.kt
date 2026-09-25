@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.repository
 
 import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
+import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.PerformedExercise
@@ -48,7 +49,7 @@ class WorkoutSessionRepositoryImplTest {
         db = Room.inMemoryDatabaseBuilder(org.robolectric.RuntimeEnvironment.getApplication(), AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        repository = WorkoutSessionRepositoryImpl(db.workoutSessionDao(), fixedClock)
+        repository = WorkoutSessionRepositoryImpl(db.workoutSessionDao(), OutboxRecorder(db, fixedClock), fixedClock)
     }
 
     @After
@@ -147,7 +148,7 @@ class WorkoutSessionRepositoryImplTest {
         repository.createWorkoutSession(session("session-1"))
 
         val laterClock = Clock.fixed(fixedClock.instant().plusSeconds(3600), ZoneOffset.UTC)
-        val laterRepository = WorkoutSessionRepositoryImpl(db.workoutSessionDao(), laterClock)
+        val laterRepository = WorkoutSessionRepositoryImpl(db.workoutSessionDao(), OutboxRecorder(db, laterClock), laterClock)
         val updated = session(
             id = "session-1",
             title = "Push Day (edited)",

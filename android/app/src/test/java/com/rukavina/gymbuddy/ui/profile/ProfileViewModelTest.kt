@@ -6,6 +6,7 @@ import com.google.firebase.FirebaseOptions
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
+import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.model.ActivityLevel
 import com.rukavina.gymbuddy.domain.model.FitnessGoal
 import com.rukavina.gymbuddy.domain.model.Gender
@@ -77,7 +78,7 @@ class ProfileViewModelTest {
             .allowMainThreadQueries()
             .build()
         return ProfileViewModel(
-            repository = UserProfileRepository(db.userProfileDao(), fixedClock),
+            repository = UserProfileRepository(db.userProfileDao(), OutboxRecorder(db, fixedClock), fixedClock),
             appPreferencesRepository = AppPreferencesRepository(testPreferencesDataStore()),
             clock = fixedClock
         )
