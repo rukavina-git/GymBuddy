@@ -1,0 +1,95 @@
+name: Sync E2E
+
+# The Android sync engine's end-to-end scenarios (push, pull, cursor
+# expiry, reference data, logout flush) against the real backend over
+# real HTTP and a real Postgres - the same run as locally:
+# backend's bootTestRun (E2eBackendApplication: production code plus
+# test-key token verification) and the android e2e tests with
+# -Pe2eBaseUrl. Runs whenever either side of the contract changes.
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'android/**'
+      - 'backend/**'
+      - 'api/openapi.yaml'
+      - 'api/kotlin-client-config.yaml'
+      - '.github/workflows/sync-e2e.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'android/**'
+      - 'backend/**'
+      - 'api/openapi.yaml'
+      - 'api/kotlin-client-config.yaml'
+      - '.github/workflows/sync-e2e.yml'
+
+jobs:
+  e2e:
+    name: Android sync against the real backend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: gymbuddy
+          POSTGRES_USER: gymbuddy
+          POSTGRES_PASSWORD: local
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gymbuddy -d gymbuddy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Backend targets 21, android 17 (see each module's jvmToolchain).
+      - name: Set up JDKs 17 and 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: |
+            17
+            21
+
+      - name: Start the e2e backend
+        working-directory: backend
+        env:
+          DATABASE_URL: jdbc:postgresql://localhost:5432/gymbuddy?user=gymbuddy
+          DB_PASSWORD: local
+        run: |
+          nohup ./gradlew bootTestRun --no-daemon > ../e2e-backend.log 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -sf http://localhost:8080/v1/health > /dev/null; then echo "backend up"; exit 0; fi
+            sleep 2
+          done
+          echo "backend did not start"; cat ../e2e-backend.log; exit 1
+
+      - name: Create google-services.json
+        working-directory: android
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON" > app/src/google-services.json
+
+      - name: Run sync e2e scenarios
+        working-directory: android
+        run: ./gradlew testDebugUnitTest --tests 'com.rukavina.gymbuddy.data.sync.e2e.*' -Pe2eBaseUrl=http://localhost:8080 --stacktrace
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-e2e-results
+          path: |
+            android/app/build/test-results/testDebugUnitTest/*e2e*.xml
+            e2e-backend.log
+          retention-days: 14
+          if-no-files-found: warn
