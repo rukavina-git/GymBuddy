@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.openapi.generator)
     jacoco
     id("org.owasp.dependencycheck") version "13.0.0"
 }
@@ -11,6 +12,9 @@ plugins {
 kotlin {
     jvmToolchain(17)
 }
+
+// Output of openApiGenerate below.
+val generatedClientDir = layout.buildDirectory.dir("generated/openapi")
 
 android {
     namespace = "com.rukavina.gymbuddy"
@@ -26,7 +30,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 10.0.2.2 is the emulator's alias for the host machine, where
+            // the backend runs locally. Override with -Pgymbuddy.apiBaseUrl.
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("http://10.0.2.2:8080/")}\"")
+        }
         release {
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.gymbuddy.app/")}\"")
             ndk {
                 debugSymbolLevel = "FULL"
             }
@@ -49,8 +59,42 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+            all {
+                // Sync end-to-end tests talk to a real backend and skip
+                // themselves unless this is set - see
+                // app/src/test/.../data/sync/e2e/E2eBackend.kt.
+                it.systemProperty("gymbuddy.e2e.baseUrl", findProperty("e2eBaseUrl")?.toString() ?: "")
+            }
         }
     }
+
+    sourceSets {
+        getByName("main") {
+            kotlin.directories.add(generatedClientDir.get().dir("src/main/kotlin").asFile.path)
+        }
+    }
+}
+
+fun apiBaseUrl(default: String): String = findProperty("gymbuddy.apiBaseUrl")?.toString() ?: default
+
+// The Retrofit/Moshi client, generated from the committed spec at build
+// time and never checked in. Same generator version (libs.versions.toml)
+// and same options file as api/package.json's generate:kotlin, which CI
+// compiles as a contract tripwire - so the app compiles exactly what CI
+// verified.
+openApiGenerate {
+    generatorName.set("kotlin")
+    inputSpec.set("$rootDir/../api/openapi.yaml")
+    configFile.set("$rootDir/../api/kotlin-client-config.yaml")
+    outputDir.set(generatedClientDir.get().asFile.path)
+    generateApiTests.set(false)
+    generateModelTests.set(false)
+    generateApiDocumentation.set(false)
+    generateModelDocumentation.set(false)
+}
+
+tasks.named("preBuild") {
+    dependsOn("openApiGenerate")
 }
 
 dependencies {
@@ -101,12 +145,28 @@ dependencies {
     implementation(libs.datastore.preferences)
     implementation(libs.kizitonwose.calendar.compose)
 
+    // Sync: generated API client and its runtime
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.moshi)
+    implementation(libs.retrofit.converter.scalars)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.moshi.adapters)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.work.runtime.ktx)
+    implementation(libs.hilt.work)
+    ksp(libs.hilt.compiler)
+    implementation(libs.lifecycle.process)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.room.testing)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
+    testImplementation(libs.work.testing)
+    testImplementation(libs.lifecycle.runtime.testing)
     androidTestImplementation(libs.testExtJunit)
     androidTestImplementation(libs.espressoCore)
     androidTestImplementation(libs.ui.test.junit)
@@ -153,7 +213,9 @@ val jacocoExcludes = listOf(
     "**/*Application*.*",
     "**/data/local/converter/**",
     "**/data/local/seeder/**",
-    "**/NavRoutes*.*"
+    "**/NavRoutes*.*",
+    // openapi-generator output - verified by compiling, not by tests
+    "**/data/remote/generated/**"
 )
 
 buildscript {

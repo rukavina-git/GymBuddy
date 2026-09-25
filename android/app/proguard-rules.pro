@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# Generated API client (build/generated/openapi): models are
+# (de)serialised by Moshi's reflective KotlinJsonAdapterFactory, which
+# needs their constructors, fields and Kotlin metadata intact.
+-keep class com.rukavina.gymbuddy.data.remote.generated.models.** { *; }
+-keep class kotlin.Metadata { *; }

@@ -1,0 +1,8 @@
+# openapi-generator options for the Kotlin client. Shared by
+# package.json's generate:kotlin (the CI codegen tripwire) and
+# android/app/build.gradle.kts (the client the app actually compiles),
+# so CI verifies exactly the code the app ships.
+library: jvm-retrofit2
+serializationLibrary: moshi
+useCoroutines: true
+packageName: com.rukavina.gymbuddy.data.remote.generated

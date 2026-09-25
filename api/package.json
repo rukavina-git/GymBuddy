@@ -5,7 +5,7 @@
     "lint": "spectral lint openapi.yaml",
     "docs": "redocly build-docs openapi.yaml -o docs.html",
     "build:docs-site": "node scripts/build-docs-site.js",
-    "generate:kotlin": "openapi-generator-cli generate -i openapi.yaml -g kotlin --additional-properties=library=jvm-retrofit2,serializationLibrary=moshi -o ../android/generated-client"
+    "generate:kotlin": "openapi-generator-cli generate -i openapi.yaml -g kotlin -c kotlin-client-config.yaml -o ../android/generated-client"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.15.0",
