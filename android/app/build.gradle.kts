@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
@@ -16,6 +18,16 @@ kotlin {
 // Output of openApiGenerate below.
 val generatedClientDir = layout.buildDirectory.dir("generated/openapi")
 
+// Release signing credentials, from android/keystore.properties
+// (gitignored, never committed): storeFile, storePassword, keyAlias,
+// keyPassword. When the file is absent (CI, a fresh clone) the release
+// config stays empty: debug builds are unaffected, and a release build
+// fails at signing validation instead of producing an unsigned APK.
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
 android {
     namespace = "com.rukavina.gymbuddy"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -29,6 +41,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            keystoreProperties.getProperty("storeFile")?.let { storeFile = file(it) }
+            storePassword = keystoreProperties.getProperty("storePassword")
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+        }
+    }
+
     buildTypes {
         debug {
             // 10.0.2.2 is the emulator's alias for the host machine, where
@@ -36,6 +57,7 @@ android {
             buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("http://10.0.2.2:8080/")}\"")
         }
         release {
+            signingConfig = signingConfigs.getByName("release")
             buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.gymbuddy.app/")}\"")
             ndk {
                 debugSymbolLevel = "FULL"
