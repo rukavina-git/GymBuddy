@@ -2,6 +2,12 @@ name: API Docs
 
 on:
   push:
+    branches: [ main, develop ]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-docs.yml'
+  # Lint and build run on PRs into main too; only a push to main deploys.
+  pull_request:
     branches: [ main ]
     paths:
       - 'api/**'
@@ -55,6 +61,8 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     needs: build
+    # Pages publishes what's on main - never develop or an unmerged PR.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write
