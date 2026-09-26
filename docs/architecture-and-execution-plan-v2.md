@@ -200,6 +200,7 @@ Settled decisions with compressed reasoning. Each has a stable identifier for re
 | **D-31** | **No rest timer in v1; `restSeconds` displays as prescriptive text** | A timer that dies on screen lock is unusable, and a correct one needs notification permissions and alarm scheduling; the guidance value is available for free |
 | **D-32** | **`SetType` has four values and no v1 interface** | Warm-up versus working is the distinction that makes v2 statistics correct; recording it by default costs nothing, exposing a picker adds clutter to every set row |
 | **D-33** | **RPE dropped entirely** | Unlike the deferred columns, RPE has no default that means anything — an unfilled RPE column is noise, not deferred capability |
+| **D-34** | **A pull does not overwrite an unpushed local edit unless the server's revision is newer than the one the edit was based on** | Without it, an edit made mid-sync is silently overwritten by the device's own echo of its previous push. A genuinely newer server revision still wins, and the discarded edit is logged. This adds a seventh sync principle (§6.1); every client, iOS included, must implement it |
 
 ---
 ## 5. Data model — as built
@@ -437,6 +438,7 @@ The protocol is deliberately unsophisticated. Because client logic is implemente
 4. The server's response is authoritative and overwrites local state without question.
 5. All writes are idempotent, keyed by entity UUID.
 6. Aggregates sync whole.
+7. A pull does not overwrite an unpushed local edit unless the pulled revision is newer than the edit's base revision (D-34). The unpushed edit then goes out on the next push and the server decides. This narrows principle 4 to server state the device hasn't already built on; it does not let the client merge. Added during Phase 4. Every client, iOS included, must implement it.
 
 If a design question arises later that these principles do not answer, prefer the simpler option.
 
