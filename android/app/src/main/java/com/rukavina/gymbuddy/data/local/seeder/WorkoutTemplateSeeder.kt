@@ -26,11 +26,19 @@ class WorkoutTemplateSeeder @Inject constructor(
     }
 
     /**
-     * Check if default templates need to be loaded or updated.
-     * Compares bundled version with stored version.
+     * Loads the bundled default templates on first install only - when no
+     * library version is stored yet (fresh install, or after the
+     * database was cleared). After that the server is authoritative:
+     * SyncEngine replaces the library whenever /v1/reference/version
+     * differs from the stored version, and stores the server's version.
+     *
+     * Comparing against the bundled version here instead would fight
+     * the server whenever the app's bundle is ahead of it: this would
+     * reseed on every cold start and the next sync would put the
+     * server's library back (D-35).
      *
      * @param context Application context for accessing assets
-     * @return true if seeding occurred, false if already up to date
+     * @return true if seeding occurred, false if a library was already loaded
      */
     suspend fun seedIfNeeded(context: Context): Boolean {
         try {
@@ -39,17 +47,17 @@ class WorkoutTemplateSeeder @Inject constructor(
             val bundledVersion = json.getInt("version")
 
             // Check current version in database
-            val currentVersion = versionDao.getCurrentVersion()?.version ?: 0
+            val currentVersion = versionDao.getCurrentVersion()?.version
 
             Log.d(TAG, "Bundled version: $bundledVersion, Current version: $currentVersion")
 
-            if (bundledVersion > currentVersion) {
-                Log.i(TAG, "Updating default templates from v$currentVersion to v$bundledVersion")
+            if (currentVersion == null) {
+                Log.i(TAG, "First install: seeding bundled default templates v$bundledVersion")
                 seedDefaultTemplates(json)
                 versionDao.setVersion(TemplateVersionEntity(version = bundledVersion))
                 return true
             } else {
-                Log.d(TAG, "Default templates are up to date (v$currentVersion)")
+                Log.d(TAG, "Default templates already loaded (v$currentVersion); later updates come from the server")
                 return false
             }
         } catch (e: Exception) {

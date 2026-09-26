@@ -201,6 +201,7 @@ Settled decisions with compressed reasoning. Each has a stable identifier for re
 | **D-32** | **`SetType` has four values and no v1 interface** | Warm-up versus working is the distinction that makes v2 statistics correct; recording it by default costs nothing, exposing a picker adds clutter to every set row |
 | **D-33** | **RPE dropped entirely** | Unlike the deferred columns, RPE has no default that means anything — an unfilled RPE column is noise, not deferred capability |
 | **D-34** | **A pull does not overwrite an unpushed local edit unless the server's revision is newer than the one the edit was based on** | Without it, an edit made mid-sync is silently overwritten by the device's own echo of its previous push. A genuinely newer server revision still wins, and the discarded edit is logged. This adds a seventh sync principle (§6.1); every client, iOS included, must implement it |
+| **D-35** | **The bundled reference library only seeds a first install; after that the server's version is authoritative** | The launch seeder used to reseed whenever the bundled version exceeded the stored one. With a bundle ahead of the server, every cold start reseeded the bundle and the next sync put the server's library back. That is self-limiting (it stops once the server is reseeded), not a sync bug, but it was pointless churn and briefly showed a library the server didn't serve |
 
 ---
 ## 5. Data model — as built
