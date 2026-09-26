@@ -48,3 +48,4 @@ local_assets
 
 # openapi-generator output (api/package.json generate:kotlin); CI-only, never committed
 /generated-client/
+/keystore.properties

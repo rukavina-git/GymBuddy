@@ -60,3 +60,14 @@ shared reusable workflows, with one caller per module.
 - Two more secrets need managing: `NVD_API_KEY` and `SONAR_TOKEN`.
 - The Android JaCoCo and Sonar wiring is CI configuration and changes
   nothing in Android's Phase 1 schema work.
+
+## Update — 2026-09-26
+
+The "OWASP scan is manual" description above (Decision and
+Consequences) is superseded. `owasp.yml` now also runs automatically,
+path-filtered to the files that can change the dependency graph
+(`build.gradle.kts`, `libs.versions.toml`, `gradle-wrapper.properties`,
+plus its own workflow files), on push to `main` or `develop` and on pull
+requests into `main`. Manual dispatch still works as a fallback. A
+newly published CVE against unchanged dependencies still needs a manual
+run to surface.

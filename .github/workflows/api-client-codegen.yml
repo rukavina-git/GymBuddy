@@ -6,12 +6,12 @@ name: API Client Codegen
 # proves the spec is well-formed; this proves it still produces Kotlin
 # that compiles, before the Android sync engine ever depends on it.
 #
-# Separate from api-docs.yml because that workflow only runs on push to
-# main (it deploys Pages); this one must also gate pull requests.
+# Separate from api-docs.yml, which lints the spec and deploys Pages:
+# this one needs a JDK and Gradle, and has nothing to do with the docs site.
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
     paths:
       - 'api/**'
       - '.github/workflows/api-client-codegen.yml'
