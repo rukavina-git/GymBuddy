@@ -1,11 +1,30 @@
 name: OWASP Dependency Check
 
-# Manual only. Two independent jobs, one per module, so a flagged
+# Runs on dependency changes (see paths below) or manually. Two
+# independent jobs, one per module, so a flagged
 # vulnerability is attributable to backend or android at a glance rather
 # than one combined report.
 
 on:
   workflow_dispatch: {}
+  # The scan only reads the resolved dependency graph, so it only runs
+  # when a file that can change that graph does.
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.gradle.kts'
+      - '**/libs.versions.toml'
+      - '**/gradle-wrapper.properties'
+      - '.github/workflows/owasp.yml'
+      - '.github/workflows/_owasp.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**/*.gradle.kts'
+      - '**/libs.versions.toml'
+      - '**/gradle-wrapper.properties'
+      - '.github/workflows/owasp.yml'
+      - '.github/workflows/_owasp.yml'
 
 jobs:
   backend:

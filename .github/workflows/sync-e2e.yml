@@ -9,7 +9,7 @@ name: Sync E2E
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
     paths:
       - 'android/**'
       - 'backend/**'
