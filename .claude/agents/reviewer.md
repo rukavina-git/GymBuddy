@@ -23,6 +23,9 @@ Check, in this order:
 6. Tests: is the new behaviour covered, including the failure path?
 
 Report, max ~15 lines, grouped as BLOCKER / SHOULD-FIX / NIT.
+BLOCKER = data loss, data leaking between users or accounts, crash or
+stuck UI, security hole, broken API contract. SHOULD-FIX = real bug with
+limited impact, or a missing test for new behaviour. NIT = everything else.
 Each finding: file:line, what is wrong, why it matters. Only report what
 you can point to in the code; no style opinions unless they hide a bug.
 If there is nothing real to report, say "No issues." and stop.
