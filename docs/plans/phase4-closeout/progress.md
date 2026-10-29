@@ -1,6 +1,6 @@
 # Progress
 
-- [x] 01 Account deletion reaches the backend (steps/01-account-deletion.md)
+- [x] 01 Account deletion reaches the backend (steps/01-account-deletion.md) (da09768)
 - [ ] 02 Sync debug screen (steps/02-sync-debug-screen.md)
 - [ ] 03 Hosting config and backups (steps/03-hosting-config.md)
 - [ ] 04 Accounts, first release, DNS, restore test (me) (steps/04-host-setup.md)
