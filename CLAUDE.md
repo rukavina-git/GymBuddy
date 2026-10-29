@@ -9,7 +9,9 @@ Kotlin backend, sharing nothing but the OpenAPI contract.
 - backend/  Kotlin, Spring Boot, PostgreSQL, Flyway
 - ios/      Swift/SwiftUI client, not started (README only)
 - docker/   compose.yaml for local Postgres + backend
-- docs/     ADRs (docs/adr/), architecture plan, status (docs/status.md)
+- docs/     roadmap (docs/roadmap.md, details in roadmap-details.md),
+            plans (docs/plans/), ADRs (docs/adr/), architecture plan,
+            status (docs/status.md)
 
 ## Commands (run inside each folder)
 - api:      npm ci · npm run lint · npm run generate:kotlin
@@ -37,6 +39,8 @@ Kotlin backend, sharing nothing but the OpenAPI contract.
   domain models in data/local/mapper.
 - Flyway migrations: backend/src/main/resources/db/migration/V<n>__name.sql
 - Decisions are ADRs: docs/adr/NNNN-*.md.
+- UI is designed in Figma first. UI changes follow a linked Figma frame
+  (from roadmap Plan 3 on).
 
 ## Rules
 - Keep summaries short. I often read on my phone.

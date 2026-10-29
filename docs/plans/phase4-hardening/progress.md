@@ -4,7 +4,7 @@
 - [x] 02 Logout errors never leave a stuck dialog (steps/02-logout-error-states.md) (c13e7bf)
 - [x] 03 Scheduler never drops a request (steps/03-scheduler-lost-request.md) (dfb0d20)
 - [x] 04 Pull-to-refresh message and tests (steps/04-pull-to-refresh-message.md) (8777ad5)
-- [ ] 05 Manual device checks (me)
+- [ ] 05 Manual device checks (me) — deferred until on Mac
 
 ## Deviations
 - 01: SyncEngine had no sign-in knowledge, so it now takes

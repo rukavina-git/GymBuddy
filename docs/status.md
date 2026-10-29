@@ -1,7 +1,8 @@
 # Status
 
 Current project status. Dated audits with full evidence are in
-STATUS_YYYY-MM-DD.md files; this file is the short, current summary.
+STATUS_YYYY-MM-DD.md files; this file is the short, current summary. What's next, step by step:
+roadmap.md (overview) and roadmap-details.md.
 
 ## Phase 4: Android sync engine (built)
 
