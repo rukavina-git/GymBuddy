@@ -26,6 +26,10 @@ fi
 grep -Eq -- '(^|[^[:alnum:]_-])git([[:space:]]+-C[[:space:]]+[^[:space:]]+)?[[:space:]]+branch[[:space:]].*(-d|-D|--delete)([[:space:]]|$)' <<<"$cmd" \
   && block "branch deletion"
 
+# Secrets: the Read deny rules in settings.json don't cover shell access.
+grep -Eq -- 'keystore\.properties|google-services\.json|service-account[^[:space:]]*\.json|firebase-adminsdk|\.jks([[:space:]"'\'']|$)|keystores/|(^|[[:space:]/"'\''])\.env([[:space:]"'\'']|$)|find-generic-password' <<<"$cmd" \
+  && block "command touches a secret file or the keychain"
+
 grep -Eiq -- '(^|[^[:alnum:]_-])(fastlane|deploy)([[:space:]]|$)|docker[[:space:]]+push|gh[[:space:]]+release|gradlew[^|;&]*[[:space:]]publish|--prod([[:space:]]|=|$)|[[:space:]]prod(uction)?([[:space:]]|$)' <<<"$cmd" \
   && block "deploy/prod command"
 
