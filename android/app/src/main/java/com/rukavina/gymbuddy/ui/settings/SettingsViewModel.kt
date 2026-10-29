@@ -12,23 +12,21 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
+import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
+import com.rukavina.gymbuddy.data.sync.AccountDeletionResult
 import com.rukavina.gymbuddy.data.sync.LogoutCoordinator
 import com.rukavina.gymbuddy.data.sync.LogoutResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import com.rukavina.gymbuddy.utils.validation.isStrongPassword
-import java.io.File
 import javax.inject.Inject
 
 data class SettingsUiState(
@@ -44,8 +42,8 @@ data class SettingsUiState(
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: UserProfileRepository,
-    private val database: AppDatabase,
     private val logoutCoordinator: LogoutCoordinator,
+    private val accountDeletionCoordinator: AccountDeletionCoordinator,
     @ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -241,6 +239,57 @@ class SettingsViewModel @Inject constructor(
     private val _accountDeletedEvent = MutableSharedFlow<Unit>()
     val accountDeletedEvent: SharedFlow<Unit> = _accountDeletedEvent.asSharedFlow()
 
+    private val _accountDeletionState = MutableStateFlow<AccountDeletionUiState>(AccountDeletionUiState.Idle)
+    val accountDeletionState: StateFlow<AccountDeletionUiState> = _accountDeletionState
+
+    private val _deletionUnsyncedLines = MutableStateFlow<List<String>>(emptyList())
+    /** Unsynced changes the delete will discard, for the confirmation dialog. Empty when there are none. */
+    val deletionUnsyncedLines: StateFlow<List<String>> = _deletionUnsyncedLines
+
+    /** Call when the delete confirmation dialog opens. */
+    fun loadDeletionWarning() {
+        viewModelScope.launch {
+            _deletionUnsyncedLines.value = unsyncedChangeLines(accountDeletionCoordinator.unsyncedChanges())
+        }
+    }
+
+    /**
+     * Runs after a successful re-auth. Deletes on the server, then wipes the
+     * device. Every failure ends in [AccountDeletionUiState.Failed].
+     */
+    fun deleteAccount() {
+        if (_accountDeletionState.value == AccountDeletionUiState.InProgress) return
+        _accountDeletionState.value = AccountDeletionUiState.InProgress
+        viewModelScope.launch {
+            try {
+                when (accountDeletionCoordinator.deleteAccount()) {
+                    AccountDeletionResult.Deleted -> {
+                        _accountDeletionState.value = AccountDeletionUiState.Idle
+                        _accountDeletedEvent.emit(Unit)
+                    }
+                    AccountDeletionResult.Retryable ->
+                        _accountDeletionState.value = AccountDeletionUiState.Failed(DELETE_OFFLINE_MESSAGE, canRetry = true)
+                    AccountDeletionResult.SignInAgain ->
+                        _accountDeletionState.value = AccountDeletionUiState.Failed(DELETE_REAUTH_MESSAGE, canRetry = false)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "account deletion failed", e)
+                _accountDeletionState.value = AccountDeletionUiState.Failed(DELETE_FAILED_MESSAGE, canRetry = true)
+            }
+        }
+    }
+
+    fun retryAccountDeletion() {
+        val failed = _accountDeletionState.value as? AccountDeletionUiState.Failed ?: return
+        if (failed.canRetry) deleteAccount()
+    }
+
+    fun dismissAccountDeletion() {
+        _accountDeletionState.value = AccountDeletionUiState.Idle
+    }
+
     /**
      * Delete account with password re-authentication (for email/password users)
      */
@@ -262,8 +311,8 @@ class SettingsViewModel @Inject constructor(
         user.reauthenticate(credential)
             .addOnCompleteListener { authTask ->
                 if (authTask.isSuccessful) {
-                    // Now delete the account
-                    performAccountDeletion(onResult)
+                    onResult(true, null)
+                    deleteAccount()
                 } else {
                     onResult(false, "Incorrect password")
                 }
@@ -288,7 +337,8 @@ class SettingsViewModel @Inject constructor(
                     user.reauthenticate(credential)
                         .addOnCompleteListener { authTask ->
                             if (authTask.isSuccessful) {
-                                performAccountDeletion(onResult)
+                                onResult(true, null)
+                                deleteAccount()
                             } else {
                                 onResult(false, authTask.exception?.localizedMessage ?: "Re-authentication failed")
                             }
@@ -320,42 +370,11 @@ class SettingsViewModel @Inject constructor(
         return googleIdTokenCredential.idToken
     }
 
-    private fun performAccountDeletion(onResult: (Boolean, String?) -> Unit) {
-        viewModelScope.launch {
-            try {
-                // Clear all local data
-                withContext(Dispatchers.IO) {
-                    // Clear database
-                    database.clearAllTables()
-
-                    // Delete profile images folder
-                    val profileImagesDir = File(appContext.filesDir, "profile_images")
-                    if (profileImagesDir.exists()) {
-                        profileImagesDir.listFiles()?.forEach { it.delete() }
-                        profileImagesDir.delete()
-                    }
-                }
-
-                // Delete Firebase account
-                val user = FirebaseAuth.getInstance().currentUser
-                user?.delete()?.addOnCompleteListener { deleteTask ->
-                    if (deleteTask.isSuccessful) {
-                        viewModelScope.launch {
-                            _accountDeletedEvent.emit(Unit)
-                        }
-                        onResult(true, null)
-                    } else {
-                        onResult(false, deleteTask.exception?.localizedMessage ?: "Failed to delete account")
-                    }
-                } ?: onResult(false, "User not found")
-            } catch (e: Exception) {
-                onResult(false, e.localizedMessage ?: "Failed to delete account data")
-            }
-        }
-    }
-
     private companion object {
         const val TAG = "SettingsViewModel"
         const val LOGOUT_FAILED_MESSAGE = "Couldn't log out. Please try again."
+        const val DELETE_OFFLINE_MESSAGE = "Couldn't reach the server. Nothing was deleted. Check your connection and try again."
+        const val DELETE_REAUTH_MESSAGE = "Your sign-in has expired. Close this and confirm your identity again."
+        const val DELETE_FAILED_MESSAGE = "Couldn't delete your account. Please try again."
     }
 }

@@ -1,7 +1,9 @@
 package com.rukavina.gymbuddy.di
 
+import android.content.Context
 import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
+import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
 import com.rukavina.gymbuddy.data.sync.AuthSession
 import com.rukavina.gymbuddy.data.sync.FirebaseAuthSession
 import com.rukavina.gymbuddy.data.sync.LogoutCoordinator
@@ -10,9 +12,11 @@ import com.rukavina.gymbuddy.data.sync.SyncLocalStore
 import com.rukavina.gymbuddy.data.sync.SyncScheduler
 import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
+import com.rukavina.gymbuddy.utils.ImageStorageUtil
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,4 +64,20 @@ object SyncModule {
     @Singleton
     fun provideLogoutCoordinator(store: SyncLocalStore, engine: SyncEngine, auth: AuthSession) =
         LogoutCoordinator(store, { engine.flushOutbox() }, auth, { block -> engine.exclusive(block) })
+
+    @Provides
+    @Singleton
+    fun provideAccountDeletionCoordinator(
+        store: SyncLocalStore,
+        apis: SyncApis,
+        engine: SyncEngine,
+        auth: AuthSession,
+        @ApplicationContext context: Context
+    ) = AccountDeletionCoordinator(
+        store,
+        deleteOnServer = { apis.account.deleteAccount().code() },
+        deleteProfileImages = { ImageStorageUtil.deleteAllProfileImages(context) },
+        auth = auth,
+        runExclusive = { block -> engine.exclusive(block) }
+    )
 }

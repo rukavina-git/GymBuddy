@@ -16,6 +16,15 @@ sealed class LogoutUiState {
     data class Failed(val message: String, val afterWarning: Boolean) : LogoutUiState()
 }
 
+/** Where account deletion stands, for SettingsScreen. Done is the accountDeletedEvent. */
+sealed class AccountDeletionUiState {
+    data object Idle : AccountDeletionUiState()
+    /** Deleting on the server, then wiping the device. */
+    data object InProgress : AccountDeletionUiState()
+    /** [canRetry] is false when the user must re-authenticate first (close, then start over). */
+    data class Failed(val message: String, val canRetry: Boolean) : AccountDeletionUiState()
+}
+
 /** One human-readable line per entity type with unsynced changes, e.g. "2 workout sessions". */
 fun unsyncedChangeLines(pendingByType: Map<SyncEntityType, Int>): List<String> =
     SyncEntityType.entries.mapNotNull { type ->

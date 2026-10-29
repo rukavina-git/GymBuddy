@@ -6,6 +6,7 @@ import com.google.firebase.FirebaseOptions
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
+import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
 import com.rukavina.gymbuddy.data.sync.FakeAuthSession
 import com.rukavina.gymbuddy.data.sync.LogoutCoordinator
 import com.rukavina.gymbuddy.data.sync.OutboxRecorder
@@ -71,12 +72,18 @@ class SettingsViewModelTest {
     @After
     fun tearDown() = db.close()
 
-    private fun buildViewModel(coordinator: LogoutCoordinator) = SettingsViewModel(
+    private fun buildViewModel(
+        coordinator: LogoutCoordinator = LogoutCoordinator(store, { true }, auth, direct),
+        deletion: AccountDeletionCoordinator = deletionCoordinator { 204 }
+    ) = SettingsViewModel(
         repository = UserProfileRepository(db.userProfileDao(), OutboxRecorder(db, clock), clock),
-        database = db,
         logoutCoordinator = coordinator,
+        accountDeletionCoordinator = deletion,
         appContext = org.robolectric.RuntimeEnvironment.getApplication()
     )
+
+    private fun deletionCoordinator(deleteOnServer: suspend () -> Int) =
+        AccountDeletionCoordinator(store, deleteOnServer, {}, auth, direct)
 
     private suspend fun addPendingExercise() {
         ExerciseRepositoryImpl(db.exerciseDao(), db.userExerciseStateDao(), OutboxRecorder(db, clock), clock)
@@ -146,5 +153,66 @@ class SettingsViewModelTest {
         withTimeout(5_000) { event.await() }
         assertEquals(1, auth.signOuts)
         assertEquals(0, db.syncDao().outboxCount())
+    }
+
+    // ---- account deletion ----
+
+    private suspend fun SettingsViewModel.awaitDeletionSettled(): AccountDeletionUiState =
+        withTimeout(5_000) { accountDeletionState.first { it != AccountDeletionUiState.InProgress } }
+
+    @Test
+    fun `server failure ends in a closable, retryable state and deletes nothing`() = runBlocking {
+        addPendingExercise()
+        var status = 500
+        val vm = buildViewModel(deletion = deletionCoordinator { status })
+
+        vm.deleteAccount()
+
+        val state = vm.awaitDeletionSettled() as AccountDeletionUiState.Failed
+        assertEquals(true, state.canRetry)
+        assertEquals(0, auth.signOuts)
+        assertEquals(1, db.syncDao().outboxCount())
+
+        status = 204
+        val event = async(start = CoroutineStart.UNDISPATCHED) { vm.accountDeletedEvent.first() }
+        vm.retryAccountDeletion()
+
+        withTimeout(5_000) { event.await() }
+        assertEquals(1, auth.signOuts)
+        assertEquals(0, db.syncDao().outboxCount())
+    }
+
+    @Test
+    fun `401 ends in Failed without retry, and close goes back to Idle`() = runBlocking {
+        val vm = buildViewModel(deletion = deletionCoordinator { 401 })
+
+        vm.deleteAccount()
+
+        val state = vm.awaitDeletionSettled() as AccountDeletionUiState.Failed
+        assertEquals(false, state.canRetry)
+        vm.dismissAccountDeletion()
+        assertEquals(AccountDeletionUiState.Idle, vm.accountDeletionState.value)
+    }
+
+    @Test
+    fun `success emits accountDeletedEvent`() = runBlocking {
+        val vm = buildViewModel()
+        val event = async(start = CoroutineStart.UNDISPATCHED) { vm.accountDeletedEvent.first() }
+
+        vm.deleteAccount()
+
+        withTimeout(5_000) { event.await() }
+        assertEquals(AccountDeletionUiState.Idle, vm.accountDeletionState.value)
+        assertEquals(1, auth.signOuts)
+    }
+
+    @Test
+    fun `the confirmation dialog lists unsynced changes`() = runBlocking {
+        addPendingExercise()
+        val vm = buildViewModel()
+
+        vm.loadDeletionWarning()
+
+        assertEquals(listOf("1 custom exercise"), withTimeout(5_000) { vm.deletionUnsyncedLines.first { it.isNotEmpty() } })
     }
 }

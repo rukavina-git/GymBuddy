@@ -21,7 +21,7 @@ waiting on me
 
 ## Plan 1: phase4-closeout
 
-- [ ] 1.1 Account deletion calls the backend, wipes under sync lock
+- [x] 1.1 Account deletion calls the backend, wipes under sync lock
 - [ ] 1.2 Sync debug screen
 - [ ] 1.3 Deploy config for the free host, nightly backup, restore script
 - [ ] 1.4 (me) Create host + database accounts, deploy, DNS for
