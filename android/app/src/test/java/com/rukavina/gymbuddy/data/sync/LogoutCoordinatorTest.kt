@@ -9,6 +9,7 @@ import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.domain.model.SyncState
 import com.rukavina.gymbuddy.ui.settings.unsyncedChangeLines
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -227,17 +228,19 @@ class LogoutCoordinatorTest {
             pageObserver = PullPageObserver { _, _ -> pulls++ },
             isSignedIn = { auth.currentUid != null }
         )
-        val coordinator = LogoutCoordinator(store, { engine.flushOutbox() }, auth, { block -> engine.exclusive(block) })
-        val wiping = CompletableDeferred<Unit>()
-        val finishWipe = CompletableDeferred<Unit>()
+        val loggedOut = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        // Holds the lock after the wipe and sign-out until the cycle is queued behind it.
+        val coordinator = LogoutCoordinator(store, { engine.flushOutbox() }, auth, { block ->
+            engine.exclusive { block(); loggedOut.complete(Unit); release.await() }
+        })
 
-        val logout = async(Dispatchers.Default) {
-            engine.exclusive { wiping.complete(Unit); finishWipe.await() }
-            coordinator.logOutAndDelete()
-        }
-        wiping.await()
-        val cycle = async(Dispatchers.Default) { engine.sync() } // queued on the lock
-        finishWipe.complete(Unit)
+        val logout = async(Dispatchers.Default) { coordinator.logOutAndDelete() }
+        loggedOut.await()
+        // UNDISPATCHED runs sync() until its first suspension: waiting on the held lock.
+        val cycle = async(start = CoroutineStart.UNDISPATCHED) { engine.sync() }
+        assertFalse("the cycle is queued behind logout", cycle.isCompleted)
+        release.complete(Unit)
         logout.await()
         val summary = cycle.await()
 

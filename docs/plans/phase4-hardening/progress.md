@@ -16,11 +16,10 @@
   contain its own hash).
 
 ## Gotchas
-- 01: test `a cycle queued behind logout does nothing once signed out`
-  is order-dependent (reviewer SHOULD-FIX, not fixed). It releases a
-  separate exclusive{} before logOutAndDelete re-locks, and Mutex is
-  FIFO, so a cycle that is already queued runs first. Fix: block inside
-  the runExclusive wrapper itself, and wait until sync() is queued.
+- 01: the queued-cycle test was order-dependent (reviewer SHOULD-FIX).
+  It's fixed in a follow-up commit: the lock is held inside runExclusive
+  and the cycle is queued with CoroutineStart.UNDISPATCHED. Removing
+  the isSignedIn guard now makes it fail every time.
 - 01: requestLogout drops the lock between flushOutbox and
   logOutAndDelete. An edit made in that gap is wiped without a warning.
   This predates step 01.
