@@ -2,7 +2,7 @@
 
 - [x] 01 Account deletion reaches the backend (steps/01-account-deletion.md) (da09768)
 - [x] 02 Sync debug screen (steps/02-sync-debug-screen.md) (dcb57db)
-- [x] 03 Hosting config and backups (steps/03-hosting-config.md)
+- [x] 03 Hosting config and backups (steps/03-hosting-config.md) (6dbb9aa)
 - [ ] 04 Accounts, first release, DNS, restore test (me) (steps/04-host-setup.md)
 - [ ] 05 Release build and spec point at api.rukavina.app (steps/05-real-host-url.md)
 - [ ] 06 Device checks against the hosted backend (me, deferred) (steps/06-device-checks.md)
