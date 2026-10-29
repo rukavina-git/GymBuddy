@@ -61,6 +61,8 @@ import com.rukavina.gymbuddy.ui.auth.PasswordToggleTextField
 import com.rukavina.gymbuddy.ui.components.ScreenHeader
 import kotlinx.coroutines.launch
 
+private const val LOG_OUT = "Log Out"
+
 /**
  * State for password setup/change dialog.
  */
@@ -271,7 +273,7 @@ fun SettingsScreen(
                                     containerColor = MaterialTheme.colorScheme.error
                                 )
                             ) {
-                                Text("Log Out", color = Color.White)
+                                Text(LOG_OUT, color = Color.White)
                             }
                         }
                     }
@@ -409,7 +411,7 @@ private fun LogoutConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Log Out") },
+        title = { Text(LOG_OUT) },
         text = { Text("Are you sure you want to log out?") },
         confirmButton = {
             TextButton(
@@ -418,7 +420,7 @@ private fun LogoutConfirmationDialog(
                     contentColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Log Out")
+                Text(LOG_OUT)
             }
         },
         dismissButton = {
@@ -437,7 +439,7 @@ private fun LogoutFailedDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Log Out") },
+        title = { Text(LOG_OUT) },
         text = { Text(message) },
         confirmButton = {
             TextButton(onClick = onRetry) {
@@ -456,7 +458,7 @@ private fun LogoutFailedDialog(
 private fun SyncingBeforeLogoutDialog() {
     AlertDialog(
         onDismissRequest = {},
-        title = { Text("Log Out") },
+        title = { Text(LOG_OUT) },
         text = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp))
