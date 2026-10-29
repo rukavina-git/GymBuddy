@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.rukavina.gymbuddy.domain.sync.SyncOutcome
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import dagger.assisted.Assisted
@@ -21,7 +22,7 @@ class SyncWorker @AssistedInject constructor(
     override suspend fun doWork(): Result = when {
         // Nothing to sync while signed out; don't burn retries on it.
         auth.currentUid == null -> Result.success()
-        requester.syncNow(SyncReason.PERIODIC) -> Result.success()
-        else -> Result.retry()
+        requester.syncNow(SyncReason.PERIODIC) == SyncOutcome.FAILED -> Result.retry()
+        else -> Result.success()
     }
 }

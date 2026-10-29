@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.rukavina.gymbuddy.domain.sync.SyncOutcome
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import javax.inject.Inject
@@ -68,17 +69,22 @@ class WorkoutSessionViewModel @Inject constructor(
     /**
      * Pull-to-refresh: runs a full sync and waits for it. The list itself
      * updates through the Room flow; this only drives the indicator and
-     * reports a failure.
+     * reports a failure. Signed out gets its own message: retrying won't
+     * help, and the connection is not the problem.
      */
     fun refresh() {
         if (_uiState.value.isRefreshing) return
         _uiState.update { it.copy(isRefreshing = true) }
         viewModelScope.launch {
-            val synced = syncRequester.syncNow(SyncReason.MANUAL)
+            val outcome = syncRequester.syncNow(SyncReason.MANUAL)
             _uiState.update {
                 it.copy(
                     isRefreshing = false,
-                    errorMessage = if (synced) it.errorMessage else "Couldn't sync. Check your connection and try again."
+                    errorMessage = when (outcome) {
+                        SyncOutcome.SYNCED -> it.errorMessage
+                        SyncOutcome.SIGNED_OUT -> SIGNED_OUT_MESSAGE
+                        SyncOutcome.FAILED -> SYNC_FAILED_MESSAGE
+                    }
                 )
             }
         }
@@ -425,5 +431,10 @@ class WorkoutSessionViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    internal companion object {
+        const val SIGNED_OUT_MESSAGE = "Sign in to sync your workouts."
+        const val SYNC_FAILED_MESSAGE = "Couldn't sync. Check your connection and try again."
     }
 }

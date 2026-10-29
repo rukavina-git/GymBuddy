@@ -10,6 +10,9 @@ import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.model.TemplateExercise
 import com.rukavina.gymbuddy.domain.sync.RecordingSyncRequester
+import com.rukavina.gymbuddy.domain.sync.SyncOutcome
+import com.rukavina.gymbuddy.domain.sync.SyncReason
+import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.DeleteWorkoutSessionUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.GetAllWorkoutSessionsUseCase
@@ -22,7 +25,9 @@ import com.rukavina.gymbuddy.testutil.FakeWorkoutSessionRepository
 import com.rukavina.gymbuddy.testutil.FixedIdGenerator
 import com.rukavina.gymbuddy.testutil.MainDispatcherRule
 import com.rukavina.gymbuddy.testutil.testPreferencesDataStore
+import kotlinx.coroutines.CompletableDeferred
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -52,7 +57,7 @@ class WorkoutSessionViewModelTest {
         exerciseRepo: FakeExerciseRepository = FakeExerciseRepository(listOf(benchPress)),
         sessionRepo: FakeWorkoutSessionRepository = FakeWorkoutSessionRepository(),
         idGenerator: FixedIdGenerator = FixedIdGenerator((0..20).map { "id-$it" }),
-        syncRequester: RecordingSyncRequester = RecordingSyncRequester()
+        syncRequester: SyncRequester = RecordingSyncRequester()
     ): WorkoutSessionViewModel {
         val validate = ValidateWorkoutSessionSetsUseCase(exerciseRepo)
         return WorkoutSessionViewModel(
@@ -245,5 +250,100 @@ class WorkoutSessionViewModelTest {
         val performedExercise = saved.performedExercises.single()
         assertEquals(2, performedExercise.sets.size)
         assertEquals(8, performedExercise.sets[0].reps)
+    }
+
+    // ---- pull-to-refresh ----
+
+    /** syncNow suspends until [finish] is called, so a test can look at the state mid-sync. */
+    private class GatedSyncRequester : SyncRequester {
+        val calls = mutableListOf<SyncReason>()
+        private val result = CompletableDeferred<SyncOutcome>()
+
+        fun finish(outcome: SyncOutcome) = result.complete(outcome)
+
+        override fun requestSync(reason: SyncReason) = Unit
+
+        override suspend fun syncNow(reason: SyncReason): SyncOutcome {
+            calls += reason
+            return result.await()
+        }
+    }
+
+    @Test
+    fun `refresh shows the indicator while syncing and runs one MANUAL sync`() {
+        val requester = GatedSyncRequester()
+        val viewModel = buildViewModel(syncRequester = requester)
+
+        viewModel.refresh()
+        assertTrue(viewModel.uiState.value.isRefreshing)
+
+        requester.finish(SyncOutcome.SYNCED)
+        assertFalse(viewModel.uiState.value.isRefreshing)
+        assertEquals(listOf(SyncReason.MANUAL), requester.calls)
+    }
+
+    @Test
+    fun `a second refresh while one is running doesn't sync again`() {
+        val requester = GatedSyncRequester()
+        val viewModel = buildViewModel(syncRequester = requester)
+
+        viewModel.refresh()
+        viewModel.refresh()
+        requester.finish(SyncOutcome.SYNCED)
+
+        assertEquals(1, requester.calls.size)
+    }
+
+    @Test
+    fun `a successful refresh shows no error`() {
+        val viewModel = buildViewModel(syncRequester = RecordingSyncRequester(SyncOutcome.SYNCED))
+
+        viewModel.refresh()
+
+        assertNull(viewModel.uiState.value.errorMessage)
+    }
+
+    @Test
+    fun `a successful refresh keeps an earlier error message`() {
+        val requester = GatedSyncRequester()
+        val viewModel = buildViewModel(syncRequester = requester)
+        // A set without reps leaves an error the user hasn't dismissed yet.
+        viewModel.createWorkoutSession(draft(performedExercises = listOf(
+            PerformedExerciseDraft(
+                existingId = null,
+                exerciseId = "ex-bench",
+                exerciseName = "Bench Press",
+                exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
+                orderIndex = 0,
+                sets = listOf(WorkoutSetDraft(existingId = null, weightKg = 60f, reps = null, durationSeconds = null, distanceMeters = null, orderIndex = 0))
+            )
+        )))
+        val earlier = viewModel.uiState.value.errorMessage
+        assertEquals("precondition", "reps is required", earlier)
+
+        viewModel.refresh()
+        requester.finish(SyncOutcome.SYNCED)
+
+        assertEquals(earlier, viewModel.uiState.value.errorMessage)
+    }
+
+    @Test
+    fun `refresh while signed out asks the user to sign in`() {
+        val viewModel = buildViewModel(syncRequester = RecordingSyncRequester(SyncOutcome.SIGNED_OUT))
+
+        viewModel.refresh()
+
+        assertEquals(WorkoutSessionViewModel.SIGNED_OUT_MESSAGE, viewModel.uiState.value.errorMessage)
+        assertFalse(viewModel.uiState.value.isRefreshing)
+    }
+
+    @Test
+    fun `a failed refresh points at the connection`() {
+        val viewModel = buildViewModel(syncRequester = RecordingSyncRequester(SyncOutcome.FAILED))
+
+        viewModel.refresh()
+
+        assertEquals(WorkoutSessionViewModel.SYNC_FAILED_MESSAGE, viewModel.uiState.value.errorMessage)
+        assertFalse(viewModel.uiState.value.isRefreshing)
     }
 }

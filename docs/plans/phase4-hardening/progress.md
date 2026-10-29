@@ -3,7 +3,7 @@
 - [x] 01 Logout under the sync lock (steps/01-logout-under-sync-lock.md) (a24dc90)
 - [x] 02 Logout errors never leave a stuck dialog (steps/02-logout-error-states.md) (c13e7bf)
 - [x] 03 Scheduler never drops a request (steps/03-scheduler-lost-request.md) (dfb0d20)
-- [ ] 04 Pull-to-refresh message and tests (not detailed yet)
+- [x] 04 Pull-to-refresh message and tests (steps/04-pull-to-refresh-message.md) (HASH)
 - [ ] 05 Manual device checks (me)
 
 ## Deviations
@@ -33,6 +33,15 @@
   proved nothing. New tests are in SyncSchedulerTest (Robolectric for
   Log); SyncTriggersTest is unchanged.
 - 03: the step 03 hash is in a follow-up commit, as before.
+- 04: SyncWorker also called syncNow. It now retries only on FAILED;
+  SIGNED_OUT counts as success, like its own signed-out check.
+- 04: the scheduler's SIGNED_OUT/FAILED cases are the existing
+  syncNow asserts in SyncTriggersTest, updated. No SyncSchedulerTest
+  change. Message strings are constants in WorkoutSessionViewModel's
+  companion so tests can reference them.
+- 04: docs: KDoc on SyncOutcome, syncNow and refresh(); a hardening
+  line in docs/status.md (user asked for docs to be current).
+- 04: the step 04 hash is in a follow-up commit, as before.
 
 ## Gotchas
 - 01: the queued-cycle test was order-dependent (reviewer SHOULD-FIX).
@@ -63,3 +72,10 @@
 - 03 reviewer, not fixed: NIT: no many-requester test. NIT: the
   "exactly 2 cycles" check uses delay(1), so it's weak. NIT: follow-up
   cycle failures log the first request's reason.
+- 04 reviewer, not fixed: NIT: no worker test for SIGNED_OUT ->
+  Result.success() (sign-out between the uid check and syncNow). NIT:
+  syncNow's runCatching also catches CancellationException, so a
+  cancelled refresh reports FAILED (older code). NIT: docs/status.md
+  still says CI green at b7334dd; update once CI runs on this work.
+- 05 (me): signed-out pull-to-refresh should now say "Sign in to sync
+  your workouts."

@@ -1,7 +1,7 @@
 package com.rukavina.gymbuddy.domain.sync
 
 /** Records sync requests instead of running them. */
-class RecordingSyncRequester(private val syncNowResult: Boolean = true) : SyncRequester {
+class RecordingSyncRequester(private val syncNowResult: SyncOutcome = SyncOutcome.SYNCED) : SyncRequester {
     val requested = mutableListOf<SyncReason>()
     val syncedNow = mutableListOf<SyncReason>()
 
@@ -9,7 +9,7 @@ class RecordingSyncRequester(private val syncNowResult: Boolean = true) : SyncRe
         requested += reason
     }
 
-    override suspend fun syncNow(reason: SyncReason): Boolean {
+    override suspend fun syncNow(reason: SyncReason): SyncOutcome {
         syncedNow += reason
         return syncNowResult
     }

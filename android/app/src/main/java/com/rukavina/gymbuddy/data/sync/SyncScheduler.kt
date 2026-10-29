@@ -1,6 +1,7 @@
 package com.rukavina.gymbuddy.data.sync
 
 import android.util.Log
+import com.rukavina.gymbuddy.domain.sync.SyncOutcome
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import kotlinx.coroutines.CoroutineScope
@@ -50,12 +51,12 @@ class SyncScheduler(
         }
     }
 
-    override suspend fun syncNow(reason: SyncReason): Boolean {
-        if (!isSignedIn()) return false
+    override suspend fun syncNow(reason: SyncReason): SyncOutcome {
+        if (!isSignedIn()) return SyncOutcome.SIGNED_OUT
         Log.d(TAG, "sync now: $reason")
         return runCatching { runCycle() }
             .onFailure { Log.w(TAG, "sync ($reason) failed", it) }
-            .isSuccess
+            .fold(onSuccess = { SyncOutcome.SYNCED }, onFailure = { SyncOutcome.FAILED })
     }
 
     /** Connectivity came back: sync only if there's something waiting to be pushed. */
