@@ -59,6 +59,9 @@ interface SyncDao {
     @Query("SELECT COUNT(*) FROM sync_outbox")
     fun observeOutboxCount(): Flow<Int>
 
+    @Query("SELECT * FROM sync_outbox ORDER BY enqueuedAt ASC")
+    fun observeOutbox(): Flow<List<OutboxEntryEntity>>
+
     @Query("DELETE FROM sync_outbox WHERE entityType = :type AND entityId = :id")
     suspend fun deleteOutboxEntry(type: SyncEntityType, id: String)
 
@@ -74,10 +77,16 @@ interface SyncDao {
     @Query("SELECT * FROM sync_log ORDER BY id ASC")
     suspend fun getLog(): List<SyncLogEntity>
 
+    @Query("SELECT * FROM sync_log ORDER BY id DESC")
+    fun observeLog(): Flow<List<SyncLogEntity>>
+
     // ---- cursor ----
 
     @Query("SELECT value FROM sync_meta WHERE `key` = :key")
     suspend fun getMeta(key: String): String?
+
+    @Query("SELECT value FROM sync_meta WHERE `key` = :key")
+    fun observeMeta(key: String): Flow<String?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun putMeta(meta: SyncMetaEntity)

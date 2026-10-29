@@ -4,6 +4,8 @@ import android.util.Log
 import com.rukavina.gymbuddy.data.local.entity.OutboxEntryEntity
 import com.rukavina.gymbuddy.data.local.entity.SyncEntityType
 import com.rukavina.gymbuddy.data.local.entity.SyncLogOutcome
+import com.rukavina.gymbuddy.data.remote.generated.infrastructure.Serializer
+import com.rukavina.gymbuddy.data.remote.generated.models.Error as ApiError
 import com.rukavina.gymbuddy.data.remote.generated.models.MutationResult
 import com.rukavina.gymbuddy.data.remote.generated.models.PushRequest
 import com.rukavina.gymbuddy.data.sync.remote.SyncApis
@@ -12,8 +14,16 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import retrofit2.Response
 
-/** A sync step that couldn't complete. Local state is left consistent; nothing is lost. */
-class SyncException(message: String, val httpStatus: Int? = null, cause: Throwable? = null) : Exception(message, cause)
+/**
+ * A sync step that couldn't complete. Local state is left consistent; nothing is lost.
+ * [traceId] comes from the server's error body, when there was one.
+ */
+class SyncException(
+    message: String,
+    val httpStatus: Int? = null,
+    cause: Throwable? = null,
+    val traceId: String? = null
+) : Exception(message, cause)
 
 data class PushSummary(
     val requests: Int = 0,
@@ -268,9 +278,15 @@ class SyncEngine(
     }
 
     private fun <T> bodyOf(what: String, response: Response<T>): T {
-        if (!response.isSuccessful) throw SyncException("$what failed: HTTP ${response.code()}", response.code())
+        if (!response.isSuccessful) {
+            throw SyncException("$what failed: HTTP ${response.code()}", response.code(), traceId = traceIdOf(response))
+        }
         return response.body() ?: throw SyncException("$what failed: empty body", response.code())
     }
+
+    private fun traceIdOf(response: Response<*>): String? = runCatching {
+        response.errorBody()?.string()?.let { Serializer.moshi.adapter(ApiError::class.java).fromJson(it)?.traceId }
+    }.getOrNull()
 
     companion object {
         private const val TAG = "SyncEngine"

@@ -31,6 +31,7 @@ object NavRoutes {
     const val HiddenExercises = "hidden_exercises"
     const val HiddenTemplates = "hidden_templates"
     const val AppPreferences = "app_preferences"
+    const val SyncDebug = "sync_debug"
 
     fun exerciseDetailsRoute(exerciseId: String): String {
         return "exercise_details/$exerciseId"

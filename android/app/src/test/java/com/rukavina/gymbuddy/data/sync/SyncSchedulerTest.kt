@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.sync
 
+import com.rukavina.gymbuddy.domain.sync.SyncOutcome
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -101,5 +102,26 @@ class SyncSchedulerTest {
         scheduler.onNetworkAvailable()
 
         assertEquals(0, cycles)
+    }
+
+    @Test
+    fun `status records the last background cycle, success after failure`() = runTest {
+        var fail = true
+        var clock = 10L
+        val scheduler = SyncScheduler(
+            runCycle = { if (fail) throw SyncException("push failed: HTTP 503", 503, traceId = "t-1") },
+            outboxCount = { 0 },
+            isSignedIn = { true },
+            scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            now = { clock }
+        )
+
+        scheduler.requestSync(SyncReason.APP_FOREGROUND)
+        assertEquals(SyncStatus(10L, SyncOutcome.FAILED, "push failed: HTTP 503", "t-1"), scheduler.status.value)
+
+        fail = false
+        clock = 20L
+        scheduler.requestSync(SyncReason.PERIODIC)
+        assertEquals(SyncStatus(20L, SyncOutcome.SYNCED, null, null), scheduler.status.value)
     }
 }

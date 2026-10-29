@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Info
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.auth.PasswordToggleTextField
@@ -259,8 +261,18 @@ fun SettingsScreen(
                                     onClick = {
                                         bottomNavController.navigate(NavRoutes.About)
                                     },
-                                    showDivider = false
+                                    showDivider = BuildConfig.DEBUG
                                 )
+                                if (BuildConfig.DEBUG) {
+                                    SettingsItem(
+                                        icon = Icons.Default.BugReport,
+                                        label = "Sync debug",
+                                        onClick = {
+                                            bottomNavController.navigate(NavRoutes.SyncDebug)
+                                        },
+                                        showDivider = false
+                                    )
+                                }
                             }
                         }
 
