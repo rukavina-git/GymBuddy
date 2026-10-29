@@ -26,11 +26,15 @@ sealed class LogoutResult {
  * Logging out always wipes local user data. Everything this user owns is
  * on the server by then (or the user chose to discard it), and the next
  * account on this device must not see it or inherit its cursor.
+ *
+ * [runExclusive] runs a block under the sync engine's lock, so a cycle
+ * that is mid-pull finishes before the wipe and can't commit after it.
  */
 class LogoutCoordinator(
     private val store: SyncLocalStore,
     private val flushOutbox: suspend () -> Boolean,
-    private val auth: AuthSession
+    private val auth: AuthSession,
+    private val runExclusive: suspend (suspend () -> Unit) -> Unit
 ) {
     suspend fun requestLogout(): LogoutResult {
         if (store.outboxCount() == 0) return logOutAndDelete()
@@ -45,8 +49,13 @@ class LogoutCoordinator(
 
     /** The "Log out and delete" confirmation: discards unsynced changes along with everything else. */
     suspend fun logOutAndDelete(): LogoutResult.LoggedOut {
-        auth.signOut()
-        store.wipeEverythingForLogout()
+        // Wipe first: if it throws, the user stays signed in with their
+        // data. If sign-out throws, the device is empty and pulls from
+        // scratch next time, which is safe.
+        runExclusive {
+            store.wipeEverythingForLogout()
+            auth.signOut()
+        }
         return LogoutResult.LoggedOut
     }
 

@@ -41,7 +41,8 @@ object SyncModule {
 
     @Provides
     @Singleton
-    fun provideSyncEngine(store: SyncLocalStore, apis: SyncApis) = SyncEngine(store, apis)
+    fun provideSyncEngine(store: SyncLocalStore, apis: SyncApis, auth: AuthSession) =
+        SyncEngine(store, apis, isSignedIn = { auth.currentUid != null })
 
     @Provides
     @Singleton
@@ -58,5 +59,5 @@ object SyncModule {
     @Provides
     @Singleton
     fun provideLogoutCoordinator(store: SyncLocalStore, engine: SyncEngine, auth: AuthSession) =
-        LogoutCoordinator(store, { engine.flushOutbox() }, auth)
+        LogoutCoordinator(store, { engine.flushOutbox() }, auth, { block -> engine.exclusive(block) })
 }

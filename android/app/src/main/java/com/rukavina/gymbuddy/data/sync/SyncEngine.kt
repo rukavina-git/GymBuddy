@@ -65,12 +65,16 @@ class SyncEngine(
     private val apis: SyncApis,
     private val pageSize: Int = DEFAULT_PAGE_SIZE,
     private val pushBatchSize: Int = DEFAULT_PUSH_BATCH,
-    private val pageObserver: PullPageObserver = PullPageObserver { _, _ -> }
+    private val pageObserver: PullPageObserver = PullPageObserver { _, _ -> },
+    private val isSignedIn: () -> Boolean = { true }
 ) {
     private val mutex = Mutex()
 
-    /** A full cycle: push, pull, reference data. */
+    /** A full cycle: push, pull, reference data. Does nothing if signed out by the time it gets the lock. */
     suspend fun sync(): SyncSummary = mutex.withLock {
+        // A cycle queued behind logout must not run once the wipe and
+        // sign-out are done: it would push and pull with no user.
+        if (!isSignedIn()) return@withLock SyncSummary(PushSummary(), PullSummary(), null)
         val conflicted = mutableSetOf<Pair<SyncEntityType, String>>()
         val push = pushLocked(conflicted)
         var pull = pullLocked(fromScratch = false)
@@ -99,6 +103,9 @@ class SyncEngine(
     suspend fun pull(): PullSummary = mutex.withLock { pullLocked(fromScratch = false) }
 
     suspend fun syncReferenceData(): ReferenceSummary = mutex.withLock { referenceLocked() }
+
+    /** Runs [block] holding the sync lock, so no push or pull overlaps it. Logout wipes under it. */
+    suspend fun <T> exclusive(block: suspend () -> T): T = mutex.withLock { block() }
 
     // ---- push ----
 

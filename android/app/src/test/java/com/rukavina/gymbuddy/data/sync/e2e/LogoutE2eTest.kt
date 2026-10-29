@@ -37,7 +37,7 @@ class LogoutE2eTest {
         val engine = phone.engine()
         val auth = FakeAuthSession(uid)
 
-        val result = LogoutCoordinator(phone.store, { engine.flushOutbox() }, auth).requestLogout()
+        val result = LogoutCoordinator(phone.store, { engine.flushOutbox() }, auth, { block -> engine.exclusive(block) }).requestLogout()
 
         assertEquals(LogoutResult.LoggedOut, result)
         assertEquals(1, auth.signOuts)
