@@ -29,19 +29,24 @@ class SyncScheduler(
     override fun requestSync(reason: SyncReason) {
         if (!isSignedIn()) return
         Log.d(TAG, "sync requested: $reason")
-        if (!running.compareAndSet(false, true)) {
-            rerunRequested.set(true)
-            return
-        }
+        // Flag first, then try to claim. If the flag were set after a failed
+        // claim, the runner could finish its last check and exit in between.
+        rerunRequested.set(true)
+        if (!running.compareAndSet(false, true)) return
         scope.launch {
-            try {
-                do {
-                    rerunRequested.set(false)
-                    runCatching { runCycle() }.onFailure { Log.w(TAG, "sync ($reason) failed", it) }
-                } while (rerunRequested.get())
-            } finally {
-                running.set(false)
-            }
+            // A request can still land after the inner loop's last check but
+            // before running is cleared: its claim fails and it only leaves the
+            // flag. Check again once running is cleared, so it isn't lost.
+            do {
+                try {
+                    do {
+                        rerunRequested.set(false)
+                        runCatching { runCycle() }.onFailure { Log.w(TAG, "sync ($reason) failed", it) }
+                    } while (rerunRequested.get())
+                } finally {
+                    running.set(false)
+                }
+            } while (rerunRequested.get() && isSignedIn() && running.compareAndSet(false, true))
         }
     }
 
