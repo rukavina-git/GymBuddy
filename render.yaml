@@ -1,0 +1,31 @@
+# Render blueprint for the hosted backend. Setup, secrets and the
+# move-to-VPS checklist are in docker/README.md ("Hosting").
+#
+# Plain Docker image, no Render-specific code: the app only sees the env
+# vars below, so the same image runs on any host.
+services:
+  - type: web
+    name: gymbuddy-backend
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /v1/health
+    autoDeploy: false
+    envVars:
+      # Spring Boot doesn't read PORT; this only tells Render which port
+      # the container listens on (Dockerfile EXPOSE 8080).
+      - key: PORT
+        value: "8080"
+      # Free instance has 512 MB. Tune in step 04 if it OOMs.
+      - key: JAVA_TOOL_OPTIONS
+        value: -Xmx300m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m
+      # Neon direct (unpooled) host, no password in the URL:
+      # jdbc:postgresql://<host>/<db>?sslmode=require&user=<user>
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: FIREBASE_CREDENTIALS_B64
+        sync: false

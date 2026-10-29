@@ -1,0 +1,55 @@
+name: DB Backup
+
+# Nightly encrypted dump of the hosted database. The repo is public, so
+# the dump is encrypted before it touches disk outside the container and
+# only the .gpg file is uploaded. Restore with docker/restore.sh.
+
+on:
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Dump and encrypt
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Dump database
+        env:
+          # libpq URL, password included:
+          # postgresql://<user>:<password>@<direct-host>/<db>?sslmode=require
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "$BACKUP_DATABASE_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::BACKUP_DATABASE_URL and BACKUP_PASSPHRASE secrets must be set"
+            exit 1
+          fi
+          file="gymbuddy-$(date -u +%Y%m%dT%H%M%SZ).dump.gpg"
+          # pg_dump must be at least the server's major version; keep this
+          # image tag in step with the Neon project's Postgres version.
+          docker run --rm -e BACKUP_DATABASE_URL postgres:17 \
+            sh -c 'pg_dump -Fc --no-owner "$BACKUP_DATABASE_URL"' \
+            | gpg --batch --yes --symmetric --cipher-algo AES256 \
+                --pinentry-mode loopback \
+                --passphrase-fd 3 3<<<"$BACKUP_PASSPHRASE" \
+                --output "$file"
+          test -s "$file"
+          echo "BACKUP_FILE=$file" >> "$GITHUB_ENV"
+
+      - name: Upload encrypted dump
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BACKUP_FILE }}
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 30
+          if-no-files-found: error
