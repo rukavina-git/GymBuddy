@@ -3,7 +3,8 @@
 - [x] 01 Account deletion reaches the backend (steps/01-account-deletion.md) (da09768)
 - [x] 02 Sync debug screen (steps/02-sync-debug-screen.md) (dcb57db)
 - [x] 03 Hosting config and backups (steps/03-hosting-config.md) (6dbb9aa)
-- [ ] 04 Accounts, first release, DNS, restore test (me) (steps/04-host-setup.md)
+- [x] 04 Accounts, first release, DNS, restore test (me) (steps/04-host-setup.md)
+- [ ] 04a restore.sh skips Neon GRANTs (steps/04a-restore-no-acl.md)
 - [ ] 05 Release build and spec point at api.rukavina.app (steps/05-real-host-url.md)
 - [ ] 06 Device checks against the hosted backend (me, deferred) (steps/06-device-checks.md)
 - [ ] 07 CI green, PR develop → main (me) (steps/07-merge-to-main.md)
@@ -41,6 +42,23 @@
   `?sslmode=require&user=` through `DATABASE_URL`.
 - 03: round-trip tested with postgres:16 tools against compose
   postgres:16 (throwaway compose project, torn down after).
+- 04: Neon project on Postgres 17 (default was 18; pg_dump 17 can't
+  dump an 18 server), AWS eu-central-1. Render service
+  gymbuddy-backend (Frankfurt) at gymbuddy-backend-m4hn.onrender.com;
+  `api.rukavina.app` is a Cloudflare CNAME, DNS only (not proxied),
+  Render issues the certificate.
+- 04: the backup workflow was not run on GitHub: `workflow_dispatch`
+  only shows for workflows on the default branch, and db-backup.yml is
+  on develop until step 07. Instead the same dump + gpg commands ran
+  locally in postgres:17, restored with restore.sh into a throwaway
+  postgres:17: tables and flyway_schema_history present.
+- 04: the restore only passed with `--no-acl` added (Neon GRANTs to
+  `neon_superuser`). Fixed in new step 04a.
+- 04: cold start not measured after real idle (the curl hit a warm
+  instance). Spring startup on the free instance took 149s, so expect
+  ~2.5 min on the first request after idle.
+- 04: `FIREBASE_CREDENTIALS_B64` was not in the Keychain on this Mac;
+  a new service account key was generated and stored there.
 
 ## Gotchas
 - 01: reviewer SHOULD items left open: the delete runs in viewModelScope,
@@ -78,3 +96,10 @@
 - From phase4-hardening: the guard hook greps the whole command, so
   text containing " main " or "deploy" in a Bash command is blocked.
   Write docs with Write/Edit, and push in its own command.
+- 04: after step 07 merges, run DB Backup by hand once on GitHub and
+  check the artifact; the nightly cron only starts then.
+- 04: Spring logs "Using generated security password" at startup
+  (UserDetailsServiceAutoConfiguration not excluded). Harmless, worth
+  a cleanup step.
+- 04: on Render, `autoDeploy: false`: a push to develop does not
+  redeploy; use Manual Deploy.
