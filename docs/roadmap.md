@@ -24,8 +24,9 @@ waiting on me
 - [ ] 1.1 Account deletion calls the backend, wipes under sync lock
 - [ ] 1.2 Sync debug screen
 - [ ] 1.3 Deploy config for the free host, nightly backup, restore script
-- [ ] 1.4 (me) Create host + database accounts, deploy, test a restore
-- [ ] 1.5 Release build and spec point at the real host (spec change)
+- [ ] 1.4 (me) Create host + database accounts, deploy, DNS for
+      api.rukavina.app, test a restore
+- [ ] 1.5 Release build and spec point at api.rukavina.app (spec change)
 - [ ] 1.6 (me, deferred) Device checks: hardening list, two devices,
       airplane mode
 - [ ] 1.7 (me) CI green, PR develop → main

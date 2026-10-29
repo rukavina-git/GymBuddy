@@ -115,10 +115,13 @@ offline edits sync, a clean resync on 410.
     `docker/README.md`. The compose file stays the local and future
     VPS setup.
 1.4 **(me)** Create the database and host accounts, set the secrets,
-    deploy, restore a dump into a local Postgres once.
+    deploy, add a CNAME `api.rukavina.app` → the Render service and
+    the custom domain in Render, restore a dump into a local Postgres
+    once.
 1.5 **Point at the real host.** Release `API_BASE_URL` and the spec's
-    production server. **Spec change.** Use a hostname you own if
-    possible (Q-G), so moving hosts later doesn't need an app update.
+    production server, both `https://api.rukavina.app`. **Spec change.**
+    Because it's my own domain, moving hosts later is a DNS change,
+    not an app update.
 1.6 **(me, deferred)** Device checks: the phase4-hardening step 05
     list, two devices converging, airplane-mode edits syncing on
     reconnect, 410 resync.
@@ -213,8 +216,7 @@ Check both free tiers at setup time, since they change.
 **Moving later** (by design, under an hour):
 1. Run the existing `docker/compose.yaml` on the new box, plus Caddy.
 2. `pg_dump` from Neon, `docker/restore.sh` into the new Postgres.
-3. Repoint DNS. If the app uses an onrender.com URL instead of my own
-   domain, it also needs an app update; that's why Q-G matters.
+3. Repoint the `api.rukavina.app` DNS record. No app update needed.
 
 ## 5. Decisions
 
@@ -226,5 +228,5 @@ Check both free tiers at setup time, since they change.
 | Q-D | Client version headers (§8.3) | Yes, in 2.4 |
 | Q-E | SonarQube new-code gate | ADR 0013 as is; revisit in Plan 4 |
 | Q-F | Can a cloud session run the tests? | Open. Needs JDK 17, Android SDK, a google-services.json stand-in, Docker. Check on first remote step |
-| Q-G | Own domain for the API (rukavina.app?) | Open. Strongly recommended before 1.5 |
+| Q-G | Own domain for the API | **api.rukavina.app.** I own rukavina.app; DNS not set up yet (1.4) |
 | Q-H | Can the Figma MCP draw frames, or only read? | Open. Answered in 3.1 |
