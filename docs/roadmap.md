@@ -42,7 +42,7 @@ waiting on me
 
 ## Plan 3: figma-foundation
 
-- [ ] 3.1 (me) Figma file + connect the Figma MCP server to Claude Code
+- [x] 3.1 (me) Figma file + connect the Figma MCP server to Claude Code
 - [ ] 3.2 Design tokens: current theme as Figma variables
 - [ ] 3.3 Component library in Figma, matching ui/components
 - [ ] 3.4 Every v1 screen as a Figma frame

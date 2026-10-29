@@ -229,4 +229,7 @@ Check both free tiers at setup time, since they change.
 | Q-E | SonarQube new-code gate | ADR 0013 as is; revisit in Plan 4 |
 | Q-F | Can a cloud session run the tests? | Open. Needs JDK 17, Android SDK, a google-services.json stand-in, Docker. Check on first remote step |
 | Q-G | Own domain for the API | **api.rukavina.app.** I own rukavina.app; DNS not set up yet (1.4) |
-| Q-H | Can the Figma MCP draw frames, or only read? | Open. Answered in 3.1 |
+| Q-H | Can the Figma MCP draw frames, or only read? | **Both.** Read checked 2026-10-29; write tools exist (`use_figma`, `generate_figma_design`), first real write in 3.2. Starter plan, Full seat. Write tools are exempt from rate limits; read limits for this seat aren't published, so keep read calls lean |
+
+Figma file: https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy
+(MCP server in `.mcp.json`, authenticated on the Mac).
