@@ -1,7 +1,7 @@
 # Progress
 
 - [x] 01 Logout under the sync lock (steps/01-logout-under-sync-lock.md) (a24dc90)
-- [ ] 02 Logout errors never leave a stuck dialog (steps/02-logout-error-states.md)
+- [x] 02 Logout errors never leave a stuck dialog (steps/02-logout-error-states.md) (HASH)
 - [ ] 03 Scheduler never drops a request (steps/03-scheduler-lost-request.md)
 - [ ] 04 Pull-to-refresh message and tests (not detailed yet)
 - [ ] 05 Manual device checks (me)
@@ -14,6 +14,15 @@
   LogoutE2eTest changed too.
 - 01: the commit hash is recorded in a follow-up commit (a commit can't
   contain its own hash).
+- 02: SettingsViewModel calls FirebaseAuth.getInstance() in its
+  constructor, so SettingsViewModelTest is Robolectric + FirebaseApp
+  (like ProfileViewModelTest), not plain fakes. LogoutCoordinator is real,
+  over in-memory Room, with fake flush/auth/runExclusive.
+- 02: Failed carries `afterWarning` so `retryLogout()` repeats the step
+  that failed (logout() vs confirmLogoutAndDelete()). Message is generic
+  ("Couldn't log out. Please try again.") because sign-out can fail
+  after the wipe already ran.
+- 02: the step 02 hash is in a follow-up commit, as in step 01.
 
 ## Gotchas
 - 01: the queued-cycle test was order-dependent (reviewer SHOULD-FIX).
@@ -25,3 +34,14 @@
   This predates step 01.
 - 01: to make a Room write fail in tests, use a SQLite RAISE(ABORT)
   trigger. db.close() doesn't make writes throw.
+- 02: "requestLogout throws" can only be faked via runExclusive (the
+  wipe). The coordinator already swallows flush errors.
+- 02: Room queries leave the main test dispatcher. Wait with
+  `logoutState.first { it != Flushing }` or an UNDISPATCHED
+  `logoutEvent.first()`, never read `.value` right after the call.
+- 02 reviewer, not fixed: SHOULD-FIX: no test for retry after a plain
+  logout failure (afterWarning=false). NIT: no test that data survives a
+  failed wipe. NIT: Failed.message is always the same string.
+- guard-bash.sh greps the whole command for push checks, so a push
+  chained with text containing " main " is blocked. Push in its own
+  command.

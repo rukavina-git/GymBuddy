@@ -1,6 +1,7 @@
 package com.rukavina.gymbuddy.ui.settings
 
 import android.content.Context
+import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
@@ -17,6 +18,7 @@ import com.rukavina.gymbuddy.data.sync.LogoutCoordinator
 import com.rukavina.gymbuddy.data.sync.LogoutResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -123,20 +125,42 @@ class SettingsViewModel @Inject constructor(
         if (_logoutState.value == LogoutUiState.Flushing) return
         _logoutState.value = LogoutUiState.Flushing
         viewModelScope.launch {
-            when (val result = logoutCoordinator.requestLogout()) {
-                LogoutResult.LoggedOut -> finishLogout()
-                is LogoutResult.UnsyncedChanges ->
-                    _logoutState.value = LogoutUiState.UnsyncedWarning(unsyncedChangeLines(result.pendingByType))
+            try {
+                when (val result = logoutCoordinator.requestLogout()) {
+                    LogoutResult.LoggedOut -> finishLogout()
+                    is LogoutResult.UnsyncedChanges ->
+                        _logoutState.value = LogoutUiState.UnsyncedWarning(unsyncedChangeLines(result.pendingByType))
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "logout failed", e)
+                _logoutState.value = LogoutUiState.Failed(LOGOUT_FAILED_MESSAGE, afterWarning = false)
             }
         }
     }
 
     /** "Log out and delete": discard the unsynced changes and sign out. */
     fun confirmLogoutAndDelete() {
+        if (_logoutState.value == LogoutUiState.Flushing) return
+        _logoutState.value = LogoutUiState.Flushing
         viewModelScope.launch {
-            logoutCoordinator.logOutAndDelete()
-            finishLogout()
+            try {
+                logoutCoordinator.logOutAndDelete()
+                finishLogout()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "log out and delete failed", e)
+                _logoutState.value = LogoutUiState.Failed(LOGOUT_FAILED_MESSAGE, afterWarning = true)
+            }
         }
+    }
+
+    /** Retry from [LogoutUiState.Failed]: repeats whichever step failed. */
+    fun retryLogout() {
+        val failed = _logoutState.value as? LogoutUiState.Failed ?: return
+        if (failed.afterWarning) confirmLogoutAndDelete() else logout()
     }
 
     fun cancelLogout() {
@@ -328,5 +352,10 @@ class SettingsViewModel @Inject constructor(
                 onResult(false, e.localizedMessage ?: "Failed to delete account data")
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "SettingsViewModel"
+        const val LOGOUT_FAILED_MESSAGE = "Couldn't log out. Please try again."
     }
 }

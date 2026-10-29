@@ -9,6 +9,11 @@ sealed class LogoutUiState {
     data object Flushing : LogoutUiState()
     /** The push failed: warn before discarding these, grouped by entity type. */
     data class UnsyncedWarning(val lines: List<String>) : LogoutUiState()
+    /**
+     * Logout threw. [afterWarning] says which step
+     * failed, so retry repeats it: "Log out and delete" or the plain logout.
+     */
+    data class Failed(val message: String, val afterWarning: Boolean) : LogoutUiState()
 }
 
 /** One human-readable line per entity type with unsynced changes, e.g. "2 workout sessions". */

@@ -291,6 +291,11 @@ fun SettingsScreen(
                 onConfirm = { viewModel.confirmLogoutAndDelete() },
                 onDismiss = { viewModel.cancelLogout() }
             )
+            is LogoutUiState.Failed -> LogoutFailedDialog(
+                message = state.message,
+                onRetry = { viewModel.retryLogout() },
+                onDismiss = { viewModel.cancelLogout() }
+            )
             LogoutUiState.Idle -> Unit
         }
 
@@ -414,6 +419,29 @@ private fun LogoutConfirmationDialog(
                 )
             ) {
                 Text("Log Out")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun LogoutFailedDialog(
+    message: String,
+    onRetry: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Log Out") },
+        text = { Text(message) },
+        confirmButton = {
+            TextButton(onClick = onRetry) {
+                Text("Retry")
             }
         },
         dismissButton = {
