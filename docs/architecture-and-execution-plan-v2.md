@@ -579,7 +579,7 @@ Distinct from logout, and a store blocker rather than a nicety. App Store guidel
 
 `DELETE /v1/account` must, in one transaction, remove all workout sessions and their trees, all custom exercises and templates, all overlay rows, the profile row, and all change-log entries for the user. It must then delete the Firebase Auth user via the Admin SDK.
 
-**Hard delete, no grace period** (resolving Q-03 from version 1.0). Simpler, unambiguously GDPR-compliant, and a portfolio project should not carry an unnecessary data-retention argument.
+**Hard delete, no grace period** (resolving Q-03 from version 1.0). Simpler, unambiguously GDPR-compliant, and it avoids holding data the product has no use for.
 
 The client flow requires re-authentication immediately before deletion — Firebase requires a recent credential for sensitive operations — plus a typed confirmation and a local wipe on success.
 
@@ -762,7 +762,7 @@ This is the difference between adding offline later as an implementation swap an
 
 **Sign in with Apple is mandatory** (guideline 4.8).
 
-**Local store undecided.** GRDB is more predictable with direct SQL control, which matters for the overlay joins. SwiftData is more idiomatic and better portfolio material but younger, and its behaviour under sync-engine write patterns is not something to assume. Evaluate at Phase 6.
+**Local store undecided.** GRDB is more predictable with direct SQL control, which matters for the overlay joins. SwiftData is more idiomatic and closer to where Apple's platform is heading, but younger, and its behaviour under sync-engine write patterns is not something to assume. Evaluate at Phase 6.
 
 **A `PrivacyInfo.xcprivacy` manifest is required** regardless of analytics decisions, and third-party SDKs including Firebase must supply their own.
 
@@ -785,7 +785,7 @@ Keeping the rule expressed as a small pure function is what makes three implemen
 
 ### 11.3 Privacy and GDPR
 
-Not merely a compliance chore — a portfolio asset given the professional context, and cheap when designed in.
+Not merely a compliance chore: users' training data is theirs, and privacy is cheap when designed in rather than retrofitted.
 
 - **Consent-gated analytics.** `analyticsConsent` lives in device preferences. Firebase Analytics collection stays disabled until consent is granted. Retrofitting consent is materially harder than building it in. Phase 5.
 - **A privacy policy is required** before either store submission, reachable in-app and from a public URL. `rukavina.app` is the intended home.
