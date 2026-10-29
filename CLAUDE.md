@@ -43,4 +43,6 @@ Kotlin backend, sharing nothing but the OpenAPI contract.
 - Never change api/openapi.yaml without saying so explicitly.
 - Never commit directly to main. Work on develop or a feature branch off
   develop. main only via PR from develop, once CI is green.
-- No "Co-Authored-By" or "Claude-Session" lines in commits or PRs.
+- Pushing develop (or a feature branch) is allowed. Never push main.
+- Commits end with a Co-Authored-By line for Claude. No Claude-Session
+  line, and no "Generated with Claude Code" footer in PRs.
