@@ -35,13 +35,11 @@ app/src/google-services.json
 
 # Android Profiling
 *.hprof
-/.claude
 /IMPLEMENTATION_SUMMARY.md
 /ACTIVE_WORKOUT_IMPLEMENTATION.md
 local_assets
 /app/src/main/assets/adi-registration.properties
 /app/debug/output-metadata.json
-/CLAUDE.md
 
 # OWASP dependency-check's local NVD database cache (gigabytes, never commit)
 /dependency-check-data/
