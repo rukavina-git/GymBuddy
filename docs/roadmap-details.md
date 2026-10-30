@@ -184,6 +184,19 @@ not the v2 UI overhaul.
     save, resume after process death).
 4.2 **ImageStorageUtil.** Write the new file first, then delete the
     old one; close streams with `use`.
+4.2a **Auth gate.** No global auth listener today: if the session dies
+    outside the app (account deleted on another device, token revoked),
+    the app stays on its screens and sync fails silently with 401. Add
+    one place that watches Firebase auth state and sync 401s, sends
+    the user to Login with a "Session expired, sign in again" message.
+    Don't wipe unsynced data before a re-sign-in as the same uid;
+    a different uid goes through the logout wipe. Found in Plan 2 T4.
+    UI change, so it needs a Figma frame first (Plan 3).
+4.2b **Durable push.** Swiping the app away right after an offline edit
+    kills the network callback, so the edit waits for the next app
+    open. When the outbox becomes non-empty, enqueue a unique one-off
+    WorkManager job with a CONNECTED constraint that pushes; it
+    survives process death. Found in Plan 2 T10.
 4.3 **Release workflow.** On a `v*` tag: build a signed, minified AAB,
     versionCode from the tag. Signing secrets in GitHub secrets (me).
 4.4 **(me)** Release build manual pass: R8, sign-in, sync, logout,

@@ -115,3 +115,9 @@
 - 05: a device with a pre-v26 DB (old dev builds) crashes on open:
   "A migration from 25 to 26 was required". Expected, no path below
   the baseline. Fix with `adb shell pm clear com.rukavina.gymbuddy`.
+- 05: device checks round 1 (debug, hosted backend): T2, T4, T5, T7,
+  T8, T9, T10, T11, T12, T13 pass. T7: offline logout with a clean
+  outbox succeeds (sign-out is local), so the failure dialog is only
+  covered by unit tests. T13: Google sign-in after deletion creates a
+  new empty account, as expected. Found: roadmap 4.2a (auth gate),
+  4.2b (durable push).

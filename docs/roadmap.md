@@ -55,6 +55,8 @@ waiting on me
 - [ ] 4.0 Dependency CVEs: Dependabot alerts + OWASP, restore OWASP triggers
 - [ ] 4.1 ViewModel test gaps (active workout failure paths)
 - [ ] 4.2 Fix ImageStorageUtil data-loss bug
+- [ ] 4.2a Auth gate: dead session → Login with "session expired"
+- [ ] 4.2b Durable push: WorkManager job when the outbox is non-empty
 - [ ] 4.3 Tag-triggered signed release AAB workflow
 - [ ] 4.4 (me) Release build manual pass
 - [ ] 4.5 (me) Privacy policy online + in-app link, Play Console, Data Safety
