@@ -1,6 +1,6 @@
 # Progress
 
-- [x] 01 One DB builder, schema export, v26 baseline (steps/01-one-db-builder.md) (HASH)
+- [x] 01 One DB builder, schema export, v26 baseline (steps/01-one-db-builder.md) (ef70690)
 - [ ] 02 Remove the destructive migration fallback (steps/02-no-destructive-migration.md)
 - [ ] 03 Crashlytics (steps/03-crashlytics.md)
 - [ ] 04 Backend JSON logs, sync metrics, client headers (steps/04-backend-observability.md)
