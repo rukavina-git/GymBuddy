@@ -8,7 +8,7 @@
 - [x] 05 Release build and spec point at api.rukavina.app (steps/05-real-host-url.md) (e543aad)
 - [x] 05a Keep the free Render instance awake (me) (steps/05a-keep-warm.md)
 - [ ] 06 Device checks against the hosted backend (me, deferred) (steps/06-device-checks.md)
-- [ ] 07 CI green, PR develop → main (me) (steps/07-merge-to-main.md)
+- [x] 07 CI green, PR develop → main (me) (steps/07-merge-to-main.md) (20dbff5)
 
 ## Deviations
 - 01: the coordinator takes `deleteOnServer: suspend () -> Int` (HTTP
@@ -74,6 +74,15 @@
   Europe region, email alerts. Checks answer in ~130 ms. Curl from
   Windows: UP in 0.41s. Idle time before the curl and the Render
   "spun down" log check were not reported.
+- 07: PR #2 got stuck on required checks that never reported: every
+  required-check workflow had a `paths` filter on `pull_request`, and
+  the PR had no backend changes. Filters removed for PRs (a3907f8,
+  5c83ecb); push filters stay.
+- 07: Dependabot alerts fixed before merge (0be5bfe):
+  sonarqube-scan-action v6, `npm audit fix` in api/, `basic-ftp`
+  override ^6.2.4. Most of roadmap 4.0; OWASP part still open.
+- 07: after the merge, also on develop: SECURITY.md, CodeQL advanced
+  setup (`codeql.yml`), root composite Gradle build for the IDE.
 
 ## Gotchas
 - 01: reviewer SHOULD items left open: the delete runs in viewModelScope,
@@ -132,3 +141,10 @@
   750 free hours. A second free service on the same account would run
   past the limit. UptimeRobot hits /v1/health only, so it never shows
   up as sync traffic.
+- 07: Android Build now runs on every PR into develop too (no paths
+  filter on pull_request). API Docs PR runs share the `pages`
+  concurrency group, so they can queue behind a Pages publish.
+- 07: CodeQL default setup must be off while `codeql.yml` exists.
+  Its android job needs the GOOGLE_SERVICES_JSON secret, so it fails
+  on PRs from forks.
+- 07: DB Backup hand run after the merge: not confirmed yet.

@@ -8,8 +8,8 @@ roadmap.md (overview) and roadmap-details.md.
 
 Details: STATUS_2026-09-26.md §Phase 4.
 
-- CI green on develop at b7334dd: Android Build, Backend Build, Sync E2E,
-  API Client Codegen, API Docs. OWASP fails, non-blocking (ADR 0013).
+- CI green on main at 20dbff5 (PR #2, Plan 1 merged): Android Build,
+  Backend Build, Sync E2E, API Client Codegen, API Docs. OWASP fails, non-blocking (ADR 0013).
 - Hardening (docs/plans/phase4-hardening): logout wipes under the sync
   lock, logout errors end in a closable dialog, the scheduler never drops
   a request, pull-to-refresh says "sign in" when signed out
