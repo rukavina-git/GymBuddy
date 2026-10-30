@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.sync.remote
 
+import com.rukavina.gymbuddy.data.remote.generated.apis.AccountApi
 import com.rukavina.gymbuddy.data.remote.generated.apis.ReferenceApi
 import com.rukavina.gymbuddy.data.remote.generated.apis.SyncApi
 import com.rukavina.gymbuddy.data.remote.generated.infrastructure.Serializer
@@ -18,7 +19,7 @@ fun interface AuthTokenProvider {
 }
 
 /** The generated Retrofit services the sync engine talks to. */
-class SyncApis(val sync: SyncApi, val reference: ReferenceApi) {
+class SyncApis(val sync: SyncApi, val reference: ReferenceApi, val account: AccountApi) {
 
     companion object {
         /**
@@ -33,7 +34,11 @@ class SyncApis(val sync: SyncApi, val reference: ReferenceApi) {
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
                 .build()
-            return SyncApis(retrofit.create(SyncApi::class.java), retrofit.create(ReferenceApi::class.java))
+            return SyncApis(
+                retrofit.create(SyncApi::class.java),
+                retrofit.create(ReferenceApi::class.java),
+                retrofit.create(AccountApi::class.java)
+            )
         }
 
         private fun defaultClient() = OkHttpClient.Builder()

@@ -9,6 +9,20 @@ sealed class LogoutUiState {
     data object Flushing : LogoutUiState()
     /** The push failed: warn before discarding these, grouped by entity type. */
     data class UnsyncedWarning(val lines: List<String>) : LogoutUiState()
+    /**
+     * Logout threw. [afterWarning] says which step
+     * failed, so retry repeats it: "Log out and delete" or the plain logout.
+     */
+    data class Failed(val message: String, val afterWarning: Boolean) : LogoutUiState()
+}
+
+/** Where account deletion stands, for SettingsScreen. Done is the accountDeletedEvent. */
+sealed class AccountDeletionUiState {
+    data object Idle : AccountDeletionUiState()
+    /** Deleting on the server, then wiping the device. */
+    data object InProgress : AccountDeletionUiState()
+    /** [canRetry] is false when the user must re-authenticate first (close, then start over). */
+    data class Failed(val message: String, val canRetry: Boolean) : AccountDeletionUiState()
 }
 
 /** One human-readable line per entity type with unsynced changes, e.g. "2 workout sessions". */

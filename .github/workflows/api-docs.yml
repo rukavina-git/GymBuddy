@@ -7,11 +7,10 @@ on:
       - 'api/**'
       - '.github/workflows/api-docs.yml'
   # Lint and build run on PRs into main too; only a push to main deploys.
+  # No paths filter: main's ruleset requires the lint and build check, and a
+  # skipped workflow never reports it.
   pull_request:
     branches: [ main ]
-    paths:
-      - 'api/**'
-      - '.github/workflows/api-docs.yml'
 
 concurrency:
   group: pages

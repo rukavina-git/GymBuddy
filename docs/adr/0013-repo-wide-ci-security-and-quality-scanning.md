@@ -71,3 +71,12 @@ plus its own workflow files), on push to `main` or `develop` and on pull
 requests into `main`. Manual dispatch still works as a fallback. A
 newly published CVE against unchanged dependencies still needs a manual
 run to surface.
+
+## Update — 2026-10-07
+
+OWASP's two status checks (backend and android) were removed from `main`'s
+required status checks in the branch protection ruleset — the workflow
+itself is unchanged and still runs and reports to the Security tab, it just
+no longer blocks merges. Cause: a classloader incompatibility between
+Gradle 9 and the `org.owasp:dependency-check-gradle` plugin. To be
+revisited before any app-store submission.

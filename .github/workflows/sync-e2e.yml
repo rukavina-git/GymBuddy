@@ -16,14 +16,10 @@ on:
       - 'api/openapi.yaml'
       - 'api/kotlin-client-config.yaml'
       - '.github/workflows/sync-e2e.yml'
+  # No paths filter: main's ruleset requires the sync E2E check, and a
+  # skipped workflow never reports it.
   pull_request:
     branches: [ main ]
-    paths:
-      - 'android/**'
-      - 'backend/**'
-      - 'api/openapi.yaml'
-      - 'api/kotlin-client-config.yaml'
-      - '.github/workflows/sync-e2e.yml'
 
 jobs:
   e2e:

@@ -1,11 +1,26 @@
 package com.rukavina.gymbuddy.data.sync
 
 import android.util.Log
+import com.rukavina.gymbuddy.domain.sync.SyncOutcome
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
+
+/**
+ * How the last sync cycle went, for the debug screen. In memory only:
+ * lost on process death, which is fine for a debug tool.
+ */
+data class SyncStatus(
+    val lastSyncAt: Long? = null,
+    val lastOutcome: SyncOutcome? = null,
+    val lastError: String? = null,
+    val lastTraceId: String? = null
+)
 
 /**
  * Turns sync requests into sync cycles. Requests that arrive while a
@@ -20,37 +35,57 @@ class SyncScheduler(
     private val runCycle: suspend () -> Unit,
     private val outboxCount: suspend () -> Int,
     private val isSignedIn: () -> Boolean,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val now: () -> Long = System::currentTimeMillis
 ) : SyncRequester {
 
     private val running = AtomicBoolean(false)
     private val rerunRequested = AtomicBoolean(false)
 
+    private val _status = MutableStateFlow(SyncStatus())
+    val status: StateFlow<SyncStatus> = _status.asStateFlow()
+
     override fun requestSync(reason: SyncReason) {
         if (!isSignedIn()) return
         Log.d(TAG, "sync requested: $reason")
-        if (!running.compareAndSet(false, true)) {
-            rerunRequested.set(true)
-            return
-        }
+        // Flag first, then try to claim. If the flag were set after a failed
+        // claim, the runner could finish its last check and exit in between.
+        rerunRequested.set(true)
+        if (!running.compareAndSet(false, true)) return
         scope.launch {
-            try {
-                do {
-                    rerunRequested.set(false)
-                    runCatching { runCycle() }.onFailure { Log.w(TAG, "sync ($reason) failed", it) }
-                } while (rerunRequested.get())
-            } finally {
-                running.set(false)
-            }
+            // A request can still land after the inner loop's last check but
+            // before running is cleared: its claim fails and it only leaves the
+            // flag. Check again once running is cleared, so it isn't lost.
+            do {
+                try {
+                    // Consume the flag before each cycle. A late claimer whose
+                    // request an earlier cycle already served finds it cleared
+                    // and runs nothing.
+                    while (rerunRequested.getAndSet(false)) runAndRecord(reason)
+                } finally {
+                    running.set(false)
+                }
+            } while (rerunRequested.get() && isSignedIn() && running.compareAndSet(false, true))
         }
     }
 
-    override suspend fun syncNow(reason: SyncReason): Boolean {
-        if (!isSignedIn()) return false
+    override suspend fun syncNow(reason: SyncReason): SyncOutcome {
+        if (!isSignedIn()) return SyncOutcome.SIGNED_OUT
         Log.d(TAG, "sync now: $reason")
-        return runCatching { runCycle() }
-            .onFailure { Log.w(TAG, "sync ($reason) failed", it) }
-            .isSuccess
+        return runAndRecord(reason)
+    }
+
+    private suspend fun runAndRecord(reason: SyncReason): SyncOutcome {
+        val result = runCatching { runCycle() }.onFailure { Log.w(TAG, "sync ($reason) failed", it) }
+        val error = result.exceptionOrNull()
+        val outcome = if (error == null) SyncOutcome.SYNCED else SyncOutcome.FAILED
+        _status.value = SyncStatus(
+            lastSyncAt = now(),
+            lastOutcome = outcome,
+            lastError = error?.let { it.message ?: it::class.simpleName },
+            lastTraceId = (error as? SyncException)?.traceId
+        )
+        return outcome
     }
 
     /** Connectivity came back: sync only if there's something waiting to be pushed. */

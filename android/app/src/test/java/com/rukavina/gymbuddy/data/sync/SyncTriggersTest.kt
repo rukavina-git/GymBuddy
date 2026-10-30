@@ -13,6 +13,7 @@ import androidx.work.WorkerParameters
 import androidx.work.testing.TestListenableWorkerBuilder
 import androidx.work.testing.WorkManagerTestInitHelper
 import com.rukavina.gymbuddy.domain.sync.RecordingSyncRequester
+import com.rukavina.gymbuddy.domain.sync.SyncOutcome
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -104,7 +105,7 @@ class SyncTriggersTest {
         val ran = harness.scheduler.syncNow(SyncReason.MANUAL)
 
         assertEquals(0, harness.cycles)
-        assertEquals(false, ran)
+        assertEquals(SyncOutcome.SIGNED_OUT, ran)
     }
 
     @Test
@@ -115,7 +116,7 @@ class SyncTriggersTest {
             isSignedIn = { true },
             scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
         )
-        assertEquals(false, scheduler.syncNow(SyncReason.MANUAL))
+        assertEquals(SyncOutcome.FAILED, scheduler.syncNow(SyncReason.MANUAL))
     }
 
     // ---- periodic ----
@@ -152,11 +153,11 @@ class SyncTriggersTest {
 
     @Test
     fun `the periodic worker runs a PERIODIC sync and retries if it fails`() = runTest {
-        val ok = RecordingSyncRequester(syncNowResult = true)
+        val ok = RecordingSyncRequester(syncNowResult = SyncOutcome.SYNCED)
         assertEquals(ListenableWorker.Result.success(), worker(ok, signedIn = true).doWork())
         assertEquals(listOf(SyncReason.PERIODIC), ok.syncedNow)
 
-        val failing = RecordingSyncRequester(syncNowResult = false)
+        val failing = RecordingSyncRequester(syncNowResult = SyncOutcome.FAILED)
         assertEquals(ListenableWorker.Result.retry(), worker(failing, signedIn = true).doWork())
     }
 

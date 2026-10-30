@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Info
@@ -55,11 +56,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.auth.PasswordToggleTextField
 import com.rukavina.gymbuddy.ui.components.ScreenHeader
 import kotlinx.coroutines.launch
+
+private const val LOG_OUT = "Log Out"
 
 /**
  * State for password setup/change dialog.
@@ -235,7 +239,10 @@ fun SettingsScreen(
                                 SettingsItem(
                                     icon = Icons.Default.DeleteForever,
                                     label = "Delete Account",
-                                    onClick = { deleteAccountDialogState = deleteAccountDialogState.copy(isVisible = true) },
+                                    onClick = {
+                                        viewModel.loadDeletionWarning()
+                                        deleteAccountDialogState = deleteAccountDialogState.copy(isVisible = true)
+                                    },
                                     showDivider = false,
                                     tint = MaterialTheme.colorScheme.error
                                 )
@@ -254,8 +261,18 @@ fun SettingsScreen(
                                     onClick = {
                                         bottomNavController.navigate(NavRoutes.About)
                                     },
-                                    showDivider = false
+                                    showDivider = BuildConfig.DEBUG
                                 )
+                                if (BuildConfig.DEBUG) {
+                                    SettingsItem(
+                                        icon = Icons.Default.BugReport,
+                                        label = "Sync debug",
+                                        onClick = {
+                                            bottomNavController.navigate(NavRoutes.SyncDebug)
+                                        },
+                                        showDivider = false
+                                    )
+                                }
                             }
                         }
 
@@ -271,7 +288,7 @@ fun SettingsScreen(
                                     containerColor = MaterialTheme.colorScheme.error
                                 )
                             ) {
-                                Text("Log Out", color = Color.White)
+                                Text(LOG_OUT, color = Color.White)
                             }
                         }
                     }
@@ -289,6 +306,11 @@ fun SettingsScreen(
             is LogoutUiState.UnsyncedWarning -> UnsyncedChangesDialog(
                 lines = state.lines,
                 onConfirm = { viewModel.confirmLogoutAndDelete() },
+                onDismiss = { viewModel.cancelLogout() }
+            )
+            is LogoutUiState.Failed -> LogoutFailedDialog(
+                message = state.message,
+                onRetry = { viewModel.retryLogout() },
                 onDismiss = { viewModel.cancelLogout() }
             )
             LogoutUiState.Idle -> Unit
@@ -360,35 +382,52 @@ fun SettingsScreen(
             )
         }
 
+        val accountDeletionState by viewModel.accountDeletionState.collectAsState()
+        when (val state = accountDeletionState) {
+            AccountDeletionUiState.InProgress -> DeletingAccountDialog()
+            is AccountDeletionUiState.Failed -> AccountDeletionFailedDialog(
+                message = state.message,
+                onRetry = if (state.canRetry) ({ viewModel.retryAccountDeletion() }) else null,
+                onDismiss = { viewModel.dismissAccountDeletion() }
+            )
+            AccountDeletionUiState.Idle -> Unit
+        }
+
         // Delete account dialog
+        val deletionUnsyncedLines by viewModel.deletionUnsyncedLines.collectAsState()
         if (deleteAccountDialogState.isVisible) {
             DeleteAccountDialog(
                 state = deleteAccountDialogState,
                 isGoogleOnly = uiState.isGoogleOnly,
+                unsyncedLines = deletionUnsyncedLines,
                 onStateChange = { deleteAccountDialogState = it },
                 onDeleteWithPassword = { password ->
                     deleteAccountDialogState = deleteAccountDialogState.copy(isLoading = true)
                     viewModel.deleteAccountWithPassword(password) { success, error ->
-                        if (!success) {
-                            deleteAccountDialogState = deleteAccountDialogState.copy(
+                        deleteAccountDialogState = if (success) {
+                            // Re-auth done: the deletion dialogs below take over.
+                            DeleteAccountDialogState()
+                        } else {
+                            deleteAccountDialogState.copy(
                                 isLoading = false,
                                 error = error ?: "Failed to delete account"
                             )
                         }
-                        // On success, the accountDeletedEvent will handle navigation
                     }
                 },
                 onDeleteWithGoogle = {
                     deleteAccountDialogState = deleteAccountDialogState.copy(isLoading = true)
                     val webClientId = context.getString(R.string.default_web_client_id)
                     viewModel.deleteAccountWithGoogle(context, webClientId) { success, error ->
-                        if (!success) {
-                            deleteAccountDialogState = deleteAccountDialogState.copy(
+                        deleteAccountDialogState = if (success) {
+                            // Re-auth done: the deletion dialogs below take over.
+                            DeleteAccountDialogState()
+                        } else {
+                            deleteAccountDialogState.copy(
                                 isLoading = false,
                                 error = error ?: "Failed to delete account"
                             )
                         }
-                        // On success, the accountDeletedEvent will handle navigation
                     }
                 },
                 onDismiss = { deleteAccountDialogState = DeleteAccountDialogState() }
@@ -404,7 +443,7 @@ private fun LogoutConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Log Out") },
+        title = { Text(LOG_OUT) },
         text = { Text("Are you sure you want to log out?") },
         confirmButton = {
             TextButton(
@@ -413,7 +452,7 @@ private fun LogoutConfirmationDialog(
                     contentColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Log Out")
+                Text(LOG_OUT)
             }
         },
         dismissButton = {
@@ -425,10 +464,75 @@ private fun LogoutConfirmationDialog(
 }
 
 @Composable
+private fun LogoutFailedDialog(
+    message: String,
+    onRetry: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(LOG_OUT) },
+        text = { Text(message) },
+        confirmButton = {
+            TextButton(onClick = onRetry) {
+                Text("Retry")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun DeletingAccountDialog() {
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text("Delete Account") },
+        text = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.width(16.dp))
+                Text("Deleting your account…")
+            }
+        },
+        confirmButton = {}
+    )
+}
+
+/** [onRetry] is null when retrying can't help (the user must re-authenticate): only Close is shown. */
+@Composable
+private fun AccountDeletionFailedDialog(
+    message: String,
+    onRetry: (() -> Unit)?,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Delete Account") },
+        text = { Text(message) },
+        confirmButton = {
+            if (onRetry != null) {
+                TextButton(onClick = onRetry) {
+                    Text("Retry")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
+
+@Composable
 private fun SyncingBeforeLogoutDialog() {
     AlertDialog(
         onDismissRequest = {},
-        title = { Text("Log Out") },
+        title = { Text(LOG_OUT) },
         text = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp))
@@ -634,6 +738,7 @@ private fun PasswordManagementDialog(
 private fun DeleteAccountDialog(
     state: DeleteAccountDialogState,
     isGoogleOnly: Boolean,
+    unsyncedLines: List<String>,
     onStateChange: (DeleteAccountDialogState) -> Unit,
     onDeleteWithPassword: (String) -> Unit,
     onDeleteWithGoogle: () -> Unit,
@@ -664,6 +769,13 @@ private fun DeleteAccountDialog(
                     Text("• Workout history", style = MaterialTheme.typography.bodySmall)
                     Text("• Custom exercises", style = MaterialTheme.typography.bodySmall)
                     Text("• All saved data", style = MaterialTheme.typography.bodySmall)
+                }
+
+                if (unsyncedLines.isNotEmpty()) {
+                    Text(
+                        text = "These changes haven't synced yet and will be lost too: " + unsyncedLines.joinToString(", "),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
 
                 if (state.error.isNotEmpty()) {

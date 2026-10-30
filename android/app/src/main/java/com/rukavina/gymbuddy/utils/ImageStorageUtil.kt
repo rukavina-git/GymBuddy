@@ -72,4 +72,9 @@ object ImageStorageUtil {
             e.printStackTrace()
         }
     }
+
+    /** Deletes the whole profile images folder, for account deletion. */
+    fun deleteAllProfileImages(context: Context) {
+        File(context.filesDir, PROFILE_IMAGES_DIR).deleteRecursively()
+    }
 }

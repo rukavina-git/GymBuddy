@@ -15,11 +15,10 @@ on:
     paths:
       - 'api/**'
       - '.github/workflows/api-client-codegen.yml'
+  # No paths filter: main's ruleset requires the codegen check, and a
+  # skipped workflow never reports it.
   pull_request:
     branches: [ main ]
-    paths:
-      - 'api/**'
-      - '.github/workflows/api-client-codegen.yml'
 
 jobs:
   codegen:

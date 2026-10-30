@@ -48,7 +48,7 @@ jobs:
         uses: ./.github/actions/coverage-exclusions
 
       - name: SonarCloud scan (whole codebase)
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:

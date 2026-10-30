@@ -20,6 +20,7 @@ import com.rukavina.gymbuddy.data.remote.generated.models.UserTemplateState
 import com.rukavina.gymbuddy.data.remote.generated.models.WorkoutSession
 import com.rukavina.gymbuddy.data.remote.generated.models.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.model.SyncState
+import kotlinx.coroutines.flow.Flow
 import java.time.Clock
 
 /** One outbox entry loaded and serialised for a push. */
@@ -319,6 +320,15 @@ class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
     }
 
     suspend fun log(): List<SyncLogEntity> = syncDao.getLog()
+
+    // ---- debug screen ----
+
+    fun observeOutbox(): Flow<List<OutboxEntryEntity>> = syncDao.observeOutbox()
+
+    /** Newest first. */
+    fun observeLog(): Flow<List<SyncLogEntity>> = syncDao.observeLog()
+
+    fun observeCursor(): Flow<String?> = syncDao.observeMeta(KEY_CURSOR)
 
     private companion object {
         const val KEY_CURSOR = "pull_cursor"

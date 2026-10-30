@@ -4,6 +4,8 @@ import android.util.Log
 import com.rukavina.gymbuddy.data.local.entity.OutboxEntryEntity
 import com.rukavina.gymbuddy.data.local.entity.SyncEntityType
 import com.rukavina.gymbuddy.data.local.entity.SyncLogOutcome
+import com.rukavina.gymbuddy.data.remote.generated.infrastructure.Serializer
+import com.rukavina.gymbuddy.data.remote.generated.models.Error as ApiError
 import com.rukavina.gymbuddy.data.remote.generated.models.MutationResult
 import com.rukavina.gymbuddy.data.remote.generated.models.PushRequest
 import com.rukavina.gymbuddy.data.sync.remote.SyncApis
@@ -12,8 +14,16 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import retrofit2.Response
 
-/** A sync step that couldn't complete. Local state is left consistent; nothing is lost. */
-class SyncException(message: String, val httpStatus: Int? = null, cause: Throwable? = null) : Exception(message, cause)
+/**
+ * A sync step that couldn't complete. Local state is left consistent; nothing is lost.
+ * [traceId] comes from the server's error body, when there was one.
+ */
+class SyncException(
+    message: String,
+    val httpStatus: Int? = null,
+    cause: Throwable? = null,
+    val traceId: String? = null
+) : Exception(message, cause)
 
 data class PushSummary(
     val requests: Int = 0,
@@ -65,12 +75,16 @@ class SyncEngine(
     private val apis: SyncApis,
     private val pageSize: Int = DEFAULT_PAGE_SIZE,
     private val pushBatchSize: Int = DEFAULT_PUSH_BATCH,
-    private val pageObserver: PullPageObserver = PullPageObserver { _, _ -> }
+    private val pageObserver: PullPageObserver = PullPageObserver { _, _ -> },
+    private val isSignedIn: () -> Boolean = { true }
 ) {
     private val mutex = Mutex()
 
-    /** A full cycle: push, pull, reference data. */
+    /** A full cycle: push, pull, reference data. Does nothing if signed out by the time it gets the lock. */
     suspend fun sync(): SyncSummary = mutex.withLock {
+        // A cycle queued behind logout must not run once the wipe and
+        // sign-out are done: it would push and pull with no user.
+        if (!isSignedIn()) return@withLock SyncSummary(PushSummary(), PullSummary(), null)
         val conflicted = mutableSetOf<Pair<SyncEntityType, String>>()
         val push = pushLocked(conflicted)
         var pull = pullLocked(fromScratch = false)
@@ -99,6 +113,9 @@ class SyncEngine(
     suspend fun pull(): PullSummary = mutex.withLock { pullLocked(fromScratch = false) }
 
     suspend fun syncReferenceData(): ReferenceSummary = mutex.withLock { referenceLocked() }
+
+    /** Runs [block] holding the sync lock, so no push or pull overlaps it. Logout wipes under it. */
+    suspend fun <T> exclusive(block: suspend () -> T): T = mutex.withLock { block() }
 
     // ---- push ----
 
@@ -261,9 +278,15 @@ class SyncEngine(
     }
 
     private fun <T> bodyOf(what: String, response: Response<T>): T {
-        if (!response.isSuccessful) throw SyncException("$what failed: HTTP ${response.code()}", response.code())
+        if (!response.isSuccessful) {
+            throw SyncException("$what failed: HTTP ${response.code()}", response.code(), traceId = traceIdOf(response))
+        }
         return response.body() ?: throw SyncException("$what failed: empty body", response.code())
     }
+
+    private fun traceIdOf(response: Response<*>): String? = runCatching {
+        response.errorBody()?.string()?.let { Serializer.moshi.adapter(ApiError::class.java).fromJson(it)?.traceId }
+    }.getOrNull()
 
     companion object {
         private const val TAG = "SyncEngine"

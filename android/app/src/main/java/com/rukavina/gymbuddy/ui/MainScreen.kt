@@ -24,6 +24,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
+import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.navigation.BottomNavItem
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.exercise.ExerciseScreen
@@ -46,6 +47,7 @@ import com.rukavina.gymbuddy.ui.settings.AppPreferencesScreen
 import com.rukavina.gymbuddy.ui.settings.HiddenExercisesScreen
 import com.rukavina.gymbuddy.ui.settings.HiddenTemplatesScreen
 import com.rukavina.gymbuddy.ui.settings.SettingsScreen
+import com.rukavina.gymbuddy.ui.settings.debug.SyncDebugScreen
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutScreen
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
 
@@ -269,6 +271,11 @@ fun MainScreen(rootNavController: NavHostController) {
 
             composable(NavRoutes.AppPreferences) {
                 AppPreferencesScreen(navController = bottomNavController)
+            }
+            if (BuildConfig.DEBUG) {
+                composable(NavRoutes.SyncDebug) {
+                    SyncDebugScreen(navController = bottomNavController)
+                }
             }
 
             composable(NavRoutes.ActiveWorkout) {

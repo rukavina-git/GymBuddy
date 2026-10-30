@@ -10,6 +10,15 @@ enum class SyncReason {
     SIGNED_IN
 }
 
+/** How a [SyncRequester.syncNow] call ended. */
+enum class SyncOutcome {
+    SYNCED,
+    /** Nobody is signed in, so no cycle ran. Retrying won't help until someone signs in. */
+    SIGNED_OUT,
+    /** The cycle ran and failed (offline, server error). Worth retrying. */
+    FAILED
+}
+
 /**
  * How the rest of the app asks for a sync, without depending on the
  * sync engine itself. Only the triggers in SyncTriggers, session
@@ -20,6 +29,6 @@ interface SyncRequester {
     /** Fire and forget. Coalesced with any sync already running. Ignored when signed out. */
     fun requestSync(reason: SyncReason)
 
-    /** Runs a sync and waits for it. Returns false if it couldn't complete (offline, signed out, server error). */
-    suspend fun syncNow(reason: SyncReason): Boolean
+    /** Runs a sync and waits for it. Says whether it synced, was skipped because signed out, or failed. */
+    suspend fun syncNow(reason: SyncReason): SyncOutcome
 }

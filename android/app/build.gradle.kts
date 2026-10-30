@@ -58,7 +58,7 @@ android {
         }
         release {
             signingConfig = signingConfigs.getByName("release")
-            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.gymbuddy.app/")}\"")
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.rukavina.app/")}\"")
             ndk {
                 debugSymbolLevel = "FULL"
             }
@@ -86,6 +86,13 @@ android {
                 // themselves unless this is set - see
                 // app/src/test/.../data/sync/e2e/E2eBackend.kt.
                 it.systemProperty("gymbuddy.e2e.baseUrl", findProperty("e2eBaseUrl")?.toString() ?: "")
+                // Robolectric loads app classes through its own class
+                // loader, which JaCoCo skips by default: every Robolectric
+                // test then reports 0% coverage for the code it runs.
+                it.extensions.configure<JacocoTaskExtension> {
+                    isIncludeNoLocationClasses = true
+                    excludes = listOf("jdk.internal.*")
+                }
             }
         }
     }
