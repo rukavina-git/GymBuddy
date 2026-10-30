@@ -1,7 +1,7 @@
 # Progress
 
 - [x] 01 One DB builder, schema export, v26 baseline (steps/01-one-db-builder.md) (ef70690)
-- [ ] 02 Remove the destructive migration fallback (steps/02-no-destructive-migration.md)
+- [x] 02 Remove the destructive migration fallback (steps/02-no-destructive-migration.md) (HASH)
 - [ ] 03 Crashlytics (steps/03-crashlytics.md)
 - [ ] 04 Backend JSON logs, sync metrics, client headers (steps/04-backend-observability.md)
 - [ ] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md)
@@ -15,6 +15,16 @@
   data/local/db/DatabaseConfig.kt, plus `DATABASE_NAME`.
 - 01: the baseline test also checks a `sync_meta` row survives opening
   (proves no destructive wipe), beyond "every table exists".
+- 02: the fallback was in DatabaseConfig.kt (moved by step 01), not
+  AppModule. `MigrationPathTest` reads the current version from an
+  in-memory Room DB (`openHelper.writableDatabase.version`) because
+  `@Database` isn't retained at runtime.
+- 02: throwaway check (not committed): v27 + `sync_meta.note`, no
+  migration → path, validate and baseline tests all fail. With
+  `Migration(26, 27)` → all pass. With a no-op migration → validate
+  fails ("Migration didn't properly handle: sync_meta"). Reverted.
+- 02: 26.json vs shipped v26 checked: no `@Entity` file changed after
+  the v26 bump (7a59788), so 26.json is the shipped schema.
 
 ## Gotchas
 - From phase4-closeout: the guard hook greps the whole Bash command,
@@ -39,3 +49,9 @@
   .gitignore. Don't stage it.
 - 1.6 (device checks against the hosted backend) is still open in
   Plan 1. Doing them before step 02 means they test today's DB setup.
+- 02: without the fallback, any version bump without a migration
+  crashes on open, in debug too. `MigrationPathTest` only accepts
+  single steps `Migration(n, n+1)`.
+- 02: the first build after a version bump exports `<n>.json` after
+  assets merge; Robolectric may report "Cannot find the schema file"
+  until the next run. Commit the new JSON.

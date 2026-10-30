@@ -11,4 +11,3 @@ const val DATABASE_NAME = "gym_buddy_db"
  */
 fun RoomDatabase.Builder<AppDatabase>.applyAppConfig(): RoomDatabase.Builder<AppDatabase> =
     addMigrations(*ALL_MIGRATIONS)
-        .fallbackToDestructiveMigration() // Phase 5 step 02 removes this
