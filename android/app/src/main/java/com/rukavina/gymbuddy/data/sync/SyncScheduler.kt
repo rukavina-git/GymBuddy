@@ -1,6 +1,8 @@
 package com.rukavina.gymbuddy.data.sync
 
 import android.util.Log
+import com.rukavina.gymbuddy.data.crash.CrashReporter
+import com.rukavina.gymbuddy.data.crash.NoOpCrashReporter
 import com.rukavina.gymbuddy.domain.sync.SyncOutcome
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
@@ -9,7 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * How the last sync cycle went, for the debug screen. In memory only:
@@ -30,13 +34,17 @@ data class SyncStatus(
  * Takes plain functions rather than the engine so the trigger logic can
  * be tested without a network. SyncModule wires in the real
  * SyncEngine.sync and outbox count.
+ *
+ * A failed cycle is reported as a non-fatal, except when it was
+ * cancelled or the device was offline: those are expected, not bugs.
  */
 class SyncScheduler(
     private val runCycle: suspend () -> Unit,
     private val outboxCount: suspend () -> Int,
     private val isSignedIn: () -> Boolean,
     private val scope: CoroutineScope,
-    private val now: () -> Long = System::currentTimeMillis
+    private val now: () -> Long = System::currentTimeMillis,
+    private val crashReporter: CrashReporter = NoOpCrashReporter
 ) : SyncRequester {
 
     private val running = AtomicBoolean(false)
@@ -79,6 +87,7 @@ class SyncScheduler(
         val result = runCatching { runCycle() }.onFailure { Log.w(TAG, "sync ($reason) failed", it) }
         val error = result.exceptionOrNull()
         val outcome = if (error == null) SyncOutcome.SYNCED else SyncOutcome.FAILED
+        if (error != null && isReportable(error)) report(error, reason)
         _status.value = SyncStatus(
             lastSyncAt = now(),
             lastOutcome = outcome,
@@ -86,6 +95,19 @@ class SyncScheduler(
             lastTraceId = (error as? SyncException)?.traceId
         )
         return outcome
+    }
+
+    private fun isReportable(error: Throwable) =
+        error !is CancellationException && generateSequence(error) { it.cause }.none { it is IOException }
+
+    private fun report(error: Throwable, reason: SyncReason) {
+        val sync = error as? SyncException
+        val keys = buildMap {
+            put("reason", reason.name)
+            sync?.traceId?.let { put("traceId", it) }
+            sync?.httpStatus?.let { put("httpStatus", it.toString()) }
+        }
+        crashReporter.recordNonFatal(error, keys)
     }
 
     /** Connectivity came back: sync only if there's something waiting to be pushed. */

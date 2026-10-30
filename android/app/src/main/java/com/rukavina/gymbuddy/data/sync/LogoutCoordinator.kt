@@ -1,7 +1,12 @@
 package com.rukavina.gymbuddy.data.sync
 
 import android.util.Log
+import com.rukavina.gymbuddy.data.crash.CrashReporter
+import com.rukavina.gymbuddy.data.crash.NoOpCrashReporter
 import com.rukavina.gymbuddy.data.local.entity.SyncEntityType
+
+/** The non-fatal reported when logout discards unsynced changes. */
+class DiscardedOnLogoutException(message: String) : Exception(message)
 
 sealed class LogoutResult {
     /** Signed out and local user data wiped. */
@@ -29,12 +34,17 @@ sealed class LogoutResult {
  *
  * [runExclusive] runs a block under the sync engine's lock, so a cycle
  * that is mid-pull finishes before the wipe and can't commit after it.
+ *
+ * Discarded changes are reported as one non-fatal before the wipe
+ * (architecture plan §6.8): counts and entity ids per type, never the
+ * payloads, so no workout data leaves the device this way.
  */
 class LogoutCoordinator(
     private val store: SyncLocalStore,
     private val flushOutbox: suspend () -> Boolean,
     private val auth: AuthSession,
-    private val runExclusive: suspend (suspend () -> Unit) -> Unit
+    private val runExclusive: suspend (suspend () -> Unit) -> Unit,
+    private val crashReporter: CrashReporter = NoOpCrashReporter
 ) {
     suspend fun requestLogout(): LogoutResult {
         if (store.outboxCount() == 0) return logOutAndDelete()
@@ -53,10 +63,21 @@ class LogoutCoordinator(
         // data. If sign-out throws, the device is empty and pulls from
         // scratch next time, which is safe.
         runExclusive {
+            reportDiscarded()
             store.wipeEverythingForLogout()
             auth.signOut()
         }
         return LogoutResult.LoggedOut
+    }
+
+    private suspend fun reportDiscarded() {
+        val byType = store.outbox().groupBy({ it.entityType }, { it.entityId })
+        if (byType.isEmpty()) return
+        val summary = byType.entries.joinToString { (type, ids) -> "${ids.size} $type" }
+        crashReporter.recordNonFatal(
+            DiscardedOnLogoutException("Logout discarded unsynced changes: $summary"),
+            byType.entries.associate { (type, ids) -> "discarded_$type" to ids.joinToString(",") }
+        )
     }
 
     private companion object {

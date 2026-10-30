@@ -2,7 +2,7 @@
 
 - [x] 01 One DB builder, schema export, v26 baseline (steps/01-one-db-builder.md) (ef70690)
 - [x] 02 Remove the destructive migration fallback (steps/02-no-destructive-migration.md) (85606bc)
-- [ ] 03 Crashlytics (steps/03-crashlytics.md)
+- [x] 03 Crashlytics (steps/03-crashlytics.md)
 - [ ] 04 Backend JSON logs, sync metrics, client headers (steps/04-backend-observability.md)
 - [ ] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md)
 
@@ -25,6 +25,26 @@
   fails ("Migration didn't properly handle: sync_meta"). Reverted.
 - 02: 26.json vs shipped v26 checked: no `@Entity` file changed after
   the v26 bump (7a59788), so 26.json is the shipped schema.
+- 03: collection is off in debug via a manifest placeholder
+  (`crashlyticsEnabled`), not `setCrashlyticsCollectionEnabled` at
+  startup. This also covers crashes that happen before `onCreate`.
+- 03: "offline" means any `IOException` in the cause chain. SyncEngine
+  wraps every IOException in `SyncException(cause = e)`, so a bare
+  `is IOException` check would never match.
+- 03: the logout report has counts and ids only, no payloads (the
+  step's recommendation). Ids go in per-call custom keys
+  `discarded_<TYPE>` (comma-joined), the error is
+  `DiscardedOnLogoutException`.
+- 03: crash reporter is a constructor param with a `NoOpCrashReporter`
+  default, so existing test call sites didn't change.
+- 03: mapping upload is off unless `-Pgymbuddy.uploadMapping=true`.
+- 03: no test for `setUserId` in `FirebaseAuthSession.observeSignIn`
+  (needs a real FirebaseAuth).
+- 03: reviewer findings not fixed (no blockers):
+  - id keys truncate at 1024 chars (about 27 UUIDs per type)
+  - the IOException filter also hides TLS errors and malformed JSON
+  - `reportDiscarded()` isn't guarded, so a reporter failure blocks
+    logout
 
 ## Gotchas
 - From phase4-closeout: the guard hook greps the whole Bash command,
@@ -55,3 +75,8 @@
 - 02: the first build after a version bump exports `<n>.json` after
   assets merge; Robolectric may report "Cannot find the schema file"
   until the next run. Commit the new JSON.
+- 03: tester or release builds without `-Pgymbuddy.uploadMapping=true`
+  give obfuscated stack traces in the Firebase console. Add it to the
+  release checklist.
+- 03: Crashlytics custom key values are capped at 1024 chars.
+  Discarded ids beyond that are lost silently.

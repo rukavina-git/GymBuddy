@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.openapi.generator)
     jacoco
     id("org.owasp.dependencycheck") version "13.0.0"
@@ -46,6 +47,8 @@ android {
         versionCode = 5
         versionName = "0.0.2-SNAPSHOT"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Crash reporting, read by the manifest. Off in debug builds.
+        manifestPlaceholders["crashlyticsEnabled"] = "true"
     }
 
     signingConfigs {
@@ -59,6 +62,7 @@ android {
 
     buildTypes {
         debug {
+            manifestPlaceholders["crashlyticsEnabled"] = "false"
             // 10.0.2.2 is the emulator's alias for the host machine, where
             // the backend runs locally. Override with -Pgymbuddy.apiBaseUrl.
             buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("http://10.0.2.2:8080/")}\"")
@@ -68,6 +72,11 @@ android {
             buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.rukavina.app/")}\"")
             ndk {
                 debugSymbolLevel = "FULL"
+            }
+            // Mapping upload needs Firebase credentials; local and CI
+            // builds skip it. Pass -Pgymbuddy.uploadMapping=true to upload.
+            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                mappingFileUploadEnabled = findProperty("gymbuddy.uploadMapping") == "true"
             }
             isMinifyEnabled = true
             isShrinkResources = true
@@ -170,6 +179,7 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.crashlytics)
 
     // Google Sign-In (Credential Manager)
     implementation(libs.credentials)

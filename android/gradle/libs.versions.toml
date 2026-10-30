@@ -30,6 +30,7 @@ datastore = "1.2.1"
 kizitonwoseCalendar = "2.10.1"
 material3 = "1.4.0"
 googleServices = "4.5.0"
+crashlyticsGradle = "3.0.8"
 googleidVersion = "1.2.0"
 kotlinxCoroutinesTest = "1.10.2"
 turbine = "1.2.0"
@@ -67,7 +68,7 @@ testExtJunit = { module = "androidx.test.ext:junit", version.ref = "testExtJunit
 lifecycleKtx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleKtx" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx"}
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 credentials = { module = "androidx.credentials:credentials", version.ref = "credentialsManager" }
 credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsManager" }
@@ -115,4 +116,5 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlyticsGradle" }
 openapi-generator = { id = "org.openapi.generator", version.ref = "openapiGenerator" }

@@ -1,6 +1,7 @@
 package com.rukavina.gymbuddy.data.sync
 
 import androidx.room.Room
+import com.rukavina.gymbuddy.data.crash.FakeCrashReporter
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.local.entity.SyncEntityType
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
@@ -139,6 +140,50 @@ class LogoutCoordinatorTest {
         assertTrue(store.log().isEmpty())
         assertNotNull(db.exerciseDao())
         assertFalse(auth.currentUid != null)
+    }
+
+    // ---- crash report of discarded changes (§6.8) ----
+
+    @Test
+    fun `log out and delete reports discarded ids per type before the wipe`() = runBlocking {
+        val first = SyncFixtures.session()
+        val second = SyncFixtures.session()
+        val exercise = SyncFixtures.exercise()
+        sessions.createWorkoutSession(first)
+        sessions.createWorkoutSession(second)
+        exercises.createExercise(exercise)
+        var outboxAtReport = -1
+        val reporter = object : com.rukavina.gymbuddy.data.crash.CrashReporter {
+            val delegate = FakeCrashReporter()
+            override fun recordNonFatal(error: Throwable, keys: Map<String, String>) {
+                outboxAtReport = runBlocking { store.outboxCount() }
+                delegate.recordNonFatal(error, keys)
+            }
+            override fun setUserId(uid: String?) = delegate.setUserId(uid)
+        }
+
+        LogoutCoordinator(store, { false }, auth, direct, reporter).logOutAndDelete()
+
+        assertEquals("reported before the wipe", 3, outboxAtReport)
+        val report = reporter.delegate.reports.single()
+        assertTrue(report.error is DiscardedOnLogoutException)
+        assertEquals(setOf("discarded_WORKOUT_SESSION", "discarded_EXERCISE"), report.keys.keys)
+        assertEquals(setOf(first.id, second.id), report.keys.getValue("discarded_WORKOUT_SESSION").split(",").toSet())
+        assertEquals(exercise.id, report.keys.getValue("discarded_EXERCISE"))
+        assertEquals(1, auth.signOuts)
+    }
+
+    @Test
+    fun `a logout whose flush succeeded reports nothing`() = runBlocking {
+        sessions.createWorkoutSession(SyncFixtures.session())
+        val reporter = FakeCrashReporter()
+        // The flush pushes everything, as the real engine would on success.
+        val coordinator = LogoutCoordinator(store, { db.syncDao().wipeOutbox(); true }, auth, direct, reporter)
+
+        assertEquals(LogoutResult.LoggedOut, coordinator.requestLogout())
+
+        assertEquals(emptyList<FakeCrashReporter.Report>(), reporter.reports)
+        assertEquals(1, auth.signOuts)
     }
 
     // ---- logout under the sync lock ----

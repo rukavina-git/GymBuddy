@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.sync
 
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
+import com.rukavina.gymbuddy.data.crash.CrashReporter
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import kotlinx.coroutines.Dispatchers
@@ -34,11 +35,16 @@ class FirebaseAuthSession(authProvider: () -> FirebaseAuth = { FirebaseAuth.getI
 
     override fun signOut() = auth.signOut()
 
-    /** Syncs as soon as someone signs in, so a fresh install or a new account pulls its data straight away. */
-    fun observeSignIn(requester: SyncRequester) {
+    /**
+     * Syncs as soon as someone signs in, so a fresh install or a new
+     * account pulls its data straight away. Also keeps crash reports
+     * attributed to the signed-in uid, cleared on sign-out.
+     */
+    fun observeSignIn(requester: SyncRequester, crashReporter: CrashReporter) {
         var lastUid: String? = null
         auth.addAuthStateListener { firebaseAuth ->
             val uid = firebaseAuth.currentUser?.uid
+            if (uid != lastUid) crashReporter.setUserId(uid)
             if (uid != null && uid != lastUid) requester.requestSync(SyncReason.SIGNED_IN)
             lastUid = uid
         }
