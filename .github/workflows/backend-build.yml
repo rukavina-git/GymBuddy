@@ -9,14 +9,10 @@ on:
       - '.github/workflows/_gradle-test.yml'
       - '.github/workflows/_sonar.yml'
       - '.github/actions/coverage-exclusions/**'
+  # No paths filter: main's ruleset requires the backend Test and Sonar
+  # checks, and a skipped workflow never reports them.
   pull_request:
     branches: [ main ]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend-build.yml'
-      - '.github/workflows/_gradle-test.yml'
-      - '.github/workflows/_sonar.yml'
-      - '.github/actions/coverage-exclusions/**'
 
 jobs:
   exclusions:
