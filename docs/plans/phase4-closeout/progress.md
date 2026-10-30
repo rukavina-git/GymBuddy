@@ -5,7 +5,7 @@
 - [x] 03 Hosting config and backups (steps/03-hosting-config.md) (6dbb9aa)
 - [x] 04 Accounts, first release, DNS, restore test (me) (steps/04-host-setup.md)
 - [x] 04a restore.sh skips Neon GRANTs (steps/04a-restore-no-acl.md) (2cad7cd)
-- [ ] 05 Release build and spec point at api.rukavina.app (steps/05-real-host-url.md)
+- [x] 05 Release build and spec point at api.rukavina.app (steps/05-real-host-url.md)
 - [ ] 05a Keep the free Render instance awake (me) (steps/05a-keep-warm.md)
 - [ ] 06 Device checks against the hosted backend (me, deferred) (steps/06-device-checks.md)
 - [ ] 07 CI green, PR develop → main (me) (steps/07-merge-to-main.md)
@@ -65,6 +65,11 @@
   ~2.5 min on the first request after idle.
 - 04: `FIREBASE_CREDENTIALS_B64` was not in the Keychain on this Mac;
   a new service account key was generated and stored there.
+- 05: api/README.md never mentioned the old host; no edit. History
+  docs (roadmap-details, architecture plan §8.3, STATUS_2026-09-26)
+  keep `api.gymbuddy.app` on purpose.
+- 05: `assembleRelease` built in the session (no signing needed);
+  release BuildConfig has `https://api.rukavina.app/`.
 
 ## Gotchas
 - 01: reviewer SHOULD items left open: the delete runs in viewModelScope,
@@ -116,3 +121,6 @@
   "permission denied".
 - 04a: in zsh, `read -s "VAR?prompt"` failed when run via a pasted
   `! ...` line; `NEON=$(pbpaste)` worked for passing the Neon URL.
+- 05: a release APK now talks to the free Render instance; the first
+  request after idle waits ~2.5 min until 05a keeps it warm. No Render
+  redeploy needed (the spec servers block isn't used at runtime).

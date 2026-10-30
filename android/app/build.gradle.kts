@@ -58,7 +58,7 @@ android {
         }
         release {
             signingConfig = signingConfigs.getByName("release")
-            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.gymbuddy.app/")}\"")
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.rukavina.app/")}\"")
             ndk {
                 debugSymbolLevel = "FULL"
             }

@@ -43,7 +43,7 @@ info:
     email: ivankarlo.rukavina@gmail.com
 
 servers:
-  - url: https://api.gymbuddy.app
+  - url: https://api.rukavina.app
     description: Production
   - url: http://localhost:8080
     description: Local development
