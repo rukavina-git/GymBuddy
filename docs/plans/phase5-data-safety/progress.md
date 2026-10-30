@@ -3,7 +3,7 @@
 - [x] 01 One DB builder, schema export, v26 baseline (steps/01-one-db-builder.md) (ef70690)
 - [x] 02 Remove the destructive migration fallback (steps/02-no-destructive-migration.md) (85606bc)
 - [x] 03 Crashlytics (steps/03-crashlytics.md) (5ea9e45)
-- [x] 04 Backend JSON logs, sync metrics, client headers (steps/04-backend-observability.md) (HASH)
+- [x] 04 Backend JSON logs, sync metrics, client headers (steps/04-backend-observability.md) (f221f0d)
 - [ ] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md)
 
 ## Deviations
