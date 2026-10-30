@@ -34,7 +34,7 @@ trap 'rm -f "$tmp"' EXIT
 gpg --batch --yes --quiet --decrypt --pinentry-mode loopback \
   --passphrase-fd 3 --output "$tmp" "$dump" 3<<<"$BACKUP_PASSPHRASE"
 
-pg_restore --clean --if-exists --no-owner --exit-on-error \
+pg_restore --clean --if-exists --no-owner --no-acl --exit-on-error \
   --dbname "$target" "$tmp"
 
 echo "Restored $dump"

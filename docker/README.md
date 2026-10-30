@@ -65,6 +65,9 @@ unencrypted.
 
    Needs `gpg` and `pg_restore` (same or newer major version) locally.
    `--clean --if-exists` drops and replaces existing objects.
+   `--no-acl` skips GRANTs: a Neon dump grants to Neon-only roles
+   (`neon_superuser`) that don't exist elsewhere, and the app connects
+   as the database owner anyway.
 
 The target server must run the same Postgres major version as the
 source, or newer. A pg_dump 17 dump fails on a 16 server

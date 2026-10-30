@@ -4,7 +4,7 @@
 - [x] 02 Sync debug screen (steps/02-sync-debug-screen.md) (dcb57db)
 - [x] 03 Hosting config and backups (steps/03-hosting-config.md) (6dbb9aa)
 - [x] 04 Accounts, first release, DNS, restore test (me) (steps/04-host-setup.md)
-- [ ] 04a restore.sh skips Neon GRANTs (steps/04a-restore-no-acl.md)
+- [x] 04a restore.sh skips Neon GRANTs (steps/04a-restore-no-acl.md)
 - [ ] 05 Release build and spec point at api.rukavina.app (steps/05-real-host-url.md)
 - [ ] 06 Device checks against the hosted backend (me, deferred) (steps/06-device-checks.md)
 - [ ] 07 CI green, PR develop → main (me) (steps/07-merge-to-main.md)
@@ -47,6 +47,11 @@
   gymbuddy-backend (Frankfurt) at gymbuddy-backend-m4hn.onrender.com;
   `api.rukavina.app` is a Cloudflare CNAME, DNS only (not proxied),
   Render issues the certificate.
+- 04a: roadmap had no 04a line; added "1.4a" (ticked).
+- 04a: real-dump test used a throwaway gpg passphrase, not the real
+  BACKUP_PASSPHRASE: Neon dump in postgres:17 → restore.sh → throwaway
+  postgres:17, all 13 tables incl. flyway_schema_history listed. Also
+  a synthetic dump with neon_superuser default privileges + GRANTs.
 - 04: the backup workflow was not run on GitHub: `workflow_dispatch`
   only shows for workflows on the default branch, and db-backup.yml is
   on develop until step 07. Instead the same dump + gpg commands ran
@@ -103,3 +108,10 @@
   a cleanup step.
 - 04: on Render, `autoDeploy: false`: a push to develop does not
   redeploy; use Manual Deploy.
+- 04a: reviewer NIT left open: README says "the app connects as the
+  database owner". True only if the restore runs as the app's DB user
+  (`--no-owner` + `--no-acl` give the restoring role ownership and no
+  GRANTs). Restoring as an admin while the app uses another role gives
+  "permission denied".
+- 04a: in zsh, `read -s "VAR?prompt"` failed when run via a pasted
+  `! ...` line; `NEON=$(pbpaste)` worked for passing the Neon URL.
