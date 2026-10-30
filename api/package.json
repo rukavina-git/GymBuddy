@@ -12,5 +12,8 @@
     "@redocly/cli": "^2.0.0",
     "@stoplight/spectral-cli": "^6.11.0",
     "swagger-ui-dist": "^5.32.13"
+  },
+  "overrides": {
+    "basic-ftp": "^6.2.4"
   }
 }
