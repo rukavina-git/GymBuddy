@@ -63,9 +63,10 @@ android {
     buildTypes {
         debug {
             manifestPlaceholders["crashlyticsEnabled"] = "false"
-            // 10.0.2.2 is the emulator's alias for the host machine, where
-            // the backend runs locally. Override with -Pgymbuddy.apiBaseUrl.
-            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("http://10.0.2.2:8080/")}\"")
+            // The hosted backend, as in release (there's only one server).
+            // For a local backend on the emulator:
+            // -Pgymbuddy.apiBaseUrl=http://10.0.2.2:8080/
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.rukavina.app/")}\"")
         }
         release {
             signingConfig = signingConfigs.getByName("release")

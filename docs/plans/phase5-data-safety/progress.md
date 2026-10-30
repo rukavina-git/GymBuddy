@@ -108,3 +108,10 @@
   `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs` in the dashboard by hand.
 - 04: a new Spring bean named like a Boot one (`requestContextFilter`)
   fails context load with BeanDefinitionOverrideException.
+- 05: debug builds now default to the hosted backend (one server for
+  now). Local backend on the emulator:
+  `-Pgymbuddy.apiBaseUrl=http://10.0.2.2:8080/`. Debug and release
+  write to the same database.
+- 05: a device with a pre-v26 DB (old dev builds) crashes on open:
+  "A migration from 25 to 26 was required". Expected, no path below
+  the baseline. Fix with `adb shell pm clear com.rukavina.gymbuddy`.
