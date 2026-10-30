@@ -12,17 +12,10 @@ on:
       - '.github/workflows/_gradle-test.yml'
       - '.github/workflows/_sonar.yml'
       - '.github/actions/coverage-exclusions/**'
+  # No paths filter: main's ruleset requires the android Test, Sonar and
+  # APK checks, and a skipped workflow never reports them.
   pull_request:
     branches: [ main, develop ]
-    paths:
-      - 'android/**'
-      # The app generates its API client from these at build time.
-      - 'api/openapi.yaml'
-      - 'api/kotlin-client-config.yaml'
-      - '.github/workflows/android-build.yml'
-      - '.github/workflows/_gradle-test.yml'
-      - '.github/workflows/_sonar.yml'
-      - '.github/actions/coverage-exclusions/**'
 
 jobs:
   exclusions:
