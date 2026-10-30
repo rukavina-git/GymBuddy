@@ -65,6 +65,8 @@ waiting on me
 
 ## Later
 
+- Fix OWASP findings, restore its push/PR triggers (manual-only since
+  2026-10-30; do before Plan 4's release)
 - Move to paid hosting (e.g. DigitalOcean): restore dump, repoint DNS
 - Phase 6 iOS (designs already in Figma), Phase 7 store launch
 - v2 list: architecture plan §14.2
