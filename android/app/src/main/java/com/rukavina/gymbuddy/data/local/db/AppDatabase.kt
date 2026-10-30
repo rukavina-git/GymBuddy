@@ -1,8 +1,6 @@
 package com.rukavina.gymbuddy.data.local.db
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.rukavina.gymbuddy.data.local.converter.ExerciseConverters
@@ -49,7 +47,7 @@ import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
         SyncMetaEntity::class
     ],
     version = 26,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(MuscleGroupConverter::class, ProfileEnumConverters::class, ExerciseConverters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -63,23 +61,4 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userExerciseStateDao(): UserExerciseStateDao
     abstract fun userTemplateStateDao(): UserTemplateStateDao
     abstract fun syncDao(): SyncDao
-
-    companion object {
-        @Volatile
-        private var INSTANCE: AppDatabase? = null
-
-        fun getDatabase(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "gym_app_database"
-                )
-                    .fallbackToDestructiveMigration(false)
-                    .build()
-                INSTANCE = instance
-                instance
-            }
-        }
-    }
 }

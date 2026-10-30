@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.google.services)
@@ -13,6 +14,12 @@ plugins {
 
 kotlin {
     jvmToolchain(17)
+}
+
+// Exported Room schemas, one JSON per version. Committed: migration
+// tests build old versions from them.
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 // Output of openApiGenerate below.
@@ -100,6 +107,12 @@ android {
     sourceSets {
         getByName("main") {
             kotlin.directories.add(generatedClientDir.get().dir("src/main/kotlin").asFile.path)
+        }
+        // MigrationTestHelper reads the exported schemas as assets.
+        // Robolectric only sees the merged debug assets (test source set
+        // assets are ignored), so they ship in debug APKs, not release.
+        getByName("debug") {
+            assets.directories.add("$projectDir/schemas")
         }
     }
 }

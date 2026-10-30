@@ -35,7 +35,7 @@ waiting on me
 
 ## Plan 2: phase5-data-safety
 
-- [ ] 2.1 One DB builder, schema export, v26 baseline, migration tests
+- [x] 2.1 One DB builder, schema export, v26 baseline, migration tests
 - [ ] 2.2 Remove destructive migration fallback
 - [ ] 2.3 Crashlytics (crashes, sync non-fatals, discarded logout data)
 - [ ] 2.4 Backend JSON logs, sync metrics, client version headers
