@@ -28,7 +28,7 @@ waiting on me
       api.rukavina.app, test a restore
 - [x] 1.4a restore.sh skips Neon GRANTs (--no-acl)
 - [x] 1.5 Release build and spec point at api.rukavina.app (spec change)
-- [ ] 1.5a (me) Uptime ping keeps the free Render instance awake
+- [x] 1.5a (me) Uptime ping keeps the free Render instance awake
 - [ ] 1.6 (me, deferred) Device checks: hardening list, two devices,
       airplane mode
 - [ ] 1.7 (me) CI green, PR develop → main

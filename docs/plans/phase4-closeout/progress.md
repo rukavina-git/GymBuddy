@@ -6,7 +6,7 @@
 - [x] 04 Accounts, first release, DNS, restore test (me) (steps/04-host-setup.md)
 - [x] 04a restore.sh skips Neon GRANTs (steps/04a-restore-no-acl.md) (2cad7cd)
 - [x] 05 Release build and spec point at api.rukavina.app (steps/05-real-host-url.md) (e543aad)
-- [ ] 05a Keep the free Render instance awake (me) (steps/05a-keep-warm.md)
+- [x] 05a Keep the free Render instance awake (me) (steps/05a-keep-warm.md)
 - [ ] 06 Device checks against the hosted backend (me, deferred) (steps/06-device-checks.md)
 - [ ] 07 CI green, PR develop → main (me) (steps/07-merge-to-main.md)
 
@@ -70,6 +70,10 @@
   keep `api.gymbuddy.app` on purpose.
 - 05: `assembleRelease` built in the session (no signing needed);
   release BuildConfig has `https://api.rukavina.app/`.
+- 05a: UptimeRobot HTTP(s) monitor on /v1/health, 5 min interval,
+  Europe region, email alerts. Checks answer in ~130 ms. Curl from
+  Windows: UP in 0.41s. Idle time before the curl and the Render
+  "spun down" log check were not reported.
 
 ## Gotchas
 - 01: reviewer SHOULD items left open: the delete runs in viewModelScope,
@@ -124,3 +128,7 @@
 - 05: a release APK now talks to the free Render instance; the first
   request after idle waits ~2.5 min until 05a keeps it warm. No Render
   redeploy needed (the spec servers block isn't used at runtime).
+- 05a: the ping keeps the instance up ~730 h/month, close to Render's
+  750 free hours. A second free service on the same account would run
+  past the limit. UptimeRobot hits /v1/health only, so it never shows
+  up as sync traffic.
