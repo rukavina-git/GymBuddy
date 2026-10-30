@@ -1,0 +1,79 @@
+name: CodeQL
+
+# Advanced setup. Default setup's autobuild can't pick between the two
+# Gradle builds (android/ and backend/), and Kotlin needs a real build,
+# so each module is compiled by hand as its own java-kotlin analysis.
+# Turn default setup off in Settings while this file exists.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }}${{ matrix.module && format(' {0}', matrix.module) || '' }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: actions
+            build-mode: none
+          - language: javascript-typescript
+            build-mode: none
+          - language: java-kotlin
+            build-mode: manual
+            module: backend
+            java-version: '21'
+            gradle-task: classes testClasses
+          - language: java-kotlin
+            build-mode: manual
+            module: android
+            java-version: '17'
+            gradle-task: :app:compileDebugKotlin :app:compileDebugUnitTestKotlin
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        if: matrix.build-mode == 'manual'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java-version }}
+
+      - name: Create google-services.json
+        if: matrix.module == 'android'
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/src/google-services.json
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      # CodeQL traces the compiler, so no daemon and no build cache:
+      # a cached task would skip compilation and leave nothing to trace.
+      - name: Build ${{ matrix.module }}
+        if: matrix.build-mode == 'manual'
+        working-directory: ${{ matrix.module }}
+        run: ./gradlew --no-daemon --no-build-cache ${{ matrix.gradle-task }}
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}${{ matrix.module && format('/{0}', matrix.module) || '' }}

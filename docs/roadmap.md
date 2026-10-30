@@ -31,7 +31,7 @@ waiting on me
 - [x] 1.5a (me) Uptime ping keeps the free Render instance awake
 - [ ] 1.6 (me, deferred) Device checks: hardening list, two devices,
       airplane mode
-- [ ] 1.7 (me) CI green, PR develop → main
+- [x] 1.7 (me) CI green, PR develop → main
 
 ## Plan 2: phase5-data-safety
 

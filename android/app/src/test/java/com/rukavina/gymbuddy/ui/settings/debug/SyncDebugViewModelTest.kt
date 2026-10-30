@@ -16,8 +16,9 @@ import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import com.rukavina.gymbuddy.testutil.MainDispatcherRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
@@ -68,10 +69,14 @@ class SyncDebugViewModelTest {
 
     private val viewModels = mutableListOf<SyncDebugViewModel>()
 
-    /** uiState keeps Room collectors alive for 5s after the last subscriber; stop them before Main is reset. */
+    /**
+     * uiState keeps Room collectors alive for 5s after the last subscriber; stop them before Main is reset.
+     * Join, not just cancel: a collector Room is resuming from its own thread would otherwise touch
+     * Dispatchers.Main while the rule resets it ("Dispatchers.Main is used concurrently with setting it").
+     */
     @After
     fun tearDown() {
-        viewModels.forEach { it.viewModelScope.cancel() }
+        runBlocking { viewModels.forEach { it.viewModelScope.coroutineContext.job.cancelAndJoin() } }
         db.close()
     }
 
