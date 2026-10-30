@@ -5,7 +5,7 @@
 - [x] 03 Hosting config and backups (steps/03-hosting-config.md) (6dbb9aa)
 - [x] 04 Accounts, first release, DNS, restore test (me) (steps/04-host-setup.md)
 - [x] 04a restore.sh skips Neon GRANTs (steps/04a-restore-no-acl.md) (2cad7cd)
-- [x] 05 Release build and spec point at api.rukavina.app (steps/05-real-host-url.md)
+- [x] 05 Release build and spec point at api.rukavina.app (steps/05-real-host-url.md) (e543aad)
 - [ ] 05a Keep the free Render instance awake (me) (steps/05a-keep-warm.md)
 - [ ] 06 Device checks against the hosted backend (me, deferred) (steps/06-device-checks.md)
 - [ ] 07 CI green, PR develop → main (me) (steps/07-merge-to-main.md)
