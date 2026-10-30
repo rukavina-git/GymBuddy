@@ -19,6 +19,9 @@ Kotlin backend, sharing nothing but the OpenAPI contract.
             ./gradlew bootRun (needs DATABASE_URL, FIREBASE_CREDENTIALS_B64)
 - android:  ./gradlew assembleDebug · ./gradlew testDebugUnitTest
             (JDK 17, needs app/src/google-services.json)
+- Root settings.gradle.kts is an IDE-only composite build (includes
+  backend and android). Don't add build logic there; keep both
+  wrappers on the same Gradle version as the root one.
 - No ktlint/detekt. Android Lint (./gradlew lint) exists but CI doesn't run it.
 
 ## API contract
