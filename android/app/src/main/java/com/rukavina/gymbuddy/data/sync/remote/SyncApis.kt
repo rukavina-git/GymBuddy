@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.sync.remote
 
+import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.data.remote.generated.apis.AccountApi
 import com.rukavina.gymbuddy.data.remote.generated.apis.ReferenceApi
 import com.rukavina.gymbuddy.data.remote.generated.apis.SyncApi
@@ -25,12 +26,23 @@ class SyncApis(val sync: SyncApi, val reference: ReferenceApi, val account: Acco
         /**
          * Builds the generated services against [baseUrl]. Uses the
          * generated client's own Moshi instance so UUID/URI adapters match
-         * what the spec declares.
+         * what the spec declares. [clientVersion] goes out as
+         * `X-Client-Version` on every call.
          */
-        fun create(baseUrl: String, tokenProvider: AuthTokenProvider, client: OkHttpClient = defaultClient()): SyncApis {
+        fun create(
+            baseUrl: String,
+            tokenProvider: AuthTokenProvider,
+            client: OkHttpClient = defaultClient(),
+            clientVersion: String = BuildConfig.VERSION_NAME,
+        ): SyncApis {
             val retrofit = Retrofit.Builder()
                 .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
-                .client(client.newBuilder().addInterceptor(BearerTokenInterceptor(tokenProvider)).build())
+                .client(
+                    client.newBuilder()
+                        .addInterceptor(ClientInfoInterceptor(clientVersion))
+                        .addInterceptor(BearerTokenInterceptor(tokenProvider))
+                        .build()
+                )
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
                 .build()
@@ -64,4 +76,18 @@ private class BearerTokenInterceptor(private val tokenProvider: AuthTokenProvide
         }
         return chain.proceed(request)
     }
+}
+
+/**
+ * Adds `X-Client-Version` and `X-Client-Platform` so the backend can log
+ * which build sent a request (wire rules in api/README.md).
+ */
+internal class ClientInfoInterceptor(private val clientVersion: String) : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response =
+        chain.proceed(
+            chain.request().newBuilder()
+                .header("X-Client-Version", clientVersion)
+                .header("X-Client-Platform", "android")
+                .build()
+        )
 }

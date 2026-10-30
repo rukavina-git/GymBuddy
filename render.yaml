@@ -21,6 +21,10 @@ services:
       # Free instance has 512 MB. Tune in step 04 if it OOMs.
       - key: JAVA_TOOL_OPTIONS
         value: -Xmx300m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m
+      # JSON log lines with traceId/userId/clientVersion (Spring Boot
+      # structured logging, see backend application.yml).
+      - key: LOGGING_STRUCTURED_FORMAT_CONSOLE
+        value: ecs
       # Neon direct (unpooled) host, no password in the URL:
       # jdbc:postgresql://<host>/<db>?sslmode=require&user=<user>
       - key: DATABASE_URL

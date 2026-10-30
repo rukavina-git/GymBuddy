@@ -34,3 +34,8 @@ Published docs: https://rukavina-git.github.io/GymBuddy/
   not as a separate list.
 - Workout sessions and templates sync as whole aggregates; their nested
   children carry no sync metadata of their own.
+- Clients send `X-Client-Version` (their app version, e.g. `0.0.2`) and
+  `X-Client-Platform` (`android` or `ios`) on every request. Both are
+  optional and only logged; the server never rejects or changes a
+  response because of them. They are not declared per operation, so
+  generated clients don't change.

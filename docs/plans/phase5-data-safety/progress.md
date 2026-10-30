@@ -3,7 +3,7 @@
 - [x] 01 One DB builder, schema export, v26 baseline (steps/01-one-db-builder.md) (ef70690)
 - [x] 02 Remove the destructive migration fallback (steps/02-no-destructive-migration.md) (85606bc)
 - [x] 03 Crashlytics (steps/03-crashlytics.md) (5ea9e45)
-- [ ] 04 Backend JSON logs, sync metrics, client headers (steps/04-backend-observability.md)
+- [x] 04 Backend JSON logs, sync metrics, client headers (steps/04-backend-observability.md) (HASH)
 - [ ] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md)
 
 ## Deviations
@@ -45,6 +45,29 @@
   - the IOException filter also hides TLS errors and malformed JSON
   - `reportDiscarded()` isn't guarded, so a reporter failure blocks
     logout
+- 04: the filter is `RequestMdcFilter`, not `RequestContextFilter`. That
+  bean name clashes with Spring Boot's own `requestContextFilter`.
+- 04: `GlobalExceptionHandler` and `SyncController` (read-only 503,
+  push traceId) also used fresh UUIDs; all now use
+  `RequestContext.traceId()`, not just `ErrorResponseWriter`.
+- 04: JSON logs are switched on by the env var
+  `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs` (added to render.yaml), not a
+  profile. Locally logs stay plain text.
+- 04: counters are `gymbuddy.sync.push.results` (tags entityType,
+  status; conflicts = status CONFLICT), `gymbuddy.sync.pull.entities`
+  (entityType), `gymbuddy.sync.cursor.expired`. No separate conflict
+  counter.
+- 04: added one INFO line per push and pull in `SyncController` so a
+  normal sync produces a log line carrying the MDC fields.
+- 04: `SyncApis.create` got `clientVersion` with default
+  `BuildConfig.VERSION_NAME`; Hilt and tests unchanged. Test uses
+  `mockwebserver3` (new test dependency, OkHttp 5).
+- 04: reviewer findings not fixed (no blockers):
+  - `userId` goes into MDC after `ensureProfile()`, so a provisioning
+    error log has no userId
+  - MDC is cleared before a Tomcat `/error` dispatch, so those lines
+    have no traceId
+  - no test for a request without client headers
 
 ## Gotchas
 - From phase4-closeout: the guard hook greps the whole Bash command,
@@ -80,3 +103,8 @@
   release checklist.
 - 03: Crashlytics custom key values are capped at 1024 chars.
   Discarded ids beyond that are lost silently.
+- 04: Render may not apply render.yaml env changes without a blueprint
+  sync. If logs are still plain text after the deploy, set
+  `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs` in the dashboard by hand.
+- 04: a new Spring bean named like a Boot one (`requestContextFilter`)
+  fails context load with BeanDefinitionOverrideException.

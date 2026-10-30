@@ -219,6 +219,7 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.work.testing)
     testImplementation(libs.lifecycle.runtime.testing)
+    testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(libs.testExtJunit)
     androidTestImplementation(libs.espressoCore)
     androidTestImplementation(libs.ui.test.junit)

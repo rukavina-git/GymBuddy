@@ -38,7 +38,7 @@ waiting on me
 - [x] 2.1 One DB builder, schema export, v26 baseline, migration tests
 - [x] 2.2 Remove destructive migration fallback
 - [x] 2.3 Crashlytics (crashes, sync non-fatals, discarded logout data)
-- [ ] 2.4 Backend JSON logs, sync metrics, client version headers
+- [x] 2.4 Backend JSON logs, sync metrics, client version headers
       (spec change)
 - [ ] 2.5 (me) CI green, PR develop → main
 
