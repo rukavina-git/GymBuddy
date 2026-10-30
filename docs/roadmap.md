@@ -28,6 +28,7 @@ waiting on me
       api.rukavina.app, test a restore
 - [x] 1.4a restore.sh skips Neon GRANTs (--no-acl)
 - [ ] 1.5 Release build and spec point at api.rukavina.app (spec change)
+- [ ] 1.5a (me) Uptime ping keeps the free Render instance awake
 - [ ] 1.6 (me, deferred) Device checks: hardening list, two devices,
       airplane mode
 - [ ] 1.7 (me) CI green, PR develop → main
@@ -51,6 +52,7 @@ waiting on me
 
 ## Plan 4: phase5-release
 
+- [ ] 4.0 Dependency CVEs: Dependabot alerts + OWASP, restore OWASP triggers
 - [ ] 4.1 ViewModel test gaps (active workout failure paths)
 - [ ] 4.2 Fix ImageStorageUtil data-loss bug
 - [ ] 4.3 Tag-triggered signed release AAB workflow
@@ -65,8 +67,6 @@ waiting on me
 
 ## Later
 
-- Fix OWASP findings, restore its push/PR triggers (manual-only since
-  2026-10-30; do before Plan 4's release)
 - Move to paid hosting (e.g. DigitalOcean): restore dump, repoint DNS
 - Phase 6 iOS (designs already in Figma), Phase 7 store launch
 - v2 list: architecture plan §14.2

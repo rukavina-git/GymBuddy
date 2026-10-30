@@ -173,6 +173,12 @@ not the v2 UI overhaul.
 
 ### Plan 4: phase5-release
 
+4.0 **Dependency CVEs.** Triage the Dependabot alerts on main (25 on
+    2026-10-30, 1 critical, 13 high) and the OWASP findings: bump,
+    replace, or suppress with a written reason. Then restore OWASP's
+    push/PR triggers (manual-only since 2026-10-30). Before the
+    release workflow, so the first AAB ships without known criticals.
+
 4.1 **ViewModel tests.** Audit the 5 existing ViewModel tests, then
     cover the active workout state machine's failure paths (rejected
     save, resume after process death).
