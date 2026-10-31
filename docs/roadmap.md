@@ -29,7 +29,7 @@ waiting on me
 - [x] 1.4a restore.sh skips Neon GRANTs (--no-acl)
 - [x] 1.5 Release build and spec point at api.rukavina.app (spec change)
 - [x] 1.5a (me) Uptime ping keeps the free Render instance awake
-- [ ] 1.6 (me, deferred) Device checks: hardening list, two devices,
+- [x] 1.6 (me) Device checks: hardening list, two devices,
       airplane mode
 - [x] 1.7 (me) CI green, PR develop → main
 
@@ -40,7 +40,7 @@ waiting on me
 - [x] 2.3 Crashlytics (crashes, sync non-fatals, discarded logout data)
 - [x] 2.4 Backend JSON logs, sync metrics, client version headers
       (spec change)
-- [ ] 2.5 (me) CI green, PR develop → main
+- [x] 2.5 (me) CI green, PR develop → main
 
 ## Plan 3: figma-foundation
 

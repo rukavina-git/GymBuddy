@@ -8,14 +8,18 @@ roadmap.md (overview) and roadmap-details.md.
 
 Details: STATUS_2026-09-26.md §Phase 4.
 
-- CI green on main at 20dbff5 (PR #2, Plan 1 merged): Android Build,
-  Backend Build, Sync E2E, API Client Codegen, API Docs. OWASP fails, non-blocking (ADR 0013).
+- CI green on main at 4349324 (PR #4, Plan 2 merged): Android Build,
+  Backend Build, Sync E2E, API Client Codegen, API Docs, CodeQL. OWASP fails, non-blocking (ADR 0013).
 - Hardening (docs/plans/phase4-hardening): logout wipes under the sync
   lock, logout errors end in a closable dialog, the scheduler never drops
   a request, pull-to-refresh says "sign in" when signed out
   (`syncNow` returns SyncOutcome).
-- Open: manual device checks of pull-to-refresh, the logout dialogs and
-  the minified release build.
+- Device checks done 2026-10-31 (debug and minified release, hosted
+  backend): phase5-data-safety progress.md, step 05. Follow-ups:
+  roadmap 4.2a (auth gate), 4.2b (durable push).
+- Plan 2 (data safety): Room v26 baseline with migration tests, no
+  destructive fallback, Crashlytics, JSON logs with traceId/userId/
+  client version on Render.
 
 ## Phase 1: schema hardening (done except Group K)
 
