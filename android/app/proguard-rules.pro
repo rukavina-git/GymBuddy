@@ -24,3 +24,7 @@
 # needs their constructors, fields and Kotlin metadata intact.
 -keep class com.rukavina.gymbuddy.data.remote.generated.models.** { *; }
 -keep class kotlin.Metadata { *; }
+# Crashlytics titles and groups non-fatals by exception class name;
+# keep our own sync exceptions readable there.
+-keepnames class com.rukavina.gymbuddy.data.sync.DiscardedOnLogoutException
+-keepnames class com.rukavina.gymbuddy.data.sync.SyncException

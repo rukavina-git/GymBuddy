@@ -121,3 +121,8 @@
   covered by unit tests. T13: Google sign-in after deletion creates a
   new empty account, as expected. Found: roadmap 4.2a (auth gate),
   4.2b (durable push).
+- 05: round 2 (release): R1 (R8 smoke) and R2 (logout discard
+  non-fatal, deobfuscated stack) pass; R3 (sync failure non-fatal)
+  skipped, a 410 is handled by resync and never reported. R2's title
+  showed the obfuscated class (`my0`), so proguard-rules.pro now
+  keeps the names of DiscardedOnLogoutException and SyncException.
