@@ -1,0 +1,275 @@
+<title>GymBuddy Idea Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap">
+<style>
+/* Layout: one long board, one section per decision, options in a horizontal snap row of phones. Single dark theme on purpose: it is the app's own world. */
+:root{
+  color-scheme:dark;
+  --page:#0B0C0F; --ink:#F3F4F6; --ink2:#9AA1AD; --line:#23272F;
+  --bg:#121418; --s1:#1C1F26; --s2:#262A33; --s3:#323743; --tx:#F3F4F6; --mu:#9AA1AD; --ol:#717886; --dis:#5E6571;
+  --ac:#D4FF24; --onac:#121418; --ac2:#4D86F0; --acsoft:#2E3A1A; --red:#FF6B6B;
+  --f:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--page);color:var(--ink);font-family:var(--f);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 120px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top h1{font-size:clamp(32px,6vw,52px);font-weight:900;letter-spacing:-.03em;margin:8px 0 6px;text-wrap:balance}
+header.top p{color:var(--ink2);max-width:62ch;margin:0}
+.lime{color:var(--ac)}
+section{margin-top:56px}
+section h2{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0 0 4px;display:flex;gap:12px;align-items:baseline}
+section h2 .id{font-size:15px;font-weight:700;color:var(--onac);background:var(--ac);border-radius:8px;padding:2px 8px}
+section > p.lead{color:var(--ink2);max-width:66ch;margin:0 0 18px}
+.row{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 16px;-webkit-overflow-scrolling:touch}
+.row::-webkit-scrollbar{height:6px}.row::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+.opt{flex:0 0 auto;scroll-snap-align:start;display:flex;flex-direction:column;gap:10px;width:300px}
+.opt.wide{width:min(560px,86vw)}
+.opt .cap{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.opt .cap b{font-size:16px}
+.opt .note{color:var(--ink2);font-size:14px;min-height:40px}
+.pick{font:600 14px var(--f);color:var(--ink);background:transparent;border:1.5px solid var(--ol);border-radius:20px;padding:8px 14px;min-height:40px;cursor:pointer}
+.pick[aria-pressed="true"]{background:var(--ac);color:var(--onac);border-color:var(--ac)}
+.pick:focus-visible,button:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
+
+/* phone */
+.phone{width:300px;height:640px;border-radius:38px;background:var(--bg);border:7px solid #000;box-shadow:0 0 0 1px #2a2d34;position:relative;overflow:hidden;display:flex;flex-direction:column;color:var(--tx);font-size:13px}
+.sb{display:flex;justify-content:space-between;padding:10px 18px 4px;font-size:11px;font-weight:600}
+.sb i{display:inline-block;width:12px;height:7px;border-radius:2px;background:var(--tx);opacity:.85;margin-left:4px}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 6px 12px;min-height:44px}
+.bar .t{display:flex;align-items:center;gap:10px}
+.bar .t b{font-size:14px}.bar .t small{display:block;color:var(--mu);font-size:10.5px;font-weight:500}
+.ico{flex:0 0 auto;display:block}
+.h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.mu{color:var(--mu)}
+.pad{padding:0 14px}
+.card{background:var(--s1);border-radius:16px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:46px;border-radius:23px;background:var(--ac);color:var(--onac);font-weight:800;font-size:14px;border:0;font-family:var(--f);width:100%;cursor:pointer}
+.btn.sec{background:var(--s2);color:var(--tx)}
+.btn.ghost{background:transparent;color:var(--tx)}
+.grow{flex:1}
+.rowi{display:flex;align-items:center;gap:10px}
+.setrow{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;border-radius:12px;background:var(--s1);font-weight:600}
+.setrow .lab{color:var(--mu);width:38px;font-size:12px}
+.chk{width:22px;height:22px;border-radius:11px;background:var(--acsoft);display:grid;place-items:center}
+.ring{width:22px;height:22px;border-radius:11px;border:2px solid var(--ol)}
+.nav{display:flex;background:var(--s1);padding:8px 4px 12px}
+.nav div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--mu)}
+.nav span{width:52px;height:26px;border-radius:13px;display:grid;place-items:center}
+.nav .on{color:var(--tx);font-weight:800}.nav .on span{background:var(--s3)}
+.dim{position:absolute;inset:0;background:rgba(5,6,8,.62)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--s1);border-radius:24px 24px 0 0;padding:10px 14px 16px;display:flex;flex-direction:column;gap:12px}
+.handle{width:36px;height:4px;border-radius:2px;background:var(--ol);margin:0 auto}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:32px;padding:0 12px;border-radius:16px;border:1.5px solid var(--ol);display:inline-flex;align-items:center;font-weight:600;font-size:12px}
+.chip.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.keys div{height:44px;border-radius:12px;background:var(--s2);display:grid;place-items:center;font-size:19px;font-weight:700}
+.big{font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+.thumb{width:44px;height:44px;border-radius:12px;background:var(--s2);display:grid;place-items:center;flex:0 0 auto;position:relative}
+.lrow{display:flex;align-items:center;gap:12px;height:58px}
+.lrow b{display:block;font-size:13.5px}.lrow small{color:var(--mu);font-size:11.5px}
+.badge{position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:7px;background:var(--s3);display:grid;place-items:center;border:2px solid var(--bg)}
+.board{background:#101216;border:1px solid var(--line);border-radius:20px;padding:20px}
+.tiles{display:flex;gap:14px;flex-wrap:wrap}
+.tile{width:62px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--ink2)}
+.tile div{width:56px;height:56px;border-radius:16px;background:var(--s1);display:grid;place-items:center}
+.appic{width:120px;height:120px;border-radius:60px;display:grid;place-items:center;overflow:hidden}
+.mono{width:56px;height:56px;border-radius:28px;background:#3B4130;display:grid;place-items:center}
+.lock{background:#07080A}
+.notif{background:#1E2128;border-radius:22px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.notif .acts{display:flex;gap:6px}.notif .acts span{flex:1;text-align:center;padding:8px 0;border-radius:16px;background:#2A2E37;font-weight:700;font-size:12px}
+.swipe{position:relative;height:44px;border-radius:12px;overflow:hidden}
+.swipe .under{position:absolute;inset:0;display:flex;align-items:center;padding:0 14px;font-weight:800;font-size:12px}
+.swipe .over{position:absolute;inset:0;background:var(--s1);display:flex;align-items:center;gap:10px;padding:0 12px;font-weight:600}
+.snack{position:absolute;left:12px;right:12px;bottom:16px;background:#E9EBEF;color:#121418;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;font-weight:600;font-size:12.5px}
+.snack b{color:#3A4A00}
+.seg{display:flex;background:var(--s2);border-radius:14px;padding:3px}.seg span{flex:1;text-align:center;padding:8px 0;border-radius:11px;font-weight:700}.seg .on{background:var(--tx);color:var(--bg)}
+.choice{border:1.5px solid var(--ol);border-radius:16px;padding:12px 14px}.choice.on{border-color:var(--ac);background:#1A2010}
+.choice b{display:block}.choice small{color:var(--mu)}
+.sx{display:flex;flex-direction:column;gap:2px}
+.srow{display:flex;justify-content:space-between;align-items:center;min-height:46px;padding:0 14px;border-top:1px solid var(--s2)}
+.srow:first-child{border-top:0}
+.sec-h{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);padding:14px 16px 6px}
+footer.picks{position:fixed;left:0;right:0;bottom:0;background:rgba(11,12,15,.96);border-top:1px solid var(--line);
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:5}
+footer.picks .in{max-width:1180px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:space-between}
+footer.picks #sum{font-weight:600;font-size:14px;min-width:0;overflow-wrap:anywhere}
+footer.picks button{flex:0 0 auto;font:800 14px var(--f);background:var(--ac);color:var(--onac);border:0;border-radius:20px;padding:10px 16px;min-height:44px;cursor:pointer}
+.ruler{position:relative;height:56px;overflow:hidden;border-radius:12px;background:var(--s2)}
+.ruler .tk{position:absolute;bottom:0;width:2px;background:var(--ol)}
+.ruler .lbl{position:absolute;top:6px;font-size:10px;color:var(--mu);transform:translateX(-50%)}
+.ruler .ctr{position:absolute;left:50%;top:0;bottom:0;width:3px;background:var(--ac);transform:translateX(-50%);border-radius:2px}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes grow{from{max-height:0;opacity:0}to{max-height:220px;opacity:1}}
+.popin{animation:pop .35s cubic-bezier(.2,.9,.3,1.2) both}
+.growin{animation:grow .4s cubic-bezier(.2,.8,.2,1) both;overflow:hidden}
+@media (prefers-reduced-motion:reduce){.popin,.growin{animation:none}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="lime" style="font-weight:700;margin:0">Soft Dark · lime</p>
+  <h1>GymBuddy idea board</h1>
+  <p>Every option is a working mock. Tap <b>Pick</b> on the ones you want (one per section), then copy your picks at the bottom and paste them to Claude. Rows scroll sideways on a phone.</p>
+</header>
+
+<section data-sec="A"><h2><span class="id">A</span>App icon</h2><p class="lead">Each icon at full size, and below it the Android 13+ themed (one-colour) version.</p><div class="row" id="rowA"></div></section>
+<section data-sec="W"><h2><span class="id">W</span>Wordmark</h2><p class="lead">Used on the splash, login and onboarding.</p><div class="row" id="rowW"></div></section>
+<section data-sec="B"><h2><span class="id">B</span>Icon style</h2><p class="lead">Twelve custom gym icons plus nav icons, same 24dp grid, round caps to match Figtree.</p><div class="row" id="rowB"></div></section>
+<section data-sec="C"><h2><span class="id">C</span>Exercise thumbnails</h2><p class="lead">Replaces the red stock photos in lists. Muscle maps are generated from each exercise's muscle groups, so custom exercises get one too.</p><div class="row" id="rowC"></div></section>
+<section data-sec="D"><h2><span class="id">D</span>Entering weight and reps</h2><p class="lead">Tap the number in the current set. All three replace the system keyboard that covered the set you were editing.</p><div class="row" id="rowD"></div></section>
+<section data-sec="E"><h2><span class="id">E</span>Live workout outside the workout screen</h2><p class="lead">You left the workout to check an exercise. How does the running workout stay with you?</p><div class="row" id="rowE"></div></section>
+<section data-sec="F"><h2><span class="id">F</span>Lock screen</h2><p class="lead">Ongoing notification while a workout runs. Phone in pocket, rest counting down.</p><div class="row" id="rowF"></div></section>
+<section data-sec="G"><h2><span class="id">G</span>Rest is over</h2><p class="lead">Plus a strong vibration and an optional sound in every option.</p><div class="row" id="rowG"></div></section>
+<section data-sec="M"><h2><span class="id">M</span>Motion: finishing a set</h2><p class="lead">Try it. Hold + or − to speed up. Tap Done: the check pops, the set collapses, rest grows in its place (sped up here).</p><div class="row" id="rowM"></div></section>
+<section data-sec="H"><h2><span class="id">H</span>Swipe and undo</h2><p class="lead">Swipe right to complete a set, left to delete. Deleting shows Undo instead of asking "Are you sure?".</p><div class="row" id="rowH"></div></section>
+<section data-sec="I"><h2><span class="id">I</span>Onboarding</h2><p class="lead">Three screens, no account needed. Pick the flow or say what to change.</p><div class="row" id="rowI"></div></section>
+<section data-sec="J"><h2><span class="id">J</span>Empty states</h2><p class="lead">One clear next step instead of a blank list.</p><div class="row" id="rowJ"></div></section>
+<section data-sec="N"><h2><span class="id">N</span>Navigation bar</h2><p class="lead">Stats is hidden until the History plan gives it content.</p><div class="row" id="rowN"></div></section>
+<section data-sec="K"><h2><span class="id">K</span>You / settings</h2><p class="lead">Privacy up front: where your data lives is the first thing in "Your data".</p><div class="row" id="rowK"></div></section>
+</div>
+
+<footer class="picks"><div class="in"><div id="sum">No picks yet</div><button id="copy" type="button">Copy picks</button></div></footer>
+
+<script>
+const $=s=>document.querySelector(s);
+// ---------- icons ----------
+const MI={check:"M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z",add:"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",remove:"M19 13H5v-2h14v2z",back:"M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z",more:"M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z",chev:"M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z",play:"M8 5v14l11-7z",search:"M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",list:"M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z",vib:"M0 15h2V9H0v6zm3 2h2V7H3v10zm19-8v6h2V9h-2zm-3 8h2V7h-2v10zM16.5 3h-9C6.67 3 6 3.67 6 4.5v15c0 .83.67 1.5 1.5 1.5h9c.83 0 1.5-.67 1.5-1.5v-15c0-.83-.67-1.5-1.5-1.5zM16 19H8V5h8v14z",del:"M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z",lock:"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z",cloud:"M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z",dl:"M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z",phone:"M17 1.01 7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z",skip:"M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"};
+function mi(n,c='currentColor',s=20){return `<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path d="${MI[n]}" fill="${c}"/></svg>`}
+const G={barbell:{b:['M2 12h20'],a:['M5 8v8','M8 6v12','M16 6v12','M19 8v8']},dumbbell:{b:['M7 12h10'],a:['M7 7v10','M4 9v6','M17 7v10','M20 9v6']},kettlebell:{b:['M8.5 10V8a3.5 3.5 0 0 1 7 0v2'],a:['M6 15.5a6 6 0 1 0 12 0a6 6 0 1 0 -12 0']},plate:{b:['M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0'],a:['M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0']},timer:{b:['M4 13a8 8 0 1 0 16 0a8 8 0 1 0 -16 0','M9 2.5h6'],a:['M12 9v4l2.5 2']},cable:{b:['M12 7v9','M7 20h10'],a:['M10 5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0','M12 16v4']},bodyweight:{b:['M12 9v6','M7 11.5h10','M12 15l-3 6','M12 15l3 6'],a:['M10 5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0']},band:{b:['M4 12c0-3.5 3.6-6 8-6s8 2.5 8 6-3.6 6-8 6-8-2.5-8-6z'],a:['M1.5 12h2.5','M20 12h2.5']},machine:{b:['M5 3v18','M5 5h11v9'],a:['M13 14h6v6h-6z','M13 17h6']},pr:{b:['M8.5 3l3.5 7 3.5-7'],a:['M7 15.5a5 5 0 1 0 10 0a5 5 0 1 0 -10 0']},superset:{b:['M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1'],a:['M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1']},template:{b:['M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'],a:['M9 8h6','M9 12h6','M9 16h3']},home:{b:['M4 10.5 12 4l8 6.5V20h-5v-5h-6v5H4z'],a:[]},you:{b:['M4 21c0-4 4-6 8-6s8 2 8 6'],a:['M8 8a4 4 0 1 0 8 0a4 4 0 1 0 -8 0']}};
+let STYLE='solid';
+function gi(n,s=20,style=STYLE,c='var(--tx)',ac='var(--ac)',filled=false){const g=G[n],w=style==='solid'?2.4:2;const p=(d,col,f)=>`<path d="${d}" fill="${f?col:'none'}" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+ let o='';for(const d of g.b)o+=p(d,c,filled&&style!=='outline');for(const d of g.a)o+=p(d,style==='duo'?ac:c,style==='solid'||filled);
+ return `<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true">${o}</svg>`}
+// ---------- muscle map ----------
+const FR={head:[14,0,12,13,6],neck:[17,12,6,4,2],deltL:[3,16,10,10,5],deltR:[27,16,10,10,5],chestL:[9,17,11,11,4],chestR:[20,17,11,11,4],abs:[12,29,16,16,4],biL:[2,26,8,16,4],biR:[30,26,8,16,4],faL:[1,43,7,16,3.5],faR:[32,43,7,16,3.5],hips:[11,45,18,8,3],quadL:[10,52,9,22,4.5],quadR:[21,52,9,22,4.5],calfL:[11,76,7,14,3.5],calfR:[22,76,7,14,3.5]};
+const BK={head:[14,0,12,13,6],trap:[13,13,14,7,3],deltL:[3,16,10,10,5],deltR:[27,16,10,10,5],latL:[9,20,11,18,4],latR:[20,20,11,18,4],low:[13,38,14,8,3],triL:[2,26,8,16,4],triR:[30,26,8,16,4],faL:[1,43,7,16,3.5],faR:[32,43,7,16,3.5],glute:[11,45,18,10,4],hamL:[10,55,9,20,4.5],hamR:[21,55,9,20,4.5],calfL:[11,76,7,14,3.5],calfR:[22,76,7,14,3.5]};
+const HL={chest:{f:['chestL','chestR'],b:[]},shoulders:{f:['deltL','deltR'],b:['deltL','deltR']},triceps:{f:[],b:['triL','triR']},biceps:{f:['biL','biR'],b:[]},back:{f:[],b:['latL','latR','trap','low']},legs:{f:['quadL','quadR','calfL','calfR'],b:['hamL','hamR','glute','calfL','calfR']},core:{f:['abs'],b:['low']},glutes:{f:[],b:['glute']}};
+function body(map,on,sec,h){const keys=Object.keys(map);let o='';for(const k of keys){const [x,y,w,hh,r]=map[k];const c=on.includes(k)?'var(--ac)':(sec.includes(k)?'#6E7F2A':'var(--s3)');o+=`<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="${r}" fill="${c}"/>`}
+ return `<svg width="${h*40/90}" height="${h}" viewBox="0 0 40 90" aria-hidden="true">${o}</svg>`}
+function mm(primary,secondary=[],h=40){const pf=[],pb=[],sf=[],sb=[];for(const m of primary){pf.push(...HL[m].f);pb.push(...HL[m].b)}for(const m of secondary){sf.push(...HL[m].f);sb.push(...HL[m].b)}
+ return `<span style="display:inline-flex;gap:${h/14}px">${body(FR,pf,sf,h)}${body(BK,pb,sb,h)}</span>`}
+// ---------- shared bits ----------
+const SB='<div class="sb"><span>9:41</span><span><i></i><i></i><i style="width:16px"></i></span></div>';
+function nav(on,variant){const it=[['home','Home'],['template','Workouts'],['dumbbell','Exercises'],['you','You']];
+ if(variant==='center'){return `<div class="nav" style="align-items:flex-end">${it.slice(0,2).map(([i,l])=>`<div class="${l===on?'on':''}"><span>${gi(i,20,STYLE,l===on?'var(--tx)':'var(--mu)','var(--ac)',l===on)}</span>${l}</div>`).join('')}<div><span style="width:52px;height:52px;border-radius:26px;background:var(--ac);margin-top:-22px;box-shadow:0 4px 14px rgba(0,0,0,.4)">${mi('play','var(--onac)',26)}</span><b style="color:var(--tx)">Start</b></div>${it.slice(2).map(([i,l])=>`<div class="${l===on?'on':''}"><span>${gi(i,20,STYLE,l===on?'var(--tx)':'var(--mu)','var(--ac)',l===on)}</span>${l}</div>`).join('')}</div>`}
+ return `<div class="nav">${it.map(([i,l])=>`<div class="${l===on?'on':''}"><span>${gi(i,20,STYLE,l===on?'var(--tx)':'var(--mu)','var(--ac)',l===on)}</span>${l}</div>`).join('')}</div>`}
+function workoutTop(){return `${SB}<div class="bar"><div class="t">${mi('back')}<div><b>Push A</b><small class="num">38:12 · 3 of 6</small></div></div><div class="rowi">${mi('list')}${mi('more')}</div></div>
+<div class="pad" style="display:flex;gap:3px;margin-bottom:12px">${[0,1,2,3,4,5].map(i=>`<i style="flex:1;height:3px;border-radius:2px;background:${i<2?'var(--mu)':i===2?'var(--ac)':'var(--s2)'};opacity:${i<2?.6:1}"></i>`).join('')}</div>
+<div class="pad"><div class="h1">Bench Press</div><div class="mu" style="font-size:12px">Barbell · 4 sets × 8 reps</div></div>`}
+function done(n,v){return `<div class="setrow"><span class="chk">${mi('check','var(--ac)',14)}</span><span class="lab">Set ${n}</span><span class="num">${v}</span></div>`}
+function homeBg(){return `${SB}<div class="pad" style="padding-top:8px"><div class="mu" style="font-size:11px;font-weight:600">Saturday, 31 October</div><div class="h1">Good evening</div></div>
+<div class="pad" style="margin-top:12px"><div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px"><div><div class="mu" style="font-size:11px;font-weight:600">Next up</div><b style="font-size:18px">Pull B</b><div class="mu" style="font-size:11.5px">Deadlift, pull-up, row +3 · ~50 min</div></div></div></div>
+<div class="pad" style="margin-top:14px"><b>This week</b><div style="display:flex;gap:6px;margin-top:8px">${'MTWTFSS'.split('').map((d,i)=>`<div style="flex:1;text-align:center;font-size:10px;color:var(--mu)">${d}<div style="margin:6px auto 0;width:20px;height:20px;border-radius:10px;${[0,2,3].includes(i)?'background:var(--acsoft)':'border:2px solid var(--ol)'}"></div></div>`).join('')}</div></div>`}
+function card(o){return `<div class="opt ${o.wide?'wide':''}" data-id="${o.id}"><div class="cap"><b>${o.id} · ${o.name}</b><button class="pick" type="button" aria-pressed="false" data-pick="${o.id}">Pick</button></div><div class="note">${o.note}</div>${o.html}</div>`}
+function put(row,opts){$(row).innerHTML=opts.map(card).join('')}
+const CK=(c='var(--ac)',s=64,w=3.4)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5L19.5 7" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function renderAll(){
+// A app icon
+put('#rowA',[
+ {id:'A1',name:'Check',note:'The action the app is about: a finished set.',html:`<div class="board" style="display:flex;flex-direction:column;align-items:center;gap:14px"><div class="appic" style="background:#121418">${CK('#D4FF24',70)}</div><div class="mono">${CK('#E4EBC8',30)}</div></div>`},
+ {id:'A2',name:'Plate G',note:'A lime weight plate with the G as its hole. Most "logo-like".',html:`<div class="board" style="display:flex;flex-direction:column;align-items:center;gap:14px"><div class="appic" style="background:#121418"><div style="width:88px;height:88px;border-radius:44px;background:#D4FF24;display:grid;place-items:center;font-weight:900;font-size:58px;color:#121418;line-height:1">G</div></div><div class="mono" style="font-weight:900;font-size:28px;color:#E4EBC8">G</div></div>`},
+ {id:'A3',name:'Barbell',note:'Literal and instantly "gym". Common in the category.',html:`<div class="board" style="display:flex;flex-direction:column;align-items:center;gap:14px"><div class="appic" style="background:#121418">${gi('barbell',84,'outline','#D4FF24')}</div><div class="mono">${gi('barbell',36,'outline','#E4EBC8')}</div></div>`},
+ {id:'A4',name:'Lime tile',note:'Full lime with a dark dumbbell. Loudest on a home screen.',html:`<div class="board" style="display:flex;flex-direction:column;align-items:center;gap:14px"><div class="appic" style="background:#D4FF24">${gi('dumbbell',76,'solid','#121418','#121418')}</div><div class="mono">${gi('dumbbell',32,'solid','#E4EBC8','#E4EBC8')}</div></div>`}]);
+put('#rowW',[
+ {id:'W1',name:'GymBuddy',note:'Plain heavy wordmark.',html:`<div class="board" style="display:grid;place-items:center;height:150px"><span style="font-weight:900;font-size:40px;letter-spacing:-.04em">GymBuddy</span></div>`},
+ {id:'W2',name:'gymbuddy.',note:'Lowercase with a lime full stop. Calm, friendly.',html:`<div class="board" style="display:grid;place-items:center;height:150px"><span style="font-weight:800;font-size:40px;letter-spacing:-.04em">gymbuddy<span class="lime">.</span></span></div>`},
+ {id:'W3',name:'Check lockup',note:'Icon A1 next to a stacked name.',html:`<div class="board" style="display:grid;place-items:center;height:150px"><span class="rowi" style="gap:12px"><span style="width:52px;height:52px;border-radius:26px;background:var(--ac);display:grid;place-items:center">${CK('#121418',30)}</span><span style="font-weight:900;font-size:26px;line-height:.95;letter-spacing:.04em">GYM<br>BUDDY</span></span></div>`}]);
+// B icon styles
+const names=Object.keys(G);
+put('#rowB',[['B1','Outline','outline','Quiet, closest to Material Symbols Rounded.'],['B2','Solid parts','solid','Chunkier; weights and heads filled. Best at small sizes and in bad light.'],['B3','Duotone','duo','Loaded parts in lime. Most branded, but lime stops meaning "press here".']].map(([id,n,s,note])=>({id,name:n,note,wide:true,html:`<div class="board"><div class="tiles">${names.map(k=>`<div class="tile"><div>${gi(k,28,s)}</div>${k}</div>`).join('')}</div><div class="rowi" style="margin-top:16px;gap:14px;color:var(--ink2);font-size:12px">20dp: ${['barbell','dumbbell','kettlebell','cable','machine','bodyweight','band','timer','pr'].map(k=>gi(k,20,s)).join('')}</div></div>`})));
+// C thumbnails
+const EX=[['Bench Press','Chest · Barbell',['chest'],['shoulders','triceps'],'barbell'],['Pull-Up','Back · Bodyweight',['back'],['biceps'],'bodyweight'],['Back Squat','Legs · Barbell',['legs'],['core'],'barbell'],['Lateral Raise','Shoulders · Dumbbell',['shoulders'],[],'dumbbell'],['Cable Fly','Chest · Cable · yours',['chest'],['shoulders'],'cable'],['Plank','Core · Bodyweight · 60 s',['core'],['shoulders'],'bodyweight']];
+const listPhone=kind=>`<div class="phone">${SB}<div class="bar"><span class="h1">Exercises</span>${mi('add')}</div><div class="pad"><div class="card rowi" style="height:40px;border-radius:20px;padding:0 12px;color:var(--mu)">${mi('search','var(--mu)',18)} Search 60 exercises</div></div><div class="pad" style="margin-top:6px">${EX.map(([n,m,p,s,eq])=>`<div class="lrow"><div class="thumb">${kind==='map'?mm(p,s,36):kind==='eq'?gi(eq,24):mm(p,s,36)+`<span class="badge">${gi(eq,12)}</span>`}</div><div class="grow"><b>${n}</b><small>${m}</small></div>${mi('chev','var(--mu)',18)}</div>`).join('')}</div><div class="grow"></div>${nav('Exercises')}</div>`;
+put('#rowC',[
+ {id:'C1',name:'Muscle map',note:'Front and back, primary muscles lime, secondary dim lime.',html:listPhone('map')},
+ {id:'C2',name:'Equipment icon',note:'Simplest. Says what you need, not what it trains.',html:listPhone('eq')},
+ {id:'C3',name:'Map + equipment badge',note:'Both answers in one tile. Busiest.',html:listPhone('both')},
+ {id:'C4',name:'Detail page',note:'Goes with any of the above: large map on the exercise page, photo below it.',html:`<div class="phone">${SB}<div class="bar"><div class="t">${mi('back')}<b>Bench Press</b></div>${mi('more')}</div><div class="pad"><div class="card" style="padding:16px;display:flex;gap:16px;align-items:center">${mm(['chest'],['shoulders','triceps'],120)}<div style="font-size:12px;display:flex;flex-direction:column;gap:8px"><div><span class="lime" style="font-weight:800">●</span> Chest</div><div><span style="color:#6E7F2A;font-weight:800">●</span> Shoulders<br><span style="color:#6E7F2A;font-weight:800">●</span> Triceps</div></div></div>
+<div class="seg" style="margin-top:12px"><span class="on">How to</span><span>Your notes</span></div>
+<div style="margin-top:12px;height:110px;border-radius:16px;background:linear-gradient(0deg,#1C1F26,#262A33);display:grid;place-items:center;color:var(--mu);font-size:12px">Photo, toned to match</div>
+<p class="mu" style="font-size:12px">Lie on a flat bench, grip just wider than shoulders, lower to mid-chest, press up.</p></div></div>`}]);
+// D number entry
+const sheetBg=`<div class="phone">${workoutTop()}<div class="pad" style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${done(1,'80 kg × 8')}${done(2,'80 kg × 8')}</div><div class="dim"></div>`;
+put('#rowD',[
+ {id:'D1',name:'Keypad',note:'Fast, exact, familiar. Quick ±2.5 and last time\'s value one tap away.',html:`${sheetBg}<div class="sheet"><div class="handle"></div><div class="rowi" style="justify-content:space-between"><b>Weight · set 3</b><span class="mu" style="font-size:12px">Last time 80</span></div><div class="big">82.5<span class="mu" style="font-size:18px;font-weight:600"> kg</span><span style="display:inline-block;width:2px;height:36px;background:var(--ac);margin-left:4px;vertical-align:-4px"></span></div><div class="chips"><span class="chip">−2.5</span><span class="chip">+2.5</span><span class="chip">+5</span><span class="chip">80 (last)</span></div><div class="keys">${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>`<div>${k}</div>`).join('')}</div><button class="btn" type="button">Next: reps ${mi('chev','var(--onac)',18)}</button></div></div>`},
+ {id:'D2',name:'Ruler',note:'Drag a ruler, snaps to 2.5 kg. Great one-handed; slower for big jumps.',html:`${sheetBg}<div class="sheet"><div class="handle"></div><b>Set 3</b><div style="text-align:center"><div class="big">82.5<span class="mu" style="font-size:18px;font-weight:600"> kg</span></div></div><div class="ruler">${Array.from({length:29},(_,i)=>65+i*1.25).map(v=>`<i class="tk" style="left:calc(50% + ${(v-82.5)*12}px);height:${v%5===0?24:12}px;${v%5===0?'background:var(--mu)':''}"></i>`).join('')}${[70,75,80,85,90,95].map(v=>`<span class="lbl" style="left:calc(50% + ${(v-82.5)*12}px)">${v}</span>`).join('')}<i class="ctr"></i></div><div class="mu" style="font-size:12px">Reps</div><div class="chips" style="justify-content:space-between">${[5,6,7,8,9,10].map(n=>`<span class="chip ${n===8?'on':''}" style="width:34px;justify-content:center;padding:0">${n}</span>`).join('')}</div><button class="btn" type="button">${mi('check','var(--onac)',18)} Done with set 3</button></div></div>`},
+ {id:'D3',name:'Plate builder',note:'Tap the plates you load. The total adds itself. Fun, teaches beginners.',html:`${sheetBg}<div class="sheet"><div class="handle"></div><div class="rowi" style="justify-content:space-between"><b>Load the bar</b><span class="chip" style="height:28px">Bar 20 kg</span></div><div style="display:flex;align-items:center;justify-content:center;gap:2px;height:70px"><i style="width:10px;height:6px;background:var(--ol)"></i>${[[60,10],[24,6],[16,5]].map(([h,w])=>`<i style="width:${w}px;height:${h}px;border-radius:2px;background:var(--tx)"></i>`).reverse().join('')}<i style="width:90px;height:5px;background:var(--ol)"></i>${[[60,10],[24,6],[16,5]].map(([h,w])=>`<i style="width:${w}px;height:${h}px;border-radius:2px;background:var(--tx)"></i>`).join('')}<i style="width:10px;height:6px;background:var(--ol)"></i></div><div style="text-align:center"><div class="big">82.5<span class="mu" style="font-size:18px;font-weight:600"> kg</span></div><div class="mu" style="font-size:12px">Each side: 25 + 5 + 1.25</div></div><div class="chips" style="justify-content:center">${['25','20','15','10','5','2.5','1.25'].map(p=>`<span class="chip" style="width:36px;height:36px;border-radius:18px;padding:0;justify-content:center;font-size:11px">${p}</span>`).join('')}</div><button class="btn" type="button">Next: reps ${mi('chev','var(--onac)',18)}</button></div></div>`}]);
+// E live bar
+put('#rowE',[
+ {id:'E1',name:'Mini bar',note:'Like a music player: sits above the tabs, tap to return, check to log the set.',html:`<div class="phone">${homeBg()}<div class="grow"></div><div style="margin:0 8px 8px;background:var(--s2);border-radius:16px;overflow:hidden"><i style="display:block;height:3px;width:42%;background:var(--ac)"></i><div class="rowi" style="padding:10px 10px 10px 14px"><div class="grow"><b style="font-size:13px">Bench Press · set 3 of 4</b><div class="mu num" style="font-size:11px">Push A · 38:12</div></div><span style="width:40px;height:40px;border-radius:20px;background:var(--ac);display:grid;place-items:center">${mi('check','var(--onac)',20)}</span></div></div>${nav('Home')}</div>`},
+ {id:'E2',name:'Floating pill',note:'Small pill in the corner; shows rest time when resting. Least space.',html:`<div class="phone">${homeBg()}<div class="grow"></div><div style="position:absolute;right:12px;bottom:84px;background:var(--s2);border-radius:28px;padding:6px 14px 6px 6px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 20px rgba(0,0,0,.45)"><svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="var(--s3)" stroke-width="4"/><circle cx="20" cy="20" r="16" fill="none" stroke="var(--ac)" stroke-width="4" stroke-dasharray="100" stroke-dashoffset="40" transform="rotate(-90 20 20)" stroke-linecap="round"/></svg><div><b class="num" style="font-size:15px">1:12</b><div class="mu" style="font-size:10.5px">Rest · Push A</div></div></div>${nav('Home')}</div>`},
+ {id:'E3',name:'Live tab',note:'The tab bar itself changes: a lime Workout tab appears while one is running.',html:`<div class="phone">${homeBg()}<div class="grow"></div><div class="nav">${[['home','Home',1],['template','Workouts'],['live','Workout'],['dumbbell','Exercises'],['you','You']].map(([i,l,on])=>i==='live'?`<div><span style="width:64px;height:30px;background:var(--ac);color:var(--onac);font-weight:800;font-size:11px" class="num">38:12</span><b style="color:var(--tx)">Workout</b></div>`:`<div class="${on?'on':''}"><span>${gi(i,20,STYLE,on?'var(--tx)':'var(--mu)','var(--ac)',!!on)}</span>${l}</div>`).join('')}</div></div>`}]);
+// F lock screen
+const lockTop=`<div class="phone lock">${SB}<div style="text-align:center;margin-top:28px"><div style="font-size:64px;font-weight:300;letter-spacing:-.02em" class="num">9:41</div><div class="mu" style="font-size:12px">Saturday, 31 October</div></div><div class="pad" style="margin-top:28px">`;
+const appMini=`<span style="width:18px;height:18px;border-radius:9px;background:#121418;display:grid;place-items:center">${CK('#D4FF24',12,4)}</span>`;
+put('#rowF',[
+ {id:'F1',name:'Compact',note:'One line of state, three actions. Changes between "set" and "rest".',html:`${lockTop}<div class="notif"><div class="rowi" style="font-size:11px;color:var(--mu)">${appMini} GymBuddy · Push A · 38:12</div><div class="rowi" style="justify-content:space-between"><b style="font-size:15px">Rest</b><b class="num" style="font-size:22px">1:12</b></div><div class="mu" style="font-size:12px">Next: Bench Press set 4 · 82.5 kg × 8</div><div class="acts"><span>−15 s</span><span>+15 s</span><span style="color:var(--ac)">Skip</span></div></div></div></div>`},
+ {id:'F2',name:'Big timer',note:'Expanded card with a progress bar; during a set it shows the set and a lime Done.',html:`${lockTop}<div class="notif" style="gap:10px"><div class="rowi" style="font-size:11px;color:var(--mu)">${appMini} GymBuddy · Push A</div><div class="rowi" style="justify-content:space-between;align-items:flex-end"><div><div class="mu" style="font-size:12px">Bench Press · set 3 of 4</div><b style="font-size:24px">82.5 kg × 8</b></div><span class="mu num" style="font-size:12px">38:12</span></div><i style="height:4px;border-radius:2px;background:#2A2E37;display:block"><i style="display:block;height:4px;width:66%;border-radius:2px;background:var(--ac2)"></i></i><div class="acts"><span>Edit</span><span style="background:var(--ac);color:var(--onac)">Done with set</span></div></div><div class="notif" style="margin-top:8px;opacity:.6"><div class="rowi" style="font-size:11px;color:var(--mu)">${appMini} After Done it becomes: Rest 2:00 · −15 s · +15 s · Skip</div></div></div></div>`}]);
+// G rest over
+put('#rowG',[
+ {id:'G1',name:'Card turns lime',note:'In the app the rest card flips to lime: the whole card is now the button.',html:`<div class="phone">${workoutTop()}<div class="pad" style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${done(1,'80 kg × 8')}${done(2,'80 kg × 8')}${done(3,'82.5 kg × 8')}<div style="background:var(--ac);color:var(--onac);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:6px;align-items:center" class="popin">${mi('vib','var(--onac)',22)}<b style="font-size:20px">Rest over</b><div style="font-weight:600">Set 4 · 82.5 kg × 8</div><div style="margin-top:6px;font-weight:800;border:2px solid var(--onac);border-radius:20px;padding:8px 18px">Start set 4</div></div></div></div>`},
+ {id:'G2',name:'Full-screen go',note:'Takes over the screen for 3 seconds, then settles back. Hard to miss across the gym.',html:`<div class="phone" style="background:var(--ac);color:var(--onac)">${SB.replace('<i></i><i></i>','<i style="background:#121418"></i><i style="background:#121418"></i>').replace('width:16px','width:16px;background:#121418')}<div class="grow" style="display:flex;flex-direction:column;justify-content:center;padding:0 24px;gap:8px"><b style="font-size:96px;line-height:.9;letter-spacing:-.05em">Go.</b><b style="font-size:22px">Set 4 of 4</b><div style="font-size:18px;font-weight:600">Bench Press · 82.5 kg × 8</div></div><div class="pad" style="padding-bottom:20px"><div class="btn" style="background:var(--onac);color:var(--ac)">Back to workout</div></div></div>`},
+ {id:'G3',name:'Quiet',note:'No visual takeover: vibration, sound, and the timer text turns lime.',html:`<div class="phone">${workoutTop()}<div class="pad" style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${done(1,'80 kg × 8')}${done(2,'80 kg × 8')}${done(3,'82.5 kg × 8')}<div class="card" style="padding:16px;text-align:center"><div class="mu" style="font-size:12px">Rest</div><div class="big lime">0:00</div><div class="mu" style="font-size:12px;margin-top:6px">Next: set 4 · 82.5 kg × 8</div></div></div><div class="grow"></div><div class="pad" style="padding-bottom:16px"><button class="btn" type="button">${mi('play','var(--onac)',18)} Start set 4</button></div></div>`}]);
+// H swipe
+put('#rowH',[
+ {id:'H1',name:'Swipe + undo',note:'Right: lime "Done" shows underneath. Left: red delete. Undo for 5 seconds.',html:`<div class="phone">${workoutTop()}<div class="pad" style="margin-top:10px;display:flex;flex-direction:column;gap:8px">${done(1,'80 kg × 8')}
+<div class="swipe"><div class="under" style="background:var(--ac);color:var(--onac);gap:6px">${mi('check','var(--onac)',18)} Done</div><div class="over" style="transform:translateX(96px)"><span class="ring"></span><span class="mu" style="width:38px;font-size:12px">Set 3</span>82.5 kg × 8</div></div>
+<div class="swipe"><div class="under" style="background:#5A1E22;color:#FFB4B4;justify-content:flex-end;gap:6px">Delete ${mi('del','#FFB4B4',18)}</div><div class="over" style="transform:translateX(-96px)"><span class="ring"></span><span class="mu" style="width:38px;font-size:12px">Set 4</span>82.5 kg × 8</div></div></div>
+<div class="snack"><span>Set 2 deleted</span><b>Undo</b></div></div>`},
+ {id:'H2',name:'No swipe',note:'Keep it simple: tap rows to edit, delete inside the edit sheet. Nothing hidden behind gestures.',html:`<div class="phone">${workoutTop()}<div class="pad" style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${done(1,'80 kg × 8')}${done(2,'80 kg × 8')}</div><div class="dim"></div><div class="sheet"><div class="handle"></div><b>Set 2</b><div class="rowi" style="gap:8px"><div class="card" style="flex:1;padding:12px;text-align:center;background:var(--s2)"><div class="big" style="font-size:30px">80</div><span class="mu">kg</span></div><div class="card" style="flex:1;padding:12px;text-align:center;background:var(--s2)"><div class="big" style="font-size:30px">8</div><span class="mu">reps</span></div></div><button class="btn" type="button">Save</button><button class="btn ghost" type="button" style="color:#FF9C9C">${mi('del','#FF9C9C',18)} Delete set</button></div></div>`}]);
+// I onboarding
+put('#rowI',[
+ {id:'I1',name:'Welcome',note:'Privacy promise first. "I have an account" for people restoring.',html:`<div class="phone">${SB}<div class="grow" style="display:flex;flex-direction:column;justify-content:center;padding:0 22px;gap:14px"><span style="width:64px;height:64px;border-radius:32px;background:var(--ac);display:grid;place-items:center" class="popin">${CK('#121418',36)}</span><div style="font-size:30px;font-weight:900;line-height:1.05;letter-spacing:-.03em">Log every set.<br>Keep every number.</div><div class="rowi mu" style="font-size:13px;align-items:flex-start">${mi('phone','var(--mu)',18)}<span>Your workouts stay on this phone. An account is optional, only for backup and other devices.</span></div></div><div class="pad" style="padding-bottom:18px;display:flex;flex-direction:column;gap:4px"><button class="btn" type="button">Get started</button><button class="btn ghost" type="button">I already have an account</button></div></div>`},
+ {id:'I2',name:'About you',note:'Units and experience. Experience decides how much the app explains.',html:`<div class="phone">${SB}<div class="bar">${mi('back')}<span class="mu" style="font-size:12px">2 of 3</span></div><div class="pad" style="display:flex;flex-direction:column;gap:12px"><div class="h1">How do you lift?</div><div class="mu" style="font-size:12px">Units</div><div class="seg"><span class="on">kg</span><span>lb</span></div><div class="mu" style="font-size:12px">Experience</div><div class="choice"><b>New to lifting</b><small>Show how-tos and tips as I go</small></div><div class="choice on"><b>Some experience</b><small>Tips only when I ask</small></div><div class="choice"><b>Experienced</b><small>Just the log, no tips</small></div></div><div class="grow"></div><div class="pad" style="padding-bottom:18px"><button class="btn" type="button">Continue</button></div></div>`},
+ {id:'I3',name:'Starting plan',note:'Ready templates, or start empty. You can change everything later.',html:`<div class="phone">${SB}<div class="bar">${mi('back')}<span class="mu" style="font-size:12px">3 of 3</span></div><div class="pad" style="display:flex;flex-direction:column;gap:10px"><div class="h1">Pick a starting plan</div>${[['Full body','3 days a week · good first plan',1],['Push / Pull / Legs','3–6 days · split by movement'],['Upper / Lower','4 days · split by body half'],['Start empty','Build your own workouts']].map(([n,d,on])=>`<div class="choice ${on?'on':''} rowi" style="justify-content:space-between"><div><b>${n}</b><small>${d}</small></div>${on?`<span class="chk" style="background:var(--ac)">${mi('check','var(--onac)',14)}</span>`:''}</div>`).join('')}</div><div class="grow"></div><div class="pad" style="padding-bottom:18px"><button class="btn" type="button">Start training</button></div></div>`}]);
+// J empty
+put('#rowJ',[
+ {id:'J1',name:'No workouts',note:'First visit to Workouts.',html:`<div class="phone">${SB}<div class="bar"><span class="h1">Workouts</span>${mi('add')}</div><div class="grow" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 28px;text-align:center"><span style="width:72px;height:72px;border-radius:24px;background:var(--s1);display:grid;place-items:center">${gi('template',36)}</span><b style="font-size:18px">No workouts yet</b><span class="mu" style="font-size:13px">Start from a ready plan or build your own.</span><button class="btn" type="button" style="margin-top:6px">Browse starter plans</button><button class="btn ghost" type="button">Create empty workout</button></div>${nav('Workouts')}</div>`},
+ {id:'J2',name:'Nothing found',note:'Search with no match offers to create it.',html:`<div class="phone">${SB}<div class="bar"><span class="h1">Exercises</span>${mi('add')}</div><div class="pad"><div class="card rowi" style="height:40px;border-radius:20px;padding:0 12px">${mi('search','var(--mu)',18)} zercher squat</div></div><div class="grow" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 28px;text-align:center"><span style="width:72px;height:72px;border-radius:24px;background:var(--s1);display:grid;place-items:center">${gi('barbell',36)}</span><b style="font-size:18px">No "zercher squat" yet</b><span class="mu" style="font-size:13px">Add it as your own exercise. It works like any other.</span><button class="btn" type="button" style="margin-top:6px">${mi('add','var(--onac)',18)} Create "Zercher Squat"</button></div>${nav('Exercises')}</div>`}]);
+// N nav
+put('#rowN',[
+ {id:'N1',name:'Four tabs',note:'Home, Workouts, Exercises, You. Active tab gets a filled icon.',wide:true,html:`<div class="board" style="padding:0;overflow:hidden">${nav('Workouts')}</div>`},
+ {id:'N2',name:'Four tabs + Start',note:'A lime Start button in the middle, always one tap from a workout.',wide:true,html:`<div class="board" style="padding:28px 0 0;overflow:hidden">${nav('Home','center')}</div>`}]);
+// K settings
+put('#rowK',[
+ {id:'K1',name:'You',note:'Where your data lives is the first line of "Your data".',html:`<div class="phone">${SB}<div class="bar"><span class="h1">You</span></div><div class="pad"><div class="card rowi" style="padding:12px"><span style="width:40px;height:40px;border-radius:20px;background:var(--s3);display:grid;place-items:center;font-weight:800">A</span><div class="grow"><b>Android test</b><div class="mu" style="font-size:11.5px">Signed in with Google</div></div>${mi('chev','var(--mu)',18)}</div></div>
+<div class="sec-h">Training</div><div class="pad"><div class="card sx">${[['Units','kg'],['Default rest','2:00'],['Sounds and vibration','On']].map(([a,b])=>`<div class="srow"><span>${a}</span><span class="mu">${b}</span></div>`).join('')}</div></div>
+<div class="sec-h">Your data</div><div class="pad"><div class="card sx"><div class="srow" style="align-items:flex-start;padding-block:10px"><span class="rowi" style="align-items:flex-start">${mi('phone','var(--ac)',18)}<span style="font-size:12px">Stored on this phone. Sync keeps a copy in your account.</span></span></div>${[['Backup and sync','On'],['Export data',''],['Delete account','']].map(([a,b])=>`<div class="srow"><span style="${a.startsWith('Delete')?'color:#FF9C9C':''}">${a}</span><span class="mu">${b}</span></div>`).join('')}</div></div><div class="grow"></div>${nav('You')}</div>`}]);
+// M interactive
+$('#rowM').innerHTML=card({id:'M1',name:'Done animation',note:'Interactive. Hold the + buttons; tap Done.',html:`<div class="phone" id="mphone"></div>`})+card({id:'M2',name:'Calmer motion',note:'Same flow, but a plain fade instead of pop and grow. Pick M1 or M2.',html:`<div class="phone" style="display:grid;place-items:center;color:var(--mu);font-size:13px;text-align:center;padding:24px">Same as M1 without the bounce: rows fade, rest card fades in. For people who find motion distracting (also used automatically when Android "Remove animations" is on).</div>`});
+mInit();
+}
+// ---------- M1 interactive ----------
+let mState={kg:82.5,reps:8,resting:false,rest:120,t:null};
+function mRender(){const p=$('#mphone');if(!p)return;const s=mState;
+ p.innerHTML=`${workoutTop()}<div class="pad" style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${done(1,'80 kg × 8')}${done(2,'80 kg × 8')}
+ ${s.resting?`<div class="setrow popin"><span class="chk">${mi('check','var(--ac)',14)}</span><span class="lab">Set 3</span><span class="num">${s.kg} kg × ${s.reps}</span></div><div class="card growin" style="padding:14px;text-align:center"><div class="mu" style="font-size:12px">Rest</div><div class="big ${s.rest<=0?'lime':''}" id="mrest">${fmt(s.rest)}</div><div style="height:5px;border-radius:3px;background:var(--s2);margin:10px 0"><i id="mbar" style="display:block;height:5px;border-radius:3px;background:var(--ac2);width:${s.rest/120*100}%"></i></div><div class="rowi"><button class="btn sec" type="button" data-r="-15">−15 s</button><button class="btn sec" type="button" data-r="15">+15 s</button></div></div>`
+ :`<div class="card" style="padding:12px;border:2px solid var(--ac2);border-radius:18px;display:flex;flex-direction:column;gap:10px"><div class="rowi" style="justify-content:space-between"><b>Set 3</b><span class="mu" style="font-size:11.5px">Last time 80 kg × 7</span></div><div class="rowi" style="gap:8px">${[['kg',s.kg,'kg'],['reps',s.reps,'reps']].map(([k,v,u])=>`<div style="flex:1;background:var(--s2);border-radius:14px;padding:10px 6px;text-align:center"><div><span class="big" style="font-size:30px">${v}</span> <span class="mu">${u}</span></div><div class="rowi" style="justify-content:center;margin-top:8px;gap:8px"><button type="button" class="hold" data-k="${k}" data-d="-1" aria-label="Less ${u}" style="width:44px;height:40px;border-radius:20px;border:0;background:var(--s3);color:var(--tx);display:grid;place-items:center;cursor:pointer">${mi('remove','var(--tx)',18)}</button><button type="button" class="hold" data-k="${k}" data-d="1" aria-label="More ${u}" style="width:44px;height:40px;border-radius:20px;border:0;background:var(--s3);color:var(--tx);display:grid;place-items:center;cursor:pointer">${mi('add','var(--tx)',18)}</button></div></div>`).join('')}</div></div>`}
+ <div class="setrow" style="background:transparent;border:1.5px solid var(--ol)"><span class="ring"></span><span class="lab">Set 4</span><span class="num">${s.kg} kg × ${s.reps}</span></div></div><div class="grow"></div>
+ <div class="pad" style="padding-bottom:16px">${s.resting?`<button class="btn" type="button" id="mreset">${mi('skip','var(--onac)',18)} Start set 4 now</button>`:`<button class="btn" type="button" id="mdone">${mi('check','var(--onac)',18)} Done with set 3</button>`}</div>`;
+ bindM();}
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+function step(k,d){if(k==='kg')mState.kg=Math.max(0,+(mState.kg+d*2.5).toFixed(1));else mState.reps=Math.max(0,mState.reps+d);}
+function bindM(){
+ document.querySelectorAll('#mphone .hold').forEach(b=>{let iv,to,n;const go=()=>{n=0;step(b.dataset.k,+b.dataset.d);mRender0();to=setTimeout(function rep(){n++;step(b.dataset.k,+b.dataset.d);mRender0();iv=setTimeout(rep,Math.max(50,220-n*25))},400)};const stop=()=>{clearTimeout(to);clearTimeout(iv);mRender()};
+  b.addEventListener('pointerdown',e=>{e.preventDefault();go()});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();step(b.dataset.k,+b.dataset.d);mRender()}});});
+ const d=$('#mdone');if(d)d.onclick=()=>{mState.resting=true;mState.rest=120;mRender();clearInterval(mState.t);mState.t=setInterval(()=>{mState.rest-=4;const r=$('#mrest'),bb=$('#mbar');if(r){r.textContent=fmt(mState.rest);if(mState.rest<=0)r.classList.add('lime')}if(bb)bb.style.width=Math.max(0,mState.rest/120*100)+'%';if(mState.rest<=0)clearInterval(mState.t)},200)};
+ document.querySelectorAll('#mphone [data-r]').forEach(b=>b.onclick=()=>{mState.rest=Math.max(0,mState.rest+ +b.dataset.r);});
+ const r=$('#mreset');if(r)r.onclick=()=>{clearInterval(mState.t);mState.resting=false;mRender()};
+}
+function mRender0(){document.querySelectorAll('#mphone .big').forEach((el,i)=>{el.textContent=i===0?mState.kg:mState.reps})}
+function mInit(){mRender()}
+
+// ---------- picks ----------
+let picks={};try{picks=JSON.parse(localStorage.getItem('gb-picks')||'{}')}catch(e){picks={}}
+function syncPicks(){document.querySelectorAll('[data-pick]').forEach(b=>{const id=b.dataset.pick;const sec=id.replace(/\d+$/,'');b.setAttribute('aria-pressed',picks[sec]===id?'true':'false');b.textContent=picks[sec]===id?'Picked':'Pick'});
+ const v=Object.keys(picks).sort().map(k=>picks[k]);$('#sum').textContent=v.length?'Picks: '+v.join(', '):'No picks yet';try{localStorage.setItem('gb-picks',JSON.stringify(picks))}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(!b)return;const id=b.dataset.pick,sec=id.replace(/\d+$/,'');picks[sec]=picks[sec]===id?undefined:id;if(!picks[sec])delete picks[sec];syncPicks()});
+$('#copy').addEventListener('click',()=>{const t=$('#sum').textContent;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>{$('#copy').textContent='Copied'},()=>sel())}else sel();function sel(){const r=document.createRange();r.selectNodeContents($('#sum'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#copy').textContent='Select + copy'}setTimeout(()=>$('#copy').textContent='Copy picks',2000)});
+renderAll();syncPicks();
+</script>

@@ -45,10 +45,13 @@ waiting on me
 ## Plan 3: figma-foundation
 
 - [x] 3.1 (me) Figma file + connect the Figma MCP server to Claude Code
-- [ ] 3.2 Design tokens: current theme as Figma variables
-- [ ] 3.3 Component library in Figma, matching ui/components
-- [ ] 3.4 Every v1 screen as a Figma frame
-- [ ] 3.5 Code reads tokens from Figma; UI steps link a frame from now on
+- [ ] 3.2 World: banned list + impeccable direction round
+- [ ] 3.3 Tokens as Figma variables + design/tokens.json
+- [ ] 3.4 Brand and icons (app icon, wordmark, gym glyphs)
+- [ ] 3.5 Component library (M3-based, on the tokens)
+- [ ] 3.6 Screens per flow, incl. Login "session expired" (6a–6f)
+- [ ] 3.7 Motion and haptics spec
+- [ ] 3.8 DESIGN.md + Plan 4 handoff (code steps per frame)
 
 ## Plan 4: phase5-release
 
