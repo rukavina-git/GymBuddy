@@ -2,6 +2,8 @@ package com.rukavina.gymbuddy.di
 
 import android.content.Context
 import com.rukavina.gymbuddy.BuildConfig
+import com.rukavina.gymbuddy.data.crash.CrashReporter
+import com.rukavina.gymbuddy.data.crash.FirebaseCrashReporter
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
 import com.rukavina.gymbuddy.data.sync.AuthSession
@@ -30,6 +32,10 @@ object SyncModule {
 
     @Provides
     @Singleton
+    fun provideCrashReporter(): CrashReporter = FirebaseCrashReporter()
+
+    @Provides
+    @Singleton
     fun provideFirebaseAuthSession(): FirebaseAuthSession = FirebaseAuthSession()
 
     @Provides
@@ -50,20 +56,22 @@ object SyncModule {
 
     @Provides
     @Singleton
-    fun provideSyncScheduler(engine: SyncEngine, store: SyncLocalStore, auth: AuthSession) = SyncScheduler(
-        runCycle = { engine.sync() },
-        outboxCount = { store.outboxCount() },
-        isSignedIn = { auth.currentUid != null },
-        scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    )
+    fun provideSyncScheduler(engine: SyncEngine, store: SyncLocalStore, auth: AuthSession, crashReporter: CrashReporter) =
+        SyncScheduler(
+            runCycle = { engine.sync() },
+            outboxCount = { store.outboxCount() },
+            isSignedIn = { auth.currentUid != null },
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+            crashReporter = crashReporter
+        )
 
     @Provides
     fun provideSyncRequester(scheduler: SyncScheduler): SyncRequester = scheduler
 
     @Provides
     @Singleton
-    fun provideLogoutCoordinator(store: SyncLocalStore, engine: SyncEngine, auth: AuthSession) =
-        LogoutCoordinator(store, { engine.flushOutbox() }, auth, { block -> engine.exclusive(block) })
+    fun provideLogoutCoordinator(store: SyncLocalStore, engine: SyncEngine, auth: AuthSession, crashReporter: CrashReporter) =
+        LogoutCoordinator(store, { engine.flushOutbox() }, auth, { block -> engine.exclusive(block) }, crashReporter)
 
     @Provides
     @Singleton

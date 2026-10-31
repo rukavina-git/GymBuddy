@@ -1,13 +1,73 @@
 # Progress
 
-- [ ] 01 One DB builder, schema export, v26 baseline (steps/01-one-db-builder.md)
-- [ ] 02 Remove the destructive migration fallback (steps/02-no-destructive-migration.md)
-- [ ] 03 Crashlytics (steps/03-crashlytics.md)
-- [ ] 04 Backend JSON logs, sync metrics, client headers (steps/04-backend-observability.md)
+- [x] 01 One DB builder, schema export, v26 baseline (steps/01-one-db-builder.md) (ef70690)
+- [x] 02 Remove the destructive migration fallback (steps/02-no-destructive-migration.md) (85606bc)
+- [x] 03 Crashlytics (steps/03-crashlytics.md) (5ea9e45)
+- [x] 04 Backend JSON logs, sync metrics, client headers (steps/04-backend-observability.md) (f221f0d)
 - [ ] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md)
 
 ## Deviations
-None yet.
+- 01: schemas dir is added to the `debug` source set's assets, not
+  `test`. Robolectric only reads `mergeDebugAssets`; test-source-set
+  assets never reach it. Debug APKs carry the schema JSON; release
+  doesn't.
+- 01: shared config is an extension, `applyAppConfig()` in
+  data/local/db/DatabaseConfig.kt, plus `DATABASE_NAME`.
+- 01: the baseline test also checks a `sync_meta` row survives opening
+  (proves no destructive wipe), beyond "every table exists".
+- 02: the fallback was in DatabaseConfig.kt (moved by step 01), not
+  AppModule. `MigrationPathTest` reads the current version from an
+  in-memory Room DB (`openHelper.writableDatabase.version`) because
+  `@Database` isn't retained at runtime.
+- 02: throwaway check (not committed): v27 + `sync_meta.note`, no
+  migration → path, validate and baseline tests all fail. With
+  `Migration(26, 27)` → all pass. With a no-op migration → validate
+  fails ("Migration didn't properly handle: sync_meta"). Reverted.
+- 02: 26.json vs shipped v26 checked: no `@Entity` file changed after
+  the v26 bump (7a59788), so 26.json is the shipped schema.
+- 03: collection is off in debug via a manifest placeholder
+  (`crashlyticsEnabled`), not `setCrashlyticsCollectionEnabled` at
+  startup. This also covers crashes that happen before `onCreate`.
+- 03: "offline" means any `IOException` in the cause chain. SyncEngine
+  wraps every IOException in `SyncException(cause = e)`, so a bare
+  `is IOException` check would never match.
+- 03: the logout report has counts and ids only, no payloads (the
+  step's recommendation). Ids go in per-call custom keys
+  `discarded_<TYPE>` (comma-joined), the error is
+  `DiscardedOnLogoutException`.
+- 03: crash reporter is a constructor param with a `NoOpCrashReporter`
+  default, so existing test call sites didn't change.
+- 03: mapping upload is off unless `-Pgymbuddy.uploadMapping=true`.
+- 03: no test for `setUserId` in `FirebaseAuthSession.observeSignIn`
+  (needs a real FirebaseAuth).
+- 03: reviewer findings not fixed (no blockers):
+  - id keys truncate at 1024 chars (about 27 UUIDs per type)
+  - the IOException filter also hides TLS errors and malformed JSON
+  - `reportDiscarded()` isn't guarded, so a reporter failure blocks
+    logout
+- 04: the filter is `RequestMdcFilter`, not `RequestContextFilter`. That
+  bean name clashes with Spring Boot's own `requestContextFilter`.
+- 04: `GlobalExceptionHandler` and `SyncController` (read-only 503,
+  push traceId) also used fresh UUIDs; all now use
+  `RequestContext.traceId()`, not just `ErrorResponseWriter`.
+- 04: JSON logs are switched on by the env var
+  `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs` (added to render.yaml), not a
+  profile. Locally logs stay plain text.
+- 04: counters are `gymbuddy.sync.push.results` (tags entityType,
+  status; conflicts = status CONFLICT), `gymbuddy.sync.pull.entities`
+  (entityType), `gymbuddy.sync.cursor.expired`. No separate conflict
+  counter.
+- 04: added one INFO line per push and pull in `SyncController` so a
+  normal sync produces a log line carrying the MDC fields.
+- 04: `SyncApis.create` got `clientVersion` with default
+  `BuildConfig.VERSION_NAME`; Hilt and tests unchanged. Test uses
+  `mockwebserver3` (new test dependency, OkHttp 5).
+- 04: reviewer findings not fixed (no blockers):
+  - `userId` goes into MDC after `ensureProfile()`, so a provisioning
+    error log has no userId
+  - MDC is cleared before a Tomcat `/error` dispatch, so those lines
+    have no traceId
+  - no test for a request without client headers
 
 ## Gotchas
 - From phase4-closeout: the guard hook greps the whole Bash command,
@@ -19,5 +79,50 @@ None yet.
 - From phase4-closeout: ViewModel tests using
   `stateIn(WhileSubscribed(5_000))` over Room must cancel
   `viewModelScope` in `@After`.
+- 01: `MigrationTestHelper` needs `InstrumentationRegistry
+  .getInstrumentation()` for context; `androidx.test:core`
+  (ApplicationProvider) isn't on the unit-test classpath.
+- 01: `MigrationBaselineTest.EXPECTED_TABLES` is the v26 list by hand.
+  Step 02's path test should derive tables from the latest schema JSON
+  instead of reusing it.
+- 01: 26.json is generated from today's entities. It's the shipped v26
+  only if no entity changed since the last tester build without a
+  version bump; worth a check in step 02.
+- Root `/local.properties` is untracked and not in the root
+  .gitignore. Don't stage it.
 - 1.6 (device checks against the hosted backend) is still open in
   Plan 1. Doing them before step 02 means they test today's DB setup.
+- 02: without the fallback, any version bump without a migration
+  crashes on open, in debug too. `MigrationPathTest` only accepts
+  single steps `Migration(n, n+1)`.
+- 02: the first build after a version bump exports `<n>.json` after
+  assets merge; Robolectric may report "Cannot find the schema file"
+  until the next run. Commit the new JSON.
+- 03: tester or release builds without `-Pgymbuddy.uploadMapping=true`
+  give obfuscated stack traces in the Firebase console. Add it to the
+  release checklist.
+- 03: Crashlytics custom key values are capped at 1024 chars.
+  Discarded ids beyond that are lost silently.
+- 04: Render may not apply render.yaml env changes without a blueprint
+  sync. If logs are still plain text after the deploy, set
+  `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs` in the dashboard by hand.
+- 04: a new Spring bean named like a Boot one (`requestContextFilter`)
+  fails context load with BeanDefinitionOverrideException.
+- 05: debug builds now default to the hosted backend (one server for
+  now). Local backend on the emulator:
+  `-Pgymbuddy.apiBaseUrl=http://10.0.2.2:8080/`. Debug and release
+  write to the same database.
+- 05: a device with a pre-v26 DB (old dev builds) crashes on open:
+  "A migration from 25 to 26 was required". Expected, no path below
+  the baseline. Fix with `adb shell pm clear com.rukavina.gymbuddy`.
+- 05: device checks round 1 (debug, hosted backend): T2, T4, T5, T7,
+  T8, T9, T10, T11, T12, T13 pass. T7: offline logout with a clean
+  outbox succeeds (sign-out is local), so the failure dialog is only
+  covered by unit tests. T13: Google sign-in after deletion creates a
+  new empty account, as expected. Found: roadmap 4.2a (auth gate),
+  4.2b (durable push).
+- 05: round 2 (release): R1 (R8 smoke) and R2 (logout discard
+  non-fatal, deobfuscated stack) pass; R3 (sync failure non-fatal)
+  skipped, a 410 is handled by resync and never reported. R2's title
+  showed the obfuscated class (`my0`), so proguard-rules.pro now
+  keeps the names of DiscardedOnLogoutException and SyncException.

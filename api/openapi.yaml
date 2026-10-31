@@ -38,6 +38,12 @@ info:
     Storage is metric everywhere: kilograms, centimetres, metres. Unit
     conversion for display is a client-side concern and never happens on
     the wire.
+
+    Clients send two headers on every request: `X-Client-Version` (the
+    app version, e.g. `0.0.2`) and `X-Client-Platform` (`android` or
+    `ios`). Both are optional and used only for server logs; the server
+    never rejects or changes a response because of them. They are
+    deliberately not declared on each operation.
   contact:
     name: Ivan Karlo Rukavina
     email: ivankarlo.rukavina@gmail.com

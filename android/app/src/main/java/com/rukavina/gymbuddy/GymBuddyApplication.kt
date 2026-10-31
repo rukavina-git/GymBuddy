@@ -12,6 +12,7 @@ import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
 import com.google.firebase.FirebaseApp
+import com.rukavina.gymbuddy.data.crash.CrashReporter
 import com.rukavina.gymbuddy.data.local.seeder.ExerciseSeeder
 import com.rukavina.gymbuddy.data.local.seeder.WorkoutTemplateSeeder
 import com.rukavina.gymbuddy.data.sync.FirebaseAuthSession
@@ -43,6 +44,9 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
     @Inject
     lateinit var authSession: FirebaseAuthSession
 
+    @Inject
+    lateinit var crashReporter: CrashReporter
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override val workManagerConfiguration: Configuration
@@ -58,7 +62,7 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
         // Always true in the app (google-services initialises Firebase at
         // startup); false only where Firebase isn't configured, e.g.
         // Robolectric tests booting this Application.
-        if (FirebaseApp.getApps(this).isNotEmpty()) authSession.observeSignIn(syncScheduler)
+        if (FirebaseApp.getApps(this).isNotEmpty()) authSession.observeSignIn(syncScheduler, crashReporter)
 
         // Seed default exercises and templates on app startup
         applicationScope.launch {

@@ -16,6 +16,8 @@ import com.rukavina.gymbuddy.data.local.dao.UserTemplateStateDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
+import com.rukavina.gymbuddy.data.local.db.DATABASE_NAME
+import com.rukavina.gymbuddy.data.local.db.applyAppConfig
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutSessionRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutTemplateRepositoryImpl
@@ -42,12 +44,9 @@ object AppModule {
     fun provideDatabase(
         @ApplicationContext appContext: Context
     ): AppDatabase {
-        return Room.databaseBuilder(
-            appContext,
-            AppDatabase::class.java,
-            "gym_buddy_db"
-        ).fallbackToDestructiveMigration() // For development - remove in production
-        .build()
+        return Room.databaseBuilder(appContext, AppDatabase::class.java, DATABASE_NAME)
+            .applyAppConfig()
+            .build()
     }
 
     // DAOs

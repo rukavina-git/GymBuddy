@@ -3,7 +3,9 @@ package com.rukavina.gymbuddy.auth
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import com.rukavina.gymbuddy.api.RequestContext
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -46,6 +48,8 @@ class FirebaseAuthenticationFilter(
                 userProvisioningService.ensureProfile(identity)
                 SecurityContextHolder.getContext().authentication =
                     UsernamePasswordAuthenticationToken(identity.uid, null, emptyList())
+                // RequestMdcFilter clears it after the request.
+                MDC.put(RequestContext.USER_ID, identity.uid)
             } catch (e: TokenVerificationException) {
                 log.debug("Rejected bearer token on {} {}: {}", request.method, request.requestURI, e.message)
             }

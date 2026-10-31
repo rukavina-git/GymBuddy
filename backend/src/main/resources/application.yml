@@ -16,6 +16,11 @@ spring:
   jpa:
     open-in-view: false
 
+# Plain text locally. On Render, LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs
+# switches the console to one JSON object per line; MDC keys (traceId,
+# userId, clientVersion, clientPlatform - see api/RequestMdcFilter.kt)
+# become top-level fields.
+
 springdoc:
   api-docs:
     path: /v3/api-docs

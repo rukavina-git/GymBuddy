@@ -1,7 +1,9 @@
 package com.rukavina.gymbuddy.data.sync
 
+import com.rukavina.gymbuddy.data.crash.FakeCrashReporter
 import com.rukavina.gymbuddy.domain.sync.SyncOutcome
 import com.rukavina.gymbuddy.domain.sync.SyncReason
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +12,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
@@ -19,6 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
@@ -123,5 +127,48 @@ class SyncSchedulerTest {
         clock = 20L
         scheduler.requestSync(SyncReason.PERIODIC)
         assertEquals(SyncStatus(20L, SyncOutcome.SYNCED, null, null), scheduler.status.value)
+    }
+
+    // ---- crash reports ----
+
+    private fun TestScope.failingScheduler(error: Throwable, reporter: FakeCrashReporter) = SyncScheduler(
+        runCycle = { throw error },
+        outboxCount = { 0 },
+        isSignedIn = { true },
+        scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+        crashReporter = reporter
+    )
+
+    @Test
+    fun `a failing cycle reports one non-fatal with traceId, reason and HTTP status`() = runTest {
+        val reporter = FakeCrashReporter()
+        val error = SyncException("push failed: HTTP 500", 500, traceId = "t-9")
+
+        failingScheduler(error, reporter).requestSync(SyncReason.PERIODIC)
+
+        assertEquals(
+            listOf(FakeCrashReporter.Report(error, mapOf("reason" to "PERIODIC", "traceId" to "t-9", "httpStatus" to "500"))),
+            reporter.reports
+        )
+    }
+
+    @Test
+    fun `an offline cycle reports nothing`() = runTest {
+        val reporter = FakeCrashReporter()
+        val offline = SyncException("pull failed: refused", cause = IOException("refused"))
+
+        failingScheduler(offline, reporter).requestSync(SyncReason.APP_FOREGROUND)
+        failingScheduler(IOException("refused"), reporter).syncNow(SyncReason.MANUAL)
+
+        assertEquals(emptyList<FakeCrashReporter.Report>(), reporter.reports)
+    }
+
+    @Test
+    fun `a cancelled cycle reports nothing`() = runTest {
+        val reporter = FakeCrashReporter()
+
+        failingScheduler(CancellationException("scope cancelled"), reporter).requestSync(SyncReason.PERIODIC)
+
+        assertEquals(emptyList<FakeCrashReporter.Report>(), reporter.reports)
     }
 }

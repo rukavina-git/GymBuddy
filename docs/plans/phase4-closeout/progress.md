@@ -147,4 +147,11 @@
 - 07: CodeQL default setup must be off while `codeql.yml` exists.
   Its android job needs the GOOGLE_SERVICES_JSON secret, so it fails
   on PRs from forks.
-- 07: DB Backup hand run after the merge: not confirmed yet.
+- 07: DB Backup hand run on 2026-10-30 passed (run 41045875762,
+  artifact gymbuddy-20261030T110818Z.dump.gpg, ~19 KB). The first try
+  failed: the BACKUP_DATABASE_URL secret was pasted without its last
+  character (`sslmode=requir`). The nightly cron runs from now on.
+- 07: PR #3 (SECURITY.md, CodeQL workflow, root Gradle build, flaky
+  SyncDebugViewModelTest fix) merged at ab36640.
+- 07: upload-artifact@v4 warns that Node 20 is deprecated (forced to
+  Node 24). Works today; bump the action when it breaks.

@@ -9,6 +9,7 @@ import com.rukavina.gymbuddy.auth.currentUid
 import com.rukavina.gymbuddy.sync.ExerciseSyncService
 import com.rukavina.gymbuddy.sync.OverlaySyncService
 import com.rukavina.gymbuddy.sync.ProfileSyncService
+import com.rukavina.gymbuddy.sync.SyncMetrics
 import com.rukavina.gymbuddy.sync.SyncPullOrchestrator
 import com.rukavina.gymbuddy.sync.WorkoutSessionSyncService
 import com.rukavina.gymbuddy.sync.WorkoutTemplateSyncService
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
 
 /**
  * POST /v1/sync/push and GET /v1/sync/pull per api/openapi.yaml. Thin by
@@ -48,6 +48,7 @@ class SyncController(
     private val overlaySyncService: OverlaySyncService,
     private val profileSyncService: ProfileSyncService,
     private val syncPullOrchestrator: SyncPullOrchestrator,
+    private val syncMetrics: SyncMetrics,
     @Value("\${gymbuddy.sync.read-only:false}") private val readOnly: Boolean,
     @Value("\${gymbuddy.sync.pull-page-size-default:200}") private val defaultPullLimit: Int,
     @Value("\${gymbuddy.sync.pull-page-size-max:500}") private val maxPullLimit: Int,
@@ -57,15 +58,14 @@ class SyncController(
     @PostMapping("/v1/sync/push")
     fun push(@RequestBody request: PushRequestDto): ResponseEntity<Any> {
         val uid = currentUid()
+        val traceId = RequestContext.traceId()
 
         if (readOnly) {
-            val traceId = UUID.randomUUID().toString()
             log.warn("503 SYNC_READ_ONLY [traceId={}] uid={}", traceId, uid)
             val body = ErrorDto(error = "SYNC_READ_ONLY", message = "Sync writes are temporarily disabled.", traceId = traceId)
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body)
         }
 
-        val traceId = UUID.randomUUID().toString()
         val results = mutableListOf<MutationResultDto>()
 
         request.workoutSessions.forEach { results += workoutSessionSyncService.apply(uid, it, traceId) }
@@ -75,6 +75,8 @@ class SyncController(
         request.userTemplateStates.forEach { results += overlaySyncService.applyTemplateState(uid, it, traceId) }
         request.userProfile?.let { results += profileSyncService.apply(uid, it, traceId) }
 
+        syncMetrics.recordPush(results)
+        log.info("push: {} results {}", results.size, results.groupingBy { it.status }.eachCount())
         return ResponseEntity.ok(PushResponseDto(results))
     }
 
@@ -98,6 +100,9 @@ class SyncController(
     ): PullResponseDto {
         val uid = currentUid()
         val effectiveLimit = (limit ?: defaultPullLimit).coerceIn(1, maxPullLimit)
-        return syncPullOrchestrator.pull(uid, cursor, effectiveLimit)
+        val response = syncPullOrchestrator.pull(uid, cursor, effectiveLimit)
+        syncMetrics.recordPull(response)
+        log.info("pull: delta={} hasMore={}", cursor != null, response.hasMore)
+        return response
     }
 }

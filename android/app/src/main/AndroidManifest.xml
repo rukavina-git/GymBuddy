@@ -18,6 +18,11 @@
         android:theme="@style/Theme.GymBuddy"
         android:usesCleartextTraffic="false"
         tools:targetApi="34">
+        <!-- Crashlytics: off in debug builds (crashlyticsEnabled in app/build.gradle.kts). -->
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="${crashlyticsEnabled}" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

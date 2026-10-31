@@ -3,9 +3,11 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.openapi.generator)
     jacoco
     id("org.owasp.dependencycheck") version "13.0.0"
@@ -13,6 +15,12 @@ plugins {
 
 kotlin {
     jvmToolchain(17)
+}
+
+// Exported Room schemas, one JSON per version. Committed: migration
+// tests build old versions from them.
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 // Output of openApiGenerate below.
@@ -39,6 +47,8 @@ android {
         versionCode = 5
         versionName = "0.0.2-SNAPSHOT"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Crash reporting, read by the manifest. Off in debug builds.
+        manifestPlaceholders["crashlyticsEnabled"] = "true"
     }
 
     signingConfigs {
@@ -52,15 +62,22 @@ android {
 
     buildTypes {
         debug {
-            // 10.0.2.2 is the emulator's alias for the host machine, where
-            // the backend runs locally. Override with -Pgymbuddy.apiBaseUrl.
-            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("http://10.0.2.2:8080/")}\"")
+            manifestPlaceholders["crashlyticsEnabled"] = "false"
+            // The hosted backend, as in release (there's only one server).
+            // For a local backend on the emulator:
+            // -Pgymbuddy.apiBaseUrl=http://10.0.2.2:8080/
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.rukavina.app/")}\"")
         }
         release {
             signingConfig = signingConfigs.getByName("release")
             buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.rukavina.app/")}\"")
             ndk {
                 debugSymbolLevel = "FULL"
+            }
+            // Mapping upload needs Firebase credentials; local and CI
+            // builds skip it. Pass -Pgymbuddy.uploadMapping=true to upload.
+            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                mappingFileUploadEnabled = findProperty("gymbuddy.uploadMapping") == "true"
             }
             isMinifyEnabled = true
             isShrinkResources = true
@@ -100,6 +117,12 @@ android {
     sourceSets {
         getByName("main") {
             kotlin.directories.add(generatedClientDir.get().dir("src/main/kotlin").asFile.path)
+        }
+        // MigrationTestHelper reads the exported schemas as assets.
+        // Robolectric only sees the merged debug assets (test source set
+        // assets are ignored), so they ship in debug APKs, not release.
+        getByName("debug") {
+            assets.directories.add("$projectDir/schemas")
         }
     }
 }
@@ -157,6 +180,7 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.crashlytics)
 
     // Google Sign-In (Credential Manager)
     implementation(libs.credentials)
@@ -196,6 +220,7 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.work.testing)
     testImplementation(libs.lifecycle.runtime.testing)
+    testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(libs.testExtJunit)
     androidTestImplementation(libs.espressoCore)
     androidTestImplementation(libs.ui.test.junit)

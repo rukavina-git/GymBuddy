@@ -10,8 +10,9 @@ Project status (phases, open items) lives in docs/status.md, not here.
 - Aggregates (session tree, template tree) sync whole.
 
 ## Database
-- Bump the database version whenever the schema changes.
-- fallbackToDestructiveMigration() stays on until Phase 5 removes it.
+- Schema change: bump the version, build to export app/schemas/<n>.json
+  (commit it), add a `Migration` to `ALL_MIGRATIONS` and a
+  MigrationTestHelper test. Never a destructive fallback, in any build.
 
 ## Code
 - The app must build and run at every commit.
