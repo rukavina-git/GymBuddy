@@ -60,6 +60,8 @@ waiting on me
 - [ ] 4.2 Fix ImageStorageUtil data-loss bug
 - [ ] 4.2a Auth gate: dead session → Login with "session expired"
 - [ ] 4.2b Durable push: WorkManager job when the outbox is non-empty
+- [ ] 4.2c Guest mode: local-only use, create account / sign in merges (ADR 0014)
+- [ ] 4.2d Data export: versioned JSON + CSV (ADR 0015)
 - [ ] 4.3 Tag-triggered signed release AAB workflow
 - [ ] 4.4 (me) Release build manual pass
 - [ ] 4.5 (me) Privacy policy online + in-app link, Play Console, Data Safety
