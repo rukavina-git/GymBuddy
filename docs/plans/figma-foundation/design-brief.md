@@ -176,3 +176,37 @@ Councils: docs/council/2026-10-31-history-and-next-flow.md,
 - No Stats hub until v2+ (records, body weight); it will be linked
   from the Progress top bar.
 - LOCKED 2026-11-01: Progress tab. Final frames on "03 Locked designs".
+
+## Round log: App frame
+Councils/consults: impeccable (2026-11-01), docs/council/2026-11-01-exercise-visual.md.
+- Bottom bar: 5 tabs Home, Workouts, Exercises, Progress, You. Active =
+  cobalt pill (25%) + filled icon + bold label. Icons: house, checklist
+  (Workouts), dumbbell, trend in a box (Progress), person; each has an
+  outline and a filled version. When a label no longer fits (measured),
+  the bar shows icons only; TalkBack names + long-press tooltip stay.
+- Top bars: M3 large title that collapses on scroll (Workouts,
+  Exercises, You). Home has no title: "gymbuddy." wordmark, then the
+  week strip, then lime "Start workout" (hidden while a workout runs).
+- Workouts: no FAB. + in the top bar and a "New template" row. Two
+  sections, "Your templates" and "Starter plans". Starters always on,
+  read-only (editing makes your copy), toggle in Settings and ⋯ →
+  Hide starter plans (Undo); turning off never deletes data.
+- Exercises: pinned search, muscle chips, text-only rows (option A;
+  list photos may come later, photos are imported for the exercise
+  page anyway). Exercise page: toned photo on top, Last / Best under
+  it. Search forgives typos (exact first, close after, no extra line,
+  "Create …" as a quiet link; same in All sessions). Nothing close →
+  lime "Create …". No "Recent" group (owner: low value across splits).
+- Live bar: above the tabs on all 5 tabs and pages pushed from them;
+  hidden in the workout, sheets, onboarding. States: on a set,
+  resting (counts down), rest over (+0:45, no colour, no buzz), timed
+  set; big font cuts the name, never the set.
+- You (guest): "saved on this phone only" card, lime Create account +
+  Sign in; never forced.
+- Motion: tab fade-through, live bar grows from ⌄ and slides away,
+  title collapses with scroll. Only with Android "Remove animations"
+  does movement become crossfades; haptics stay.
+- Muscle icons tried (blocky, two open-source anatomy maps) and
+  rejected by owner.
+- Later idea (owner): "Suggest with AI" for picking exercises, v2+.
+- LOCKED 2026-11-01: App frame. Final frames on "03 Locked designs".
