@@ -210,3 +210,32 @@ Councils/consults: impeccable (2026-11-01), docs/council/2026-11-01-exercise-vis
   rejected by owner.
 - Later idea (owner): "Suggest with AI" for picking exercises, v2+.
 - LOCKED 2026-11-01: App frame. Final frames on "03 Locked designs".
+
+## Round log: Home
+Councils: docs/council/2026-11-01-home-contents.md (Round 10 "Next up"
+rejected by owner: list order is not a plan; no schedule model in v1).
+- Home: wordmark, week strip card, lime Start workout, then "Your
+  templates": the 3 most recently used, row = name + "6 exercises ·
+  yesterday" + play icon; a row tap starts that workout. Then "All
+  templates". Nothing else: no Next up, last-session card, weekly
+  totals, greeting or streaks (owner sided with impeccable).
+- New user: the rows show the starter plan picked in onboarding.
+  While a workout runs, rows hide with the button.
+- Start sheet: Your templates by recency (last done on the right),
+  Starter plans with a one-line description ("Full body plan, day 1
+  of 3 · about 45 min"), lime "+ Empty workout" last.
+- Week strip card has a chevron; tap opens Progress › All sessions on
+  Calendar, at the current month.
+- All sessions: List | Calendar segmented button (selected = cobalt +
+  check). Calendar: months stacked vertically, newest first, sticky
+  headers with counts, no future weeks, no sideways swipe. Done day =
+  filled circle + bold number; today = cobalt ring; 2+ sessions =
+  count badge. Day tap: 1 session opens it, 2+ open a sheet. TalkBack
+  reads "Wed 14 Oct, 2 sessions, Push A, Run".
+- Runs/cardio: Empty workout → add Running (DISTANCE_DURATION, km +
+  time). Plan 4 adds Running, Treadmill running, Cycling, Rowing
+  machine to default_exercises.json (reference data, no schema change).
+- v2: weekly schedule (pin templates to weekdays); Home's row spot
+  becomes "Today: Push A".
+- Not yet checked: Home at 200% font (harden round).
+- LOCKED 2026-11-01: Home. Final frames on "03 Locked designs".

@@ -977,6 +977,7 @@ The distinguishing feature of this list is that **the storage for most of it alr
 | Statistics and charts | Derived from stored data |
 | Personal records | Derived from stored data |
 | Body weight history | New table, purely additive |
+| Weekly schedule (pin templates to weekdays; Home shows today's) | New table, purely additive |
 | Health Connect / HealthKit | New integration |
 | Data export | Trivial once sync exists |
 | User-uploaded exercise images | New table plus object storage |
