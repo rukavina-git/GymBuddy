@@ -960,7 +960,7 @@ Store listings, screenshots, descriptions. App Store submission — expect at le
 
 ### 14.1 Android v1 — frozen
 
-Authentication (email, Google, Apple); exercise library with search, filter, hide and personal notes; custom exercise CRUD; template CRUD including planned rest; active workout logging across all six tracking types; workout history with immutable snapshots; user profile with sync; device-local settings; full offline per §5; bidirectional sync; account deletion.
+Authentication (email, Google, Apple); exercise library with search, filter, hide and personal notes; custom exercise CRUD; template CRUD including planned rest; per-exercise default rest (moved from v2 by the owner, 2026-11-02; `defaultRestSeconds` on the overlay); active workout logging across all six tracking types; workout history with immutable snapshots; user profile with sync; device-local settings; full offline per §5; bidirectional sync; account deletion.
 
 ### 14.2 Deferred to v2
 
@@ -970,7 +970,6 @@ The distinguishing feature of this list is that **the storage for most of it alr
 |---|---|
 | Set type picker (warmup / working / drop / failure) | `setType` column populated, defaults to `WORKING` |
 | Rest timer with actual-rest capture | `restTakenSeconds` column exists, always null |
-| Per-exercise default rest | `defaultRestSeconds` on the overlay, always null |
 | Favourites | `isFavorite` on both overlay tables, always false |
 | Supersets and circuits | `supersetGroup` on `PerformedExercise`, always null |
 | Duplicate-and-edit a default exercise (owner 2026-11-02: doubtful even for v2; users create their own by hand, usually just a name. Discuss in v2, lean no) | `derivedFromId` on exercises and templates, always null |
