@@ -973,7 +973,7 @@ The distinguishing feature of this list is that **the storage for most of it alr
 | Per-exercise default rest | `defaultRestSeconds` on the overlay, always null |
 | Favourites | `isFavorite` on both overlay tables, always false |
 | Supersets and circuits | `supersetGroup` on `PerformedExercise`, always null |
-| Duplicate-and-edit a default exercise | `derivedFromId` on exercises and templates, always null |
+| Duplicate-and-edit a default exercise (owner 2026-11-02: doubtful even for v2; users create their own by hand, usually just a name. Discuss in v2, lean no) | `derivedFromId` on exercises and templates, always null |
 | Statistics and charts | Derived from stored data |
 | Personal records | Derived from stored data |
 | Body weight history | New table, purely additive |

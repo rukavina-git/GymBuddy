@@ -273,3 +273,31 @@ Shaped by impeccable (2026-11-01); owner picked page A, editor A, picker A.
 - Editing a template doesn't change a running workout.
 - Changed a locked flow (owner): active workout subtitle gains rest.
 - LOCKED 2026-11-01: Templates. Final frames on "03 Locked designs".
+
+## Round log: Exercise page + create
+Round 13 (2026-11-01/02). Council: docs/council/2026-11-02-exercise-flags.md.
+- Exercise page A, one scroll: photo, name, "Chest · Barbell",
+  Last / Best, quiet rest row (timer + muted "Rest 2:00 between sets",
+  tap = time sheet, per exercise, used when added to a template or
+  workout), your note, Progress (sentence, chart, Show on Progress),
+  History (3 rows + "All 14 sessions"), How to, Tips, Muscles and
+  equipment. No main button; ⋯ built-in: Add to template, Hide from
+  lists; own: Edit, Add to template, Hide, Delete.
+- Own exercise: no photo, name on top. Never done: no numbers, no
+  progress, nothing empty.
+- Create A: one screen (name, what you log, main muscle, equipment;
+  More details folded: other muscles, steps, rest). Difficulty,
+  category, compound/isolation get defaults. Create C: quick sheet from
+  search or the picker, name prefilled.
+- Rest is one fixed number (owner): a range (1:00–3:00) would need a
+  schema change and confuses the timer. Not planned.
+- Delete own exercise (owner, council d): dialog names the templates
+  ("They keep it until you change them. Past workouts keep it."),
+  Cancel / Hide instead / red Delete. Templates still start with it;
+  the editor shows "Deleted exercise" with Swap, Remove, Restore.
+  Plan 4: start from the template's snapshot name + tracking type.
+- No "Make a copy" of built-ins in v1; doubtful for v2 (owner).
+- Notes in a workout (owner + impeccable): one note only. Plan note
+  wins; your note sits behind a small note icon (one tap). If only your
+  note exists, it shows. Owner: "no loud screen during workout, only
+  crucial info."
