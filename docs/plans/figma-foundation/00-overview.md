@@ -53,7 +53,7 @@ Set 2026-11-01. Every step follows it.
   03 and its rounds are deleted. Never treated as final.
 - **03 Locked designs**: owner-approved screens only. One section per
   flow, named "<Flow> · locked YYYY-MM-DD", in app order: App frame,
-  Home, Workouts, Active workout, Exercises, Progress, You,
+  Home, Templates (Workouts), Active workout, Exercises, Progress, You,
   Onboarding + auth, Error/offline states. Changing a locked flow
   needs a new round on 02.
 - Old versions live in Figma version history, never on a page. No

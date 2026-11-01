@@ -238,4 +238,38 @@ rejected by owner: list order is not a plan; no schedule model in v1).
 - v2: weekly schedule (pin templates to weekdays); Home's row spot
   becomes "Today: Push A".
 - Not yet checked: Home at 200% font (harden round).
+- Start sheet starter line: no made-up minutes. Show the user's own
+  average for that template, hidden until there is data (owner, Round 12).
 - LOCKED 2026-11-01: Home. Final frames on "03 Locked designs".
+
+## Round log: Templates
+Shaped by impeccable (2026-11-01); owner picked page A, editor A, picker A.
+- Template page: ←, pencil, ⋯ in the top bar. Title, then "7
+  exercises · 23 sets · last done Tue". Numbered rows: name, "4 × 6 ·
+  80 kg", muted "rest 3:00" on the right, note under it if any. Lime
+  Start workout pinned at the bottom (hidden while a workout runs).
+  ⋯: Duplicate, Delete (Undo). Starter: "Starter plan" line, read-only;
+  pencil or ⋯ Make a copy opens "Full Body (copy)" in the editor;
+  ⋯ Hide this plan (Undo). Both per-plan hide and the global "Hide
+  starter plans" stay (owner).
+- Editor: own screen (X, title, lime Save). Name field first (empty:
+  "Give it a name" on save). Cards: name, drag handle on the right,
+  chips [4 sets] [6 reps] [80 kg] that open the workout keypad (Next
+  moves on), then rest as timer + value, no chip (quieter, owner). Note
+  per exercise in this template: "+ Add note" when empty, the text
+  when filled, tap to edit; shown in the workout under the name.
+  Reorder by handle (TalkBack Move up/down); swipe removes + Undo.
+  Back/X with changes: "Discard changes?" Keep editing / Discard.
+  Chips follow tracking type (reps only, time, km + time).
+- Rest: shown wherever the plan shows (page, editor, workout subtitle
+  "Barbell · 4 × 8 · rest 2:00" in muted), never as big as sets/reps/kg.
+  New exercises: 3 × 10, kg empty, rest from Settings default.
+- Picker (editor and workout): full screen, search, muscle chips, text
+  rows. Tap toggles; picked = cobalt tonal row + numbered cobalt circle
+  (order of adding); lime "Add 3". Picks survive searches. "In
+  template"/"In workout" rows can still be picked. Back drops picks.
+  Added exercises go to the end in pick order, outlined briefly;
+  reorder in the editor.
+- Editing a template doesn't change a running workout.
+- Changed a locked flow (owner): active workout subtitle gains rest.
+- LOCKED 2026-11-01: Templates. Final frames on "03 Locked designs".
