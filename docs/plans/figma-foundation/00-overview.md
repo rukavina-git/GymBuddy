@@ -41,6 +41,24 @@ Gates: no next round without the owner's pick. No critique P0/P1 left
 open when the owner sees a round. Read `craft-floor.md` before any
 Figma edit. "More ideas" sends the surface back to 2.
 
+## Figma file layout (3 pages, Starter plan limit)
+Set 2026-11-01. Every step follows it.
+- **01 System**: the design system and nothing else. Rules cards
+  (colour meaning, access, copy; units/limits/rest), then tokens,
+  type, icons and components as steps 03–05 add them. Only finished,
+  reusable parts. Plan 4 builds from it. "Light mode (later)" holds
+  the light proof until step 03 makes it a token mode.
+- **02 Rounds**: work in progress. One section per round
+  ("Round N · topic"). When a flow is locked, its final frames move to
+  03 and its rounds are deleted. Never treated as final.
+- **03 Locked designs**: owner-approved screens only. One section per
+  flow, named "<Flow> · locked YYYY-MM-DD", in app order: App frame,
+  Home, Workouts, Active workout, Exercises, Progress, You,
+  Onboarding + auth, Error/offline states. Changing a locked flow
+  needs a new round on 02.
+- Old versions live in Figma version history, never on a page. No
+  new pages (the plan allows 3).
+
 ## Steps
 1. (done, roadmap 3.1) Figma file + MCP. Figma Console MCP since
    2026-10-31 (no call limit; needs Desktop + Bridge plugin).

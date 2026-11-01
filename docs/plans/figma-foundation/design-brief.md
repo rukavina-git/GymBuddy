@@ -150,7 +150,7 @@ All "new" behaviour items are in scope (owner, 2026-10-31).
   first − / + snaps to the unit's step. Equal ceilings, so a value
   valid in one unit is valid in the other.
 - LOCKED 2026-10-31: active workout. Final frames on Figma page
-  "03 Locked designs" (Starter plan: max 3 pages); rounds stay on "02 Rounds" as history.
+  "03 Locked designs" (Starter plan: max 3 pages); decided rounds are deleted from "02 Rounds" (2026-11-01; still in Figma version history).
 
 ## Round log: Progress tab
 Councils: docs/council/2026-10-31-history-and-next-flow.md,
