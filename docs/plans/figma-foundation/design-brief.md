@@ -301,3 +301,6 @@ Round 13 (2026-11-01/02). Council: docs/council/2026-11-02-exercise-flags.md.
   wins; your note sits behind a small note icon (one tap). If only your
   note exists, it shows. Owner: "no loud screen during workout, only
   crucial info."
+- Own exercises' ⋯ also has "Hide from lists" (council idea).
+- LOCKED 2026-11-02: Exercise page + create. Final frames on "03
+  Locked designs" (after Active workout).
