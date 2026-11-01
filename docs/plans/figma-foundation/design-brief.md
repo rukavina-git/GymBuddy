@@ -89,7 +89,7 @@ Board: https://claude.ai/artifact/QG6t4FY68Euikci3uRkiDs
 - G1 rest over: rest card turns lime and becomes the button.
 - H1 swipe right = done, left = delete, undo snackbar (no confirm).
 - M1 motion: pop/collapse/grow; M2 fade is the reduced-motion fallback.
-- N1 nav: Home, Workouts, Exercises, You (Stats hidden for now).
+- N1 nav (changed 2026-11-01, council): 5 tabs Home, Workouts, Exercises, Progress, You. Progress replaces v1 Sessions + Stats. Mon-Sun week strip lives on Home.
 - K1 You screen with "Your data" first.
 - I onboarding, refined: (1) Welcome: lime "Create account" (backup,
   all devices), "Sign in", text button "Continue without account";
@@ -150,4 +150,29 @@ All "new" behaviour items are in scope (owner, 2026-10-31).
   first − / + snaps to the unit's step. Equal ceilings, so a value
   valid in one unit is valid in the other.
 - LOCKED 2026-10-31: active workout. Final frames on Figma page
-  "03 Active workout (locked)"; rounds stay on "02 Rounds" as history.
+  "03 Locked designs" (Starter plan: max 3 pages); rounds stay on "02 Rounds" as history.
+
+## Round log: Progress tab
+Councils: docs/council/2026-10-31-history-and-next-flow.md,
+2026-11-01-progress-layout.md, -progress-contents.md, -chart-tap.md.
+- Round 6: four layouts (A1 summary line, A2 stats in week headers,
+  C card feed, H week strip + sideways cards), first build vs v4.
+  Owner: A1, week strip moves to Home.
+- Round 7 (final): one vertical scroll. Counts line "This week ·
+  3 sessions · 2 h 54 m · 9,850 kg" (first build). One chart card:
+  best (heaviest) set of one lift per session, plain sentence above
+  ("You lift 7.5 kg more than 8 weeks ago."), "Change lift" chip
+  (sheet lists lifts with 3+ logs; selected = cobalt). Card hidden
+  until a lift has 3+ logs over 2+ weeks, no placeholder. Then last 5
+  sessions (PR pill = new best set), "All sessions".
+- Card tap opens the exercise page at its Progress section: big chart,
+  "Show on Progress" switch, rows (date, best set) that open the
+  session. Chart points are not tappable; press-and-drag shows a value
+  tooltip only. Whole chart is one TalkBack stop with a summary. At
+  175%+ font the line drops, the sentence stays.
+- All sessions: search (workout names), Exercise filter chip (shows
+  that lift's sets inline), sticky month headers with counts, empty
+  search state with "Clear search".
+- No Stats hub until v2+ (records, body weight); it will be linked
+  from the Progress top bar.
+- LOCKED 2026-11-01: Progress tab. Final frames on "03 Locked designs".

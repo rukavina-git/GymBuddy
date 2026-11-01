@@ -66,8 +66,10 @@ Figma edit. "More ideas" sends the surface back to 2.
 - v1 features stay frozen. New interaction designs from the brief
   (keypad, live bar, lock-screen timer, keep screen on, swipe + undo,
   onboarding) are in scope as design only. History features (last-time
-  numbers, summaries, stats) are a later plan. The Stats tab is
-  skipped in this plan.
+  numbers, summaries, stats) are a later plan. Exception (owner,
+  2026-11-01): the Progress tab replaces Sessions + Stats, with a counts
+  line, one lift chart and All sessions search (design-brief "Round
+  log: Progress tab"). A Stats hub is v2+.
 - Material 3 governs structure, navigation and system Back; the brand
   shows through colour roles, type, shape and motion.
 - WCAG AA contrast, 48dp+ in-workout targets, system font scaling.
