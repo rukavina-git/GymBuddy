@@ -304,3 +304,23 @@ Round 13 (2026-11-01/02). Council: docs/council/2026-11-02-exercise-flags.md.
 - Own exercises' ⋯ also has "Hide from lists" (council idea).
 - LOCKED 2026-11-02: Exercise page + create. Final frames on "03
   Locked designs" (after Active workout).
+- Per-exercise rest moved to v1 scope (owner, 2026-11-02).
+
+## Round log: Session detail
+Round 14 (2026-11-02). Owner picked B: "you mostly don't care what you
+lifted in each set".
+- Opens from All sessions, the calendar, Progress last 5 and an
+  exercise's History. Title, "Mon 26 Oct · 18:24–19:16", tiles (time,
+  sets, lifted; a run shows distance and pace), session note.
+- One row per exercise: "4 sets · top 82.5 kg × 8", PR pill (new
+  heaviest set). Tap opens the sets in place; "Bench Press page ›"
+  inside opens the exercise page. From an exercise's history: that row
+  opens, outlined in cobalt briefly. No set-type tags (v2).
+- ⋯: Start Push A again (only if from a template), Edit workout,
+  Delete (Undo snackbar, no confirm).
+- Edit: own screen with Save; name, date, start/end, note; same rows,
+  open one to edit sets with the workout keypad; + Add set; swipe a set
+  to delete (Undo).
+- Empty workout sessions are called "Workout"; rename in Edit.
+- LOCKED 2026-11-02: Session detail. Final frames on "03 Locked
+  designs" (after Progress).
