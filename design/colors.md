@@ -2,8 +2,11 @@
 
 Every colour used in the locked designs, in one place. Pulled from
 Figma page "03 Locked designs" on 2026-11-02 (all fills, strokes and
-text). Dark is the only mode in v1. Step 03 turns this file into
-Figma variables and `design/tokens.json`.
+text). Dark is the only mode in v1. Values live in Figma variables
+(collection "Colour"); their committed copy is `design/tokens.json`.
+Change a value in Figma and re-export. This file explains meaning and
+use. Type, space, radius, stroke, size and motion tokens are in the
+same JSON (step 03).
 
 Contrast is WCAG 2 on the ground (#121418) unless noted. Text needs
 4.5:1, icons, outlines and large text need 3:1.
@@ -69,8 +72,7 @@ offline is normal, not an error).
   30%): animation steps, not colours.
 
 ## Decided 2026-11-02 (owner, impeccable agrees)
-Figma frames still show the old values; step 03 applies these when it
-binds the frames to variables.
+Applied in step 03 (2026-11-02) when the frames were bound to variables.
 1. **One red.** #FF7A7A only; #FF8A80 (keypad error) becomes danger.
 2. **One cobalt tint.** 25% only; the 16% and 30% uses become 25%.
 3. **One scrim.** 60% only; the 55% and 35% uses become 60%.
