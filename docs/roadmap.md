@@ -65,7 +65,7 @@ waiting on me
 - [ ] 4.2d Data export: versioned JSON + CSV (ADR 0015)
 - [ ] 4.2e Body weight tracking: new table + spec change (designed in Plan 3)
 - [ ] 4.2f Profile fields: experience, avatar, consent record, days per week
-      (spec change, owner OK 2026-11-02; days per week pending OK)
+      (spec change, owner OK 2026-11-02)
 - [ ] 4.2g Per-account local data + account switching rules (ADR 0014)
 - [ ] 4.2h Plans (a set of templates to rotate through) + rework of the default
       templates and starter plans (owner 2026-11-02; data model change)

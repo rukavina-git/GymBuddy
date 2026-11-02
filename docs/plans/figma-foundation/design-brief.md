@@ -363,3 +363,40 @@ Reviewed by impeccable (critique applied, dialogs rebuilt to M3).
 - Export (ADR 0015): JSON backup (re-importable) + CSV of sets.
 - LOCKED 2026-11-02: You + Settings. Final frames on "03 Locked
   designs" (after Session detail).
+
+## Round log: Onboarding + auth
+Round 16 (2026-11-02). Research on Strong, Hevy, Fitbod, Strava, NTC,
+MyFitnessPal, Duolingo; council docs/council/2026-11-02-onboarding.md
+(8 members, 2 rounds) + 5 owner reviews; impeccable critique applied.
+- Welcome: logo, "gymbuddy.", "Log your workouts. Works offline, no
+  account needed.", lime "Get started", outlined "I have an account".
+- Setup, tap = next (options are buttons; Back keeps the answer; Skip
+  uses defaults): experience → goal (build muscle, get stronger, lose
+  weight, stay fit and healthy, improve endurance) → days a week (1–3,
+  4, 5–7, Not sure yet) → starting plan (suggested by days: Full Body,
+  Upper/Lower, Push/Pull/Legs, or no plan; goal-based suggestions v2)
+  → "You're all set" / "No streaks, no feed, no ads. Just your
+  workouts." / 3 Good-to-know tips / lime "Let's go" → Home. Units
+  come from the region, never asked.
+- Sign-in (centred): Android's account sheet + Google's own dark
+  button with the G logo, then email + password (email remembered if
+  used last time; one password field with Show; paste and password
+  managers; errors under the field: "Email or password is wrong").
+  No Apple on Android, no magic links. Sign-in that finds no account
+  asks before creating one.
+- Create account: says what moves into the account, unticked consent
+  box for health data (wording final in roadmap 4.6), Terms/Privacy
+  links.
+- Guest → account with data: "Add this phone's workouts?" with counts;
+  "Stay signed out" keeps the guest; receipt after.
+- Account offer: card after a finished workout, ≤ 1 a week, ≤ 5 total.
+- Session expired: banner "Backup paused. Sign in again to keep backing
+  up"; keep logging. Another account signing in never sees the first
+  account's unsynced changes (they wait for that account). Account
+  deleted elsewhere: counts, Keep on this phone / Erase….
+- Notifications: a quiet "Workout on the lock screen · Turn on" row on
+  the first rest after install; system dialog only on tap.
+- Later in v1: new logo (an animal, e.g. a duck); error/offline
+  messages round; plans + default templates rework (roadmap 4.2h).
+- LOCKED 2026-11-02: Onboarding + auth. Final frames on "03 Locked
+  designs" (after You + Settings).
