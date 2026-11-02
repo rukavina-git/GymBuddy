@@ -27,10 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 
 /**
  * Large profile header card showing user avatar, name, and email.
@@ -40,7 +38,6 @@ import coil3.compose.AsyncImage
 fun ProfileHeaderCard(
     name: String,
     email: String,
-    profileImageUri: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -68,21 +65,12 @@ fun ProfileHeaderCard(
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                if (profileImageUri != null) {
-                    AsyncImage(
-                        model = profileImageUri,
-                        contentDescription = "Profile picture",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
 
             // Name and email

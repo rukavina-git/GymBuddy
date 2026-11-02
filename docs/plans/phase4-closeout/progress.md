@@ -7,7 +7,7 @@
 - [x] 04a restore.sh skips Neon GRANTs (steps/04a-restore-no-acl.md) (2cad7cd)
 - [x] 05 Release build and spec point at api.rukavina.app (steps/05-real-host-url.md) (e543aad)
 - [x] 05a Keep the free Render instance awake (me) (steps/05a-keep-warm.md)
-- [ ] 06 Device checks against the hosted backend (me, deferred) (steps/06-device-checks.md)
+- [x] 06 Device checks against the hosted backend (me, done in phase5-data-safety step 05) (steps/06-device-checks.md)
 - [x] 07 CI green, PR develop → main (me) (steps/07-merge-to-main.md) (20dbff5)
 
 ## Deviations

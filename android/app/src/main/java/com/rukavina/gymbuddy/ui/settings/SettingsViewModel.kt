@@ -32,7 +32,6 @@ import javax.inject.Inject
 data class SettingsUiState(
     val userName: String = "",
     val userEmail: String = "",
-    val profileImageUri: String? = null,
     val isLoading: Boolean = true,
     val hasPassword: Boolean = false,
     val isGoogleOnly: Boolean = false,
@@ -80,7 +79,6 @@ class SettingsViewModel @Inject constructor(
                     SettingsUiState(
                         userName = profile.name,
                         userEmail = profile.email.ifBlank { firebaseEmail },
-                        profileImageUri = profile.profileImageUrl,
                         isLoading = false,
                         hasPassword = hasPassword,
                         isGoogleOnly = isGoogleOnly,
@@ -90,7 +88,6 @@ class SettingsViewModel @Inject constructor(
                     SettingsUiState(
                         userName = "",
                         userEmail = firebaseEmail,
-                        profileImageUri = null,
                         isLoading = false,
                         hasPassword = hasPassword,
                         isGoogleOnly = isGoogleOnly,
@@ -101,7 +98,6 @@ class SettingsViewModel @Inject constructor(
                 _uiState.value = SettingsUiState(
                     userName = "",
                     userEmail = firebaseEmail,
-                    profileImageUri = null,
                     isLoading = false,
                     hasPassword = hasPassword,
                     isGoogleOnly = isGoogleOnly,

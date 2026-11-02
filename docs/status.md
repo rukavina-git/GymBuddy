@@ -1,49 +1,39 @@
 # Status
 
-Current project status. Dated audits with full evidence are in
-STATUS_YYYY-MM-DD.md files; this file is the short, current summary. What's next, step by step:
-roadmap.md (overview) and roadmap-details.md.
+Current project status, short. Dated audits with full evidence are in
+STATUS_YYYY-MM-DD.md files. What's next: roadmap.md (checklist) and
+roadmap-details.md (what each step means).
 
-## Phase 4: Android sync engine (built)
+Updated 2026-11-02.
 
-Details: STATUS_2026-09-26.md §Phase 4.
+## Where things are
 
-- CI green on main at 20dbff5 (PR #2, Plan 1 merged): Android Build,
-  Backend Build, Sync E2E, API Client Codegen, API Docs. OWASP fails, non-blocking (ADR 0013).
-- Hardening (docs/plans/phase4-hardening): logout wipes under the sync
-  lock, logout errors end in a closable dialog, the scheduler never drops
-  a request, pull-to-refresh says "sign in" when signed out
-  (`syncNow` returns SyncOutcome).
-- Open: manual device checks of pull-to-refresh, the logout dialogs and
-  the minified release build.
+- **Backend:** deployed on Render + Neon at api.rukavina.app. Sync,
+  reference, /me, account deletion, tombstone job, rate limit, spec
+  drift test, JSON logs with traceId/userId/client version. One
+  environment only (staging comes in Plan 5).
+- **Android:** v1 skeleton UI on the sync engine (outbox, push, pull,
+  410 resync, logout flush-and-warn). Room v26 baseline with migration
+  tests, no destructive fallback, Crashlytics. Device checks passed
+  2026-10-31 (phase5-data-safety progress.md, step 05).
+- **Design:** full Soft Dark redesign locked in Figma; build guide is
+  design/DESIGN.md. Not built in Compose yet (Plan 7).
+- **CI:** green on main at 4349324 (PR #4): Android Build, Backend
+  Build, Sync E2E, API Client Codegen, API Docs, CodeQL. OWASP is
+  manual-only and non-blocking (ADR 0013). Dependabot: 35/35 fixed.
+  develop is 44 commits ahead of main (Plan 3 docs).
+- **iOS:** not started.
 
-## Phase 1: schema hardening (done except Group K)
+## Known gaps (planned)
 
-Audited 2026-09-26 against code, tests and commits. Evidence:
-STATUS_2026-09-26.md §4a.
+- An offline edit waits for the next app open if the app is swiped
+  away (4.4).
+- A dead session fails sync silently with 401 (6.3).
+- No staging environment; debug builds use prod (Plan 5).
+- No release pipeline, store listing, privacy policy or licence record
+  for the stock exercise photos (Plans 8, 9).
 
-- A. Housekeeping: package move, UserProfile split, jvmToolchain [done]
-- B. Identity: UUIDv7 generator + tests [done]
-- C. ID migration: Exercise/PerformedExercise/TemplateExercise ids
-  Int -> String, plus all foreign keys [done]
-- D. Seed data: bundled JSON regenerated with stable UUIDs [done]
-- E. Tracking types: ExerciseTrackingType on Exercise [done]
-- F. Set model: nullable measurements, setType, isCompleted,
-  restTakenSeconds [done]
-- G. Snapshots: exercise name/category/trackingType/muscles copied into
-  PerformedExercise; orderIndex; explicit ordering [done]
-- H. Session/template: startedAt, endedAt, notes, templateId; planned
-  duration/distance/weight on TemplateExercise [done]
-- I. Overlay: user_exercise_state / user_template_state; isHidden and
-  note off Exercise; isCustom/isDefault -> source [done]
-- J. Sync metadata: updatedAt, deletedAt, revision, syncState [done]
-- K. Prefs + UI [partial]: units, set editor and hidden screens done.
-  Favourites and rest timer not started. Group K is separate from sync.
-  - `isFavorite` is a column on both overlay entities, but no DAO query,
-    repository, domain model or screen reads or writes it.
-  - The active-workout screen says "there is no rest timer in v1"
-    (ActiveWorkoutScreen.kt) and shows only the planned restSeconds.
+## Schema history
 
-## Next (not started)
-- Phase 5: includes removing fallbackToDestructiveMigration().
-  See STATUS_2026-09-26.md §5 for the wider list.
+Phase 1 schema hardening (groups A–J) is done; evidence in
+STATUS_2026-09-26.md §4a. Group K favourites and rest timer are v2.

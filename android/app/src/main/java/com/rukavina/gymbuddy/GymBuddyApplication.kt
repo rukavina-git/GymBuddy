@@ -13,6 +13,7 @@ import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
 import com.google.firebase.FirebaseApp
 import com.rukavina.gymbuddy.data.crash.CrashReporter
+import com.rukavina.gymbuddy.data.local.dao.SyncDao
 import com.rukavina.gymbuddy.data.local.seeder.ExerciseSeeder
 import com.rukavina.gymbuddy.data.local.seeder.WorkoutTemplateSeeder
 import com.rukavina.gymbuddy.data.sync.FirebaseAuthSession
@@ -47,6 +48,9 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
     @Inject
     lateinit var crashReporter: CrashReporter
 
+    @Inject
+    lateinit var syncDao: SyncDao
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override val workManagerConfiguration: Configuration
@@ -59,6 +63,7 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
         SyncTriggers.observeForeground(ProcessLifecycleOwner.get().lifecycle, syncScheduler)
         SyncTriggers.observeNetwork(this, syncScheduler)
         SyncTriggers.schedulePeriodic(WorkManager.getInstance(this))
+        SyncTriggers.observeOutbox(syncDao.observeOutboxCount(), WorkManager.getInstance(this), applicationScope)
         // Always true in the app (google-services initialises Firebase at
         // startup); false only where Firebase isn't configured, e.g.
         // Robolectric tests booting this Application.

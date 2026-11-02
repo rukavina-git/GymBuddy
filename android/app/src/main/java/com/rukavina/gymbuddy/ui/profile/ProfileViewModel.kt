@@ -83,8 +83,7 @@ class ProfileViewModel @Inject constructor(
                 current.fitnessGoal != saved.fitnessGoal ||
                 current.activityLevel != saved.activityLevel ||
                 current.preferredUnits != saved.preferredUnits ||
-                current.bio != saved.bio ||
-                current.profileImageUri != saved.profileImageUri
+                current.bio != saved.bio
     }
 
     private fun loadProfile() {
@@ -98,7 +97,6 @@ class ProfileViewModel @Inject constructor(
                 val profile = repository.getProfile(userId)
                 Log.d(TAG, "Loaded profile: $profile")
                 profile?.let { p ->
-                    Log.d(TAG, "Profile imageUrl from DB: ${p.profileImageUrl}")
                     _uiState.value = _uiState.value.copy(
                         name = p.name,
                         email = p.email.ifBlank { firebaseEmail },
@@ -109,10 +107,8 @@ class ProfileViewModel @Inject constructor(
                         gender = p.gender,
                         fitnessGoal = p.fitnessGoal,
                         activityLevel = p.activityLevel,
-                        bio = p.bio ?: "",
-                        profileImageUri = p.profileImageUrl
+                        bio = p.bio ?: ""
                     )
-                    Log.d(TAG, "UI state updated with profileImageUri: ${_uiState.value.profileImageUri}")
                     // Save the loaded state as baseline for change tracking
                     savedProfileState = _uiState.value
                 } ?: run {
@@ -156,7 +152,6 @@ class ProfileViewModel @Inject constructor(
             Log.d(TAG, "uid: $uid")
             uid?.let { userId ->
                 var currentState = _uiState.value
-                Log.d(TAG, "Current profileImageUri: ${currentState.profileImageUri}")
 
                 // Use default name if blank
                 if (currentState.name.isBlank()) {
@@ -173,7 +168,9 @@ class ProfileViewModel @Inject constructor(
                     uid = userId,
                     name = currentState.name,
                     email = currentState.email,
-                    profileImageUrl = currentState.profileImageUri,
+                    // No custom photos in v1 (preset avatars: roadmap 6.5).
+                    // Null also clears phone file paths older builds synced.
+                    profileImageUrl = null,
                     birthDate = currentState.birthDate,
                     weight = currentState.weight,
                     height = currentState.height,
@@ -184,7 +181,6 @@ class ProfileViewModel @Inject constructor(
                     joinedDate = existingProfile?.joinedDate ?: clock.millis(),
                     bio = currentState.bio.ifBlank { null }
                 )
-                Log.d(TAG, "Saving profile with imageUrl: ${profile.profileImageUrl}")
                 repository.saveProfile(profile)
                 Log.d(TAG, "Profile saved successfully")
                 _uiState.value = currentState.copy(message = "Profile saved.")
@@ -201,10 +197,6 @@ class ProfileViewModel @Inject constructor(
         _uiState.value = savedProfileState.copy(
             message = null // Don't restore old messages
         )
-    }
-
-    fun onImageSelected(uri: String) {
-        _uiState.value = _uiState.value.copy(profileImageUri = uri)
     }
 
     fun logout() {
@@ -288,7 +280,9 @@ class ProfileViewModel @Inject constructor(
                     uid = userId,
                     name = currentState.name.ifBlank { "User" },
                     email = currentState.email,
-                    profileImageUrl = currentState.profileImageUri,
+                    // No custom photos in v1 (preset avatars: roadmap 6.5).
+                    // Null also clears phone file paths older builds synced.
+                    profileImageUrl = null,
                     birthDate = currentState.birthDate,
                     weight = currentState.weight,
                     height = currentState.height,

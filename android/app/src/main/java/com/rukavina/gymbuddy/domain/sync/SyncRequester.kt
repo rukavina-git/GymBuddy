@@ -7,7 +7,9 @@ enum class SyncReason {
     NETWORK_AVAILABLE,
     MANUAL,
     PERIODIC,
-    SIGNED_IN
+    SIGNED_IN,
+    /** The outbox went non-empty: a one-off WorkManager job pushes it once online. */
+    OUTBOX_PENDING
 }
 
 /** How a [SyncRequester.syncNow] call ended. */

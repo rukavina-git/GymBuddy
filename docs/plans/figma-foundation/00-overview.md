@@ -1,36 +1,98 @@
-# Plan 3: Figma foundation
+# Plan 3: Figma foundation (redesign)
 
 ## Why
-From here on, UI changes follow a Figma frame (CLAUDE.md). Today the
-Figma file (MdD33rDNKJ3S82azTOYfEk) is empty, so no UI step can link
-one. Plan 4 already needs frames: 4.2a adds a "session expired" path
-to Login. This plan mirrors the current v1 UI in Figma so code and
-design start from the same place (roadmap-details.md, Plan 3).
+The v1 UI is a functional skeleton. On 2026-10-31 Plan 3 became a full
+UI/UX redesign: direction "Soft Dark" (design-brief.md). Every screen
+is designed in Figma first; Plan 4 builds it in Compose. Plan 4 also
+needs a Login "session expired" frame (4.2a).
 
-## Scope
-1. (done, roadmap 3.1) Figma file, MCP connected.
-2. Design tokens: colours, type scale, spacing, shapes from
-   `ui/theme/` as Figma variables, light and dark. Same values in
-   `design/tokens.json`.
-3. Component library: one Figma component per file in
-   `ui/components/`, built on the tokens.
-4. Screens: inventory of every v1 screen and its states (empty,
-   loading, error), then one frame per screen/state from the
-   components. Includes the Login "session expired" state for 4.2a.
-5. Code follows Figma: Compose theme reads the token values; step
-   files for UI work link a frame from here on.
+## Roles
+- **Claude, product owner and architect.** Writes each surface brief
+  from PRODUCT.md (task, data, states, constraints), guards scope and
+  invariants, checks Compose/M3 feasibility, and builds frames in
+  Figma. Doesn't decide the look alone.
+- **impeccable, the UI team.** Decides how things look and work:
+  directions, layout, type, colour, copy, motion. Its critique, audit
+  and finish review gate every round. When it and Claude disagree on
+  design, impeccable wins unless it breaks PRODUCT.md or an invariant.
+- **Owner, final taste call.** Picks between options, kills anything
+  that looks like AI-made UI, and says "more ideas" to reopen a round.
 
-Out of scope: the v2 UI overhaul, new features, any behaviour change,
-iOS, Code Connect.
+## Round loop (every surface, steps 04–07)
+1. **Brief.** Claude writes the surface brief. impeccable `shape`
+   turns it into UX questions and a plan.
+2. **Wide.** impeccable new-work (`concept-seed`) deals 3+
+   materially different options plus one plain "category standard".
+   Claude builds them on a Figma board. Owner picks one or more.
+3. **Refine.** impeccable `critique` (two subagents) on Figma
+   screenshots, then the fixes it names (`layout`, `typeset`,
+   `clarify`, `bolder`/`quieter`). 2–3 variants with real data and
+   edge cases. Owner picks.
+4. **Harden.** impeccable `harden` + `onboard` for empty, loading,
+   error and offline states; `audit` (native) for contrast, 48dp
+   targets and font scaling.
+5. **Polish.** impeccable `polish`, then the
+   `impeccable-finish-reviewer` agent. Owner signs off.
+
+impeccable checks every round, not just the last: accessibility,
+ease of use, style, and motion where it helps (`animate`).
+
+Gates: no next round without the owner's pick. No critique P0/P1 left
+open when the owner sees a round. Read `craft-floor.md` before any
+Figma edit. "More ideas" sends the surface back to 2.
+
+## Figma file layout (3 pages, Starter plan limit)
+Set 2026-11-01. Every step follows it.
+- **01 System**: the design system and nothing else. Rules cards
+  (colour meaning, access, copy; units/limits/rest), then tokens,
+  type, icons and components as steps 03–05 add them. Only finished,
+  reusable parts. Plan 4 builds from it. "Light mode (later)" holds
+  the light proof until step 03 makes it a token mode.
+- **02 Rounds**: work in progress. One section per round
+  ("Round N · topic"). When a flow is locked, its final frames move to
+  03 and its rounds are deleted. Never treated as final.
+- **03 Locked designs**: owner-approved screens only. One section per
+  flow, named "<Flow> · locked YYYY-MM-DD", in app order: App frame,
+  Home, Templates (Workouts), Active workout, Exercises, Progress, You,
+  Onboarding + auth, Error/offline states. Changing a locked flow
+  needs a new round on 02.
+- Old versions live in Figma version history, never on a page. No
+  new pages (the plan allows 3).
+
+## Steps
+1. (done, roadmap 3.1) Figma file + MCP. Figma Console MCP since
+   2026-10-31 (no call limit; needs Desktop + Bridge plugin).
+2. World: a banned list,
+   impeccable's direction round with Soft Dark as the pinned brief,
+   direction contract. PRODUCT.md updated to the chosen palette.
+3. Tokens: colour, type, space, radius, motion as Figma variables
+   (Dark mode, Light slot later) + `design/tokens.json`.
+4. Brand and icons: app icon, wordmark, 12 gym glyphs.
+5. Components: M3-based library on the tokens (buttons, set row,
+   keypad sheet, rest card, live bar, cards, nav bar, sheets).
+6. Screens, one sub-step per flow: 6a onboarding + auth (incl.
+   session expired), 6b home + templates, 6c active workout, 6d
+   exercise library + detail, 6e You + settings, 6f cross-flow
+   states (empty, error, offline, sync).
+7. Motion and haptics spec (impeccable `animate`).
+8. DESIGN.md (impeccable documenter) and the Plan 4 handoff: code
+   steps that build the redesign, each linked to its frames.
 
 ## Invariants
-- v1 scope stays frozen (architecture plan §14). Figma mirrors and
-  tidies; it does not redesign.
-- Steps 02–04 change no app code. Step 05 changes only `ui/theme/`
-  and how it's read; the app looks the same before and after.
-- `design/tokens.json` and the Figma variables hold the same values.
-  Figma is the source; the JSON is its committed copy.
-- Figma calls stay lean (Starter plan): read only the nodes a step
-  needs.
-- No Room schema change, no `api/openapi.yaml` change.
-- Each step builds and passes its tests on its own.
+- No app code changes. Code is Plan 4.
+- No `api/openapi.yaml` or Room schema change.
+- v1 features stay frozen. New interaction designs from the brief
+  (keypad, live bar, lock-screen timer, keep screen on, swipe + undo,
+  onboarding) are in scope as design only. History features (last-time
+  numbers, summaries, stats) are a later plan. Exception (owner,
+  2026-11-01): the Progress tab replaces Sessions + Stats, with a counts
+  line, one lift chart and All sessions search (design-brief "Round
+  log: Progress tab"). A Stats hub is v2+.
+- Material 3 governs structure, navigation and system Back; the brand
+  shows through colour roles, type, shape and motion.
+- WCAG AA contrast, 48dp+ in-workout targets, system font scaling.
+- Figma is the source; `design/tokens.json` is its committed copy.
+- Every round uses real content (real exercise names, weights,
+  long names, 0 sets), never lorem ipsum.
+- Impeccable working files (`.impeccable/`) stay out of git, except
+  what a step names.

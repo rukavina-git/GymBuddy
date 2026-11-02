@@ -171,7 +171,6 @@ fun SettingsScreen(
                             ProfileHeaderCard(
                                 name = uiState.userName,
                                 email = uiState.userEmail,
-                                profileImageUri = uiState.profileImageUri,
                                 onClick = {
                                     bottomNavController.navigate(NavRoutes.Profile)
                                 }

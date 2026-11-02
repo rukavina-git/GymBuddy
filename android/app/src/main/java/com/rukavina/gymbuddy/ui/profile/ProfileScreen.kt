@@ -1,8 +1,5 @@
 package com.rukavina.gymbuddy.ui.profile
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.MonitorWeight
@@ -46,20 +42,13 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil3.compose.AsyncImage
 import com.rukavina.gymbuddy.navigation.NavRoutes
-import android.util.Log
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.ui.settings.SettingsSection
-import com.rukavina.gymbuddy.utils.ImageStorageUtil
 import com.rukavina.gymbuddy.utils.UnitConverter
-
-private const val TAG = "ProfileScreen"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,33 +57,9 @@ fun ProfileScreen(
     bottomNavController: NavHostController? = null,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-
-    // Image picker launcher
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        Log.d(TAG, "Image picker returned uri: $uri")
-        uri?.let {
-            // Copy image to internal storage for persistence
-            val savedPath = ImageStorageUtil.saveImageToInternalStorage(context, it)
-            Log.d(TAG, "Saved path: $savedPath")
-            if (savedPath != null) {
-                Log.d(TAG, "Calling viewModel.onImageSelected with: $savedPath")
-                viewModel.onImageSelected(savedPath)
-                Log.d(TAG, "Calling viewModel.onSaveClick")
-                viewModel.onSaveClick()
-            } else {
-                Log.e(TAG, "Failed to save image - savedPath is null")
-                scope.launch {
-                    snackbarHostState.showSnackbar("Failed to save image")
-                }
-            }
-        }
-    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -131,12 +96,6 @@ fun ProfileScreen(
                         name = uiState.name.ifBlank { "Guest User" },
                         email = uiState.email,
                         bio = uiState.bio,
-                        profileImageUri = uiState.profileImageUri,
-                        onImageClick = {
-                            imagePickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        }
                     )
                 }
 
@@ -268,9 +227,7 @@ fun ProfileScreen(
 private fun ProfileHeader(
     name: String,
     email: String,
-    bio: String,
-    profileImageUri: String?,
-    onImageClick: () -> Unit
+    bio: String
 ) {
     Column(
         modifier = Modifier
@@ -283,41 +240,15 @@ private fun ProfileHeader(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                    .clickable(onClick = onImageClick),
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                if (profileImageUri != null) {
-                    AsyncImage(
-                        model = profileImageUri,
-                        contentDescription = "Profile image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Default icon",
-                        modifier = Modifier.size(50.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .align(Alignment.BottomEnd)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .clickable(onClick = onImageClick),
-                contentAlignment = Alignment.Center
-            ) {
+                // Preset avatars replace this in roadmap 6.5; no custom photos in v1.
                 Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit profile picture",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(18.dp)
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(50.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }

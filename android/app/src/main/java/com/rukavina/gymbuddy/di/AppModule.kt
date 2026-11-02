@@ -18,12 +18,14 @@ import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.local.db.DATABASE_NAME
 import com.rukavina.gymbuddy.data.local.db.applyAppConfig
+import com.rukavina.gymbuddy.data.repository.ActiveWorkoutDraftRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutSessionRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutTemplateRepositoryImpl
 import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.id.Uuid7Generator
+import com.rukavina.gymbuddy.domain.repository.ActiveWorkoutDraftRepository
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
 import com.rukavina.gymbuddy.domain.repository.WorkoutTemplateRepository
@@ -126,6 +128,15 @@ object AppModule {
         clock: Clock
     ): WorkoutTemplateRepository {
         return WorkoutTemplateRepositoryImpl(workoutTemplateDao, userTemplateStateDao, outbox, clock)
+    }
+
+    @Provides
+    @Singleton
+    fun provideActiveWorkoutDraftRepository(
+        database: AppDatabase,
+        clock: Clock
+    ): ActiveWorkoutDraftRepository {
+        return ActiveWorkoutDraftRepositoryImpl(database.activeWorkoutDraftDao(), clock)
     }
 
     @Provides

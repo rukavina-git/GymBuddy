@@ -10,6 +10,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
+import androidx.work.testing.SynchronousExecutor
 import androidx.work.testing.TestListenableWorkerBuilder
 import androidx.work.testing.WorkManagerTestInitHelper
 import com.rukavina.gymbuddy.domain.sync.RecordingSyncRequester
@@ -17,6 +18,7 @@ import com.rukavina.gymbuddy.domain.sync.SyncOutcome
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -166,5 +168,89 @@ class SyncTriggersTest {
         val requester = RecordingSyncRequester()
         assertEquals(ListenableWorker.Result.success(), worker(requester, signedIn = false).doWork())
         assertTrue(requester.syncedNow.isEmpty())
+    }
+
+    // ---- durable push (outbox non-empty) ----
+
+    private class FakeAuth(signedIn: Boolean) : AuthSession {
+        override val currentUid = if (signedIn) "uid" else null
+        override suspend fun idToken() = null
+        override fun signOut() = Unit
+    }
+
+    private fun pushFactory(requester: RecordingSyncRequester, signedIn: Boolean) = object : WorkerFactory() {
+        override fun createWorker(appContext: Context, workerClassName: String, workerParameters: WorkerParameters): ListenableWorker =
+            PushOutboxWorker(appContext, workerParameters, requester, FakeAuth(signedIn))
+    }
+
+    private fun testWorkManager(factory: WorkerFactory): WorkManager {
+        val context = RuntimeEnvironment.getApplication()
+        WorkManagerTestInitHelper.initializeTestWorkManager(
+            context,
+            Configuration.Builder().setWorkerFactory(factory).setExecutor(SynchronousExecutor()).build()
+        )
+        return WorkManager.getInstance(context)
+    }
+
+    private fun pushWork(workManager: WorkManager) =
+        workManager.getWorkInfosForUniqueWork(SyncTriggers.PUSH_OUTBOX_WORK_NAME).get()
+
+    @Test
+    fun `the outbox going non-empty enqueues one push job, needing a network`() = runTest {
+        val workManager = testWorkManager(pushFactory(RecordingSyncRequester(), signedIn = true))
+        val count = MutableStateFlow(0)
+        SyncTriggers.observeOutbox(count, workManager, CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
+        assertTrue("empty outbox: nothing enqueued", pushWork(workManager).isEmpty())
+
+        count.value = 1
+        count.value = 2
+        // Even a fresh 0 -> 1 edge doesn't duplicate a push that is still waiting.
+        count.value = 0
+        count.value = 1
+
+        val info = pushWork(workManager).single()
+        assertEquals(WorkInfo.State.ENQUEUED, info.state)
+        assertEquals(NetworkType.CONNECTED, info.constraints.requiredNetworkType)
+    }
+
+    @Test
+    fun `the push job runs an OUTBOX_PENDING sync once a network is there`() = runTest {
+        val requester = RecordingSyncRequester(syncNowResult = SyncOutcome.SYNCED)
+        val workManager = testWorkManager(pushFactory(requester, signedIn = true))
+        SyncTriggers.enqueuePush(workManager)
+        val id = pushWork(workManager).single().id
+        assertTrue("no network yet: nothing ran", requester.syncedNow.isEmpty())
+
+        WorkManagerTestInitHelper.getTestDriver(RuntimeEnvironment.getApplication())!!.setAllConstraintsMet(id)
+
+        assertEquals(listOf(SyncReason.OUTBOX_PENDING), requester.syncedNow)
+        assertEquals(WorkInfo.State.SUCCEEDED, workManager.getWorkInfoById(id).get()!!.state)
+    }
+
+    @Test
+    fun `a failed push is retried`() = runTest {
+        val requester = RecordingSyncRequester(syncNowResult = SyncOutcome.FAILED)
+        val workManager = testWorkManager(pushFactory(requester, signedIn = true))
+        SyncTriggers.enqueuePush(workManager)
+        val id = pushWork(workManager).single().id
+
+        WorkManagerTestInitHelper.getTestDriver(RuntimeEnvironment.getApplication())!!.setAllConstraintsMet(id)
+
+        val info = workManager.getWorkInfoById(id).get()!!
+        assertEquals(WorkInfo.State.ENQUEUED, info.state)
+        assertEquals(1, info.runAttemptCount)
+    }
+
+    @Test
+    fun `the push job succeeds without syncing while signed out`() = runTest {
+        val requester = RecordingSyncRequester()
+        val workManager = testWorkManager(pushFactory(requester, signedIn = false))
+        SyncTriggers.enqueuePush(workManager)
+        val id = pushWork(workManager).single().id
+
+        WorkManagerTestInitHelper.getTestDriver(RuntimeEnvironment.getApplication())!!.setAllConstraintsMet(id)
+
+        assertTrue(requester.syncedNow.isEmpty())
+        assertEquals(WorkInfo.State.SUCCEEDED, workManager.getWorkInfoById(id).get()!!.state)
     }
 }

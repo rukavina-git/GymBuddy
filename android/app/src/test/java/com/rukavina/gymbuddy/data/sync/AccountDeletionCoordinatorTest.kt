@@ -6,7 +6,6 @@ import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutSessionRepositoryImpl
 import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.domain.model.EntitySource
-import com.rukavina.gymbuddy.utils.ImageStorageUtil
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -79,7 +78,7 @@ class AccountDeletionCoordinatorTest {
     ) = AccountDeletionCoordinator(
         store,
         deleteOnServer,
-        deleteProfileImages = { ImageStorageUtil.deleteAllProfileImages(context) },
+        deleteProfileImages = { imagesDir.deleteRecursively() },
         auth = auth,
         runExclusive = runExclusive
     )

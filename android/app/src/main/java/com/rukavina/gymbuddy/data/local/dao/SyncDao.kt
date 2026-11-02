@@ -188,9 +188,12 @@ interface SyncDao {
     @Query("DELETE FROM sync_meta")
     suspend fun wipeMeta()
 
+    @Query("DELETE FROM active_workout_draft")
+    suspend fun wipeActiveWorkoutDraft()
+
     /**
      * Removes everything that belongs to the signed-in user, plus the
-     * outbox and cursor, leaving the DEFAULT reference library (and its
+     * outbox, cursor and the in-progress workout draft, leaving the DEFAULT reference library (and its
      * version rows) in place. Session and template children go via their
      * ON DELETE CASCADE foreign keys. The discarded-change log is left
      * alone; logout clears it separately.
@@ -205,5 +208,6 @@ interface SyncDao {
         wipeProfiles()
         wipeOutbox()
         wipeMeta()
+        wipeActiveWorkoutDraft()
     }
 }

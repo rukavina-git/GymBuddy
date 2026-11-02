@@ -4,7 +4,7 @@
 - [x] 02 Remove the destructive migration fallback (steps/02-no-destructive-migration.md) (85606bc)
 - [x] 03 Crashlytics (steps/03-crashlytics.md) (5ea9e45)
 - [x] 04 Backend JSON logs, sync metrics, client headers (steps/04-backend-observability.md) (f221f0d)
-- [ ] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md)
+- [x] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md) (4349324)
 
 ## Deviations
 - 01: schemas dir is added to the `debug` source set's assets, not
@@ -126,3 +126,5 @@
   skipped, a 410 is handled by resync and never reported. R2's title
   showed the obfuscated class (`my0`), so proguard-rules.pro now
   keeps the names of DiscardedOnLogoutException and SyncException.
+- 05: T1 passes: Render logs are ECS JSON with traceId, userId,
+  clientVersion and clientPlatform (no dashboard env change needed).
