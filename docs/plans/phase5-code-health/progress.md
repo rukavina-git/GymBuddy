@@ -4,7 +4,7 @@
   on `feature/owasp-triage` (steps/01-owasp.md)
 - [x] 02 Remove custom profile photos (steps/02-image-storage.md) (fd871c3)
 - [x] 03 Active workout failure paths + process death (steps/03-active-workout-tests.md) (aedd05a)
-- [x] 04 Durable push via WorkManager (steps/04-durable-push.md) (HASH)
+- [x] 04 Durable push via WorkManager (steps/04-durable-push.md) (3e5c458)
 - [ ] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md)
 
 ## Deviations
