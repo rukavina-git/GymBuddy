@@ -6,7 +6,7 @@
       only mode for v1 (2026-11-02). No new direction round.
 - [x] 02b Colours file (design/colors.md) + Do/Don't list
       (design/do-dont.md) + PRODUCT.md palette (0f469ac)
-- [x] 03 Tokens as Figma variables + design/tokens.json (dark only) (HASH)
+- [x] 03 Tokens as Figma variables + design/tokens.json (dark only) (dca0550)
 - [ ] 04 Brand and icons (incl. new animal logo, owner 2026-11-02)
 - [ ] 05 Components
 - [x] 06 App frame (locked 2026-11-01)
