@@ -65,6 +65,8 @@ waiting on me
 - [ ] 4.2e Body weight tracking: new table + spec change (designed in Plan 3)
 - [ ] 4.2f Profile fields: experience, avatar, consent record (spec change, owner OK 2026-11-02)
 - [ ] 4.2g Per-account local data + account switching rules (ADR 0014)
+- [ ] 4.2h Plans (a set of templates to rotate through) + rework of the default
+      templates and starter plans (owner 2026-11-02; data model change)
 - [ ] 4.3 Tag-triggered signed release AAB workflow
 - [ ] 4.4 (me) Release build manual pass
 - [ ] 4.5 (me) Privacy policy online + in-app link, Play Console, Data Safety
