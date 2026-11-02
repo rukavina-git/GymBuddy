@@ -50,7 +50,7 @@ waiting on me
 - [x] 3.3 Tokens as Figma variables + design/tokens.json
 - [x] 3.4 Brand and icons (app icon, wordmark, gym glyphs). Logo: own ECG
       line (owner 2026-11-02, replaced the animal idea)
-- [ ] 3.5 Component library (M3-based, on the tokens)
+- [x] 3.5 Component library (M3-based, on the tokens)
 - [x] 3.6 Screens per flow: app frame, Home, Templates, Active workout,
       Exercise page + create, Session detail, Progress, You + Settings,
       Onboarding + auth (incl. session expired), error/offline states

@@ -396,8 +396,9 @@ MyFitnessPal, Duolingo; council docs/council/2026-11-02-onboarding.md
   deleted elsewhere: counts, Keep on this phone / Erase….
 - Notifications: a quiet "Workout on the lock screen · Turn on" row on
   the first rest after install; system dialog only on tap.
-- Later in v1: new logo (an animal, e.g. a duck); error/offline
-  messages round; plans + default templates rework (roadmap 4.2h).
+- Later in v1: error/offline messages round; plans + default
+  templates rework (roadmap 4.2h). Logo done in step 04 (own ECG
+  line, 2026-11-02).
 - LOCKED 2026-11-02: Onboarding + auth. Final frames on "03 Locked
   designs" (after You + Settings).
 

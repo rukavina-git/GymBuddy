@@ -8,7 +8,7 @@
       (design/do-dont.md) + PRODUCT.md palette (0f469ac)
 - [x] 03 Tokens as Figma variables + design/tokens.json (dark only) (dca0550)
 - [x] 04 Brand and icons: own ECG logo, 12 glyphs, tab + Material UI icons (2f366fe)
-- [ ] 05 Components
+- [x] 05 Components: 35 on 01 System, 627 instances on locked frames (HASH)
 - [x] 06 App frame (locked 2026-11-01)
 - [x] 06a Onboarding + auth incl. session expired (locked 2026-11-02)
 - [x] 06b Home (2026-11-01) + Templates (2026-11-01)
@@ -22,6 +22,24 @@
 - [ ] 08 DESIGN.md + Plan 4 handoff
 
 ## Deviations
+- 2026-11-02 (05): 14 merges, not 8. D1-D9 on the Round 19 board;
+  D10-D14 (text field fill, keypad footer 60->56, snackbar 52->56,
+  upcoming set row 52->48, nav icons) found while building; owner
+  approved "if impeccable approves", impeccable approved all. D3
+  amended: sheets keep surface fill (colors.md wording is wrong).
+- 05: not every repeated part is an instance. Swapped: nav bar, live
+  bar, buttons, chips, switch, search, set row, stepper, keypad key,
+  session/template/info rows, stat tile, snackbar (627). Containers
+  with per-screen content stay drawn but token-bound, merges applied
+  by hand: sheets, dialogs, menus, set card, keypad sheet, week strip,
+  top bars, text fields, list rows. Skipped on purpose: filter chip
+  with x, mid-swipe set, rows with extra texts, PR glyph row, 200% frames.
+- 05: library is 35 components, more than the step's start list
+  (ValuePanel, WeekDay, KeypadKey, MenuItem, RestLine split out).
+- 05: logo leftovers removed: "Round 18 · logo" section deleted from
+  03 Locked designs; Round 19 board deleted after the merges.
+- 05: impeccable critique/audit ran inline (native: Assessment A only).
+  Fix applied: fixed heights -> min heights so rows grow at 200%.
 - 2026-11-02 (04): logo is not an animal. Owner rejected the duck,
   meerkat, raccoon and 17 symbols; picked an ECG line, then asked for
   our own drawing (logo E, stroke 5/48, impeccable picked medium over
@@ -68,6 +86,21 @@
   Decisions in design-brief.md "Round log".
 
 ## Gotchas
+- From 05: a paint bound to a variable must also carry the resolved
+  colour (setBoundVariableForPaint on black renders dark until
+  refreshed). Resolve aliases first.
+- From 05: swapComponent / icon INSTANCE_SWAP resets the icon tint;
+  re-tint vectors to the label colour after.
+- From 05: filled tab icons have cut-out detail; never tint them, use
+  fresh instances.
+- From 05: matching flat frames by bounds must respect z-order: only
+  take layers above the anchor. Early runs (Home, App frame) deleted
+  hidden layers behind bars (invisible) and 3 sheet buttons over nav
+  bars (restored from version "Before step 05 swap").
+- From 05: tokens.json not re-exported; components use some raw sizes
+  (72/40 buttons, 52 InfoRow, 68 ListRow, 64 stepper vs size/stepper-width
+  60, dialog 356). Reconcile in 08 or Plan 4.
+- From 05: Figma versions "Before step 05 swap" and "Step 05 components".
 - From 04: NEVER call figma.triggerUndo() from the plugin. The Desktop
   Bridge session is one undo group: one undo reverted every plugin
   edit since 2026-10-31. Recovery was owner Shift+Cmd+Z, then restoring
