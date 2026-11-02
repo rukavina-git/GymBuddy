@@ -5,7 +5,7 @@
       cobalt = you are here, #121418 ground; dark is the default and
       only mode for v1 (2026-11-02). No new direction round.
 - [x] 02b Colours file (design/colors.md) + Do/Don't list
-      (design/do-dont.md) + PRODUCT.md palette (7c1a3b6)
+      (design/do-dont.md) + PRODUCT.md palette (0f469ac)
 - [ ] 03 Tokens as Figma variables + design/tokens.json (dark only)
 - [ ] 04 Brand and icons (incl. new animal logo, owner 2026-11-02)
 - [ ] 05 Components
