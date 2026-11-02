@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.domain.id.IdGenerator
+import com.rukavina.gymbuddy.domain.model.ActiveWorkoutDraft
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
@@ -11,18 +12,22 @@ import com.rukavina.gymbuddy.domain.model.PerformedExercise
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
+import com.rukavina.gymbuddy.domain.repository.ActiveWorkoutDraftRepository
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Clock
 import javax.inject.Inject
 
 /**
@@ -74,13 +79,19 @@ data class ActiveWorkoutUiState(
 /**
  * ViewModel for managing an active workout session.
  * Handles timer, exercise tracking, and saving the completed workout.
+ *
+ * Every change is written to a local draft (Room), so the workout
+ * survives process death, swipe-away and reboot. A fresh ViewModel
+ * restores it; a save or discard deletes it.
  */
 @HiltViewModel
 class ActiveWorkoutViewModel @Inject constructor(
     private val createWorkoutSessionUseCase: CreateWorkoutSessionUseCase,
     private val getAllExercisesIncludingHiddenUseCase: GetAllExercisesIncludingHiddenUseCase,
     private val appPreferencesRepository: AppPreferencesRepository,
-    private val idGenerator: IdGenerator
+    private val idGenerator: IdGenerator,
+    private val draftRepository: ActiveWorkoutDraftRepository,
+    private val clock: Clock
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ActiveWorkoutUiState())
@@ -89,9 +100,76 @@ class ActiveWorkoutViewModel @Inject constructor(
     private var timerJob: Job? = null
     private var availableExercises: List<Exercise> = emptyList()
 
+    /** A pending draft write. Conflated: only the newest one matters. */
+    private sealed interface DraftWrite {
+        data class Save(val draft: ActiveWorkoutDraft) : DraftWrite
+        data object Clear : DraftWrite
+    }
+
+    private val draftWrites = MutableSharedFlow<DraftWrite>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     init {
+        startDraftWriter()
         loadExercises()
         loadUserPreferences()
+        restoreDraft()
+    }
+
+    /** One sequential writer, so writes land in the order they were made. */
+    private fun startDraftWriter() {
+        viewModelScope.launch {
+            draftWrites.collect { write ->
+                when (write) {
+                    is DraftWrite.Save -> draftRepository.save(write.draft)
+                    DraftWrite.Clear -> draftRepository.clear()
+                }
+            }
+        }
+    }
+
+    /**
+     * Resumes a workout the process lost. Skipped if a workout was
+     * already started or ended in this ViewModel before the read finished.
+     */
+    private fun restoreDraft() {
+        viewModelScope.launch {
+            val draft = draftRepository.load() ?: return@launch
+            val current = _uiState.value
+            if (current.exercises.isNotEmpty() || current.workoutSaved || current.workoutDiscarded) {
+                return@launch
+            }
+            // A running timer kept counting while the app was gone.
+            val awaySeconds = if (draft.isTimerRunning) {
+                ((clock.millis() - draft.savedAt) / 1000).coerceAtLeast(0)
+            } else {
+                0L
+            }
+            _uiState.update { state ->
+                state.copy(
+                    workoutTitle = draft.title,
+                    workoutStartTime = draft.startedAt,
+                    elapsedSeconds = draft.elapsedSeconds + awaySeconds,
+                    isTimerRunning = draft.isTimerRunning,
+                    exercises = draft.exercises.map { it.toActiveExercise() },
+                    templateId = draft.templateId,
+                    templateTitle = draft.templateTitle
+                )
+            }
+            if (draft.isTimerRunning) startTimer()
+        }
+    }
+
+    private fun persistDraft() {
+        val state = _uiState.value
+        if (state.exercises.isEmpty()) return
+        draftWrites.tryEmit(DraftWrite.Save(state.toDraft(clock.millis())))
+    }
+
+    private fun clearDraft() {
+        draftWrites.tryEmit(DraftWrite.Clear)
     }
 
     /**
@@ -184,6 +262,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             )
 
             startTimer()
+            persistDraft()
         }
     }
 
@@ -214,6 +293,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         } else {
             timerJob?.cancel()
         }
+        persistDraft()
     }
 
     /**
@@ -235,6 +315,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 }
             )
         }
+        persistDraft()
     }
 
     /**
@@ -256,6 +337,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 }
             )
         }
+        persistDraft()
     }
 
     /**
@@ -277,6 +359,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 }
             )
         }
+        persistDraft()
     }
 
     /**
@@ -298,6 +381,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 }
             )
         }
+        persistDraft()
     }
 
     /**
@@ -319,14 +403,17 @@ class ActiveWorkoutViewModel @Inject constructor(
                 }
             )
         }
+        persistDraft()
     }
 
     /**
      * Save the completed workout and stop the timer.
      */
     fun saveWorkout() {
+        // A second tap while the first save runs would store the workout twice.
+        if (_uiState.value.isLoading) return
+        _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
             timerJob?.cancel()
 
             val state = _uiState.value
@@ -423,6 +510,7 @@ class ActiveWorkoutViewModel @Inject constructor(
 
             createWorkoutSessionUseCase(workoutSession)
                 .onSuccess {
+                    clearDraft()
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -456,6 +544,7 @@ class ActiveWorkoutViewModel @Inject constructor(
      * Discard the current workout without saving.
      */
     fun discardWorkout() {
+        clearDraft()
         timerJob?.cancel()
         timerJob = null
         _uiState.value = ActiveWorkoutUiState(
@@ -489,3 +578,58 @@ class ActiveWorkoutViewModel @Inject constructor(
         timerJob?.cancel()
     }
 }
+
+private fun ActiveWorkoutUiState.toDraft(now: Long) = ActiveWorkoutDraft(
+    title = workoutTitle,
+    templateId = templateId,
+    templateTitle = templateTitle,
+    startedAt = workoutStartTime,
+    elapsedSeconds = elapsedSeconds,
+    isTimerRunning = isTimerRunning,
+    savedAt = now,
+    exercises = exercises.map { exercise ->
+        ActiveWorkoutDraft.Exercise(
+            id = exercise.id,
+            exerciseId = exercise.exerciseId,
+            exerciseName = exercise.exerciseName,
+            trackingType = exercise.exerciseTrackingType,
+            plannedSets = exercise.plannedSets,
+            plannedReps = exercise.plannedReps,
+            restSeconds = exercise.restSeconds,
+            sets = exercise.sets.map { set ->
+                ActiveWorkoutDraft.Set(
+                    id = set.id,
+                    setNumber = set.setNumber,
+                    reps = set.reps,
+                    weight = set.weight,
+                    duration = set.duration,
+                    distance = set.distance,
+                    notes = set.notes,
+                    isCompleted = set.isCompleted
+                )
+            }
+        )
+    }
+)
+
+private fun ActiveWorkoutDraft.Exercise.toActiveExercise() = ActiveExercise(
+    id = id,
+    exerciseId = exerciseId,
+    exerciseName = exerciseName,
+    exerciseTrackingType = trackingType,
+    sets = sets.map { set ->
+        WorkoutSet(
+            id = set.id,
+            setNumber = set.setNumber,
+            reps = set.reps,
+            weight = set.weight,
+            duration = set.duration,
+            distance = set.distance,
+            notes = set.notes,
+            isCompleted = set.isCompleted
+        )
+    },
+    plannedSets = plannedSets,
+    plannedReps = plannedReps,
+    restSeconds = restSeconds
+)

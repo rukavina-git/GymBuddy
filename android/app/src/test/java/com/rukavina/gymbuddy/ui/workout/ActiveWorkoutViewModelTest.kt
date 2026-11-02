@@ -14,15 +14,23 @@ import com.rukavina.gymbuddy.domain.sync.RecordingSyncRequester
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.ValidateWorkoutSessionSetsUseCase
+import com.rukavina.gymbuddy.domain.model.WorkoutSession
+import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
+import com.rukavina.gymbuddy.testutil.FakeActiveWorkoutDraftRepository
 import com.rukavina.gymbuddy.testutil.FakeExerciseRepository
 import com.rukavina.gymbuddy.testutil.FakeWorkoutSessionRepository
 import com.rukavina.gymbuddy.testutil.FixedIdGenerator
 import com.rukavina.gymbuddy.testutil.MainDispatcherRule
+import com.rukavina.gymbuddy.testutil.MutableClock
 import com.rukavina.gymbuddy.testutil.testPreferencesDataStore
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -109,19 +117,24 @@ class ActiveWorkoutViewModelTest {
     private fun buildViewModel(
         exerciseRepo: FakeExerciseRepository = FakeExerciseRepository(listOf(benchPress, plank, sprint)),
         sessionRepo: FakeWorkoutSessionRepository = FakeWorkoutSessionRepository(),
-        idGenerator: FixedIdGenerator = FixedIdGenerator((0..20).map { "id-$it" })
+        idGenerator: FixedIdGenerator = FixedIdGenerator((0..20).map { "id-$it" }),
+        sessionRepository: WorkoutSessionRepository = sessionRepo,
+        draftRepo: FakeActiveWorkoutDraftRepository = FakeActiveWorkoutDraftRepository(),
+        clock: MutableClock = MutableClock()
     ): Triple<ActiveWorkoutViewModel, FakeWorkoutSessionRepository, FixedIdGenerator> {
         val appPreferencesRepository = AppPreferencesRepository(testPreferencesDataStore())
         val viewModel = ActiveWorkoutViewModel(
             createWorkoutSessionUseCase = CreateWorkoutSessionUseCase(
-                sessionRepo,
+                sessionRepository,
                 idGenerator,
                 ValidateWorkoutSessionSetsUseCase(exerciseRepo),
                 RecordingSyncRequester()
             ),
             getAllExercisesIncludingHiddenUseCase = GetAllExercisesIncludingHiddenUseCase(exerciseRepo),
             appPreferencesRepository = appPreferencesRepository,
-            idGenerator = idGenerator
+            idGenerator = idGenerator,
+            draftRepository = draftRepo,
+            clock = clock
         )
         return Triple(viewModel, sessionRepo, idGenerator)
     }
@@ -258,7 +271,9 @@ class ActiveWorkoutViewModelTest {
                 FakeExerciseRepository(listOf(benchPress))
             ),
             appPreferencesRepository = appPreferencesRepository,
-            idGenerator = idGenerator
+            idGenerator = idGenerator,
+            draftRepository = FakeActiveWorkoutDraftRepository(),
+            clock = MutableClock()
         )
 
         val template = WorkoutTemplate(
@@ -478,7 +493,9 @@ class ActiveWorkoutViewModelTest {
                 FakeExerciseRepository(listOf(benchPress))
             ),
             appPreferencesRepository = appPreferencesRepository,
-            idGenerator = FixedIdGenerator((0..20).map { "id-$it" })
+            idGenerator = FixedIdGenerator((0..20).map { "id-$it" }),
+            draftRepository = FakeActiveWorkoutDraftRepository(),
+            clock = MutableClock()
         )
 
         // DataStore's read is genuine background-thread I/O, not virtual
@@ -507,5 +524,181 @@ class ActiveWorkoutViewModelTest {
 
         val savedSet = sessionRepo.created.single().performedExercises.single().sets.single()
         assertEquals(99.79f, savedSet.weightKg!!, 0.01f)
+    }
+
+    // --- repository failures and repeated taps ---
+
+    private val oneSetBench = WorkoutTemplate(
+        id = "template-1",
+        title = "Push Day",
+        templateExercises = listOf(templateExercise("ex-bench", orderIndex = 0, plannedSets = 1))
+    )
+
+    private fun ActiveWorkoutViewModel.fillFirstSet(reps: String, weight: String) {
+        val exercise = uiState.value.exercises[0]
+        updateSetReps(exercise.id, exercise.sets[0].id, reps)
+        updateSetWeight(exercise.id, exercise.sets[0].id, weight)
+    }
+
+    /** Fails every create until [failing] is false; can also hold a create open on [gate]. */
+    private class ControllableSessionRepository : WorkoutSessionRepository {
+        var failing = false
+        var gate: CompletableDeferred<Unit>? = null
+        val created = mutableListOf<WorkoutSession>()
+        var createCalls = 0
+
+        override fun getAllWorkoutSessions(): Flow<List<WorkoutSession>> = flowOf(created)
+        override suspend fun getWorkoutSessionById(id: String): WorkoutSession? = null
+        override fun getWorkoutSessionsByDateRange(startDate: Long, endDate: Long) = flowOf(created.toList())
+        override suspend fun createWorkoutSession(workoutSession: WorkoutSession) {
+            createCalls++
+            gate?.await()
+            if (failing) throw IllegalStateException("disk full")
+            created.add(workoutSession)
+        }
+        override suspend fun updateWorkoutSession(workoutSession: WorkoutSession) = Unit
+        override suspend fun deleteWorkoutSession(id: String) = Unit
+    }
+
+    @Test
+    fun `a repository exception on save keeps the workout and shows its message`() {
+        val repo = ControllableSessionRepository().apply { failing = true }
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (viewModel, _, _) = buildViewModel(sessionRepository = repo, draftRepo = draftRepo)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.fillFirstSet("10", "60")
+
+        viewModel.saveWorkout()
+
+        val state = viewModel.uiState.value
+        assertEquals("disk full", state.errorMessage)
+        assertFalse(state.isLoading)
+        assertFalse(state.workoutSaved)
+        assertTrue(state.isTimerRunning)
+        assertEquals("10", state.exercises[0].sets[0].reps)
+        assertNotNull("the draft must survive a failed save", draftRepo.draft)
+    }
+
+    @Test
+    fun `a second save tap while the first is running is ignored`() {
+        val repo = ControllableSessionRepository().apply { gate = CompletableDeferred() }
+        val (viewModel, _, _) = buildViewModel(sessionRepository = repo)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.fillFirstSet("10", "60")
+
+        viewModel.saveWorkout()
+        assertTrue(viewModel.uiState.value.isLoading)
+        viewModel.saveWorkout()
+        repo.gate!!.complete(Unit)
+
+        assertEquals(1, repo.createCalls)
+        assertEquals(1, repo.created.size)
+        assertTrue(viewModel.uiState.value.workoutSaved)
+    }
+
+    @Test
+    fun `set edits after a failed save are what the retry saves`() {
+        val repo = ControllableSessionRepository().apply { failing = true }
+        val (viewModel, _, _) = buildViewModel(sessionRepository = repo)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.fillFirstSet("10", "60")
+        viewModel.saveWorkout()
+        viewModel.clearError()
+
+        viewModel.fillFirstSet("12", "70")
+        repo.failing = false
+        viewModel.saveWorkout()
+
+        val savedSet = repo.created.single().performedExercises.single().sets.single()
+        assertEquals(12, savedSet.reps)
+        assertEquals(70f, savedSet.weightKg)
+        assertTrue(viewModel.uiState.value.workoutSaved)
+    }
+
+    // --- the draft: surviving process death ---
+
+    @Test
+    fun `every set edit is written to the draft`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (viewModel, _, _) = buildViewModel(draftRepo = draftRepo)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        assertNotNull(draftRepo.draft)
+
+        viewModel.fillFirstSet("10", "60")
+        val exercise = viewModel.uiState.value.exercises[0]
+        viewModel.updateSetNotes(exercise.id, exercise.sets[0].id, "slow negatives")
+
+        val set = draftRepo.draft!!.exercises.single().sets.single()
+        assertEquals("10", set.reps)
+        assertEquals("60", set.weight)
+        assertEquals("slow negatives", set.notes)
+    }
+
+    @Test
+    fun `a fresh ViewModel restores the draft, counting time away while the timer ran`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+        val before = first.uiState.value
+
+        // Process death: the ViewModel is gone, the draft stays. 40 min pass.
+        clock.advanceSeconds(40 * 60)
+        val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        val restored = second.uiState.value
+        assertTrue(second.hasActiveWorkout())
+        assertEquals("Push Day", restored.workoutTitle)
+        assertEquals("template-1", restored.templateId)
+        assertEquals(before.workoutStartTime, restored.workoutStartTime)
+        assertEquals(before.exercises, restored.exercises)
+        assertTrue(restored.isTimerRunning)
+        assertEquals(before.elapsedSeconds + 40 * 60, restored.elapsedSeconds)
+
+        second.saveWorkout()
+        assertEquals("Push Day", sessionRepo.created.single().title)
+        assertNull("a saved workout must not come back", draftRepo.draft)
+    }
+
+    @Test
+    fun `a paused timer stays paused on restore and away time is not counted`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.toggleTimer()
+        val pausedAt = first.uiState.value.elapsedSeconds
+
+        clock.advanceSeconds(600)
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        assertFalse(second.uiState.value.isTimerRunning)
+        assertEquals(pausedAt, second.uiState.value.elapsedSeconds)
+    }
+
+    @Test
+    fun `discarding deletes the draft so a fresh ViewModel starts empty`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+
+        first.discardWorkout()
+        assertNull(draftRepo.draft)
+
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo)
+        assertFalse(second.hasActiveWorkout())
+    }
+
+    @Test
+    fun `a rejected empty save keeps the draft`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (viewModel, _, _) = buildViewModel(draftRepo = draftRepo)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+
+        viewModel.saveWorkout()
+
+        assertNotNull(draftRepo.draft)
     }
 }

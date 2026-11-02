@@ -13,8 +13,8 @@ import org.robolectric.annotation.Config
 
 /**
  * v26 is the schema on installed devices. Builds it from the exported
- * schema and opens it with the app's configuration: no migration runs
- * and no table is dropped.
+ * schema and opens it with the app's configuration: it migrates forward
+ * and no table or row is dropped.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])

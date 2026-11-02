@@ -28,3 +28,10 @@
 # keep our own sync exceptions readable there.
 -keepnames class com.rukavina.gymbuddy.data.sync.DiscardedOnLogoutException
 -keepnames class com.rukavina.gymbuddy.data.sync.SyncException
+
+# Active workout draft: stored as JSON via Moshi's reflective
+# KotlinJsonAdapterFactory, so names must survive R8 or stored drafts
+# break between releases (plan 4 step 03).
+-keep class com.rukavina.gymbuddy.domain.model.ActiveWorkoutDraft { *; }
+-keep class com.rukavina.gymbuddy.domain.model.ActiveWorkoutDraft$* { *; }
+-keep enum com.rukavina.gymbuddy.domain.model.ExerciseTrackingType { *; }

@@ -67,7 +67,7 @@ roadmap-details.md §3.
 - 4.1 OWASP moved to 8.1 (owner 2026-11-02: not needed before the
       core app; Dependabot is clean, 35/35 fixed)
 - [x] 4.2 Remove custom profile photos (preset avatars come in 6.5)
-- [ ] 4.3 ViewModel test gaps (active workout failure paths)
+- [x] 4.3 ViewModel test gaps (active workout failure paths)
 - [ ] 4.4 Durable push: WorkManager job when the outbox is non-empty
 - [ ] 4.5 (me) CI green, PR develop → main
 
