@@ -11,17 +11,22 @@ block() {
   exit 2
 }
 
-if grep -Eq '(^|[^[:alnum:]_-])git([[:space:]]+-C[[:space:]]+[^[:space:]]+)?[[:space:]]+push' <<<"$cmd"; then
-  grep -Eq -- '(--force|--force-with-lease|--force-if-includes|[[:space:]]-[[:alnum:]]*f)' <<<"$cmd" \
+# Check only the git push segment(s), so flags elsewhere in a chained
+# command (e.g. `rm -f x && git push`) don't trip the push rules.
+push_re='(^|[^[:alnum:]_-])git([[:space:]]+-C[[:space:]]+[^[:space:]]+)?[[:space:]]+push'
+while IFS= read -r seg; do
+  grep -Eq "$push_re" <<<"$seg" || continue
+  push=$(sed -E 's/.*git([[:space:]]+-C[[:space:]]+[^[:space:]]+)?[[:space:]]+push/push/' <<<"$seg")
+  grep -Eq -- '(--force|--force-with-lease|--force-if-includes|[[:space:]]-[[:alnum:]]*f)' <<<"$push" \
     && block "force push"
-  grep -Eq '[[:space:]]\+[^[:space:]]+' <<<"$cmd" && block "force push (+refspec)"
-  grep -Eq -- '(--delete|[[:space:]]-d([[:space:]]|$)|[[:space:]]:[^[:space:]]+)' <<<"$cmd" \
+  grep -Eq '[[:space:]]\+[^[:space:]]+' <<<"$push" && block "force push (+refspec)"
+  grep -Eq -- '(--delete|[[:space:]]-d([[:space:]]|$)|[[:space:]]:[^[:space:]]+)' <<<"$push" \
     && block "remote branch deletion"
-  grep -Eq -- '(^|[[:space:]:/])main([[:space:]]|$)' <<<"$cmd" && block "push to main"
+  grep -Eq -- '(^|[[:space:]:/])main([[:space:]]|$)' <<<"$push" && block "push to main"
   if [ "$(git -C "${CLAUDE_PROJECT_DIR:-.}" branch --show-current 2>/dev/null)" = "main" ]; then
     block "push while on main"
   fi
-fi
+done < <(sed -E 's/(&&|\|\||;|\|)/\n/g' <<<"$cmd")
 
 grep -Eq -- '(^|[^[:alnum:]_-])git([[:space:]]+-C[[:space:]]+[^[:space:]]+)?[[:space:]]+branch[[:space:]].*(-d|-D|--delete)([[:space:]]|$)' <<<"$cmd" \
   && block "branch deletion"
