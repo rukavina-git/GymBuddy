@@ -400,3 +400,34 @@ MyFitnessPal, Duolingo; council docs/council/2026-11-02-onboarding.md
   messages round; plans + default templates rework (roadmap 4.2h).
 - LOCKED 2026-11-02: Onboarding + auth. Final frames on "03 Locked
   designs" (after You + Settings).
+
+## Round log: Error, offline, empty states (06f)
+Brief (2026-11-02). Owner picked all 12 cases.
+Already designed, reused not redesigned: You-card backup line, session
+expired banner, undo snackbars, sign-in field errors, sign out with
+unsynced changes, account deleted elsewhere.
+Facts from the code:
+- The app works fully offline. Exercises and starter templates are
+  bundled (assets/default_*.json), so the library is never empty on
+  first launch; only photos and reference updates need the network.
+- 410: the sync engine flushes the outbox, wipes local user data and
+  pulls everything again (SyncEngine fullResync). Workouts are briefly
+  missing on screen while it runs.
+- Rate limit / server down: sync fails quietly today; the outbox keeps
+  the changes.
+Cases:
+1. Offline indicator: show at all? How quiet?
+2. Backup stuck 24 h+ outside You (Home? live bar? nowhere?)
+3. Full re-download (410) while workouts reload
+4. Server down / busy while online
+5. Couldn't save (local write failed, e.g. storage full) mid-set
+6. Workout restored after the app was killed mid-workout
+7. Exercises not loaded: photos or reference updates missing offline
+8. Image failed (exercise photo, profile picture)
+9. Empty-state audit: every list
+10. No search results: Exercises, All sessions, add exercise
+11. Thin data: charts with 0–1 points, a lift used once, empty week
+12. Loading: skeleton vs nothing; where waiting is visible
+Constraints: calm workout screen (nothing new while logging unless the
+set is at risk); never blame the user; never colour-only; dark only;
+no new features (no retry queues UI beyond what sync does).
