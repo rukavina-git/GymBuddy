@@ -28,13 +28,14 @@ commits ahead (Plan 3 docs only).
 
 1. **Code health (4)** first: known bugs and CVEs, before new code
    lands on top of them.
-2. **Environments (5)** before features: guest mode, account switching
-   and the redesign are tested against staging, never against prod data.
-3. **Features (6)** before the redesign: the new screens need their
+2. **Features (6)** before the redesign: the new screens need their
    data (per-account data, guest, body weight, profile, plans, export).
    Each feature step leaves the old UI working, with at most a plain
    entry point.
-4. **Redesign (7)** builds every screen once, on top of 6.
+3. **Redesign (7)** builds every screen once, on top of 6.
+4. **Environments (5)** after the redesign (owner, 2026-11-03): no
+   point splitting staging and prod before the app works. Until then
+   the one backend holds only my own test data. Ids kept.
 5. **Delivery (8)**: CI/CD and fastlane once there is something worth
    shipping; testers get staging builds from here on.
 6. **Legal (9)** describes the finished app: the policy and Data safety
@@ -134,31 +135,6 @@ Plan 3 docs, council notes and older progress files keep the old ids.
     survives process death. Found in Plan 2 T10.
 4.5 **(me)** CI green, PR develop → main.
 
-### Plan 5: environments (test + prod)
-
-Today there is one backend, one database and one Firebase project, and
-debug builds talk to it. From Plan 6 on, nothing under test touches
-prod data.
-
-5.1 **ADR 0016.** Staging and prod each get their own Render service,
-    Neon database (or branch), Firebase project and API host
-    (api-staging.rukavina.app, api.rukavina.app). Check free-tier
-    limits (Render services, Neon branches) at write time. Debug and
-    staging builds point at staging; only prod release builds point at
-    prod.
-5.2 **Backend.** Staging service in `render.yaml` (same image, own
-    env vars), nightly backup stays prod only, `docker/README.md`
-    documents both. Spec: add the staging server. **Spec change.**
-5.3 **Android flavors.** `staging` and `prod` product flavors:
-    `applicationIdSuffix ".staging"` (both installable side by side),
-    own Firebase config per flavor, own API URL, app name "GymBuddy
-    Staging". The `-Pgymbuddy.apiBaseUrl` override stays. CI builds
-    and tests both; secrets per flavor.
-5.4 **(me)** Create the staging Firebase project (Auth: Google +
-    email), the Neon branch, the Render service, the DNS record, and
-    the GitHub secrets. Deploy staging.
-5.5 **(me)** CI green, PR develop → main.
-
 ### Plan 6: v1 features (data + logic)
 
 Each step leaves the current UI working. New screens come in Plan 7;
@@ -240,7 +216,32 @@ invariants) plus what Plan 6 added.
     sync. Sets logged during a re-download (410) must survive the
     wipe. Replaces EmptyState, LoadingState, AppSnackBar,
     UnsyncedChanges where they differ.
-7.12 **(me)** Device pass on a staging build, CI green, PR.
+7.12 **(me)** Device pass against the current backend, CI green, PR.
+
+### Plan 5: environments (test + prod)
+
+Runs after Plan 7 (owner, 2026-11-03). Today there is one backend, one
+database and one Firebase project, and debug builds talk to it. From
+Plan 8 on, nothing under test touches prod data.
+
+5.1 **ADR 0016.** Staging and prod each get their own Render service,
+    Neon database (or branch), Firebase project and API host
+    (api-staging.rukavina.app, api.rukavina.app). Check free-tier
+    limits (Render services, Neon branches) at write time. Debug and
+    staging builds point at staging; only prod release builds point at
+    prod.
+5.2 **Backend.** Staging service in `render.yaml` (same image, own
+    env vars), nightly backup stays prod only, `docker/README.md`
+    documents both. Spec: add the staging server. **Spec change.**
+5.3 **Android flavors.** `staging` and `prod` product flavors:
+    `applicationIdSuffix ".staging"` (both installable side by side),
+    own Firebase config per flavor, own API URL, app name "GymBuddy
+    Staging". The `-Pgymbuddy.apiBaseUrl` override stays. CI builds
+    and tests both; secrets per flavor.
+5.4 **(me)** Create the staging Firebase project (Auth: Google +
+    email), the Neon branch, the Render service, the DNS record, and
+    the GitHub secrets. Deploy staging.
+5.5 **(me)** CI green, PR develop → main.
 
 ### Plan 8: delivery (CI/CD + fastlane)
 
@@ -331,7 +332,7 @@ Check both free tiers at setup time, since they change. Staging (Plan
 | Q-F | Can a cloud session run the tests? | Open. Needs JDK 17, Android SDK, a Firebase config stand-in, Docker. Check on first remote step |
 | Q-G | Own domain for the API | **api.rukavina.app** (live). Staging: api-staging.rukavina.app (Plan 5) |
 | Q-H | Can the Figma MCP draw frames? | **Yes.** Figma Console MCP since 2026-10-31 (Desktop + Bridge plugin). Starter plan: 3 pages, 1 variable mode |
-| Q-I | Test + prod environments? | **Yes,** Plan 5, before features (owner 2026-11-02) |
+| Q-I | Test + prod environments? | **Yes,** Plan 5, after the redesign (owner 2026-11-03) |
 | Q-J | Deployment tool | **fastlane** (MIT) for Play; Render deploy hooks for the backend (Plan 8) |
 
 Figma file: https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy

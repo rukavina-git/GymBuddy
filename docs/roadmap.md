@@ -57,8 +57,9 @@ waiting on me
 - [x] 3.7 Motion and haptics spec
 - [x] 3.8 DESIGN.md + redesign handoff (now Plan 7)
 
-Order (owner, 2026-11-02): fix what's there → test + prod
-environments → features → redesign → CI/CD → legal → release last.
+Order (owner, 2026-11-03): fix what's there → features → redesign →
+test + prod environments → CI/CD → legal → release last. Plan ids
+kept, so Plan 5 comes after Plan 7.
 Old step ids (4.0–4.6, 4.D1–4.D11, old Plan 5) map to the new ones in
 roadmap-details.md §3.
 
@@ -70,16 +71,6 @@ roadmap-details.md §3.
 - [x] 4.3 ViewModel test gaps (active workout failure paths)
 - [x] 4.4 Durable push: WorkManager job when the outbox is non-empty
 - [x] 4.5 (me) CI green, PR develop → main
-
-## Plan 5: environments (test + prod)
-
-- [ ] 5.1 ADR: staging + prod split (backend, database, Firebase, app)
-- [ ] 5.2 Backend: staging service in render.yaml, backups prod only
-- [ ] 5.3 Android: `staging` / `prod` flavors (app id suffix, own
-      Firebase config, API URL); CI builds both
-- [ ] 5.4 (me) Staging Firebase project, Neon branch, Render service,
-      DNS api-staging.rukavina.app, secrets
-- [ ] 5.5 (me) CI green, PR develop → main
 
 ## Plan 6: v1 features (data + logic)
 
@@ -107,7 +98,17 @@ roadmap-details.md §3.
 - [ ] 7.9 Session detail
 - [ ] 7.10 You + Settings (UI for 6.4, 6.5, 6.7)
 - [ ] 7.11 Cross-flow states: error, offline, empty, sync
-- [ ] 7.12 (me) Device pass on staging, CI green, PR develop → main
+- [ ] 7.12 (me) Device pass on the current backend, CI green, PR develop → main
+
+## Plan 5: environments (test + prod), after Plan 7
+
+- [ ] 5.1 ADR: staging + prod split (backend, database, Firebase, app)
+- [ ] 5.2 Backend: staging service in render.yaml, backups prod only
+- [ ] 5.3 Android: `staging` / `prod` flavors (app id suffix, own
+      Firebase config, API URL); CI builds both
+- [ ] 5.4 (me) Staging Firebase project, Neon branch, Render service,
+      DNS api-staging.rukavina.app, secrets
+- [ ] 5.5 (me) CI green, PR develop → main
 
 ## Plan 8: delivery (CI/CD + fastlane)
 
