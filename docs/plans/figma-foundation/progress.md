@@ -8,7 +8,7 @@
       (design/do-dont.md) + PRODUCT.md palette (0f469ac)
 - [x] 03 Tokens as Figma variables + design/tokens.json (dark only) (dca0550)
 - [x] 04 Brand and icons: own ECG logo, 12 glyphs, tab + Material UI icons (2f366fe)
-- [x] 05 Components: 35 on 01 System, 627 instances on locked frames (HASH)
+- [x] 05 Components: 35 on 01 System, 627 instances on locked frames (711fb05)
 - [x] 06 App frame (locked 2026-11-01)
 - [x] 06a Onboarding + auth incl. session expired (locked 2026-11-02)
 - [x] 06b Home (2026-11-01) + Templates (2026-11-01)
