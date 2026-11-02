@@ -470,3 +470,13 @@ Critique flags: C2c blocks Start (breaks "works offline" promise);
 B2 interrupts the calm workout screen; C1b Retry needs a 48dp tap area.
 Owner picks (round 17): B1 inline above the button, C1b line in the
 week card, C2a in place, D3 no Progress section until 3 sessions.
+Critique (impeccable, native design review, 31/40, 0 P0, 3 P1), all
+6 fixes applied (owner): B1 card gains "Storage settings", body 14;
+C1b whole line is a 48dp row, tap = "Backing up…" then the line goes;
+C2a keeps "Your templates" + "Coming back from your account.", failure
+"Couldn't get your workouts · Retry", Start sheet offers starter plans
++ Empty workout while reloading (owner); D3 one box "First time".
+Plan 4 note: sets logged during a 410 reload must survive the wipe.
+Restore rule (owner OK): last set < 3 h ago → straight back in; 3 h+
+→ Home card "Unfinished workout" with Resume and lime Finish; Finish
+sets the end time to the last set.
