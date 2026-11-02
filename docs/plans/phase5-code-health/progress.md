@@ -2,7 +2,7 @@
 
 - 01 OWASP: moved to roadmap 8.1 (owner 2026-11-02). Work so far is
   on `feature/owasp-triage` (steps/01-owasp.md)
-- [x] 02 Remove custom profile photos (steps/02-image-storage.md) (HASH)
+- [x] 02 Remove custom profile photos (steps/02-image-storage.md) (fd871c3)
 - [ ] 03 Active workout failure paths + process death (steps/03-active-workout-tests.md)
 - [ ] 04 Durable push via WorkManager (steps/04-durable-push.md)
 - [ ] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md)
