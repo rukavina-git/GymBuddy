@@ -47,13 +47,16 @@ progressing. Beginners need guidance as much as tracking.
 - Statistics tab exists but is a placeholder; what it shows is
   undecided.
 - UI is designed in Figma first (file MdD33rDNKJ3S82azTOYfEk).
-- Dark mode was not built yet; theme modes are undecided (see brand).
+- Dark only in v1 (see Brand Commitments); light theme is v2.
 
 ## Brand Commitments
 - Name: GymBuddy.
-- Proposed palette from the owner (direction, not yet final):
-  midnight black #030407, electric cobalt blue #1558C9, acid lime
-  #D4FF24 (lime as the third, supporting colour).
+- Direction: Soft Dark (locked 2026-10-31). Dark is the only mode in
+  v1; light theme is v2.
+- Brand colours: lime #D4FF24 = "you can press this" (only on
+  actions and done), cobalt #4D86F0 = "you are here", ground #121418.
+  Every other colour: design/colors.md.
+- Type: Figtree.
 
 ## Evidence on Hand
 - Reference exercise photos (stock, red studio backgrounds) bundled

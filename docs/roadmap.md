@@ -46,7 +46,7 @@ waiting on me
 
 - [x] 3.1 (me) Figma file + connect the Figma MCP server to Claude Code
 - [x] 3.2 Direction: Soft Dark locked (lime, cobalt, #121418), dark only in v1
-- [ ] 3.2b Banned list + PRODUCT.md palette
+- [x] 3.2b Colours file + Do/Don't list + PRODUCT.md palette
 - [ ] 3.3 Tokens as Figma variables + design/tokens.json
 - [ ] 3.4 Brand and icons (app icon, wordmark, gym glyphs). Owner 2026-11-02:
       new logo (an animal, e.g. a duck) before the end of v1

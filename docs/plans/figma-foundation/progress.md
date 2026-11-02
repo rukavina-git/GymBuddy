@@ -4,7 +4,8 @@
 - [x] 02 Direction: Soft Dark locked 2026-10-31. Owner: lime = press,
       cobalt = you are here, #121418 ground; dark is the default and
       only mode for v1 (2026-11-02). No new direction round.
-- [ ] 02b Banned list in design-brief.md + PRODUCT.md palette
+- [x] 02b Colours file (design/colors.md) + Do/Don't list
+      (design/do-dont.md) + PRODUCT.md palette (7c1a3b6)
 - [ ] 03 Tokens as Figma variables + design/tokens.json (dark only)
 - [ ] 04 Brand and icons (incl. new animal logo, owner 2026-11-02)
 - [ ] 05 Components
@@ -21,6 +22,11 @@
 - [ ] 08 DESIGN.md + Plan 4 handoff
 
 ## Deviations
+- 2026-11-02 (02b): owner renamed "banned list" to a living Do/Don't
+  list in design/do-dont.md (not design-brief.md "## Banned"). Added
+  design/colors.md (every colour, pulled from Figma "03 Locked
+  designs") instead of a direction-contract summary. Owner picked all
+  six colour merges in colors.md "Decided" (impeccable agrees).
 - 2026-11-02: screens (06) were designed before tokens (03), icons
   (04) and components (05); those now follow from the locked frames.
 - 2026-10-31: plan rewritten from "mirror v1 UI" to a full redesign
@@ -31,6 +37,11 @@
   Decisions in design-brief.md "Round log".
 
 ## Gotchas
+- From 02b: Figma frames still use the old values for the six colour
+  decisions in design/colors.md (#FF8A80, cobalt 16%/30%, scrims
+  55%/35%, #3A3F4B, outline and disabled greys as text). Step 03 must
+  apply them while binding frames to variables. Google button,
+  Android system UI and board chrome colours are not tokens.
 - 2026-11-02: screens were designed in rounds outside /step, so this
   file and roadmap.md fell behind. Tick both whenever a flow locks.
   Final frames: Figma "03 Locked designs"; decisions: design-brief.md
