@@ -490,3 +490,6 @@ off, Progress empty, sign in / sign out offline.
 Critique row E (native review, 32/40, 0 P0, 0 P1). Copy fixed: E5 "a
 chart appears after 3 entries", E6 "Bring it back from here". Open
 P2s for the owner: Discard on E2, E3 reverting to Retry.
+Owner (row E): E2 shows three buttons, Discard (red, confirms) ·
+Resume · lime Finish. E3 "Needs internet" shows 4 s, then back to
+"Not backed up for 3 days · Retry"; backup runs by itself once online.
