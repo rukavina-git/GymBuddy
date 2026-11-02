@@ -480,3 +480,13 @@ Plan 4 note: sets logged during a 410 reload must survive the wipe.
 Restore rule (owner OK): last set < 3 h ago → straight back in; 3 h+
 → Home card "Unfinished workout" with Resume and lime Finish; Finish
 sets the end time to the last set.
+Row E (follows the picks): E1 workout restored snackbar (4 s), E2
+"Unfinished workout" card on Home (3 h+; Resume / lime Finish), E3
+backup Retry while offline ("Needs internet. Safe on this phone."), E4
+photo not downloaded offline (photos load from the web and are cached;
+quiet stand-in, no error), E5 body weight empty, E6 hidden exercises
+empty. Already locked elsewhere: no results, Workouts with starters
+off, Progress empty, sign in / sign out offline.
+Critique row E (native review, 32/40, 0 P0, 0 P1). Copy fixed: E5 "a
+chart appears after 3 entries", E6 "Bring it back from here". Open
+P2s for the owner: Discard on E2, E3 reverting to Retry.
