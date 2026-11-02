@@ -18,10 +18,20 @@
 - [x] 06g Progress tab (locked 2026-11-01)
 - [x] 06h Session detail (locked 2026-11-02)
 - [x] 06f Cross-flow states: error, offline, empty, sync (locked 2026-11-02)
-- [ ] 07 Motion and haptics spec
+- [x] 07 Motion and haptics spec: design/motion.md + Motion section on 01 System (HASH)
 - [ ] 08 DESIGN.md + Plan 4 handoff
 
 ## Deviations
+- 2026-11-02 (07): Remove animations = instant cut (owner), not
+  crossfade. design-brief.md (l.91, 141, 206-208) and the tokens.json
+  `short4` description still say crossfade; motion.md rule 4 wins.
+- 07: inventory has no per-row haptic / reduced-motion columns; the
+  separate haptics map and the global rule 4 cover them.
+- 07: Motion section sits last on 01 System (after Components), not
+  under Tokens; motion tokens stay on the Tokens card. Tokens card text
+  updated to "instant cut". No new tokens, no tokens.json re-export.
+- 07: owner picks: press shrink on buttons + keys only; − / + one tick
+  on press + REJECT once at a limit; rest buzz follows silent / DND.
 - 2026-11-02 (05): 14 merges, not 8. D1-D9 on the Round 19 board;
   D10-D14 (text field fill, keypad footer 60->56, snackbar 52->56,
   upcoming set row 52->48, nav icons) found while building; owner
@@ -86,6 +96,19 @@
   Decisions in design-brief.md "Round log".
 
 ## Gotchas
+- From 07 (reviewer, not fixed): Plan 4 should use Compose
+  `HapticFeedbackType` (own API fallbacks) instead of hand-rolled ones;
+  set lands (row 2) likely needs `sharedBounds` or one node swapping
+  content, not `animateBounds`; drag reorder (row 20) needs a library
+  (check licence) or custom code; Navigation Compose 2.8+ already does
+  predictive back (drop `PredictiveBackHandler`); `ModalBottomSheet`
+  tokens can't be set (M3 defaults); Done + couldn't save = two pulses;
+  rest buzz needs VIBRATE permission, consider a notification channel
+  for DND; some rows lack easing (default to `std`); 1 s outline hold
+  and 80/120/80 buzz are raw ms; "hits 0" should say "floor"; no motion
+  for the first-3-workouts hint. Fix these in 08 or Plan 4.
+- From 07: 01 System has two stray layers at page root (empty Text
+  151:3220, backspace instance 151:4134, from step 05). Not removed.
 - From 05: a paint bound to a variable must also carry the resolved
   colour (setBoundVariableForPaint on black renders dark until
   refreshed). Resolve aliases first.

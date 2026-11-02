@@ -54,7 +54,7 @@ waiting on me
 - [x] 3.6 Screens per flow: app frame, Home, Templates, Active workout,
       Exercise page + create, Session detail, Progress, You + Settings,
       Onboarding + auth (incl. session expired), error/offline states
-- [ ] 3.7 Motion and haptics spec
+- [x] 3.7 Motion and haptics spec
 - [ ] 3.8 DESIGN.md + Plan 4 handoff (code steps per frame)
 
 ## Plan 4: phase5-release
