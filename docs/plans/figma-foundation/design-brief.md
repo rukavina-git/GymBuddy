@@ -431,3 +431,31 @@ Cases:
 Constraints: calm workout screen (nothing new while logging unless the
 set is at risk); never blame the user; never colour-only; dark only;
 no new features (no retry queues UI beyond what sync does).
+Shape (impeccable, 2026-11-02). Mode: Operate. Owner picks:
+- Offline: no global indicator. Network-only actions (sign in, back up
+  now, photos) say "Needs internet" when tapped; You card shows
+  waiting changes.
+- Backup stuck: quiet Home card after 3 days of failing, with Retry.
+  Never on the workout screen.
+- Killed mid-workout: reopen straight into the workout, snackbar
+  "Workout restored", timer counts from the real start.
+Brief:
+- Job: tell the truth about state without stealing attention. Offline
+  is normal, not an error. Loud only when a set could be lost.
+- Loud tier (1 case): Couldn't save. Stays on screen until resolved,
+  keeps the typed numbers, says what to do (free up space, Retry).
+- Quiet tier: backup stuck, server down (same as backup waiting, no
+  separate message), 410 reload ("Getting your workouts…" in place of
+  lists, no wipe visible), image failed (muscle map fallback, letter
+  avatar), photos offline.
+- Empty / thin / no results: one pattern for every list (glyph, one
+  line, at most one action); charts with 0–1 points show the number,
+  not a broken chart.
+- Loading: local reads are instant, so no skeletons on local lists;
+  waiting is only visible on network actions (sign in, back up, 410).
+Wide round (Figma "02 Rounds", 3 options + 1 category standard each):
+A. Empty-state pattern across all lists. B. Couldn't save. C. Backup
+stuck Home card + 410 reload. D. Thin-data chart. Rest follow the
+picked patterns.
+Open: restore after very long gaps (e.g. 6 h+) may need "Finish or
+resume?"; owner to confirm in Wide.
