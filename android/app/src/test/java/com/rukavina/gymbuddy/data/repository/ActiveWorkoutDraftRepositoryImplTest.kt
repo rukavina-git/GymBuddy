@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.repository
 
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
@@ -57,7 +58,7 @@ class ActiveWorkoutDraftRepositoryImplTest {
             InstrumentationRegistry.getInstrumentation().targetContext,
             AppDatabase::class.java
         ).allowMainThreadQueries().build()
-        repository = ActiveWorkoutDraftRepositoryImpl(db.activeWorkoutDraftDao(), MutableClock())
+        repository = ActiveWorkoutDraftRepositoryImpl(DatabaseHolder.fixed(db), MutableClock())
     }
 
     @After

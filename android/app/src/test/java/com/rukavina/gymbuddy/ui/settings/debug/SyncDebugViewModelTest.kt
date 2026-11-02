@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.ui.settings.debug
 
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
@@ -64,7 +65,7 @@ class SyncDebugViewModelTest {
         db = Room.inMemoryDatabaseBuilder(RuntimeEnvironment.getApplication(), AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        store = SyncLocalStore(db, clock)
+        store = SyncLocalStore(DatabaseHolder.fixed(db), clock)
     }
 
     private val viewModels = mutableListOf<SyncDebugViewModel>()

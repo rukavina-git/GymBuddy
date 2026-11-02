@@ -4,7 +4,7 @@ import android.content.Context
 import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.data.crash.CrashReporter
 import com.rukavina.gymbuddy.data.crash.FirebaseCrashReporter
-import com.rukavina.gymbuddy.data.local.db.AppDatabase
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
 import com.rukavina.gymbuddy.data.sync.AuthSession
 import com.rukavina.gymbuddy.data.sync.FirebaseAuthSession
@@ -43,7 +43,7 @@ object SyncModule {
 
     @Provides
     @Singleton
-    fun provideSyncLocalStore(database: AppDatabase, clock: Clock) = SyncLocalStore(database, clock)
+    fun provideSyncLocalStore(holder: DatabaseHolder, clock: Clock) = SyncLocalStore(holder, clock)
 
     @Provides
     @Singleton
@@ -51,8 +51,15 @@ object SyncModule {
 
     @Provides
     @Singleton
-    fun provideSyncEngine(store: SyncLocalStore, apis: SyncApis, auth: AuthSession) =
-        SyncEngine(store, apis, isSignedIn = { auth.currentUid != null })
+    fun provideSyncEngine(store: SyncLocalStore, apis: SyncApis, auth: AuthSession, holder: DatabaseHolder) =
+        SyncEngine(
+            store,
+            apis,
+            // Only the signed-in account's own file syncs, never another owner's outbox (ADR 0014).
+            isSignedIn = { auth.currentUid.let { it != null && it == holder.owner } },
+            // Shared with the holder, so a database switch never runs mid-cycle.
+            mutex = holder.lock
+        )
 
     @Provides
     @Singleton

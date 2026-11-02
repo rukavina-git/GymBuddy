@@ -6,22 +6,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
-import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
-import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
-import com.rukavina.gymbuddy.data.local.dao.TemplateVersionDao
-import com.rukavina.gymbuddy.data.local.dao.UserExerciseStateDao
-import com.rukavina.gymbuddy.data.local.dao.UserProfileDao
-import com.rukavina.gymbuddy.data.local.dao.SyncDao
-import com.rukavina.gymbuddy.data.local.dao.UserTemplateStateDao
-import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
-import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
-import com.rukavina.gymbuddy.data.local.db.DATABASE_NAME
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.db.applyAppConfig
 import com.rukavina.gymbuddy.data.repository.ActiveWorkoutDraftRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutSessionRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutTemplateRepositoryImpl
+import com.rukavina.gymbuddy.data.sync.AuthSession
 import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.id.Uuid7Generator
@@ -41,103 +33,57 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    /**
+     * One Room file per data owner (ADR 0014). Opens the signed-in uid's
+     * file (or the signed-out one) and moves the pre-Plan-6 file first.
+     * FirebaseAuth restores the signed-in user synchronously at startup.
+     */
     @Provides
     @Singleton
-    fun provideDatabase(
-        @ApplicationContext appContext: Context
-    ): AppDatabase {
-        return Room.databaseBuilder(appContext, AppDatabase::class.java, DATABASE_NAME)
-            .applyAppConfig()
-            .build()
-    }
-
-    // DAOs
-    @Provides
-    fun provideUserProfileDao(database: AppDatabase): UserProfileDao {
-        return database.userProfileDao()
-    }
-
-    @Provides
-    fun provideExerciseDao(database: AppDatabase): ExerciseDao {
-        return database.exerciseDao()
-    }
-
-    @Provides
-    fun provideExerciseVersionDao(database: AppDatabase): ExerciseVersionDao {
-        return database.exerciseVersionDao()
-    }
-
-    @Provides
-    fun provideWorkoutSessionDao(database: AppDatabase): WorkoutSessionDao {
-        return database.workoutSessionDao()
-    }
-
-    @Provides
-    fun provideWorkoutTemplateDao(database: AppDatabase): WorkoutTemplateDao {
-        return database.workoutTemplateDao()
-    }
-
-    @Provides
-    fun provideTemplateVersionDao(database: AppDatabase): TemplateVersionDao {
-        return database.templateVersionDao()
-    }
-
-    @Provides
-    fun provideUserExerciseStateDao(database: AppDatabase): UserExerciseStateDao {
-        return database.userExerciseStateDao()
-    }
-
-    @Provides
-    fun provideUserTemplateStateDao(database: AppDatabase): UserTemplateStateDao {
-        return database.userTemplateStateDao()
-    }
-
-    @Provides
-    fun provideSyncDao(database: AppDatabase): SyncDao {
-        return database.syncDao()
+    fun provideDatabaseHolder(
+        @ApplicationContext appContext: Context,
+        auth: AuthSession
+    ): DatabaseHolder {
+        val uid = auth.currentUid
+        DatabaseHolder.migrateLegacyFile({ appContext.getDatabasePath(it) }, uid)
+        return DatabaseHolder(uid, open = { owner ->
+            Room.databaseBuilder(appContext, AppDatabase::class.java, DatabaseHolder.fileName(owner))
+                .applyAppConfig()
+                .build()
+        })
     }
 
     // Repositories
     @Provides
     @Singleton
     fun provideExerciseRepository(
-        exerciseDao: ExerciseDao,
-        userExerciseStateDao: UserExerciseStateDao,
+        holder: DatabaseHolder,
         outbox: OutboxRecorder,
         clock: Clock
-    ): ExerciseRepository {
-        return ExerciseRepositoryImpl(exerciseDao, userExerciseStateDao, outbox, clock)
-    }
+    ): ExerciseRepository = ExerciseRepositoryImpl(holder, outbox, clock)
 
     @Provides
     @Singleton
     fun provideWorkoutSessionRepository(
-        workoutSessionDao: WorkoutSessionDao,
+        holder: DatabaseHolder,
         outbox: OutboxRecorder,
         clock: Clock
-    ): WorkoutSessionRepository {
-        return WorkoutSessionRepositoryImpl(workoutSessionDao, outbox, clock)
-    }
+    ): WorkoutSessionRepository = WorkoutSessionRepositoryImpl(holder, outbox, clock)
 
     @Provides
     @Singleton
     fun provideWorkoutTemplateRepository(
-        workoutTemplateDao: WorkoutTemplateDao,
-        userTemplateStateDao: UserTemplateStateDao,
+        holder: DatabaseHolder,
         outbox: OutboxRecorder,
         clock: Clock
-    ): WorkoutTemplateRepository {
-        return WorkoutTemplateRepositoryImpl(workoutTemplateDao, userTemplateStateDao, outbox, clock)
-    }
+    ): WorkoutTemplateRepository = WorkoutTemplateRepositoryImpl(holder, outbox, clock)
 
     @Provides
     @Singleton
     fun provideActiveWorkoutDraftRepository(
-        database: AppDatabase,
+        holder: DatabaseHolder,
         clock: Clock
-    ): ActiveWorkoutDraftRepository {
-        return ActiveWorkoutDraftRepositoryImpl(database.activeWorkoutDraftDao(), clock)
-    }
+    ): ActiveWorkoutDraftRepository = ActiveWorkoutDraftRepositoryImpl(holder, clock)
 
     @Provides
     @Singleton

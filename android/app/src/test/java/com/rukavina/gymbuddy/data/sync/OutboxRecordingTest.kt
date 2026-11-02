@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.sync
 
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.local.entity.OutboxOperation
@@ -44,11 +45,11 @@ class OutboxRecordingTest {
         db = Room.inMemoryDatabaseBuilder(org.robolectric.RuntimeEnvironment.getApplication(), AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        val outbox = OutboxRecorder(db, clock)
-        sessions = WorkoutSessionRepositoryImpl(db.workoutSessionDao(), outbox, clock)
-        exercises = ExerciseRepositoryImpl(db.exerciseDao(), db.userExerciseStateDao(), outbox, clock)
-        templates = WorkoutTemplateRepositoryImpl(db.workoutTemplateDao(), db.userTemplateStateDao(), outbox, clock)
-        profiles = UserProfileRepository(db.userProfileDao(), outbox, clock)
+        val outbox = OutboxRecorder(DatabaseHolder.fixed(db), clock)
+        sessions = WorkoutSessionRepositoryImpl(DatabaseHolder.fixed(db), outbox, clock)
+        exercises = ExerciseRepositoryImpl(DatabaseHolder.fixed(db), outbox, clock)
+        templates = WorkoutTemplateRepositoryImpl(DatabaseHolder.fixed(db), outbox, clock)
+        profiles = UserProfileRepository(DatabaseHolder.fixed(db), outbox, clock)
     }
 
     @After

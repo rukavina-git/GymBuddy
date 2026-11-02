@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.sync
 
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
@@ -58,10 +59,10 @@ class AccountDeletionCoordinatorTest {
         db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        store = SyncLocalStore(db, clock)
-        val outbox = OutboxRecorder(db, clock)
-        sessions = WorkoutSessionRepositoryImpl(db.workoutSessionDao(), outbox, clock)
-        exercises = ExerciseRepositoryImpl(db.exerciseDao(), db.userExerciseStateDao(), outbox, clock)
+        store = SyncLocalStore(DatabaseHolder.fixed(db), clock)
+        val outbox = OutboxRecorder(DatabaseHolder.fixed(db), clock)
+        sessions = WorkoutSessionRepositoryImpl(DatabaseHolder.fixed(db), outbox, clock)
+        exercises = ExerciseRepositoryImpl(DatabaseHolder.fixed(db), outbox, clock)
         imagesDir.mkdirs()
         File(imagesDir, "profile_1.jpg").writeText("jpeg")
     }

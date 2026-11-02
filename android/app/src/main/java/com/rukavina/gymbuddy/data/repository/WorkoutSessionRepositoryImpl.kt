@@ -1,6 +1,7 @@
 package com.rukavina.gymbuddy.data.repository
 
 import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.entity.OutboxOperation
 import com.rukavina.gymbuddy.data.local.entity.SyncEntityType
 import com.rukavina.gymbuddy.data.local.mapper.WorkoutSessionMapper
@@ -21,35 +22,41 @@ import javax.inject.Inject
  * A write keeps the stored revision rather than whatever the caller's
  * domain object carries: the revision is the server version this edit
  * is based on, and a stale in-memory copy must not roll it back.
+ *
+ * DAOs come from [DatabaseHolder] per call (the owner can switch);
+ * writes use the database [OutboxRecorder] hands them.
  */
 class WorkoutSessionRepositoryImpl @Inject constructor(
-    private val workoutSessionDao: WorkoutSessionDao,
+    private val holder: DatabaseHolder,
     private val outbox: OutboxRecorder,
     private val clock: Clock
 ) : WorkoutSessionRepository {
 
-    override fun getAllWorkoutSessions(): Flow<List<WorkoutSession>> {
-        return workoutSessionDao.getAllWorkoutSessions().map { sessions ->
+    private val workoutSessionDao: WorkoutSessionDao get() = holder.db.workoutSessionDao()
+
+    override fun getAllWorkoutSessions(): Flow<List<WorkoutSession>> = holder.observe { db ->
+        val dao = db.workoutSessionDao()
+        dao.getAllWorkoutSessions().map { sessions ->
             sessions.map { session ->
-                val performedExercisesWithSets = workoutSessionDao.getPerformedExercisesWithSets(session.id)
-                WorkoutSessionMapper.toDomain(session, performedExercisesWithSets)
+                WorkoutSessionMapper.toDomain(session, dao.getPerformedExercisesWithSets(session.id))
             }
         }
     }
 
     override suspend fun getWorkoutSessionById(id: String): WorkoutSession? {
-        val session = workoutSessionDao.getWorkoutSessionById(id)
+        val dao = workoutSessionDao
+        val session = dao.getWorkoutSessionById(id)
         return session?.let {
-            val performedExercisesWithSets = workoutSessionDao.getPerformedExercisesWithSets(it.id)
+            val performedExercisesWithSets = dao.getPerformedExercisesWithSets(it.id)
             WorkoutSessionMapper.toDomain(it, performedExercisesWithSets)
         }
     }
 
-    override fun getWorkoutSessionsByDateRange(startDate: Long, endDate: Long): Flow<List<WorkoutSession>> {
-        return workoutSessionDao.getWorkoutSessionsByDateRange(startDate, endDate).map { sessions ->
+    override fun getWorkoutSessionsByDateRange(startDate: Long, endDate: Long): Flow<List<WorkoutSession>> = holder.observe { db ->
+        val dao = db.workoutSessionDao()
+        dao.getWorkoutSessionsByDateRange(startDate, endDate).map { sessions ->
             sessions.map { session ->
-                val performedExercisesWithSets = workoutSessionDao.getPerformedExercisesWithSets(session.id)
-                WorkoutSessionMapper.toDomain(session, performedExercisesWithSets)
+                WorkoutSessionMapper.toDomain(session, dao.getPerformedExercisesWithSets(session.id))
             }
         }
     }
@@ -57,7 +64,8 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     override suspend fun createWorkoutSession(workoutSession: WorkoutSession) {
         requireStampedSnapshots(workoutSession)
         val (workoutSessionEntity, performedExerciseEntities, workoutSetEntities) = WorkoutSessionMapper.toEntities(workoutSession)
-        outbox.record(SyncEntityType.WORKOUT_SESSION, workoutSession.id) {
+        outbox.record(SyncEntityType.WORKOUT_SESSION, workoutSession.id) { db ->
+            val workoutSessionDao = db.workoutSessionDao()
             val revision = workoutSessionDao.getRevision(workoutSession.id) ?: 0
             workoutSessionDao.insertWorkoutSession(
                 workoutSessionEntity.copy(updatedAt = clock.millis(), revision = revision, syncState = SyncState.PENDING)
@@ -70,7 +78,8 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     override suspend fun updateWorkoutSession(workoutSession: WorkoutSession) {
         requireStampedSnapshots(workoutSession)
         val (workoutSessionEntity, performedExerciseEntities, workoutSetEntities) = WorkoutSessionMapper.toEntities(workoutSession)
-        outbox.record(SyncEntityType.WORKOUT_SESSION, workoutSession.id) {
+        outbox.record(SyncEntityType.WORKOUT_SESSION, workoutSession.id) { db ->
+            val workoutSessionDao = db.workoutSessionDao()
             val revision = workoutSessionDao.getRevision(workoutSession.id) ?: 0
             workoutSessionDao.updateWorkoutSession(
                 workoutSessionEntity.copy(updatedAt = clock.millis(), revision = revision, syncState = SyncState.PENDING)
@@ -83,8 +92,8 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
 
     override suspend fun deleteWorkoutSession(id: String) {
         val now = clock.millis()
-        outbox.record(SyncEntityType.WORKOUT_SESSION, id, OutboxOperation.DELETE) {
-            workoutSessionDao.deleteWorkoutSession(id, deletedAt = now, updatedAt = now)
+        outbox.record(SyncEntityType.WORKOUT_SESSION, id, OutboxOperation.DELETE) { db ->
+            db.workoutSessionDao().deleteWorkoutSession(id, deletedAt = now, updatedAt = now)
         }
     }
 

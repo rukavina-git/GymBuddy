@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.local.seeder
 
 import android.content.Context
 import android.util.Log
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.dao.TemplateVersionDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.entity.TemplateExerciseEntity
@@ -17,9 +18,12 @@ import javax.inject.Inject
  * Loads templates from bundled JSON asset and updates when version changes.
  */
 class WorkoutTemplateSeeder @Inject constructor(
-    private val workoutTemplateDao: WorkoutTemplateDao,
-    private val versionDao: TemplateVersionDao
+    private val holder: DatabaseHolder
 ) {
+    // Seeds whichever owner's file is current; the app runs it per new file.
+    private val workoutTemplateDao: WorkoutTemplateDao get() = holder.db.workoutTemplateDao()
+    private val versionDao: TemplateVersionDao get() = holder.db.templateVersionDao()
+
     companion object {
         private const val TAG = "WorkoutTemplateSeeder"
         private const val DEFAULT_TEMPLATES_FILE = "default_workout_templates.json"

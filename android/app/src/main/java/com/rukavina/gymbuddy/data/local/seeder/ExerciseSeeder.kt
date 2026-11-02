@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.local.seeder
 
 import android.content.Context
 import android.util.Log
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
 import com.rukavina.gymbuddy.data.local.entity.ExerciseEntity
@@ -22,9 +23,12 @@ import javax.inject.Inject
  * Loads exercises from bundled JSON asset and updates when version changes.
  */
 class ExerciseSeeder @Inject constructor(
-    private val exerciseDao: ExerciseDao,
-    private val versionDao: ExerciseVersionDao
+    private val holder: DatabaseHolder
 ) {
+    // Seeds whichever owner's file is current; the app runs it per new file.
+    private val exerciseDao: ExerciseDao get() = holder.db.exerciseDao()
+    private val versionDao: ExerciseVersionDao get() = holder.db.exerciseVersionDao()
+
     companion object {
         private const val TAG = "ExerciseSeeder"
         private const val DEFAULT_EXERCISES_FILE = "default_exercises.json"

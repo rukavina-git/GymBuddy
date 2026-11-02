@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.local.seeder
 
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.local.entity.ExerciseVersionEntity
@@ -47,8 +48,8 @@ class ReferenceSeederTest {
 
     @Test
     fun `a first install seeds the bundled library and records its version`() = runBlocking {
-        assertTrue(ExerciseSeeder(db.exerciseDao(), db.exerciseVersionDao()).seedIfNeeded(context))
-        assertTrue(WorkoutTemplateSeeder(db.workoutTemplateDao(), db.templateVersionDao()).seedIfNeeded(context))
+        assertTrue(ExerciseSeeder(DatabaseHolder.fixed(db)).seedIfNeeded(context))
+        assertTrue(WorkoutTemplateSeeder(DatabaseHolder.fixed(db)).seedIfNeeded(context))
 
         assertTrue(db.exerciseDao().getDefaultExerciseCount() > 0)
         assertTrue(db.workoutTemplateDao().getDefaultTemplates().first().isNotEmpty())
@@ -61,7 +62,7 @@ class ReferenceSeederTest {
         val serverVersion = bundledVersion("default_exercises.json") - 1
         db.exerciseVersionDao().setVersion(ExerciseVersionEntity(version = serverVersion))
 
-        val seeded = ExerciseSeeder(db.exerciseDao(), db.exerciseVersionDao()).seedIfNeeded(context)
+        val seeded = ExerciseSeeder(DatabaseHolder.fixed(db)).seedIfNeeded(context)
 
         assertFalse(seeded)
         assertEquals(0, db.exerciseDao().getDefaultExerciseCount())
@@ -74,7 +75,7 @@ class ReferenceSeederTest {
         db.templateVersionDao().setVersion(TemplateVersionEntity(version = serverVersion))
         db.workoutTemplateDao().insertTemplate(WorkoutTemplateEntity(id = "server-template", title = "From server", source = EntitySource.DEFAULT))
 
-        val seeded = WorkoutTemplateSeeder(db.workoutTemplateDao(), db.templateVersionDao()).seedIfNeeded(context)
+        val seeded = WorkoutTemplateSeeder(DatabaseHolder.fixed(db)).seedIfNeeded(context)
 
         assertFalse(seeded)
         assertEquals(listOf("server-template"), db.workoutTemplateDao().getDefaultTemplates().first().map { it.template.id })

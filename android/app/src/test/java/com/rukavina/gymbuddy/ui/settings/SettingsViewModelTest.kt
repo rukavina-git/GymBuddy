@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.ui.settings
 
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.room.Room
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
@@ -66,7 +67,7 @@ class SettingsViewModelTest {
         db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        store = SyncLocalStore(db, clock)
+        store = SyncLocalStore(DatabaseHolder.fixed(db), clock)
     }
 
     @After
@@ -76,7 +77,7 @@ class SettingsViewModelTest {
         coordinator: LogoutCoordinator = LogoutCoordinator(store, { true }, auth, direct),
         deletion: AccountDeletionCoordinator = deletionCoordinator { 204 }
     ) = SettingsViewModel(
-        repository = UserProfileRepository(db.userProfileDao(), OutboxRecorder(db, clock), clock),
+        repository = UserProfileRepository(DatabaseHolder.fixed(db), OutboxRecorder(DatabaseHolder.fixed(db), clock), clock),
         logoutCoordinator = coordinator,
         accountDeletionCoordinator = deletion,
         appContext = org.robolectric.RuntimeEnvironment.getApplication()
@@ -86,7 +87,7 @@ class SettingsViewModelTest {
         AccountDeletionCoordinator(store, deleteOnServer, {}, auth, direct)
 
     private suspend fun addPendingExercise() {
-        ExerciseRepositoryImpl(db.exerciseDao(), db.userExerciseStateDao(), OutboxRecorder(db, clock), clock)
+        ExerciseRepositoryImpl(DatabaseHolder.fixed(db), OutboxRecorder(DatabaseHolder.fixed(db), clock), clock)
             .createExercise(SyncFixtures.exercise())
     }
 

@@ -74,7 +74,7 @@ roadmap-details.md §3.
 
 ## Plan 6: v1-features (data + logic)
 
-- [ ] 6.1 Per-account local data + account switching rules (ADR 0014)
+- [x] 6.1 Per-account local data + account switching rules (ADR 0014)
 - [ ] 6.2 Guest mode: local-only use, create account / sign in merges (ADR 0014)
 - [ ] 6.3 Auth gate: dead session → "sign in again" banner, no wipe
 - [ ] 6.4 Body weight tracking: new table (spec change)

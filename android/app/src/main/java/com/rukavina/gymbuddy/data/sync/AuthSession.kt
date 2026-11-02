@@ -5,7 +5,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.rukavina.gymbuddy.data.crash.CrashReporter
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** The signed-in user, as far as sync is concerned. */
@@ -36,17 +39,36 @@ class FirebaseAuthSession(authProvider: () -> FirebaseAuth = { FirebaseAuth.getI
     override fun signOut() = auth.signOut()
 
     /**
-     * Syncs as soon as someone signs in, so a fresh install or a new
-     * account pulls its data straight away. Also keeps crash reports
-     * attributed to the signed-in uid, cleared on sign-out.
+     * On every uid change, first opens that owner's database
+     * ([switchOwner], ADR 0014), then syncs if someone signed in, so a
+     * fresh install or a new account pulls its data straight away. Also
+     * keeps crash reports attributed to the signed-in uid, cleared on
+     * sign-out.
+     *
+     * Changes are handled one at a time, in order; a quick A → B only
+     * needs to end on B, so the flow conflates.
      */
-    fun observeSignIn(requester: SyncRequester, crashReporter: CrashReporter) {
-        var lastUid: String? = null
+    fun observeSignIn(
+        requester: SyncRequester,
+        crashReporter: CrashReporter,
+        switchOwner: suspend (uid: String?) -> Unit,
+        scope: CoroutineScope
+    ) {
+        // Starts at the restored uid, which DatabaseHolder already opened:
+        // a cold start must not pass through the signed-out file.
+        val uids = MutableStateFlow(currentUid)
+        var reportedUid: String? = null
         auth.addAuthStateListener { firebaseAuth ->
             val uid = firebaseAuth.currentUser?.uid
-            if (uid != lastUid) crashReporter.setUserId(uid)
-            if (uid != null && uid != lastUid) requester.requestSync(SyncReason.SIGNED_IN)
-            lastUid = uid
+            if (uid != reportedUid) crashReporter.setUserId(uid)
+            reportedUid = uid
+            uids.value = uid
+        }
+        scope.launch {
+            uids.collect { uid ->
+                switchOwner(uid)
+                if (uid != null) requester.requestSync(SyncReason.SIGNED_IN)
+            }
         }
     }
 }

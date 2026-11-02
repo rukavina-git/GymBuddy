@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.sync
 
 import androidx.room.withTransaction
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.entity.ExerciseVersionEntity
 import com.rukavina.gymbuddy.data.local.entity.OutboxEntryEntity
 import com.rukavina.gymbuddy.data.local.entity.OutboxOperation
@@ -68,7 +69,11 @@ data class PageApplyCounts(val applied: Map<SyncEntityType, Int>, val skippedPen
  * in (or is) one transaction, so the engine never leaves a half-applied
  * push result or pull page behind.
  */
-class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
+class SyncLocalStore(private val holder: DatabaseHolder, private val clock: Clock) {
+
+    // The current owner's database. The engine calls this under its lock,
+    // so it can't switch mid-cycle.
+    private val db: AppDatabase get() = holder.db
 
     private val syncDao get() = db.syncDao()
 
@@ -323,12 +328,12 @@ class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
 
     // ---- debug screen ----
 
-    fun observeOutbox(): Flow<List<OutboxEntryEntity>> = syncDao.observeOutbox()
+    fun observeOutbox(): Flow<List<OutboxEntryEntity>> = holder.observe { it.syncDao().observeOutbox() }
 
     /** Newest first. */
-    fun observeLog(): Flow<List<SyncLogEntity>> = syncDao.observeLog()
+    fun observeLog(): Flow<List<SyncLogEntity>> = holder.observe { it.syncDao().observeLog() }
 
-    fun observeCursor(): Flow<String?> = syncDao.observeMeta(KEY_CURSOR)
+    fun observeCursor(): Flow<String?> = holder.observe { it.syncDao().observeMeta(KEY_CURSOR) }
 
     private companion object {
         const val KEY_CURSOR = "pull_cursor"
