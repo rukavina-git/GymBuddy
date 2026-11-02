@@ -324,3 +324,42 @@ lifted in each set".
 - Empty workout sessions are called "Workout"; rename in Edit.
 - LOCKED 2026-11-02: Session detail. Final frames on "03 Locked
   designs" (after Progress).
+
+## Round log: You + Settings
+Round 15 (2026-11-02). Council: docs/council/2026-11-02-you-settings.md.
+Reviewed by impeccable (critique applied, dialogs rebuilt to M3).
+- One page (owner + impeccable): account card, then groups Workout
+  (weight kg/lb, distance km/mi, default rest 2:00, weight step 2.5 kg,
+  rest buzz off, keep screen on in a workout on, workout notification →
+  Android settings), Calendar (week starts on, from locale), Lists
+  (starter plans, hidden exercises, hidden templates), Your data
+  (export; guests also "Erase data on this phone"), Help (show tips
+  again, About), Account (change password for email accounts, sign out,
+  delete account in red). "Text size and animations follow your
+  phone's settings." Cut: quote of the day, sync debug (debug builds),
+  Theme and Language rows (v2: light theme, Croatian).
+- Switch on = cobalt (a state), not lime. Locked switches (Show on
+  Progress) follow in the components step.
+- Account card: picture, name, email, one backup line ("Backed up · 2
+  min ago" check / "3 changes waiting" cloud-off / "Couldn't back up ·
+  Retry" after 24 h), Profile ›. Guest card: "saved on this phone only",
+  lime Create account, Sign in. Words: "On this phone" / "In your
+  account".
+- Profile: picture (your letter or one of 20 Fluent Emoji animals, MIT,
+  stored as an id; own photo upload is v2), name, email as plain text,
+  body weight, experience, optional About you (height, birth date,
+  gender, activity level, goal, target weight; "—" until set; for BMI
+  and calorie target in v2).
+- Body weight (v1, owner): current value, change over 30 days, chart
+  30/90 days/1 year/all, entries, All entries, lime Log weight; sheet
+  with − / + (0.1 kg, hold to repeat), tap to type, date.
+- Guest mode (ADR 0014): create account says what moves ("Your 14
+  workouts… Nothing on this phone is removed"); sign in merges.
+- Sign out with unsynced changes: dialog, stacked "Back up and sign
+  out" / "Sign out anyway" (red) / Cancel; offline greys out back up.
+- Delete account: dialog with radio Keep my workouts (default,
+  continue as guest) / Erase them too ("Delete and erase"), then
+  re-auth. Guest erase: Export first / Erase all / Cancel.
+- Export (ADR 0015): JSON backup (re-importable) + CSV of sets.
+- LOCKED 2026-11-02: You + Settings. Final frames on "03 Locked
+  designs" (after Session detail).
