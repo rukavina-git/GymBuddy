@@ -68,7 +68,7 @@ roadmap-details.md §3.
       core app; Dependabot is clean, 35/35 fixed)
 - [x] 4.2 Remove custom profile photos (preset avatars come in 6.5)
 - [x] 4.3 ViewModel test gaps (active workout failure paths)
-- [ ] 4.4 Durable push: WorkManager job when the outbox is non-empty
+- [x] 4.4 Durable push: WorkManager job when the outbox is non-empty
 - [ ] 4.5 (me) CI green, PR develop → main
 
 ## Plan 5: environments (test + prod)
