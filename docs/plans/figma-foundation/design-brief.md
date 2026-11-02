@@ -468,3 +468,5 @@ D lift done once (D1 sentence, D2 one dot, D3 no section, D0 chart
 with one point). Empty-state pattern reuses locked Progress R7-3/R7-9.
 Critique flags: C2c blocks Start (breaks "works offline" promise);
 B2 interrupts the calm workout screen; C1b Retry needs a 48dp tap area.
+Owner picks (round 17): B1 inline above the button, C1b line in the
+week card, C2a in place, D3 no Progress section until 3 sessions.
