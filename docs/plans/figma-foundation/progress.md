@@ -19,9 +19,20 @@
 - [x] 06h Session detail (locked 2026-11-02)
 - [x] 06f Cross-flow states: error, offline, empty, sync (locked 2026-11-02)
 - [x] 07 Motion and haptics spec: design/motion.md + Motion section on 01 System (f116eed)
-- [ ] 08 DESIGN.md + Plan 4 handoff
+- [x] 08 DESIGN.md + Plan 4 handoff: design/DESIGN.md, roadmap 4.D1-4.D11 (HASH)
 
 ## Deviations
+- 2026-11-02 (08): Plan 4 redesign steps are 4.D1-4.D11, listed
+  before 4.3 so release comes after the build; 4.0-4.6 not renumbered.
+  Owner has not okayed the order yet (Done when): change in roadmap.md.
+- 08: "No ads" cut (owner); Ready now says "No streaks, no feed. Your
+  workouts stay private." Not run past impeccable.
+- 08: wording fixes beyond the step: do-dont.md (instant cut; UI icons
+  are Material fills, glyphs/tabs strokes), colors.md (sheets keep
+  `surface`), motion.md ("hits 0" -> "floor"). 03 Locked designs layer
+  list sorted to app order (canvas already was).
+- 08: tokens.json `short4` still says crossfade (generated); DESIGN.md
+  notes motion.md wins. No new tokens; raw sizes "use as drawn".
 - 2026-11-02 (07): Remove animations = instant cut (owner), not
   crossfade. design-brief.md (l.91, 141, 206-208) and the tokens.json
   `short4` description still say crossfade; motion.md rule 4 wins.
@@ -96,6 +107,15 @@
   Decisions in design-brief.md "Round log".
 
 ## Gotchas
+- From 08 (reviewer, not fixed): stock exercise photo licence is not
+  recorded (PRODUCT.md bundles them; DESIGN.md §10 flags it) and no
+  Plan 4 step owns it; add to 4.D7 or 4.5 before a paid release.
+  4.D6 says it replaces WorkoutScreen, but its Sessions tab and
+  session dialog belong to 4.D8/4.D9: don't delete them early.
+  4.D9 has no "Replaces" line; 4.D11 omits AppSnackBar/UnsyncedChanges,
+  4.D6 omits NumberPicker (see DESIGN.md screen table). DESIGN.md says
+  "15 M3 roles" (tokens.json has 14) and lists theme files under App
+  frame (4.D1 owns them).
 - From 07 (reviewer, not fixed): Plan 4 should use Compose
   `HapticFeedbackType` (own API fallbacks) instead of hand-rolled ones;
   set lands (row 2) likely needs `sharedBounds` or one node swapping
@@ -106,9 +126,7 @@
   rest buzz needs VIBRATE permission, consider a notification channel
   for DND; some rows lack easing (default to `std`); 1 s outline hold
   and 80/120/80 buzz are raw ms; "hits 0" should say "floor"; no motion
-  for the first-3-workouts hint. Fix these in 08 or Plan 4.
-- From 07: 01 System has two stray layers at page root (empty Text
-  151:3220, backspace instance 151:4134, from step 05). Not removed.
+  for the first-3-workouts hint. Carried into roadmap-details 4.D1/4.D3/4.D6 (08).
 - From 05: a paint bound to a variable must also carry the resolved
   colour (setBoundVariableForPaint on black renders dark until
   refreshed). Resolve aliases first.
@@ -122,7 +140,7 @@
   bars (restored from version "Before step 05 swap").
 - From 05: tokens.json not re-exported; components use some raw sizes
   (72/40 buttons, 52 InfoRow, 68 ListRow, 64 stepper vs size/stepper-width
-  60, dialog 356). Reconcile in 08 or Plan 4.
+  60, dialog 356). DESIGN.md lists them as "use as drawn" (08).
 - From 05: Figma versions "Before step 05 swap" and "Step 05 components".
 - From 04: NEVER call figma.triggerUndo() from the plugin. The Desktop
   Bridge session is one undo group: one undo reverted every plugin
@@ -134,8 +152,6 @@
   new ad hoc icons drawn on locked frames won't be instances. Step 05
   components must use the library instances only.
 - From 04: "Lock screen" ring (53:3478) and the Google G stay raw.
-- From 04: R16-6b Ready says "No streaks, no feed, no ads." "No ads"
-  conflicts with the monetization rule; owner to decide (not changed).
 - From 04: Material icons are fills; custom ones are strokes. To tint
   an instance, set fills on ui/* and strokes on glyph/* and tab/*.
 - From 03: Starter allows 1 variable mode (tested: "Limited to 1

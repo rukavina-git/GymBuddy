@@ -200,6 +200,57 @@ not the v2 UI overhaul.
     open. When the outbox becomes non-empty, enqueue a unique one-off
     WorkManager job with a CONNECTED constraint that pushes; it
     survives process death. Found in Plan 2 T10.
+4.D **Build the redesign.** Added 2026-11-02 (Plan 3 step 08). Read
+    `design/DESIGN.md` first. Each step links its Figma section and
+    reads it through the MCP before code. Order is the owner's to
+    change; 4.D1-4.D3 come first, the rest can move. Old screens are
+    replaced, not restyled. Stay on v1 features (Plan 3 invariants).
+4.D1 **Theme.** Color.kt/Type.kt/Theme.kt from `design/tokens.json`
+    (dark only), Shapes (radius.full → CircleShape), stat-value and
+    tag roles, `fontFeatureSettings "tnum"` on the styles named in
+    DESIGN.md, motion tokens (rows without easing use `std`), haptics
+    via Compose `HapticFeedbackType` with own API fallbacks. Raw sizes
+    used as drawn (DESIGN.md list). Figma: https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=124-26794 (Tokens),
+    https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=153-8784 (Motion). Specs: colors.md, motion.md.
+4.D2 **Icons + components.** design/icons.md + components.md, 35
+    components on https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=151-3214, icons https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=137-26976. Material icons tint
+    fills, own glyphs/tabs tint strokes, filled tab icons never
+    tinted. `ModalBottomSheet` keeps M3 defaults where tokens can't
+    be set. Replaces ui/components/* where a library part exists.
+4.D3 **App frame.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=85-9890. 5 tabs (Home, Workouts, Exercises,
+    Progress, You), top bars, title collapse, tab fade-through.
+    Navigation Compose 2.8+ predictive back (no
+    `PredictiveBackHandler`). Replaces MainScreen.kt nav.
+4.D4 **Onboarding + auth.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=114-20520. Welcome, setup (no Next
+    buttons), sign-in, create account with consent, session expired
+    banner, account deleted elsewhere, Ready. Builds with 4.2a and
+    4.2c. Replaces SplashScreen, LoginScreen, RegisterScreen.
+4.D5 **Home + Templates.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=87-11340, https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=92-12488. Week strip on
+    Home. Replaces HomeScreen, WorkoutsScreen, CombinedWorkoutsScreen,
+    WorkoutTemplateScreen + dialogs. Plans (4.2h) fit here later.
+4.D6 **Active workout.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=67-6561. Keypad sheet, − / + stepper,
+    live bar from ⌄, swipe done/delete + Undo, rest card. Set lands:
+    `sharedBounds` or one node swapping content, not `animateBounds`.
+    Drag reorder needs a library (check licence) or own code. Rest
+    buzz: VIBRATE permission, a notification channel for DND. Done +
+    couldn't save = two pulses (decide). Hint for first 3 workouts
+    has no motion (fine). 1 s outline hold and 80/120/80 buzz are raw
+    ms (keep). Replaces ActiveWorkoutScreen, WorkoutScreen,
+    SetTrackingFields.
+4.D7 **Exercise page + create.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=97-14553. Replaces
+    ExerciseScreen, ExerciseDetailsScreen, ExerciseCreationBottomSheet,
+    ExerciseWizardDialog.
+4.D8 **Progress tab.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=62-5195. Counts line, one lift chart, All
+    sessions search. Replaces SessionsScreen + StatisticsScreen.
+4.D9 **Session detail.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=107-15763.
+4.D10 **You + Settings.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=110-17469. One settings page, backup
+    line, delete account (keep or erase), export (4.2d), body weight
+    (4.2e), profile fields + animal avatars (Fluent Emoji, MIT; 4.2f).
+    Replaces ProfileScreen, SettingsScreen, AppPreferencesScreen,
+    Hidden*Screen, AboutScreen.
+4.D11 **Cross-flow states.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=124-26620. Empty, error, offline,
+    sync. Sets logged during a re-download (410) must survive the
+    wipe. Replaces EmptyState, LoadingState where they differ.
 4.3 **Release workflow.** On a `v*` tag: build a signed, minified AAB,
     versionCode from the tag. Signing secrets in GitHub secrets (me).
 4.4 **(me)** Release build manual pass: R8, sign-in, sync, logout,

@@ -77,7 +77,7 @@ floor = impeccable craft floor, colors = design/colors.md.
   bounce, confetti or count-up numbers. (R5)
 - Do use M3 transitions (fade-through tabs, shared axis, sheets). /
   Don't animate when rest passes. (R5, App frame)
-- Do turn movement into crossfades with Android "Remove animations";
+- Do cut movement instantly with Android "Remove animations";
   haptics stay. / Don't block input while animating. (R5)
 
 ## States
@@ -96,7 +96,7 @@ floor = impeccable craft floor, colors = design/colors.md.
 - Do pair colour with an icon or text for state (check, ring, empty
   ring). / Don't show state by colour alone. (palette)
 - Do give charts one TalkBack stop with a summary sentence. (R7)
-- Do draw icons in one outline set (2dp round stroke), with a filled
-  version only for the active tab. / Don't use
+- Do use Material Rounded for UI icons (fills) and our own 2dp round
+  stroke set for gym glyphs and tabs, filled only for the active tab. / Don't use
   emoji or Unicode as icons. (B1, App frame, floor) Exception: profile animals
   (Fluent Emoji, R15) are pictures, not icons.

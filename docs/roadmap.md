@@ -55,7 +55,7 @@ waiting on me
       Exercise page + create, Session detail, Progress, You + Settings,
       Onboarding + auth (incl. session expired), error/offline states
 - [x] 3.7 Motion and haptics spec
-- [ ] 3.8 DESIGN.md + Plan 4 handoff (code steps per frame)
+- [x] 3.8 DESIGN.md + Plan 4 handoff (code steps per frame)
 
 ## Plan 4: phase5-release
 
@@ -72,6 +72,17 @@ waiting on me
 - [ ] 4.2g Per-account local data + account switching rules (ADR 0014)
 - [ ] 4.2h Plans (a set of templates to rotate through) + rework of the default
       templates and starter plans (owner 2026-11-02; data model change)
+- [ ] 4.D1 Theme in Compose: tokens.json → colour, type (tnum), shape, motion, haptics
+- [ ] 4.D2 Icons + component library (01 System)
+- [ ] 4.D3 App frame: 5-tab nav, top bars, predictive back
+- [ ] 4.D4 Onboarding + auth (with 4.2a, 4.2c)
+- [ ] 4.D5 Home + Templates (Workouts tab)
+- [ ] 4.D6 Active workout (keypad, live bar, swipe + undo, rest)
+- [ ] 4.D7 Exercise page + create
+- [ ] 4.D8 Progress tab (replaces Sessions + Stats)
+- [ ] 4.D9 Session detail
+- [ ] 4.D10 You + Settings (with 4.2e, 4.2f)
+- [ ] 4.D11 Cross-flow states: error, offline, empty, sync
 - [ ] 4.3 Tag-triggered signed release AAB workflow
 - [ ] 4.4 (me) Release build manual pass
 - [ ] 4.5 (me) Privacy policy online + in-app link, Play Console, Data Safety

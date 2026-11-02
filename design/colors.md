@@ -23,7 +23,7 @@ Contrast is WCAG 2 on the ground (#121418) unless noted. Text needs
 |---|---|---|
 | ground | #121418 | Screen background. |
 | surface | #1C1F26 | Cards, rows, bottom bar. |
-| surface-raised | #262A33 | Keypad keys, input fields, chips, sheets. Also at 60% in places. |
+| surface-raised | #262A33 | Keypad keys, input fields, chips. Sheets keep `surface` (step 05 D3). Also at 60% in places. |
 | surface-high | #323743 | Calendar days, progress tracks, fills inside workout cards. |
 
 ## Text and lines

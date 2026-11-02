@@ -88,7 +88,7 @@ Board: https://claude.ai/artifact/QG6t4FY68Euikci3uRkiDs
   rest state with −15 s / +15 s / Skip.
 - G1 rest over: rest card turns lime and becomes the button.
 - H1 swipe right = done, left = delete, undo snackbar (no confirm).
-- M1 motion: pop/collapse/grow; M2 fade is the reduced-motion fallback.
+- M1 motion: pop/collapse/grow; M2 reduced motion = instant cut (step 07; was fade).
 - N1 nav (changed 2026-11-01, council): 5 tabs Home, Workouts, Exercises, Progress, You. Progress replaces v1 Sessions + Stats. Mon-Sun week strip lives on Home.
 - K1 You screen with "Your data" first.
 - I onboarding, refined: (1) Welcome: lime "Create account" (backup,
@@ -138,7 +138,7 @@ All "new" behaviour items are in scope (owner, 2026-10-31).
   rolls; ~520 ms, never blocks). Motion map: odometer digits on − / +,
   shared-axis X between exercises, ⌄ = container transform into live
   bar, M3 sheets/dialogs, no motion when rest passes, no count-up
-  numbers, no bounce/confetti. Remove animations = crossfade, haptic
+  numbers, no bounce/confetti. Remove animations = instant cut, haptic
   stays. Hint only first 3 workouts / until first number tap. Limits:
   floors 0 kg, 1 rep, 5 s; ceilings 999.75 kg, 999 reps, 9:59:59;
   disabled − / + at limits. Keypad: disable keys that make invalid
@@ -205,7 +205,7 @@ Councils/consults: impeccable (2026-11-01), docs/council/2026-11-01-exercise-vis
   Sign in; never forced.
 - Motion: tab fade-through, live bar grows from ⌄ and slides away,
   title collapses with scroll. Only with Android "Remove animations"
-  does movement become crossfades; haptics stay.
+  does movement become an instant cut; haptics stay.
 - Muscle icons tried (blocky, two open-source anatomy maps) and
   rejected by owner.
 - Later idea (owner): "Suggest with AI" for picking exercises, v2+.
@@ -375,8 +375,8 @@ MyFitnessPal, Duolingo; council docs/council/2026-11-02-onboarding.md
   weight, stay fit and healthy, improve endurance) → days a week (1–3,
   4, 5–7, Not sure yet) → starting plan (suggested by days: Full Body,
   Upper/Lower, Push/Pull/Legs, or no plan; goal-based suggestions v2)
-  → "You're all set" / "No streaks, no feed, no ads. Just your
-  workouts." / 3 Good-to-know tips / lime "Let's go" → Home. Units
+  → "You're all set" / "No streaks, no feed. Your workouts stay
+  private." (owner 2026-11-02 cut "no ads") / 3 Good-to-know tips / lime "Let's go" → Home. Units
   come from the region, never asked.
 - Sign-in (centred): Android's account sheet + Google's own dark
   button with the G logo, then email + password (email remembered if

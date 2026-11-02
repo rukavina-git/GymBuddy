@@ -23,7 +23,7 @@ decelerate / accelerate.
    every duration by `ANIMATOR_DURATION_SCALE`, so at 0 all motion
    ends at once with no extra code; partial scales (0.5×) apply too.
    State that carries meaning (check icon, colours, text) still
-   shows. Haptics stay. This replaces "crossfade" in design-brief.md.
+   shows. Haptics stay. design-brief.md said "crossfade"; fixed in step 08.
 5. Haptics only answer a user action. The one exception is the rest
    buzz, opt-in, off by default.
 6. Haptics follow the phone's touch-feedback setting: use
@@ -75,7 +75,7 @@ than 28 need the fallback.
 | Swipe released past threshold, done | `CONFIRM` (30) | `VIRTUAL_KEY` |
 | Set couldn't save (banner appears after Done) | `REJECT` (30) | `LONG_PRESS` |
 | − / + press (owner: first tick only, none per repeat) | `CLOCK_TICK` | – |
-| A hold hits 0 or the ceiling (once) | `REJECT` (30) | none |
+| A hold hits the floor or the ceiling (once) | `REJECT` (30) | none |
 | Keypad key | `KEYBOARD_TAP` | – |
 | Keypad Next on a typeable-but-invalid value (0 reps) | `REJECT` (30) | none |
 | Long-press a set; lift a drag handle | `LONG_PRESS` (`DRAG_START` 34) | `LONG_PRESS` |
