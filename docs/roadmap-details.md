@@ -119,8 +119,8 @@ Plan 3 docs, council notes and older progress files keep the old ids.
 
 ### Plan 4: phase5-code-health
 
-4.1 **Moved to 8.1** (owner, 2026-11-02). Dependabot is clean
-    (35/35 fixed), so OWASP waits until there's an app to release.
+4.1 **Moved to 10.0** (owner, 2026-11-02): just before release.
+    Dependabot is clean (35/35 fixed).
 4.2 **Remove custom photos.** v1 has preset avatars only (6.5); the
     old picker and ImageStorageUtil go, saves clear the synced file path.
 4.3 **ViewModel tests.** Audit the existing ViewModel tests, then
@@ -244,10 +244,7 @@ invariants) plus what Plan 6 added.
 
 ### Plan 8: delivery (CI/CD + fastlane)
 
-8.1 **CI gates.** OWASP: the fix is parked on `feature/owasp-triage`
-    (commons-lang3 classloader clash, NVD cache saved on failure,
-    push/PR/weekly triggers); merge it, run, triage each finding (bump,
-    replace, or suppress with a reason). Stays non-blocking (ADR 0013).
+8.1 **CI gates.** OWASP moved to 10.0.
     Android Lint in CI (baseline the current warnings, fail on new
     errors). Revisit the SonarQube gate (Q-E).
 8.2 **Release workflow.** On a `v*` tag: build a signed, minified prod
@@ -285,6 +282,10 @@ invariants) plus what Plan 6 added.
 
 ### Plan 10: release
 
+10.0 **OWASP.** The fix is parked on `feature/owasp-triage`
+     (commons-lang3 classloader clash, NVD cache saved on failure,
+     push/PR/weekly triggers); merge it, run, triage each finding (bump,
+     replace, or suppress with a reason). Stays non-blocking (ADR 0013).
 10.1 **(me)** Release build manual pass, staging then prod: R8,
      sign-in, guest, sync, logout, account deletion.
 10.2 **(me)** First prod AAB on the internal track via fastlane.

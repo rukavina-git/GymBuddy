@@ -7,7 +7,7 @@ untested failure paths in the active workout, and offline edits that
 wait for the next app open (roadmap-details.md, Plan 4).
 
 ## Scope
-1. (moved to roadmap 8.1) OWASP.
+1. (moved to roadmap 10.0) OWASP.
 2. Remove custom profile photos (owner 2026-11-02: preset avatars in 6.5).
 3. Active workout: test gaps, and decide what happens on process death.
 4. Durable push: a WorkManager job when the outbox is non-empty.

@@ -64,8 +64,8 @@ roadmap-details.md §3.
 
 ## Plan 4: phase5-code-health
 
-- 4.1 OWASP moved to 8.1 (owner 2026-11-02: not needed before the
-      core app; Dependabot is clean, 35/35 fixed)
+- 4.1 OWASP moved to 10.0, just before release (owner 2026-11-02;
+      Dependabot is clean, 35/35 fixed)
 - [x] 4.2 Remove custom profile photos (preset avatars come in 6.5)
 - [x] 4.3 ViewModel test gaps (active workout failure paths)
 - [x] 4.4 Durable push: WorkManager job when the outbox is non-empty
@@ -111,8 +111,7 @@ roadmap-details.md §3.
 
 ## Plan 8: delivery (CI/CD + fastlane)
 
-- [ ] 8.1 CI gates: OWASP triage + triggers back on (fix parked on
-      `feature/owasp-triage`), Android Lint, SonarQube (Q-E)
+- [ ] 8.1 CI gates: Android Lint, SonarQube (Q-E). OWASP is 10.0
 - [ ] 8.2 Signed release AAB on a `v*` tag, versionCode from the tag
 - [ ] 8.3 fastlane: staging build to testers, prod AAB to the Play
       internal track, store listing kept in the repo
@@ -135,6 +134,8 @@ roadmap-details.md §3.
 
 ## Plan 10: release
 
+- [ ] 10.0 OWASP triage + triggers back on (fix parked on
+      `feature/owasp-triage`)
 - [ ] 10.1 (me) Release build manual pass on staging, then prod: R8,
       sign-in, guest, sync, logout, account deletion
 - [ ] 10.2 (me) Internal testing track via fastlane

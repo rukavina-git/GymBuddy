@@ -1,6 +1,6 @@
 # Progress
 
-- 01 OWASP: moved to roadmap 8.1 (owner 2026-11-02). Work so far is
+- 01 OWASP: moved to roadmap 10.0, just before release (owner 2026-11-02). Work so far is
   on `feature/owasp-triage` (steps/01-owasp.md)
 - [x] 02 Remove custom profile photos (steps/02-image-storage.md) (fd871c3)
 - [x] 03 Active workout failure paths + process death (steps/03-active-workout-tests.md) (aedd05a)
@@ -34,6 +34,8 @@
   a non-empty outbox at app start also enqueues. `PushOutboxWorker` is
   a copy of `SyncWorker` with reason OUTBOX_PENDING. Backoff:
   exponential, 30 s base. Wired in GymBuddyApplication via SyncDao.
+- 05: owner checked step 03 on a device (workout survives, 2026-11-02).
+  Step 04's airplane-mode check skipped for now (owner).
 
 ## Gotchas
 - Dependabot: 35 alerts, all fixed (checked 2026-11-02 via gh api).
