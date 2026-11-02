@@ -19,7 +19,7 @@
 - [x] 06h Session detail (locked 2026-11-02)
 - [x] 06f Cross-flow states: error, offline, empty, sync (locked 2026-11-02)
 - [x] 07 Motion and haptics spec: design/motion.md + Motion section on 01 System (f116eed)
-- [x] 08 DESIGN.md + Plan 4 handoff: design/DESIGN.md, roadmap 4.D1-4.D11 (HASH)
+- [x] 08 DESIGN.md + Plan 4 handoff: design/DESIGN.md, roadmap 4.D1-4.D11 (f68e5b8)
 
 ## Deviations
 - 2026-11-02 (08): Plan 4 redesign steps are 4.D1-4.D11, listed
