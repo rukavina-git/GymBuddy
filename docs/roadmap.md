@@ -47,7 +47,8 @@ waiting on me
 - [x] 3.1 (me) Figma file + connect the Figma MCP server to Claude Code
 - [ ] 3.2 World: banned list + impeccable direction round
 - [ ] 3.3 Tokens as Figma variables + design/tokens.json
-- [ ] 3.4 Brand and icons (app icon, wordmark, gym glyphs)
+- [ ] 3.4 Brand and icons (app icon, wordmark, gym glyphs). Owner 2026-11-02:
+      new logo (an animal, e.g. a duck) before the end of v1
 - [ ] 3.5 Component library (M3-based, on the tokens)
 - [ ] 3.6 Screens per flow, incl. Login "session expired" (6a–6f)
 - [ ] 3.7 Motion and haptics spec
@@ -63,7 +64,8 @@ waiting on me
 - [ ] 4.2c Guest mode: local-only use, create account / sign in merges (ADR 0014)
 - [ ] 4.2d Data export: versioned JSON + CSV (ADR 0015)
 - [ ] 4.2e Body weight tracking: new table + spec change (designed in Plan 3)
-- [ ] 4.2f Profile fields: experience, avatar, consent record (spec change, owner OK 2026-11-02)
+- [ ] 4.2f Profile fields: experience, avatar, consent record, days per week
+      (spec change, owner OK 2026-11-02; days per week pending OK)
 - [ ] 4.2g Per-account local data + account switching rules (ADR 0014)
 - [ ] 4.2h Plans (a set of templates to rotate through) + rework of the default
       templates and starter plans (owner 2026-11-02; data model change)

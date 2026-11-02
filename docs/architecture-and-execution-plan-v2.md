@@ -978,6 +978,7 @@ The distinguishing feature of this list is that **the storage for most of it alr
 | Calorie target calculator (owner 2026-11-02) | Birth date, gender, height, activity level, goal, target weight on the profile (columns exist) |
 | Personal records | Derived from stored data |
 | Weekly schedule (pin templates to weekdays; Home shows today's) | New table, purely additive |
+| Plan suggestions by goal (v1 suggests by days a week only) | fitnessGoal + days per week on the profile |
 | Health Connect / HealthKit | New integration |
 | User-uploaded exercise images | New table plus object storage |
 | Own profile photo upload (v1 has preset avatars only) | Object storage; profileImageUrl exists |
