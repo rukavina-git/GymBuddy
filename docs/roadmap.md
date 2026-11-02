@@ -64,8 +64,8 @@ roadmap-details.md §3.
 
 ## Plan 4: phase5-code-health
 
-- [ ] 4.1 OWASP findings triaged, OWASP push/PR triggers back on
-      (Dependabot: 35/35 alerts fixed by 2026-11-02)
+- 4.1 OWASP moved to 8.1 (owner 2026-11-02: not needed before the
+      core app; Dependabot is clean, 35/35 fixed)
 - [ ] 4.2 Fix ImageStorageUtil data-loss bug
 - [ ] 4.3 ViewModel test gaps (active workout failure paths)
 - [ ] 4.4 Durable push: WorkManager job when the outbox is non-empty
@@ -111,7 +111,8 @@ roadmap-details.md §3.
 
 ## Plan 8: delivery (CI/CD + fastlane)
 
-- [ ] 8.1 Android Lint in CI; SonarQube gate revisited (Q-E)
+- [ ] 8.1 CI gates: OWASP triage + triggers back on (fix parked on
+      `feature/owasp-triage`), Android Lint, SonarQube (Q-E)
 - [ ] 8.2 Signed release AAB on a `v*` tag, versionCode from the tag
 - [ ] 8.3 fastlane: staging build to testers, prod AAB to the Play
       internal track, store listing kept in the repo

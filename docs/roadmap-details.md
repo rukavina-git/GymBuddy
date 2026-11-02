@@ -119,11 +119,8 @@ Plan 3 docs, council notes and older progress files keep the old ids.
 
 ### Plan 4: phase5-code-health
 
-4.1 **OWASP.** Dependabot shows 35 alerts, all fixed (2026-11-02).
-    Run OWASP dependency-check for backend and Android, triage each
-    finding (bump, replace, or suppress with a written reason), then
-    restore OWASP's push/PR triggers (manual-only since 2026-10-30).
-    Stays non-blocking (ADR 0013) unless I say otherwise.
+4.1 **Moved to 8.1** (owner, 2026-11-02). Dependabot is clean
+    (35/35 fixed), so OWASP waits until there's an app to release.
 4.2 **ImageStorageUtil.** Write the new file first, then delete the
     old one; close streams with `use`.
 4.3 **ViewModel tests.** Audit the existing ViewModel tests, then
@@ -247,8 +244,12 @@ invariants) plus what Plan 6 added.
 
 ### Plan 8: delivery (CI/CD + fastlane)
 
-8.1 **CI gates.** Run Android Lint in CI (baseline the current
-    warnings, fail on new errors). Revisit the SonarQube gate (Q-E).
+8.1 **CI gates.** OWASP: the fix is parked on `feature/owasp-triage`
+    (commons-lang3 classloader clash, NVD cache saved on failure,
+    push/PR/weekly triggers); merge it, run, triage each finding (bump,
+    replace, or suppress with a reason). Stays non-blocking (ADR 0013).
+    Android Lint in CI (baseline the current warnings, fail on new
+    errors). Revisit the SonarQube gate (Q-E).
 8.2 **Release workflow.** On a `v*` tag: build a signed, minified prod
     AAB, versionCode from the tag, Crashlytics mapping upload on.
     Signing secrets in GitHub secrets.

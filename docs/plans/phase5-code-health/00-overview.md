@@ -7,8 +7,7 @@ untested failure paths in the active workout, and offline edits that
 wait for the next app open (roadmap-details.md, Plan 4).
 
 ## Scope
-1. OWASP: triage findings, make the scan fast enough to run on
-   push/PR again.
+1. (moved to roadmap 8.1) OWASP.
 2. ImageStorageUtil: write the new file before deleting the old one.
 3. Active workout: test gaps, and decide what happens on process death.
 4. Durable push: a WorkManager job when the outbox is non-empty.

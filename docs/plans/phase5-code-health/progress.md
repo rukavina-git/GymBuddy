@@ -1,13 +1,18 @@
 # Progress
 
-- [ ] 01 OWASP triage + triggers back on (steps/01-owasp.md)
+- 01 OWASP: moved to roadmap 8.1 (owner 2026-11-02). Work so far is
+  on `feature/owasp-triage` (steps/01-owasp.md)
 - [ ] 02 ImageStorageUtil write-then-delete (steps/02-image-storage.md)
 - [ ] 03 Active workout failure paths + process death (steps/03-active-workout-tests.md)
 - [ ] 04 Durable push via WorkManager (steps/04-durable-push.md)
 - [ ] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md)
 
 ## Deviations
-None yet.
+- 01 moved out of this plan (owner: not before the core app).
+  Findings so far: last runs died on NVD 503s (cache was only saved on
+  success, so every run started cold) and, on Android, an
+  IllegalAccessError from commons-lang3 3.16 (root, AGP) vs 3.20
+  (app). Both fixed on the branch; no scan finished yet.
 
 ## Gotchas
 - Dependabot: 35 alerts, all fixed (checked 2026-11-02 via gh api).
