@@ -26,7 +26,6 @@ Updated 2026-11-02.
 
 ## Known gaps (planned)
 
-- ImageStorageUtil deletes before it writes (4.2).
 - An offline edit waits for the next app open if the app is swiped
   away (4.4).
 - A dead session fails sync silently with 401 (6.3).

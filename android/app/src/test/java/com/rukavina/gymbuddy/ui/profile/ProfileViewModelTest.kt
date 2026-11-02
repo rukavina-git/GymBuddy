@@ -164,13 +164,4 @@ class ProfileViewModelTest {
         assertFalse(viewModel.hasUnsavedChanges())
         assertNull(viewModel.uiState.value.message)
     }
-
-    @Test
-    fun `onImageSelected updates the profile image uri`() {
-        val viewModel = buildViewModel()
-
-        viewModel.onImageSelected("content://photo/1")
-
-        assertEquals("content://photo/1", viewModel.uiState.value.profileImageUri)
-    }
 }

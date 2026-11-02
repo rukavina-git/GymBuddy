@@ -14,7 +14,6 @@ import com.rukavina.gymbuddy.data.sync.SyncLocalStore
 import com.rukavina.gymbuddy.data.sync.SyncScheduler
 import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
-import com.rukavina.gymbuddy.utils.ImageStorageUtil
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,6 +22,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import java.io.File
 import java.time.Clock
 import javax.inject.Singleton
 
@@ -84,7 +84,8 @@ object SyncModule {
     ) = AccountDeletionCoordinator(
         store,
         deleteOnServer = { apis.account.deleteAccount().code() },
-        deleteProfileImages = { ImageStorageUtil.deleteAllProfileImages(context) },
+        // Older builds let users pick a photo; remove any left on the phone.
+        deleteProfileImages = { File(context.filesDir, "profile_images").deleteRecursively() },
         auth = auth,
         runExclusive = { block -> engine.exclusive(block) }
     )

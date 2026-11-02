@@ -121,8 +121,8 @@ Plan 3 docs, council notes and older progress files keep the old ids.
 
 4.1 **Moved to 8.1** (owner, 2026-11-02). Dependabot is clean
     (35/35 fixed), so OWASP waits until there's an app to release.
-4.2 **ImageStorageUtil.** Write the new file first, then delete the
-    old one; close streams with `use`.
+4.2 **Remove custom photos.** v1 has preset avatars only (6.5); the
+    old picker and ImageStorageUtil go, saves clear the synced file path.
 4.3 **ViewModel tests.** Audit the existing ViewModel tests, then
     cover the active workout state machine's failure paths (rejected
     save, resume after process death). The ViewModel survives the

@@ -38,8 +38,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import coil3.compose.AsyncImage
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -131,7 +129,6 @@ fun HomeScreen(
                 WelcomeSection(
                     greeting = greeting,
                     userName = userName,
-                    profileImageUri = profileUiState.profileImageUri,
                     onProfileClick = onNavigateToProfile
                 )
             }
@@ -193,7 +190,6 @@ fun HomeScreen(
 private fun WelcomeSection(
     greeting: String,
     userName: String,
-    profileImageUri: String?,
     onProfileClick: () -> Unit
 ) {
     Row(
@@ -225,21 +221,12 @@ private fun WelcomeSection(
                 .clickable(onClick = onProfileClick),
             contentAlignment = Alignment.Center
         ) {
-            if (profileImageUri != null) {
-                AsyncImage(
-                    model = profileImageUri,
-                    contentDescription = "Profile",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Profile",
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(32.dp)
+            )
         }
     }
 }

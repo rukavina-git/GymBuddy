@@ -17,7 +17,6 @@ data class ProfileUiState(
     val activityLevel: ActivityLevel? = null,
     val preferredUnits: PreferredUnits = PreferredUnits.METRIC,
     val bio: String = "",
-    val profileImageUri: String? = null,
     val isLoading: Boolean = false,
     val message: String? = null
 )
