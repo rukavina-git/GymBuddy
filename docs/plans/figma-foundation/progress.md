@@ -7,7 +7,7 @@
 - [x] 02b Colours file (design/colors.md) + Do/Don't list
       (design/do-dont.md) + PRODUCT.md palette (0f469ac)
 - [x] 03 Tokens as Figma variables + design/tokens.json (dark only) (dca0550)
-- [x] 04 Brand and icons: own ECG logo, 12 glyphs, tab + Material UI icons (HASH)
+- [x] 04 Brand and icons: own ECG logo, 12 glyphs, tab + Material UI icons (2f366fe)
 - [ ] 05 Components
 - [x] 06 App frame (locked 2026-11-01)
 - [x] 06a Onboarding + auth incl. session expired (locked 2026-11-02)
