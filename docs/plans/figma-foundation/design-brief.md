@@ -459,3 +459,12 @@ stuck Home card + 410 reload. D. Thin-data chart. Rest follow the
 picked patterns.
 Open: restore after very long gaps (e.g. 6 h+) may need "Finish or
 resume?"; owner to confirm in Wide.
+Wide round 17 (Figma "02 Rounds", section "Round 17 · Error, offline,
+empty"): B couldn't save (B1 inline above button, B2 dialog, B3 banner
+under tabs, B0 snackbar), C1 backup stuck (C1a card under Start, C1b
+line in week card, C1c card at bottom, C0 M3 banner), C2 re-download
+(C2a in place, C2b thin bar, C2c full screen with count, C0 spinner),
+D lift done once (D1 sentence, D2 one dot, D3 no section, D0 chart
+with one point). Empty-state pattern reuses locked Progress R7-3/R7-9.
+Critique flags: C2c blocks Start (breaks "works offline" promise);
+B2 interrupts the calm workout screen; C1b Retry needs a 48dp tap area.
