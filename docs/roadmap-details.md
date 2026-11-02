@@ -186,12 +186,15 @@ not the v2 UI overhaul.
     old one; close streams with `use`.
 4.2a **Auth gate.** No global auth listener today: if the session dies
     outside the app (account deleted on another device, token revoked),
-    the app stays on its screens and sync fails silently with 401. Add
-    one place that watches Firebase auth state and sync 401s, sends
-    the user to Login with a "Session expired, sign in again" message.
-    Don't wipe unsynced data before a re-sign-in as the same uid;
-    a different uid goes through the logout wipe. Found in Plan 2 T4.
-    UI change, so it needs a Figma frame first (Plan 3).
+    sync fails silently with 401. Add one place that watches Firebase
+    auth state and sync 401s (getIdToken(true) tells expired, deleted
+    and offline apart). Changed 2026-11-02 (onboarding council, ADR
+    0014): no forced Login and no wipe. Expired: a banner "Sign in
+    again to keep backing up", the user keeps logging, the outbox pushes
+    after re-sign-in as the same account. Deleted elsewhere: "Your
+    workouts stay on this phone", keep as guest or erase. Another
+    account signing in never sees or uploads the previous account's
+    unsynced data. Figma: "Onboarding + auth" (Plan 3).
 4.2b **Durable push.** Swiping the app away right after an offline edit
     kills the network callback, so the edit waits for the next app
     open. When the outbox becomes non-empty, enqueue a unique one-off

@@ -29,6 +29,30 @@ docs/council/2026-11-02-you-settings.md).
   on this phone and continue as a guest.
 - Export (ADR 0015) works for guests; it is their only off-phone copy.
 
+## Additions (owner + council, 2026-11-02, docs/council/2026-11-02-onboarding.md)
+
+- Data on the phone belongs to one owner at a time: a guest or one
+  account (device-local dataOwnerUid). Sync uses the signed-in
+  account's token, and the server refuses writes to rows another
+  account owns.
+- Session expired (same account): nothing is wiped, no forced Login.
+  The user keeps logging; changes wait in the outbox exactly like a
+  long offline stretch and push after signing in again as the same
+  account. A banner asks to sign in again.
+- A different account signs in while the previous account still has
+  unsynced changes: those changes are never shown to, merged into, or
+  uploaded under the new account. They stay on the phone, kept apart,
+  and sync when the original account signs in again. This needs
+  per-account local storage (for example one Room database file per
+  owner, plus one for the guest); Plan 4 decides the mechanism.
+- Guest data into an account that already has data: ask first, with
+  counts ("Add 5 workouts from this phone to x@…?"); Cancel keeps the
+  guest. A receipt follows. A new account takes the guest data as is.
+- Account offer for guests: a card after a finished workout, at most
+  once a week and at most 5 times in total (counted on the device),
+  then only in You.
+- Apple sign-in is not offered on Android (iOS only).
+
 ## Consequences
 
 - Plan 4 gains a guest-mode step (roughly M–L), with tests for "guest

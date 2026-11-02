@@ -63,9 +63,14 @@ waiting on me
 - [ ] 4.2c Guest mode: local-only use, create account / sign in merges (ADR 0014)
 - [ ] 4.2d Data export: versioned JSON + CSV (ADR 0015)
 - [ ] 4.2e Body weight tracking: new table + spec change (designed in Plan 3)
+- [ ] 4.2f Profile fields: experience, avatar, consent record (spec change, owner OK 2026-11-02)
+- [ ] 4.2g Per-account local data + account switching rules (ADR 0014)
 - [ ] 4.3 Tag-triggered signed release AAB workflow
 - [ ] 4.4 (me) Release build manual pass
 - [ ] 4.5 (me) Privacy policy online + in-app link, Play Console, Data Safety
+- [ ] 4.6 Privacy + compliance pass, after the designs are built: web account
+      deletion, health-data consent, Data safety, 16+ audience, Crashlytics
+      payloads, timer/notification rules (list: docs/council/2026-11-02-onboarding.md)
 
 ## Plan 5: phase5-closed-testing
 
