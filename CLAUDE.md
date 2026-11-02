@@ -47,6 +47,11 @@ Kotlin backend, sharing nothing but the OpenAPI contract.
 
 ## Rules
 - Keep summaries short. I often read on my phone.
+- Nothing may block future monetization: only commercial-friendly
+  licences (MIT, Apache 2.0, BSD, OFL, CC0, CC BY with credit) for
+  code, fonts, icons and data; never NC, ND, SA or GPL/AGPL. Record
+  each third-party asset's source and licence. Flag choices that
+  would make paid features or ads hard later.
 - Never change api/openapi.yaml without saying so explicitly.
 - Never commit directly to main. Work on develop or a feature branch off
   develop. main only via PR from develop, once CI is green.

@@ -7,7 +7,7 @@
 - [x] 02b Colours file (design/colors.md) + Do/Don't list
       (design/do-dont.md) + PRODUCT.md palette (0f469ac)
 - [x] 03 Tokens as Figma variables + design/tokens.json (dark only) (dca0550)
-- [ ] 04 Brand and icons (incl. new animal logo, owner 2026-11-02)
+- [x] 04 Brand and icons: own ECG logo, 12 glyphs, tab + Material UI icons (HASH)
 - [ ] 05 Components
 - [x] 06 App frame (locked 2026-11-01)
 - [x] 06a Onboarding + auth incl. session expired (locked 2026-11-02)
@@ -22,6 +22,21 @@
 - [ ] 08 DESIGN.md + Plan 4 handoff
 
 ## Deviations
+- 2026-11-02 (04): logo is not an animal. Owner rejected the duck,
+  meerkat, raccoon and 17 symbols; picked an ECG line, then asked for
+  our own drawing (logo E, stroke 5/48, impeccable picked medium over
+  thin). No licence needed. Old G plate replaced on 5 sign-in screens.
+- 04: glyph "muscle" swapped for jump-rope (hand-drawn arm didn't
+  read). Cable redrawn (first draft looked like a gallows).
+- 04: library has more than the step file: 35 Material Rounded UI icons
+  (Apache 2.0) and 10 tab icons (own, outline + filled). 1,199 ad hoc
+  icon frames on "03 Locked designs" are now instances.
+- 04: visible changes on locked frames beyond the logo: UI icons are
+  Material Rounded shapes (slightly different from the hand-drawn
+  ones), the wordmark dot is now lime everywhere (W2), drift merged
+  (3 chevrons, 3 checks, 4 "more", 2 persons, 2 alerts -> one each).
+- 04: impeccable critique ran on the logo only; glyphs got no separate
+  critique/audit round (owner reviewed them on the boards).
 - 2026-11-02 (03): scales came from impeccable typeset + layout
   (two subagents); owner accepted all and every visible change:
   titles 26/30 -> 28, dialog titles 24 SemiBold, workout buttons
@@ -53,6 +68,20 @@
   Decisions in design-brief.md "Round log".
 
 ## Gotchas
+- From 04: NEVER call figma.triggerUndo() from the plugin. The Desktop
+  Bridge session is one undo group: one undo reverted every plugin
+  edit since 2026-10-31. Recovery was owner Shift+Cmd+Z, then restoring
+  version "5:49 pm" and re-running the step's scripts.
+- From 04: before replacing a node, check its parent. The "G" text sat
+  directly on the screen frame; "replace parent" replaced 5 screens.
+- From 04: icon frames are matched by geometry signature (bbox + path);
+  new ad hoc icons drawn on locked frames won't be instances. Step 05
+  components must use the library instances only.
+- From 04: "Lock screen" ring (53:3478) and the Google G stay raw.
+- From 04: R16-6b Ready says "No streaks, no feed, no ads." "No ads"
+  conflicts with the monetization rule; owner to decide (not changed).
+- From 04: Material icons are fills; custom ones are strokes. To tint
+  an instance, set fills on ui/* and strokes on glyph/* and tab/*.
 - From 03: Starter allows 1 variable mode (tested: "Limited to 1
   modes only"). Light needs a paid plan or a separate collection.
 - From 03: not bound on purpose: status-bar "9:41", drawn keyboard,
