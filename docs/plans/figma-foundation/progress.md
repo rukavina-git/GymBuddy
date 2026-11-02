@@ -18,7 +18,7 @@
 - [x] 06g Progress tab (locked 2026-11-01)
 - [x] 06h Session detail (locked 2026-11-02)
 - [x] 06f Cross-flow states: error, offline, empty, sync (locked 2026-11-02)
-- [x] 07 Motion and haptics spec: design/motion.md + Motion section on 01 System (HASH)
+- [x] 07 Motion and haptics spec: design/motion.md + Motion section on 01 System (f116eed)
 - [ ] 08 DESIGN.md + Plan 4 handoff
 
 ## Deviations
