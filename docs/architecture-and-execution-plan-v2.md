@@ -960,7 +960,7 @@ Store listings, screenshots, descriptions. App Store submission — expect at le
 
 ### 14.1 Android v1 — frozen
 
-Authentication (email, Google, Apple); exercise library with search, filter, hide and personal notes; custom exercise CRUD; template CRUD including planned rest; per-exercise default rest (moved from v2 by the owner, 2026-11-02; `defaultRestSeconds` on the overlay); active workout logging across all six tracking types; workout history with immutable snapshots; guest mode, the app fully usable without an account (owner 2026-11-02, ADR 0014); data export as versioned JSON + CSV (owner 2026-11-02, ADR 0015); body weight tracking with history (owner 2026-11-02; needs a new table and an api/openapi.yaml addition in Plan 4); user profile with sync; device-local settings; full offline per §5; bidirectional sync; account deletion.
+Authentication (email, Google, Apple); exercise library with search, filter, hide and personal notes; custom exercise CRUD; template CRUD including planned rest; per-exercise default rest (moved from v2 by the owner, 2026-11-02; `defaultRestSeconds` on the overlay); active workout logging across all six tracking types; workout history with immutable snapshots; guest mode, the app fully usable without an account (owner 2026-11-02, ADR 0014); data export as versioned JSON + CSV (owner 2026-11-02, ADR 0015); profile picture from 20 preset animal avatars, stored as an id in profileImageUrl (owner 2026-11-02, no schema change); body weight tracking with history (owner 2026-11-02; needs a new table and an api/openapi.yaml addition in Plan 4); user profile with sync; device-local settings; full offline per §5; bidirectional sync; account deletion.
 
 ### 14.2 Deferred to v2
 
@@ -980,6 +980,7 @@ The distinguishing feature of this list is that **the storage for most of it alr
 | Weekly schedule (pin templates to weekdays; Home shows today's) | New table, purely additive |
 | Health Connect / HealthKit | New integration |
 | User-uploaded exercise images | New table plus object storage |
+| Own profile photo upload (v1 has preset avatars only) | Object storage; profileImageUrl exists |
 | Plate calculator | No storage impact |
 | Light theme (Theme row in Settings) | Token modes in Figma; no storage |
 | Croatian translation (Language row in Settings) | Strings only |
