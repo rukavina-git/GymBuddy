@@ -493,3 +493,5 @@ P2s for the owner: Discard on E2, E3 reverting to Retry.
 Owner (row E): E2 shows three buttons, Discard (red, confirms) ·
 Resume · lime Finish. E3 "Needs internet" shows 4 s, then back to
 "Not backed up for 3 days · Retry"; backup runs by itself once online.
+- LOCKED 2026-11-02: Error/offline states. Final frames on "03 Locked
+  designs" (after Onboarding + auth). Round 17 removed from 02 Rounds.

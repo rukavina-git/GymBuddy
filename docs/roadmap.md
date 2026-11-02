@@ -51,10 +51,9 @@ waiting on me
 - [ ] 3.4 Brand and icons (app icon, wordmark, gym glyphs). Owner 2026-11-02:
       new logo (an animal, e.g. a duck) before the end of v1
 - [ ] 3.5 Component library (M3-based, on the tokens)
-- [ ] 3.6 Screens per flow. Locked: app frame, Home, Templates, Active
-      workout, Exercise page + create, Session detail, Progress, You +
-      Settings, Onboarding + auth (incl. session expired).
-      Left: error / offline / empty / sync states (6f)
+- [x] 3.6 Screens per flow: app frame, Home, Templates, Active workout,
+      Exercise page + create, Session detail, Progress, You + Settings,
+      Onboarding + auth (incl. session expired), error/offline states
 - [ ] 3.7 Motion and haptics spec
 - [ ] 3.8 DESIGN.md + Plan 4 handoff (code steps per frame)
 
