@@ -72,7 +72,7 @@ roadmap-details.md §3.
 - [x] 4.4 Durable push: WorkManager job when the outbox is non-empty
 - [x] 4.5 (me) CI green, PR develop → main
 
-## Plan 6: v1 features (data + logic)
+## Plan 6: v1-features (data + logic)
 
 - [ ] 6.1 Per-account local data + account switching rules (ADR 0014)
 - [ ] 6.2 Guest mode: local-only use, create account / sign in merges (ADR 0014)
