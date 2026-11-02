@@ -4,10 +4,35 @@ name: OWASP Dependency Check
 # is attributable to backend or android at a glance rather than
 # one combined report.
 
-# Manual only for now: the scan kept failing CI. Fix the findings, then
-# restore push/pull_request triggers on Gradle files (see git history).
+# Non-blocking (ADR 0013). Runs when dependencies change, and weekly so
+# new CVEs in unchanged dependencies still show up.
 on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**/*.gradle.kts'
+      - 'backend/gradle/**'
+      - 'android/**/*.gradle.kts'
+      - 'android/gradle/**'
+      - '.github/workflows/owasp.yml'
+      - '.github/workflows/_owasp.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**/*.gradle.kts'
+      - 'backend/gradle/**'
+      - 'android/**/*.gradle.kts'
+      - 'android/gradle/**'
+      - '.github/workflows/owasp.yml'
+      - '.github/workflows/_owasp.yml'
+  schedule:
+    - cron: '0 4 * * 1'
   workflow_dispatch: {}
+
+# A newer push makes an older scan of the same branch pointless.
+concurrency:
+  group: owasp-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend:

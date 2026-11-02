@@ -10,7 +10,8 @@ plugins {
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.openapi.generator)
     jacoco
-    id("org.owasp.dependencycheck") version "13.0.0"
+    // Version and the commons-lang3 force live in the root build file.
+    id("org.owasp.dependencycheck")
 }
 
 kotlin {
@@ -271,14 +272,6 @@ val jacocoExcludes = listOf(
     // openapi-generator output - verified by compiling, not by tests
     "**/data/remote/generated/**"
 )
-
-buildscript {
-    configurations.getByName("classpath") {
-        resolutionStrategy {
-            force("org.apache.commons:commons-lang3:3.20.0")
-        }
-    }
-}
 
 dependencyCheck {
     formats = listOf("HTML", "SARIF")

@@ -103,8 +103,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-owasp-${{ inputs.module-path }}-
 
-      - name: Cache NVD database
-        uses: actions/cache@v6
+      # Restore and save are split so a failed run (NVD 503s are common)
+      # still saves whatever it downloaded. actions/cache only saves on
+      # success, which is why every past run started from an empty DB.
+      - name: Restore NVD database
+        uses: actions/cache/restore@v6
         with:
           # Must match the dependencyCheck { data.directory = ... } set
           # in this module's build file, or this cache silently caches
@@ -129,6 +132,13 @@ jobs:
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: ./gradlew ${{ inputs.gradle-task }} --stacktrace
+
+      - name: Save NVD database
+        if: always() && hashFiles(format('{0}/dependency-check-data/**', inputs.module-path)) != ''
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ inputs.module-path }}/dependency-check-data
+          key: nvd-db-${{ inputs.module-path }}-${{ runner.os }}-${{ github.run_id }}
 
       - name: List OWASP report directory
         if: always()
