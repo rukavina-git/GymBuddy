@@ -5,7 +5,7 @@ description: Soft Dark redesign of the GymBuddy Android app. Dark only in v1. To
 
 # GymBuddy design (Soft Dark)
 
-Read this page before you build Plan 4. It tells you where each answer
+Read this page before you build Plan 7. It tells you where each answer
 lives and how the Figma tokens map to Compose. It does not copy the
 tables: follow the links.
 
@@ -109,7 +109,7 @@ after step 07.
 
 ## 4. Raw sizes: use as drawn
 
-No token yet; the Figma component is right. Reconcile in Plan 4.
+No token yet; the Figma component is right. Reconcile in Plan 7.
 
 | Part | Size (dp) | Note |
 |---|---|---|
@@ -173,7 +173,7 @@ Spec: `design/motion.md` (7 rules, 27-row inventory, haptics map).
 Figma: "01 System" → Motion. Locked frames have no prototype
 animation.
 
-Plan 4 must act on these reviewer notes (step 07, not yet fixed in
+Plan 7 must act on these reviewer notes (step 07, not yet fixed in
 motion.md):
 - Use Compose `HapticFeedbackType` (own fallbacks for constants newer than minSdk 28)
   instead of hand-rolled calls.
@@ -208,7 +208,7 @@ Links go to "03 Locked designs". Current code is under
 | Progress tab | [62:5195](https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=62-5195) | `SessionsScreen.kt` + `StatisticsScreen.kt` (placeholders), session list in `workout/WorkoutScreen.kt` (Sessions tab) |
 | Session detail | [107:15763](https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=107-15763) | No screen today; closest is the session dialog in `workout/WorkoutScreen.kt` |
 | You + Settings | [110:17469](https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=110-17469) | `profile/ProfileScreen.kt`, `profile/edit/*`, `settings/SettingsScreen.kt`, `AppPreferencesScreen.kt`, `HiddenExercisesScreen.kt`, `HiddenTemplatesScreen.kt`, `AboutScreen.kt` |
-| Onboarding + auth | [114:20520](https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=114-20520) | `SplashScreen.kt`, `auth/LoginScreen.kt`, `RegisterScreen.kt`, `PasswordTextField.kt`; onboarding is new. Includes the "session expired" frame for Plan 4.2a |
+| Onboarding + auth | [114:20520](https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=114-20520) | `SplashScreen.kt`, `auth/LoginScreen.kt`, `RegisterScreen.kt`, `PasswordTextField.kt`; onboarding is new. Includes the "session expired" frame for roadmap 6.3 (auth gate) |
 | Error / offline states | [124:26620](https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=124-26620) | `components/EmptyState.kt`, `LoadingState.kt` (local lists show nothing while loading, no skeletons), `AppSnackBar.kt`, `settings/UnsyncedChanges.kt` |
 
 Nav: 5 tabs, Home, Workouts, Exercises, Progress, You. Progress

@@ -3,7 +3,7 @@
 Rules for GymBuddy's design (Soft Dark, Android, dark only in v1).
 Drafted by impeccable from what the rounds decided; impeccable has
 the main say on design, the owner the final call. Every critique,
-the components step and Plan 4 code check against this list.
+the components step and Plan 7 code check against this list.
 Living file: when a round decides something new, add a line here.
 
 Source tags: R = round in design-brief.md, owner = owner's call,

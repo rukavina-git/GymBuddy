@@ -1,51 +1,45 @@
 # Roadmap: details
 
-Re-plan of 2026-10-29. The checklist is [roadmap.md](roadmap.md); this
-file explains each item. It replaces §13 (execution plan) and §17 (next
-actions) of `architecture-and-execution-plan-v2.md`. The rest of that
-document (decisions, data model, sync protocol, scope freeze §14) still
-holds. iOS is out of scope until Android v1 is in closed testing.
+Re-plan of 2026-10-29, re-ordered 2026-11-02. The checklist is
+[roadmap.md](roadmap.md); this file explains each item. It replaces
+§13 (execution plan) and §17 (next actions) of
+`architecture-and-execution-plan-v2.md`. The rest of that document
+(decisions, data model, sync protocol, scope freeze §14) still holds.
+iOS is out of scope until Android v1 is live.
 
 ## 1. Where we are
 
 | Phase | State |
 |---|---|
 | 0 Monorepo | Done |
-| 1 Schema hardening | Done. Group K favourites and rest timer are v2 (§14.2, Q-07), not open work |
+| 1 Schema hardening | Done. Group K favourites and rest timer are v2 (§14.2, Q-07) |
 | 2 OpenAPI contract | Done. All 8 endpoints in the spec |
-| 3 Backend | Done. Sync, reference, /me, account deletion, tombstone job, rate limiter, drift test, Testcontainers suite |
-| 4 Android sync | Mostly done. Hardening plan done except device checks. Gaps below |
-| 5 Android v1 | Not started |
-| 6 iOS | Later |
-| 7 Launch | Later |
+| 3 Backend | Done, deployed on Render + Neon at api.rukavina.app |
+| 4 Android sync | Done (Plan 1). Device checks passed 2026-10-31 |
+| Data safety | Done (Plan 2): migrations, Crashlytics, JSON logs |
+| Redesign in Figma | Done (Plan 3): Soft Dark, every screen locked, DESIGN.md |
+| Android v1 | Plans 4–10 below |
+| iOS | Later |
 
-main is 30 commits behind develop. Last recorded green CI: b7334dd.
+Last merge to main: 4349324 (PR #4, 2026-10-31). develop is 44
+commits ahead (Plan 3 docs only).
 
-### Gaps found in this audit
+### Why this order
 
-Checked against the code on 2026-10-29, not against older status docs.
-
-1. **Account deletion never reaches the backend.** `SettingsViewModel
-   .performAccountDeletion` clears Room and deletes the Firebase user
-   client-side. It never calls `DELETE /v1/account`, so the server keeps
-   all of the user's data and nothing can delete it later. GDPR Art. 17
-   and a Play/App Store blocker. It also wipes outside the sync lock
-   (same bug class as hardening step 01).
-2. **Two database builders.** `di/AppModule.kt` and
-   `AppDatabase.getInstance` both build the DB, both with destructive
-   fallback. `exportSchema = false`, so there are no schema JSONs to
-   test migrations against.
-3. **No sync debug screen** (§11.4, planned for Phase 4).
-4. **Backend not deployed.** The release `API_BASE_URL` and the spec's
-   production server are `api.gymbuddy.app`, which doesn't exist (§8.3).
-5. **No Crashlytics.** The §6.8 rule "discarded payloads go to a
-   Crashlytics non-fatal" isn't implemented.
-6. **Backend observability partial.** traceId is in error responses;
-   no structured JSON logs, no sync counters (§11.4).
-7. **`X-Client-Version` / `X-Client-Platform` headers** (§8.3) are in
-   neither the spec nor the code.
-8. Carried known issues (§9.3): `ImageStorageUtil` write-then-delete,
-   redundant notes query, unwired filter queries.
+1. **Code health (4)** first: known bugs and CVEs, before new code
+   lands on top of them.
+2. **Environments (5)** before features: guest mode, account switching
+   and the redesign are tested against staging, never against prod data.
+3. **Features (6)** before the redesign: the new screens need their
+   data (per-account data, guest, body weight, profile, plans, export).
+   Each feature step leaves the old UI working, with at most a plain
+   entry point.
+4. **Redesign (7)** builds every screen once, on top of 6.
+5. **Delivery (8)**: CI/CD and fastlane once there is something worth
+   shipping; testers get staging builds from here on.
+6. **Legal (9)** describes the finished app: the policy and Data safety
+   form must match what the shipped build collects.
+7. **Release (10)** last: internal → closed → production.
 
 ## 2. How we work
 
@@ -58,7 +52,7 @@ Checked against the code on 2026-10-29, not against older status docs.
 | `reviewer` | `.claude/agents/reviewer.md` | One read-only review per step, BLOCKER/SHOULD-FIX/NIT |
 | Guard hook | `.claude/hooks/guard-bash.sh` | Blocks force push, push to main, deletes, secrets, deploys |
 | Permissions | `.claude/settings.json` | Gradle/git allowlist, secret files denied |
-| Figma | Figma MCP server (from Plan 3) | Source of truth for all UI |
+| Figma | Figma Console MCP (Desktop + Bridge plugin) | Source of truth for all UI |
 | Remote | claude.ai/code from the phone | Same flow; "go" is approved from the phone |
 
 ### The loop
@@ -73,12 +67,9 @@ Checked against the code on 2026-10-29, not against older status docs.
 
 ### Step size
 
-Bigger than the hardening steps. One step is one feature-sized change
-that the reviewer can still hold in its head:
-
 - One commit, roughly up to 600 changed lines including tests.
-- May cross backend and Android when the feature does (e.g. account
-  deletion), but at most one Room version bump.
+- May cross backend and Android when the feature does, but at most
+  one Room version bump.
 - Has a "Done when" with exact commands, and a manual check list for
   what tests can't prove.
 - Manual-only work is its own "(me)" step. One I can't do yet is
@@ -89,184 +80,218 @@ that the reviewer can still hold in its head:
 - Out-of-scope list in every step file (v2 plan §1.2).
 - Spec change, Room schema change, Flyway migration: called out in the
   step file and in the commit message.
-- The hook blocks deploys, so deploying is always a "(me)" step.
-- UI steps (after Plan 3) link a Figma frame. No frame, no UI change.
+- The hook blocks deploys, so deploying by hand is always a "(me)"
+  step. CI deploying on push (8.4) is fine.
+- UI steps link a Figma frame. No frame, no UI change.
 
 ## 3. The plans
 
-### Plan 1: phase4-closeout
+### Plans 1–3 (done)
 
-Finish Phase 4 to its exit criteria (§13.3): two devices converge,
-offline edits sync, a clean resync on 410.
+- **Plan 1, phase4-closeout:** account deletion end to end, sync debug
+  screen, Render + Neon deploy with nightly backup, api.rukavina.app,
+  device checks, PR to main.
+- **Plan 2, phase5-data-safety:** one DB builder, v26 baseline with
+  migration tests, no destructive fallback, Crashlytics, JSON logs,
+  client version headers (spec change), PR to main.
+- **Plan 3, figma-foundation:** full redesign (Soft Dark) instead of
+  the planned "mirror v1": tokens, brand + icons, 35 components, every
+  screen locked, motion spec, `design/DESIGN.md`. Details in its
+  progress.md.
 
-1.1 **Account deletion end to end.** Android calls `DELETE /v1/account`
-    after re-auth. Only on success: wipe under the sync lock
-    (`LogoutCoordinator`'s pattern), then delete the Firebase user if
-    the backend didn't already. Offline or failure: nothing is deleted,
-    the dialog shows a retryable error. Tests: ViewModel + coordinator
-    over in-memory Room, fake API. Fixes gap 1.
-1.2 **Sync debug screen.** Outbox rows grouped by type, cursor, last
-    sync time and outcome, last error with traceId. Reached from
-    Settings, debug builds only. No Figma frame needed (dev tool).
-1.3 **Deploy config.** See §4 Hosting. A `render.yaml` (or the chosen
-    host's equivalent) that runs the existing Docker image, JVM memory
-    flags for a 512 MB box, a GitHub Actions nightly `pg_dump` kept as
-    an encrypted artifact, and `docker/restore.sh`. Docs in
-    `docker/README.md`. The compose file stays the local and future
-    VPS setup.
-1.4 **(me)** Create the database and host accounts, set the secrets,
-    deploy, add a CNAME `api.rukavina.app` → the Render service and
-    the custom domain in Render, restore a dump into a local Postgres
-    once.
-1.5 **Point at the real host.** Release `API_BASE_URL` and the spec's
-    production server, both `https://api.rukavina.app`. **Spec change.**
-    Because it's my own domain, moving hosts later is a DNS change,
-    not an app update.
-1.6 **(me, deferred)** Device checks: the phase4-hardening step 05
-    list, two devices converging, airplane-mode edits syncing on
-    reconnect, 410 resync.
-1.7 **(me)** CI green on develop, PR develop → main.
+### Old ids → new ids (2026-11-02)
 
-### Plan 2: phase5-data-safety
+| Old | New | Old | New |
+|---|---|---|---|
+| 4.0 | 4.1 | 4.D1–4.D11 | 7.1–7.11 |
+| 4.1 | 4.3 | 4.3 | 8.2 |
+| 4.2 | 4.2 | 4.4 | 10.1 |
+| 4.2a | 6.3 | 4.5 | 9.2, 9.5 |
+| 4.2b | 4.4 | 4.6 | 9.3, 9.4 |
+| 4.2c | 6.2 | old 5.1 | 10.3 |
+| 4.2d | 6.7 | old 5.2 | 10.4 |
+| 4.2e | 6.4 | old 5.3 | 10.5 |
+| 4.2f | 6.5 | | |
+| 4.2g | 6.1 | | |
+| 4.2h | 6.6 | | |
 
-Nothing ships to testers until a schema change can't wipe their data.
-R-11 is the one risk that can't be undone.
+Plan 3 docs, council notes and older progress files keep the old ids.
 
-2.1 **One DB builder.** Remove the duplicate, `exportSchema = true`,
-    commit the v26 schema JSON as the baseline, set up
-    `MigrationTestHelper`.
-2.2 **Remove `fallbackToDestructiveMigration()`.** Add a test that
-    fails if the DB version has no migration path from v26.
-2.3 **Crashlytics.** Crashes, sync failures as non-fatals tagged with
-    traceId, discarded logout payloads (§6.8). No Analytics (Q-C).
-    Collection off in debug builds.
-2.4 **Backend observability + client headers.** JSON logs with
-    traceId and userId, Micrometer counters for push/pull volume,
-    conflicts and 410s. Android sends `X-Client-Version` and
-    `X-Client-Platform`; the backend logs them. **Spec change.**
-2.5 **(me)** CI green, PR develop → main.
+### Plan 4: phase5-code-health
 
-### Plan 3: figma-foundation
-
-All UI lives in Figma first, for Android now and iOS later. v1 scope
-stays frozen (§14): this mirrors and tidies the current screens, it is
-not the v2 UI overhaul.
-
-3.1 **(me)** Create the GymBuddy Figma file. Connect Figma's official
-    MCP server to Claude Code (needs a Figma account; Dev Mode features
-    may need a paid seat, check at setup). Then Claude checks it can
-    read a frame and reports which write tools exist (Q-H).
-3.2 **Design tokens.** Colours, type scale, spacing and shapes from
-    `ui/theme/` (Color.kt, Type.kt, Theme.kt) as Figma variables,
-    light and dark. Also kept as `design/tokens.json` in the repo.
-3.3 **Component library.** One Figma component per file in
-    `ui/components/` (ScreenHeader, EmptyState, ThumbnailCard,
-    NumberPicker, FilterBottomSheet, …), using the tokens.
-3.4 **Screens.** Every v1 screen as a frame, built from the components:
-    auth, home, exercises, templates, active workout, history, profile,
-    settings. Claude writes the screen inventory and states (empty,
-    loading, error); frames drawn in Figma by Claude if the MCP can
-    write, otherwise by me.
-3.5 **Code follows Figma.** Compose theme updated from the variables.
-    From here on, step files for UI work link a Figma frame and the
-    step reads it through the MCP before writing code.
-
-### Plan 4: phase5-release
-
-4.0 **Dependency CVEs.** Triage the Dependabot alerts on main (25 on
-    2026-10-30, 1 critical, 13 high) and the OWASP findings: bump,
-    replace, or suppress with a written reason. Then restore OWASP's
-    push/PR triggers (manual-only since 2026-10-30). Before the
-    release workflow, so the first AAB ships without known criticals.
-
-4.1 **ViewModel tests.** Audit the 5 existing ViewModel tests, then
-    cover the active workout state machine's failure paths (rejected
-    save, resume after process death).
+4.1 **OWASP.** Dependabot shows 35 alerts, all fixed (2026-11-02).
+    Run OWASP dependency-check for backend and Android, triage each
+    finding (bump, replace, or suppress with a written reason), then
+    restore OWASP's push/PR triggers (manual-only since 2026-10-30).
+    Stays non-blocking (ADR 0013) unless I say otherwise.
 4.2 **ImageStorageUtil.** Write the new file first, then delete the
     old one; close streams with `use`.
-4.2a **Auth gate.** No global auth listener today: if the session dies
-    outside the app (account deleted on another device, token revoked),
-    sync fails silently with 401. Add one place that watches Firebase
-    auth state and sync 401s (getIdToken(true) tells expired, deleted
-    and offline apart). Changed 2026-11-02 (onboarding council, ADR
-    0014): no forced Login and no wipe. Expired: a banner "Sign in
-    again to keep backing up", the user keeps logging, the outbox pushes
-    after re-sign-in as the same account. Deleted elsewhere: "Your
-    workouts stay on this phone", keep as guest or erase. Another
-    account signing in never sees or uploads the previous account's
-    unsynced data. Figma: "Onboarding + auth" (Plan 3).
-4.2b **Durable push.** Swiping the app away right after an offline edit
+4.3 **ViewModel tests.** Audit the existing ViewModel tests, then
+    cover the active workout state machine's failure paths (rejected
+    save, resume after process death). The ViewModel survives the
+    redesign; only its screen is replaced.
+4.4 **Durable push.** Swiping the app away right after an offline edit
     kills the network callback, so the edit waits for the next app
     open. When the outbox becomes non-empty, enqueue a unique one-off
     WorkManager job with a CONNECTED constraint that pushes; it
     survives process death. Found in Plan 2 T10.
-4.D **Build the redesign.** Added 2026-11-02 (Plan 3 step 08). Read
-    `design/DESIGN.md` first. Each step links its Figma section and
-    reads it through the MCP before code. Order is the owner's to
-    change; 4.D1-4.D3 come first, the rest can move. Old screens are
-    replaced, not restyled. Stay on v1 features (Plan 3 invariants).
-4.D1 **Theme.** Color.kt/Type.kt/Theme.kt from `design/tokens.json`
+4.5 **(me)** CI green, PR develop → main.
+
+### Plan 5: environments (test + prod)
+
+Today there is one backend, one database and one Firebase project, and
+debug builds talk to it. From Plan 6 on, nothing under test touches
+prod data.
+
+5.1 **ADR 0016.** Staging and prod each get their own Render service,
+    Neon database (or branch), Firebase project and API host
+    (api-staging.rukavina.app, api.rukavina.app). Check free-tier
+    limits (Render services, Neon branches) at write time. Debug and
+    staging builds point at staging; only prod release builds point at
+    prod.
+5.2 **Backend.** Staging service in `render.yaml` (same image, own
+    env vars), nightly backup stays prod only, `docker/README.md`
+    documents both. Spec: add the staging server. **Spec change.**
+5.3 **Android flavors.** `staging` and `prod` product flavors:
+    `applicationIdSuffix ".staging"` (both installable side by side),
+    own Firebase config per flavor, own API URL, app name "GymBuddy
+    Staging". The `-Pgymbuddy.apiBaseUrl` override stays. CI builds
+    and tests both; secrets per flavor.
+5.4 **(me)** Create the staging Firebase project (Auth: Google +
+    email), the Neon branch, the Render service, the DNS record, and
+    the GitHub secrets. Deploy staging.
+5.5 **(me)** CI green, PR develop → main.
+
+### Plan 6: v1 features (data + logic)
+
+Each step leaves the current UI working. New screens come in Plan 7;
+until then a feature may have a plain entry point or none.
+
+6.1 **Per-account local data** (ADR 0014). One local store per
+    account plus one for the guest; switching accounts never shows or
+    uploads another account's data. Room schema change.
+6.2 **Guest mode** (ADR 0014). The app works fully without an
+    account. Creating an account or signing in merges guest data into
+    that account once.
+6.3 **Auth gate.** One place watches Firebase auth state and sync 401s
+    (`getIdToken(true)` tells expired, deleted and offline apart).
+    Expired: the user keeps logging, the outbox pushes after re-sign-in
+    as the same account. Deleted elsewhere: keep as guest or erase.
+    No forced Login, no wipe. UI in 7.4.
+6.4 **Body weight.** New table, sync, spec. **Spec change, Flyway
+    migration, Room schema change.**
+6.5 **Profile fields.** Experience, avatar (Fluent Emoji animals,
+    MIT), consent record, days per week. **Spec change.**
+6.6 **Plans.** A plan is a set of templates to rotate through. Rework
+    the default templates and add starter plans. Data model change.
+6.7 **Data export** (ADR 0015). Versioned JSON + CSV through the
+    system share sheet.
+6.8 **(me)** CI green, PR develop → main.
+
+### Plan 7: redesign build (Compose)
+
+Read `design/DESIGN.md` first. Each step links its Figma section and
+reads it through the MCP before code. 7.1–7.3 come first, in order.
+Old screens are replaced, not restyled. Stay on v1 features (Plan 3
+invariants) plus what Plan 6 added.
+
+7.1 **Theme.** Color.kt/Type.kt/Theme.kt from `design/tokens.json`
     (dark only), Shapes (radius.full → CircleShape), stat-value and
     tag roles, `fontFeatureSettings "tnum"` on the styles named in
     DESIGN.md, motion tokens (rows without easing use `std`), haptics
     via Compose `HapticFeedbackType` with own API fallbacks. Raw sizes
     used as drawn (DESIGN.md list). Figma: https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=124-26794 (Tokens),
     https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=153-8784 (Motion). Specs: colors.md, motion.md.
-4.D2 **Icons + components.** design/icons.md + components.md, 35
+7.2 **Icons + components.** design/icons.md + components.md, 35
     components on https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=151-3214, icons https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=137-26976. Material icons tint
     fills, own glyphs/tabs tint strokes, filled tab icons never
     tinted. `ModalBottomSheet` keeps M3 defaults where tokens can't
     be set. Replaces ui/components/* where a library part exists.
-4.D3 **App frame.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=85-9890. 5 tabs (Home, Workouts, Exercises,
+7.3 **App frame.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=85-9890. 5 tabs (Home, Workouts, Exercises,
     Progress, You), top bars, title collapse, tab fade-through.
     Navigation Compose 2.8+ predictive back (no
     `PredictiveBackHandler`). Replaces MainScreen.kt nav.
-4.D4 **Onboarding + auth.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=114-20520. Welcome, setup (no Next
+7.4 **Onboarding + auth.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=114-20520. Welcome, setup (no Next
     buttons), sign-in, create account with consent, session expired
-    banner, account deleted elsewhere, Ready. Builds with 4.2a and
-    4.2c. Replaces SplashScreen, LoginScreen, RegisterScreen.
-4.D5 **Home + Templates.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=87-11340, https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=92-12488. Week strip on
-    Home. Replaces HomeScreen, WorkoutsScreen, CombinedWorkoutsScreen,
-    WorkoutTemplateScreen + dialogs. Plans (4.2h) fit here later.
-4.D6 **Active workout.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=67-6561. Keypad sheet, − / + stepper,
+    banner, account deleted elsewhere, Ready. UI for 6.2 and 6.3.
+    Replaces SplashScreen, LoginScreen, RegisterScreen.
+7.5 **Home + Templates.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=87-11340, https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=92-12488. Week strip on
+    Home, plans from 6.6. Replaces HomeScreen, WorkoutsScreen,
+    CombinedWorkoutsScreen, WorkoutTemplateScreen + dialogs.
+7.6 **Active workout.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=67-6561. Keypad sheet, − / + stepper,
     live bar from ⌄, swipe done/delete + Undo, rest card. Set lands:
     `sharedBounds` or one node swapping content, not `animateBounds`.
     Drag reorder needs a library (check licence) or own code. Rest
     buzz: VIBRATE permission, a notification channel for DND. Done +
-    couldn't save = two pulses (decide). Hint for first 3 workouts
-    has no motion (fine). 1 s outline hold and 80/120/80 buzz are raw
-    ms (keep). Replaces ActiveWorkoutScreen, WorkoutScreen,
-    SetTrackingFields.
-4.D7 **Exercise page + create.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=97-14553. Replaces
+    couldn't save = two pulses (decide). 1 s outline hold and
+    80/120/80 buzz are raw ms (keep). Replaces ActiveWorkoutScreen,
+    SetTrackingFields, NumberPicker, and WorkoutScreen's active part.
+    WorkoutScreen's Sessions tab and session dialog stay until 7.8/7.9.
+7.7 **Exercise page + create.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=97-14553. Replaces
     ExerciseScreen, ExerciseDetailsScreen, ExerciseCreationBottomSheet,
     ExerciseWizardDialog.
-4.D8 **Progress tab.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=62-5195. Counts line, one lift chart, All
+7.8 **Progress tab.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=62-5195. Counts line, one lift chart, All
     sessions search. Replaces SessionsScreen + StatisticsScreen.
-4.D9 **Session detail.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=107-15763.
-4.D10 **You + Settings.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=110-17469. One settings page, backup
-    line, delete account (keep or erase), export (4.2d), body weight
-    (4.2e), profile fields + animal avatars (Fluent Emoji, MIT; 4.2f).
-    Replaces ProfileScreen, SettingsScreen, AppPreferencesScreen,
+7.9 **Session detail.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=107-15763. Replaces WorkoutScreen's
+    session dialog; WorkoutScreen goes here.
+7.10 **You + Settings.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=110-17469. One settings page, backup
+    line, delete account (keep or erase), export (6.7), body weight
+    (6.4), profile fields + animal avatars (6.5). Replaces
+    ProfileScreen, SettingsScreen, AppPreferencesScreen,
     Hidden*Screen, AboutScreen.
-4.D11 **Cross-flow states.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=124-26620. Empty, error, offline,
+7.11 **Cross-flow states.** https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=124-26620. Empty, error, offline,
     sync. Sets logged during a re-download (410) must survive the
-    wipe. Replaces EmptyState, LoadingState where they differ.
-4.3 **Release workflow.** On a `v*` tag: build a signed, minified AAB,
-    versionCode from the tag. Signing secrets in GitHub secrets (me).
-4.4 **(me)** Release build manual pass: R8, sign-in, sync, logout,
-    account deletion.
-4.5 **(me)** Privacy policy at a public URL (Q-11), linked in-app.
-    Play Console setup and the Data Safety form (Firebase Auth +
-    Crashlytics).
+    wipe. Replaces EmptyState, LoadingState, AppSnackBar,
+    UnsyncedChanges where they differ.
+7.12 **(me)** Device pass on a staging build, CI green, PR.
 
-### Plan 5: phase5-closed-testing
+### Plan 8: delivery (CI/CD + fastlane)
 
-5.1 **(me)** Closed testing track. Check the current tester rule (it
-    was 12 testers for 14 days) before setting a date.
-5.2 Fix what testers find, one step per batch of issues.
-5.3 **(me)** Exit: a release build passes a full manual pass and closed
-    testing is running. Then iOS planning starts, with designs already
-    in Figma.
+8.1 **CI gates.** Run Android Lint in CI (baseline the current
+    warnings, fail on new errors). Revisit the SonarQube gate (Q-E).
+8.2 **Release workflow.** On a `v*` tag: build a signed, minified prod
+    AAB, versionCode from the tag, Crashlytics mapping upload on.
+    Signing secrets in GitHub secrets.
+8.3 **fastlane** (MIT). Lanes: `staging` (staging APK to testers via
+    Firebase App Distribution), `internal` (prod AAB to the Play
+    internal track), `promote` (internal → closed). Store listing text
+    and screenshots in `android/fastlane/metadata`. CI runs the lanes;
+    I run them by hand only as a fallback.
+8.4 **Backend CD.** Push to develop deploys staging, a `v*` tag
+    deploys prod (Render deploy hooks from CI). Flyway runs on start,
+    as today.
+8.5 **(me)** Play Console developer account and app, Play App Signing
+    with an upload key, a Google Cloud service account for fastlane,
+    all secrets in GitHub.
+8.6 **(me)** CI green, PR develop → main.
+
+### Plan 9: legal + privacy
+
+9.1 **Licences.** Every third-party asset and library with source and
+    licence (CLAUDE.md rule), including the stock exercise photos
+    (not recorded yet; DESIGN.md §10). An in-app open-source licences
+    page, reached from About.
+9.2 **Privacy policy + terms** (Q-11). Written in the repo, published
+    at a public URL on rukavina.app, linked in-app and in Play.
+9.3 **Web account deletion.** Play requires a URL where users can ask
+    for deletion without the app.
+9.4 **Compliance pass.** Health-data consent, 16+ audience,
+    Crashlytics payloads (no PII), timer/notification rules. Checklist:
+    docs/council/2026-11-02-onboarding.md.
+9.5 **(me)** Play Console: Data safety (Firebase Auth + Crashlytics),
+    content rating, target audience, store listing, privacy URL.
+9.6 **(me)** CI green, PR develop → main.
+
+### Plan 10: release
+
+10.1 **(me)** Release build manual pass, staging then prod: R8,
+     sign-in, guest, sync, logout, account deletion.
+10.2 **(me)** First prod AAB on the internal track via fastlane.
+10.3 **(me)** Closed testing. Check the current tester rule (it was 12
+     testers for 14 days on new personal accounts) before setting a date.
+10.4 Fix what testers find, one step per batch of issues.
+10.5 **(me)** Full manual pass, then production release. Android v1
+     is done; iOS planning starts, with designs already in Figma.
 
 ## 4. Hosting
 
@@ -274,12 +299,13 @@ Goal for now: free, easy to set up, easy to leave. Later: paid
 hosting of my own (e.g. DigitalOcean).
 
 **Choice: Render free web service (Docker) + Neon free Postgres.**
-Check both free tiers at setup time, since they change.
+Check both free tiers at setup time, since they change. Staging (Plan
+5) uses the same pair.
 
 - Render builds `backend/Dockerfile` as is. No buildpack, so nothing
   ties us to Render (§12.3).
 - Neon is plain Postgres: `DATABASE_URL` + `DB_PASSWORD`, nothing
-  else. `pg_dump` works. Pick an EU region for both.
+  else. `pg_dump` works. EU region for both.
 - The sync lock is `pg_advisory_xact_lock`, which works through Neon's
   pooled connection.
 - Costs of free: the service sleeps when idle, so the first request
@@ -298,11 +324,12 @@ Check both free tiers at setup time, since they change.
 | Q-A | Sign in with Apple on Android? | **No.** Built with iOS. Enable the Firebase provider then |
 | Q-B | Hosting (old Q-02) | **Free + portable for now:** Render + Neon (§4). Paid VPS later |
 | Q-C | Firebase Analytics in v1? | **No.** Crashlytics only, so no consent gate |
-| Q-D | Client version headers (§8.3) | Yes, in 2.4 |
-| Q-E | SonarQube new-code gate | ADR 0013 as is; revisit in Plan 4 |
-| Q-F | Can a cloud session run the tests? | Open. Needs JDK 17, Android SDK, a google-services.json stand-in, Docker. Check on first remote step |
-| Q-G | Own domain for the API | **api.rukavina.app.** I own rukavina.app; DNS not set up yet (1.4) |
-| Q-H | Can the Figma MCP draw frames, or only read? | **Both.** Read checked 2026-10-29; write tools exist (`use_figma`, `generate_figma_design`), first real write in 3.2. Starter plan, Full seat. Write tools are exempt from rate limits; read limits for this seat aren't published, so keep read calls lean |
+| Q-D | Client version headers (§8.3) | Yes, done in 2.4 |
+| Q-E | SonarQube new-code gate | ADR 0013 as is; revisit in 8.1 |
+| Q-F | Can a cloud session run the tests? | Open. Needs JDK 17, Android SDK, a Firebase config stand-in, Docker. Check on first remote step |
+| Q-G | Own domain for the API | **api.rukavina.app** (live). Staging: api-staging.rukavina.app (Plan 5) |
+| Q-H | Can the Figma MCP draw frames? | **Yes.** Figma Console MCP since 2026-10-31 (Desktop + Bridge plugin). Starter plan: 3 pages, 1 variable mode |
+| Q-I | Test + prod environments? | **Yes,** Plan 5, before features (owner 2026-11-02) |
+| Q-J | Deployment tool | **fastlane** (MIT) for Play; Render deploy hooks for the backend (Plan 8) |
 
 Figma file: https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy
-(MCP server in `.mcp.json`, authenticated on the Mac).

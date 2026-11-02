@@ -55,49 +55,94 @@ waiting on me
       Exercise page + create, Session detail, Progress, You + Settings,
       Onboarding + auth (incl. session expired), error/offline states
 - [x] 3.7 Motion and haptics spec
-- [x] 3.8 DESIGN.md + Plan 4 handoff (code steps per frame)
+- [x] 3.8 DESIGN.md + redesign handoff (now Plan 7)
 
-## Plan 4: phase5-release
+Order (owner, 2026-11-02): fix what's there → test + prod
+environments → features → redesign → CI/CD → legal → release last.
+Old step ids (4.0–4.6, 4.D1–4.D11, old Plan 5) map to the new ones in
+roadmap-details.md §3.
 
-- [ ] 4.0 Dependency CVEs: Dependabot alerts + OWASP, restore OWASP triggers
-- [ ] 4.1 ViewModel test gaps (active workout failure paths)
+## Plan 4: phase5-code-health
+
+- [ ] 4.1 OWASP findings triaged, OWASP push/PR triggers back on
+      (Dependabot: 35/35 alerts fixed by 2026-11-02)
 - [ ] 4.2 Fix ImageStorageUtil data-loss bug
-- [ ] 4.2a Auth gate: dead session → Login with "session expired"
-- [ ] 4.2b Durable push: WorkManager job when the outbox is non-empty
-- [ ] 4.2c Guest mode: local-only use, create account / sign in merges (ADR 0014)
-- [ ] 4.2d Data export: versioned JSON + CSV (ADR 0015)
-- [ ] 4.2e Body weight tracking: new table + spec change (designed in Plan 3)
-- [ ] 4.2f Profile fields: experience, avatar, consent record, days per week
+- [ ] 4.3 ViewModel test gaps (active workout failure paths)
+- [ ] 4.4 Durable push: WorkManager job when the outbox is non-empty
+- [ ] 4.5 (me) CI green, PR develop → main
+
+## Plan 5: environments (test + prod)
+
+- [ ] 5.1 ADR: staging + prod split (backend, database, Firebase, app)
+- [ ] 5.2 Backend: staging service in render.yaml, backups prod only
+- [ ] 5.3 Android: `staging` / `prod` flavors (app id suffix, own
+      Firebase config, API URL); CI builds both
+- [ ] 5.4 (me) Staging Firebase project, Neon branch, Render service,
+      DNS api-staging.rukavina.app, secrets
+- [ ] 5.5 (me) CI green, PR develop → main
+
+## Plan 6: v1 features (data + logic)
+
+- [ ] 6.1 Per-account local data + account switching rules (ADR 0014)
+- [ ] 6.2 Guest mode: local-only use, create account / sign in merges (ADR 0014)
+- [ ] 6.3 Auth gate: dead session → "sign in again" banner, no wipe
+- [ ] 6.4 Body weight tracking: new table (spec change)
+- [ ] 6.5 Profile fields: experience, avatar, consent record, days per week
       (spec change, owner OK 2026-11-02)
-- [ ] 4.2g Per-account local data + account switching rules (ADR 0014)
-- [ ] 4.2h Plans (a set of templates to rotate through) + rework of the default
-      templates and starter plans (owner 2026-11-02; data model change)
-- [ ] 4.D1 Theme in Compose: tokens.json → colour, type (tnum), shape, motion, haptics
-- [ ] 4.D2 Icons + component library (01 System)
-- [ ] 4.D3 App frame: 5-tab nav, top bars, predictive back
-- [ ] 4.D4 Onboarding + auth (with 4.2a, 4.2c)
-- [ ] 4.D5 Home + Templates (Workouts tab)
-- [ ] 4.D6 Active workout (keypad, live bar, swipe + undo, rest)
-- [ ] 4.D7 Exercise page + create
-- [ ] 4.D8 Progress tab (replaces Sessions + Stats)
-- [ ] 4.D9 Session detail
-- [ ] 4.D10 You + Settings (with 4.2e, 4.2f)
-- [ ] 4.D11 Cross-flow states: error, offline, empty, sync
-- [ ] 4.3 Tag-triggered signed release AAB workflow
-- [ ] 4.4 (me) Release build manual pass
-- [ ] 4.5 (me) Privacy policy online + in-app link, Play Console, Data Safety
-- [ ] 4.6 Privacy + compliance pass, after the designs are built: web account
-      deletion, health-data consent, Data safety, 16+ audience, Crashlytics
-      payloads, timer/notification rules (list: docs/council/2026-11-02-onboarding.md)
+- [ ] 6.6 Plans (templates to rotate through) + rework of the default
+      templates and starter plans (data model change)
+- [ ] 6.7 Data export: versioned JSON + CSV (ADR 0015)
+- [ ] 6.8 (me) CI green, PR develop → main
 
-## Plan 5: phase5-closed-testing
+## Plan 7: redesign build (Compose)
 
-- [ ] 5.1 (me) Closed testing track (check current tester rule)
-- [ ] 5.2 Fix tester findings
-- [ ] 5.3 (me) Full manual pass → Android v1 done, start iOS planning
+- [ ] 7.1 Theme: tokens.json → colour, type (tnum), shape, motion, haptics
+- [ ] 7.2 Icons + component library (01 System)
+- [ ] 7.3 App frame: 5-tab nav, top bars, predictive back
+- [ ] 7.4 Onboarding + auth (UI for 6.2, 6.3)
+- [ ] 7.5 Home + Templates (Workouts tab, plans from 6.6)
+- [ ] 7.6 Active workout (keypad, live bar, swipe + undo, rest)
+- [ ] 7.7 Exercise page + create
+- [ ] 7.8 Progress tab (replaces Sessions + Stats)
+- [ ] 7.9 Session detail
+- [ ] 7.10 You + Settings (UI for 6.4, 6.5, 6.7)
+- [ ] 7.11 Cross-flow states: error, offline, empty, sync
+- [ ] 7.12 (me) Device pass on staging, CI green, PR develop → main
+
+## Plan 8: delivery (CI/CD + fastlane)
+
+- [ ] 8.1 Android Lint in CI; SonarQube gate revisited (Q-E)
+- [ ] 8.2 Signed release AAB on a `v*` tag, versionCode from the tag
+- [ ] 8.3 fastlane: staging build to testers, prod AAB to the Play
+      internal track, store listing kept in the repo
+- [ ] 8.4 Backend CD: develop → staging, `v*` tag → prod
+- [ ] 8.5 (me) Play Console app, upload key, service account, secrets
+- [ ] 8.6 (me) CI green, PR develop → main
+
+## Plan 9: legal + privacy
+
+- [ ] 9.1 Third-party licence audit (incl. stock exercise photos) +
+      in-app open-source licences screen
+- [ ] 9.2 Privacy policy + terms at a public URL, linked in-app
+- [ ] 9.3 Web account deletion page (Play requires one)
+- [ ] 9.4 Compliance pass: health-data consent, 16+ audience,
+      Crashlytics payloads, timer/notification rules
+      (list: docs/council/2026-11-02-onboarding.md)
+- [ ] 9.5 (me) Play Console: Data safety, content rating, audience,
+      store listing
+- [ ] 9.6 (me) CI green, PR develop → main
+
+## Plan 10: release
+
+- [ ] 10.1 (me) Release build manual pass on staging, then prod: R8,
+      sign-in, guest, sync, logout, account deletion
+- [ ] 10.2 (me) Internal testing track via fastlane
+- [ ] 10.3 (me) Closed testing (check the current tester rule)
+- [ ] 10.4 Fix tester findings (one step per batch)
+- [ ] 10.5 (me) Full manual pass, production release → Android v1 done
 
 ## Later
 
 - Move to paid hosting (e.g. DigitalOcean): restore dump, repoint DNS
-- Phase 6 iOS (designs already in Figma), Phase 7 store launch
+- iOS (designs already in Figma), after Android v1 is live
 - v2 list: architecture plan §14.2

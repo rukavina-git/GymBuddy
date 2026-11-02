@@ -1,7 +1,7 @@
 # 14. Guest mode: the app works fully without an account
 
 Date: 2026-11-02
-Status: Accepted (owner, 2026-11-02). Details are refined in Plan 4.
+Status: Accepted (owner, 2026-11-02). Details are refined in Plan 6.
 
 ## Context
 
@@ -44,7 +44,7 @@ docs/council/2026-11-02-you-settings.md).
   uploaded under the new account. They stay on the phone, kept apart,
   and sync when the original account signs in again. This needs
   per-account local storage (for example one Room database file per
-  owner, plus one for the guest); Plan 4 decides the mechanism.
+  owner, plus one for the guest); Plan 6 decides the mechanism.
 - Guest data into an account that already has data: ask first, with
   counts ("Add 5 workouts from this phone to x@…?"); Cancel keeps the
   guest. A receipt follows. A new account takes the guest data as is.
@@ -55,7 +55,7 @@ docs/council/2026-11-02-you-settings.md).
 
 ## Consequences
 
-- Plan 4 gains a guest-mode step (roughly M–L), with tests for "guest
+- Plan 6 gains a guest-mode step (roughly M–L), with tests for "guest
   signs in to an account that already has data" and "account deleted,
   kept as guest".
 - Screens never assume an account: sync line, sign out and delete

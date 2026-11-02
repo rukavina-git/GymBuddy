@@ -1,7 +1,7 @@
 # Components
 
 Built in Figma "01 System" → Components (step 05, 2026-11-02). Figma is
-the source; this file is the index Plan 4 builds from. Every component
+the source; this file is the index Plan 7 builds from. Every component
 uses only tokens (`design/tokens.json`) and library icons
 (`design/icons.md`). Names match the planned Compose names.
 
@@ -62,4 +62,4 @@ set row 48 · D14 nav bar uses the tab icons.
 627 instances on "03 Locked designs". Containers whose content differs
 per screen stay drawn but token-bound (sheets, dialogs, menus, set
 card, keypad sheet, week strip, top bars, text fields, list rows);
-Plan 4 builds them from the components above.
+Plan 7 builds them from the components above.

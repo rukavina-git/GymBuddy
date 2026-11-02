@@ -4,7 +4,7 @@ Step 07 (2026-11-02). Sources: design-brief.md round logs (Round 5
 "set lands", App frame, Templates, Session detail, 06f), motion
 tokens in `design/tokens.json`, components in `design/components.md`.
 Reviewed by impeccable `animate` (native Android); owner picked the
-four options marked (owner). Plan 4 builds from this file.
+four options marked (owner). Plan 7 builds from this file.
 
 Token shorthand: `medium2` = `motion.duration.medium2`, `std` =
 `easing.standard`, `emph` = `easing.emphasized`, `-dec` / `-acc` =
