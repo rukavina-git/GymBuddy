@@ -56,7 +56,8 @@ class ProfileFieldsTest {
         avatarId = "red-panda",
         trainingDays = TrainingDays.FIVE_TO_SEVEN,
         healthDataConsentVersion = "2026-11",
-        healthDataConsentAt = 1_762_000_000_000
+        healthDataConsentAt = 1_762_000_000_000,
+        activePlanId = "01a19f0f-dc18-7975-8b8f-61819042e23a"
     )
 
     @Before
@@ -83,6 +84,7 @@ class ProfileFieldsTest {
         assertEquals(expected.trainingDays, actual.trainingDays)
         assertEquals(expected.healthDataConsentVersion, actual.healthDataConsentVersion)
         assertEquals(expected.healthDataConsentAt, actual.healthDataConsentAt)
+        assertEquals(expected.activePlanId, actual.activePlanId)
     }
 
     @Test
@@ -110,7 +112,8 @@ class ProfileFieldsTest {
         profiles.saveProfile(full)
         val pushed = mutableListOf<String>()
         val pulledProfile = """{"uid":"$UID","name":"Server","email":"s@example.com","joinedDate":1,"updatedAt":9,"revision":4,""" +
-            """"experienceLevel":"NEW","avatarId":"owl","trainingDays":"FOUR","healthDataConsentVersion":"2026-12","healthDataConsentAt":7}"""
+            """"experienceLevel":"NEW","avatarId":"owl","trainingDays":"FOUR","healthDataConsentVersion":"2026-12","healthDataConsentAt":7,""" +
+            """"activePlanId":"01a19f0f-dc18-7975-8b8f-000000000002"}"""
         val client = OkHttpClient.Builder().addInterceptor { chain ->
             val request = chain.request()
             val isPush = request.url.encodedPath.endsWith("/sync/push")
@@ -127,13 +130,14 @@ class ProfileFieldsTest {
         SyncEngine(store, SyncApis.create("http://canned.invalid/", { "token" }, client), mutex = holder.lock).sync()
 
         val sent = pushed.single()
-        assertTrue(sent, listOf("\"experienceLevel\":\"EXPERIENCED\"", "\"avatarId\":\"red-panda\"", "\"trainingDays\":\"FIVE_TO_SEVEN\"", "\"healthDataConsentVersion\":\"2026-11\"").all { it in sent })
+        assertTrue(sent, listOf("\"experienceLevel\":\"EXPERIENCED\"", "\"avatarId\":\"red-panda\"", "\"trainingDays\":\"FIVE_TO_SEVEN\"", "\"healthDataConsentVersion\":\"2026-11\"", "\"activePlanId\":\"01a19f0f-dc18-7975-8b8f-61819042e23a\"").all { it in sent })
         val stored = profiles.getProfile(UID)!!
         assertEquals(ExperienceLevel.NEW, stored.experienceLevel)
         assertEquals("owl", stored.avatarId)
         assertEquals(TrainingDays.FOUR, stored.trainingDays)
         assertEquals("2026-12", stored.healthDataConsentVersion)
         assertEquals(7L, stored.healthDataConsentAt)
+        assertEquals("01a19f0f-dc18-7975-8b8f-000000000002", stored.activePlanId)
     }
 
     private suspend fun waitFor(condition: suspend () -> Boolean) {

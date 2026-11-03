@@ -5,7 +5,7 @@
 - [x] 03 Auth gate (steps/03-auth-gate.md) — 12dd9ea
 - [x] 04 Body weight (steps/04-body-weight.md) — c60d997
 - [x] 05 Profile fields (steps/05-profile-fields.md) — 291c23b
-- [ ] 06 Plans + default templates
+- [x] 06 Plans + default templates (steps/06-plans.md) — HASH
 - [ ] 07 Data export
 - [ ] 08 CI green, PR develop → main (me)
 
@@ -56,6 +56,21 @@
 - 05: ProfileViewModel saves start from the stored row (so new fields
   survive). The Plan 4 note "inject AuthSession" was already covered by
   step 03 (uid from the data owner).
+
+- 06: Spec (said out loud): `StarterPlan` schema, required
+  `TemplateLibraryResponse.plans`, `UserProfile.activePlanId`. Flyway V7,
+  Room v30 (MIGRATION_29_30, 30.json), template library v6.
+- 06: V2's generator is frozen (refuses inputs past v5). V7 has its own
+  generator (backend/tools/generate_starter_plans_seed.py) that emits
+  only the v6 delta. Not in the step file.
+- 06: `suggestPlan(plans, days, experience)` takes the plan list and
+  picks by `suggestedFor`; `nextInPlan` takes an `isAvailable` filter
+  for "deprecated template skipped". Both in domain/usecase/template.
+- 06: `setActivePlan` returns false (writes nothing) without a profile
+  row for the owner in the open file; that also covers an owner switch.
+- 06: Backend checks activePlanId is a UUID (INVALID otherwise); the
+  plan itself isn't checked (soft reference).
+- 06: Templates picked by Claude (5–6 exercises each, existing defaults).
 
 ## Gotchas
 - From 01 (reviewer, not fixed):
@@ -140,4 +155,13 @@
     now also keeps deletedAt from the stored row.
 - Open: push answers 500 (not 400) for an unreadable body. Spec change
   to fix; candidate for the cleanup before step 08.
-
+- From 06 (reviewer, not fixed):
+  - The seeder only seeds when no version is stored. A guest file seeded
+    at v5 never syncs, so it never gets plans or the deprecations. Plan 7
+    onboarding needs it: reseed for the guest when the bundle is newer.
+  - `nextInPlan` doesn't drop sessions with null endedAt (falls back to
+    startedAt). Sessions from a copied template (derivedFromId) don't
+    advance the rotation; decide before 7.4/7.5.
+  - Backend accepts uppercase activePlanId; Postgres returns lowercase,
+    so an uppercase replay is a CONFLICT. Android sends lowercase.
+  - No test ties the bundled JSON v6 to V7; only the generator does.

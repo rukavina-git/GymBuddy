@@ -28,7 +28,7 @@ class UserProfileRepository(private val jdbcTemplate: NamedParameterJdbcTemplate
             SELECT uid, name, email, profile_image_url, birth_date, weight, height, gender,
                    fitness_goal, activity_level, target_weight, joined_date, bio, experience_level,
                    avatar_id, training_days, health_data_consent_version, health_data_consent_at,
-                   updated_at, deleted_at, revision
+                   active_plan_id, updated_at, deleted_at, revision
             FROM user_profile
             WHERE uid = :ownerId
         """.trimIndent()
@@ -82,7 +82,7 @@ class UserProfileRepository(private val jdbcTemplate: NamedParameterJdbcTemplate
                 activity_level = :activityLevel, target_weight = :targetWeight, joined_date = :joinedDate,
                 bio = :bio, experience_level = :experienceLevel, avatar_id = :avatarId,
                 training_days = :trainingDays, health_data_consent_version = :consentVersion,
-                health_data_consent_at = :consentAt, updated_at = :now, revision = :newRevision
+                health_data_consent_at = :consentAt, active_plan_id = :activePlanId::uuid, updated_at = :now, revision = :newRevision
             WHERE uid = :uid
         """.trimIndent()
         val params = MapSqlParameterSource()
@@ -104,6 +104,7 @@ class UserProfileRepository(private val jdbcTemplate: NamedParameterJdbcTemplate
             .addValue("trainingDays", dto.trainingDays?.name)
             .addValue("consentVersion", dto.healthDataConsentVersion)
             .addValue("consentAt", dto.healthDataConsentAt)
+            .addValue("activePlanId", dto.activePlanId)
             .addValue("now", now)
             .addValue("newRevision", newRevision)
         jdbcTemplate.update(sql, params)
@@ -128,6 +129,7 @@ class UserProfileRepository(private val jdbcTemplate: NamedParameterJdbcTemplate
         trainingDays = rs.getString("training_days")?.let { TrainingDays.valueOf(it) },
         healthDataConsentVersion = rs.getString("health_data_consent_version"),
         healthDataConsentAt = rs.getNullableLong("health_data_consent_at"),
+        activePlanId = rs.getString("active_plan_id"),
         updatedAt = rs.getLong("updated_at"),
         deletedAt = rs.getNullableLong("deleted_at"),
         revision = rs.getInt("revision"),

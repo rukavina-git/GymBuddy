@@ -673,7 +673,7 @@ components:
       description: |
         The full default workout template library. Includes deprecated
         entries, for the same reason as ExerciseLibraryResponse.
-      required: [ version, templates ]
+      required: [ version, templates, plans ]
       properties:
         version:
           type: integer
@@ -681,6 +681,46 @@ components:
         templates:
           type: array
           items: { $ref: '#/components/schemas/WorkoutTemplate' }
+        plans:
+          type: array
+          description: |
+            Starter plans, in display order. Server-owned and read-only,
+            versioned together with the templates they point at.
+            Includes deprecated plans.
+          items: { $ref: '#/components/schemas/StarterPlan' }
+
+    StarterPlan:
+      type: object
+      description: |
+        A set of default templates to rotate through, in order (e.g.
+        Upper A, Lower A, Upper B, Lower B). Reference data: users don't
+        create or edit plans; the chosen one is UserProfile.activePlanId.
+      required: [ id, title, templateIds, deprecated ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: [string, "null"]
+        templateIds:
+          type: array
+          description: Ordered ids of DEFAULT workout templates in this plan's rotation.
+          minItems: 1
+          items:
+            type: string
+            format: uuid
+        suggestedFor:
+          description: |
+            The days-a-week bucket onboarding suggests this plan for.
+            Null: not suggested by days.
+          oneOf:
+            - $ref: '#/components/schemas/TrainingDays'
+            - type: 'null'
+        deprecated:
+          type: boolean
+          description: Hidden from browsing; kept so an activePlanId pointing at it still resolves.
 
     WorkoutSession:
       type: object
@@ -1375,6 +1415,12 @@ components:
           type: [integer, "null"]
           format: int64
           description: When the user gave that consent, epoch milliseconds (client time).
+        activePlanId:
+          type: [string, "null"]
+          format: uuid
+          description: |
+            The StarterPlan the user follows. Soft reference: it may name a
+            plan the client doesn't know or that is deprecated. Null: no plan.
         updatedAt:
           type: integer
           format: int64

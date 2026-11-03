@@ -20,6 +20,7 @@ import com.rukavina.gymbuddy.data.remote.generated.models.UserExerciseState
 import com.rukavina.gymbuddy.data.remote.generated.models.UserProfile
 import com.rukavina.gymbuddy.data.remote.generated.models.UserTemplateState
 import com.rukavina.gymbuddy.data.remote.generated.models.WorkoutSession
+import com.rukavina.gymbuddy.data.remote.generated.models.StarterPlan
 import com.rukavina.gymbuddy.data.remote.generated.models.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.model.SyncState
 import kotlinx.coroutines.flow.Flow
@@ -330,8 +331,19 @@ class SyncLocalStore(private val holder: DatabaseHolder, private val clock: Cloc
     }
 
     /** Same as [replaceDefaultExercises] for templates; template_exercises go via ON DELETE CASCADE. */
-    suspend fun replaceDefaultTemplates(version: Int, templates: List<WorkoutTemplate>) = transaction {
+    suspend fun replaceDefaultTemplates(
+        version: Int,
+        templates: List<WorkoutTemplate>,
+        plans: List<StarterPlan>
+    ) = transaction {
         syncDao.deleteDefaultTemplates()
+        // Starter plans are versioned with the templates they point at (Plan 6 step 06).
+        db.starterPlanDao().deleteAll()
+        plans.forEachIndexed { i, dto ->
+            val (plan, rows) = SyncDtoMapper.toEntities(dto, displayOrder = i)
+            db.starterPlanDao().insertPlans(listOf(plan))
+            db.starterPlanDao().insertPlanTemplates(rows)
+        }
         templates.filter { it.source == EntitySource.DEFAULT }.forEach { dto ->
             val aggregate = SyncDtoMapper.toEntities(dto)
             db.workoutTemplateDao().insertTemplate(aggregate.template)

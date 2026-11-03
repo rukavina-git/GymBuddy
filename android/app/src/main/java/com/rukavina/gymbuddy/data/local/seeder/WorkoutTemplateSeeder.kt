@@ -3,13 +3,18 @@ package com.rukavina.gymbuddy.data.local.seeder
 import android.content.Context
 import android.util.Log
 import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
+import androidx.room.withTransaction
+import com.rukavina.gymbuddy.data.local.dao.StarterPlanDao
 import com.rukavina.gymbuddy.data.local.dao.TemplateVersionDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
+import com.rukavina.gymbuddy.data.local.entity.StarterPlanEntity
+import com.rukavina.gymbuddy.data.local.entity.StarterPlanTemplateEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateVersionEntity
 import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
 import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
+import com.rukavina.gymbuddy.domain.model.TrainingDays
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -21,7 +26,6 @@ class WorkoutTemplateSeeder @Inject constructor(
     private val holder: DatabaseHolder
 ) {
     // Seeds whichever owner's file is current; the app runs it per new file.
-    private val workoutTemplateDao: WorkoutTemplateDao get() = holder.db.workoutTemplateDao()
     private val versionDao: TemplateVersionDao get() = holder.db.templateVersionDao()
 
     companion object {
@@ -57,8 +61,7 @@ class WorkoutTemplateSeeder @Inject constructor(
 
             if (currentVersion == null) {
                 Log.i(TAG, "First install: seeding bundled default templates v$bundledVersion")
-                seedDefaultTemplates(json)
-                versionDao.setVersion(TemplateVersionEntity(version = bundledVersion))
+                seedAll(json, bundledVersion)
                 return true
             } else {
                 Log.d(TAG, "Default templates already loaded (v$currentVersion); later updates come from the server")
@@ -76,10 +79,48 @@ class WorkoutTemplateSeeder @Inject constructor(
      */
     suspend fun forceReseed(context: Context) {
         val json = loadJsonFromAssets(context)
-        seedDefaultTemplates(json)
         val version = json.getInt("version")
-        versionDao.setVersion(TemplateVersionEntity(version = version))
+        seedAll(json, version)
         Log.i(TAG, "Forced reseed of default templates (v$version)")
+    }
+
+    /** Templates, starter plans and the version land together, or not at all. */
+    private suspend fun seedAll(json: JSONObject, version: Int) {
+        val db = holder.db
+        db.withTransaction {
+            seedDefaultTemplates(db.workoutTemplateDao(), json)
+            seedStarterPlans(db.starterPlanDao(), json)
+            db.templateVersionDao().setVersion(TemplateVersionEntity(version = version))
+        }
+    }
+
+    /** Plan 6 step 06: the bundle's "plans" replace whatever plans the file has. */
+    private suspend fun seedStarterPlans(dao: StarterPlanDao, json: JSONObject) {
+        dao.deleteAll()
+        val plansJson = json.optJSONArray("plans") ?: return
+        for (i in 0 until plansJson.length()) {
+            val planJson = plansJson.getJSONObject(i)
+            val planId = planJson.getString("id")
+            dao.insertPlans(
+                listOf(
+                    StarterPlanEntity(
+                        id = planId,
+                        title = planJson.getString("title"),
+                        description = planJson.optString("description").takeIf { it.isNotEmpty() },
+                        suggestedFor = planJson.optString("suggestedFor").takeIf { it.isNotEmpty() }
+                            ?.let { TrainingDays.valueOf(it) },
+                        displayOrder = i,
+                        deprecated = planJson.optBoolean("deprecated")
+                    )
+                )
+            )
+            val templateIds = planJson.getJSONArray("templateIds")
+            dao.insertPlanTemplates(
+                (0 until templateIds.length()).map {
+                    StarterPlanTemplateEntity(planId = planId, orderIndex = it, templateId = templateIds.getString(it))
+                }
+            )
+        }
     }
 
     /**
@@ -96,7 +137,7 @@ class WorkoutTemplateSeeder @Inject constructor(
      * Parse and insert default templates into the database.
      * Only inserts templates that don't already exist (by ID).
      */
-    private suspend fun seedDefaultTemplates(json: JSONObject) {
+    private suspend fun seedDefaultTemplates(workoutTemplateDao: WorkoutTemplateDao, json: JSONObject) {
         val templatesJson = json.getJSONArray("templates")
 
         for (i in 0 until templatesJson.length()) {

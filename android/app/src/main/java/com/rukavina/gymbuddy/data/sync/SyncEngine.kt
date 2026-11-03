@@ -264,7 +264,7 @@ class SyncEngine(
         }
         if (server.templateLibraryVersion != store.templateLibraryVersion()) {
             val library = call("reference templates") { apis.reference.getReferenceTemplates() }
-            store.replaceDefaultTemplates(library.version, library.templates)
+            store.replaceDefaultTemplates(library.version, library.templates, library.plans)
             templatesReplaced = true
         }
         return ReferenceSummary(exercisesReplaced, templatesReplaced)

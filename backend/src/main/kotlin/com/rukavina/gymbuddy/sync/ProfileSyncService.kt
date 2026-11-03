@@ -47,7 +47,8 @@ class ProfileSyncService(
                         joinedDate = it.joinedDate, bio = it.bio, experienceLevel = it.experienceLevel,
                         avatarId = it.avatarId, trainingDays = it.trainingDays,
                         healthDataConsentVersion = it.healthDataConsentVersion,
-                        healthDataConsentAt = it.healthDataConsentAt, revision = 0,
+                        healthDataConsentAt = it.healthDataConsentAt, activePlanId = it.activePlanId,
+                        revision = 0,
                     )
                 }
 
@@ -101,10 +102,12 @@ class ProfileSyncService(
         if ((dto.targetWeight ?: 0f) < 0f) return "targetWeight cannot be negative"
         if (dto.avatarId != null && !AVATAR_ID.matches(dto.avatarId)) return "avatarId must match ${AVATAR_ID.pattern}"
         if ((dto.healthDataConsentVersion?.length ?: 0) > 32) return "healthDataConsentVersion is longer than 32 characters"
+        if (dto.activePlanId != null && !UUID.matches(dto.activePlanId)) return "activePlanId must be a UUID"
         return null
     }
 
     private companion object {
         val AVATAR_ID = Regex("^[a-z0-9-]{1,32}$")
+        val UUID = Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     }
 }

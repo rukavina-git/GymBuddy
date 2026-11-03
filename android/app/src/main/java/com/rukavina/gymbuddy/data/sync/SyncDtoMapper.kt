@@ -24,6 +24,9 @@ import java.net.URI
 import java.util.UUID
 import com.rukavina.gymbuddy.data.local.entity.BodyWeightEntryEntity
 import com.rukavina.gymbuddy.data.remote.generated.models.BodyWeightEntry
+import com.rukavina.gymbuddy.data.remote.generated.models.StarterPlan
+import com.rukavina.gymbuddy.data.local.entity.StarterPlanEntity
+import com.rukavina.gymbuddy.data.local.entity.StarterPlanTemplateEntity
 import com.rukavina.gymbuddy.data.remote.generated.models.ActivityLevel as DtoActivityLevel
 import com.rukavina.gymbuddy.data.remote.generated.models.ExperienceLevel as DtoExperienceLevel
 import com.rukavina.gymbuddy.data.remote.generated.models.TrainingDays as DtoTrainingDays
@@ -333,6 +336,21 @@ object SyncDtoMapper {
         syncState = SyncState.SYNCED
     )
 
+    // ---- StarterPlan (reference data, pull only) ----
+
+    fun toEntities(d: StarterPlan, displayOrder: Int): Pair<StarterPlanEntity, List<StarterPlanTemplateEntity>> {
+        val id = d.id.toString()
+        val plan = StarterPlanEntity(
+            id = id,
+            title = d.title,
+            description = d.description,
+            suggestedFor = d.suggestedFor?.convert(),
+            displayOrder = displayOrder,
+            deprecated = d.deprecated
+        )
+        return plan to d.templateIds.mapIndexed { i, t -> StarterPlanTemplateEntity(planId = id, orderIndex = i, templateId = t.toString()) }
+    }
+
     // ---- Profile ----
 
     fun toDto(p: UserProfileEntity) = UserProfile(
@@ -356,6 +374,7 @@ object SyncDtoMapper {
         trainingDays = p.trainingDays?.convert<DtoTrainingDays>(),
         healthDataConsentVersion = p.healthDataConsentVersion,
         healthDataConsentAt = p.healthDataConsentAt,
+        activePlanId = p.activePlanId?.let(::uuid),
         deletedAt = p.deletedAt
     )
 
@@ -378,6 +397,7 @@ object SyncDtoMapper {
         trainingDays = d.trainingDays?.convert(),
         healthDataConsentVersion = d.healthDataConsentVersion,
         healthDataConsentAt = d.healthDataConsentAt,
+        activePlanId = d.activePlanId?.toString(),
         updatedAt = d.updatedAt,
         deletedAt = d.deletedAt,
         revision = d.revision,

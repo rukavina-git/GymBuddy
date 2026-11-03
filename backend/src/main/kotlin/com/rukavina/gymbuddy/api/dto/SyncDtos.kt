@@ -156,6 +156,7 @@ data class UserProfileSyncDto(
     val trainingDays: TrainingDays? = null,
     val healthDataConsentVersion: String? = null,
     val healthDataConsentAt: Long? = null,
+    val activePlanId: String? = null,
     val revision: Int = 0,
 )
 

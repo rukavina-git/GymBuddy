@@ -27,6 +27,9 @@ data class UserProfile(
     val healthDataConsentVersion: String? = null,
     val healthDataConsentAt: Long? = null,
 
+    /** The StarterPlan the user follows (decision 2A: synced with the profile). Soft reference. */
+    val activePlanId: String? = null,
+
     /**
      * When this row last changed locally, in epoch ms. Set from the
      * injected Clock at write time - see Exercise.updatedAt.

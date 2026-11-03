@@ -26,6 +26,7 @@ data class UserProfileDto(
     val trainingDays: TrainingDays? = null,
     val healthDataConsentVersion: String? = null,
     val healthDataConsentAt: Long? = null,
+    val activePlanId: String? = null,
     val updatedAt: Long,
     val deletedAt: Long?,
     val revision: Int,

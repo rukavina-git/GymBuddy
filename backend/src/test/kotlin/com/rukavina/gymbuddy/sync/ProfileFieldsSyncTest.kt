@@ -99,4 +99,24 @@ class ProfileFieldsSyncTest : AbstractPostgresIntegrationTest() {
         assertEquals(SyncStatus.INVALID, longVersion.results.single().status)
         assertNull(pull(uid).userProfile?.avatarId)
     }
+
+    @Test
+    fun `activePlanId pushes, comes back on pull and can be cleared`() {
+        val uid = newUid("active-plan")
+        val planId = "01a19f0f-dc18-7975-8b8f-61819042e23a"
+        push(uid, PushRequestDto(userProfile = SyncTestFixtures.userProfile().copy(activePlanId = planId)))
+        val pulled = pull(uid).userProfile!!
+        assertEquals(planId, pulled.activePlanId)
+
+        val cleared = push(uid, PushRequestDto(userProfile = SyncTestFixtures.userProfile().copy(revision = pulled.revision)))
+        assertEquals(SyncStatus.APPLIED, cleared.results.single().status)
+        assertNull(pull(uid).userProfile!!.activePlanId)
+    }
+
+    @Test
+    fun `an activePlanId that is not a UUID is INVALID`() {
+        val uid = newUid("active-plan-invalid")
+        val result = push(uid, PushRequestDto(userProfile = SyncTestFixtures.userProfile().copy(activePlanId = "full-body")))
+        assertEquals(SyncStatus.INVALID, result.results.single().status)
+    }
 }
