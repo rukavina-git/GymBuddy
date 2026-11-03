@@ -4,7 +4,7 @@
 - [x] 02 Guest mode (steps/02-guest-mode.md) — ab07df5
 - [x] 03 Auth gate (steps/03-auth-gate.md) — 12dd9ea
 - [x] 04 Body weight (steps/04-body-weight.md) — c60d997
-- [x] 05 Profile fields (steps/05-profile-fields.md) — HASH
+- [x] 05 Profile fields (steps/05-profile-fields.md) — 291c23b
 - [ ] 06 Plans + default templates
 - [ ] 07 Data export
 - [ ] 08 CI green, PR develop → main (me)
