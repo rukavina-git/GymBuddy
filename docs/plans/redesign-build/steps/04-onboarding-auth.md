@@ -78,3 +78,42 @@ Magic links. Privacy wording (roadmap 4.6).
 
 ## Done when
 android `testDebugUnitTest` and `assembleDebug` green. No manual checks.
+
+## Amendment 1: account-first (owner, 2026-11-03, after device check)
+Figma: Round 18 + 18b on "02 Rounds"
+https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=167-8931
+Owner picked option C plus the 18b split. Lock it into "03 Locked
+designs" (replacing the affected frames in 114:20520) before code.
+
+Decisions:
+- **Welcome:** lime "Create account", outline "I have an account",
+  text link "Continue without account" (→ setup as guest).
+- **Create account, split:** (1) "Create your account": Continue with
+  Google / Continue with email / "Already have an account? Sign in";
+  (2) email + password ("At least 8 characters", Show, paste and
+  password managers work, **no repeat-password field**); (3) consent
+  "Keep a copy on our servers?" with "Agree and create account" and
+  "Not now". The tap on Agree is the consent (no checkbox); recorded
+  as before (version + time). Terms line is plain text; links in 9.2.
+- **Setup step 5:** after the plan question, guests see screen (1)
+  with back, a 5-segment progress bar and "Not now". Not shown when
+  already signed in. Then "You're all set" (signed-in tip when made).
+- **Sign in:** no logo/wordmark, "Welcome back" as left headline
+  (32 Bold), Google and email buttons 48dp, fields 56dp, "Forgot
+  password?" small muted, "No account yet? Create one" link.
+- **Progress:** a spinner replaces the label of the tapped button while
+  Firebase answers.
+
+Code: Welcome, `SignInScreen` (sign-in only), new create-account route
+with three steps (method / email / consent), OnboardingViewModel gets
+step 5 and keeps the answers until the account exists, Settings guest
+entries point at the new route. Google on the create path: token →
+consent screen → sign-in (no probe needed; probe stays for Sign in).
+ADR 0014 gets a short note: guest is still always offered, accounts
+are now encouraged first (owner).
+
+Tests: create flow VM (method → email → consent; Not now keeps guest;
+consent parked only on Agree; Google token held until Agree), setup
+step 5 skipped when signed in, spinner state, UI tests for Welcome
+buttons and consent screen. Device check on the owner's phone (owner
+asked for it in this step).
