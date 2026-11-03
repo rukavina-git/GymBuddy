@@ -17,6 +17,7 @@ import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.seeder.ExerciseSeeder
 import com.rukavina.gymbuddy.data.local.seeder.WorkoutTemplateSeeder
 import com.rukavina.gymbuddy.data.sync.FirebaseAuthSession
+import com.rukavina.gymbuddy.data.sync.GuestMergeCoordinator
 import com.rukavina.gymbuddy.data.sync.SyncScheduler
 import com.rukavina.gymbuddy.data.sync.SyncTriggers
 import dagger.hilt.android.HiltAndroidApp
@@ -51,6 +52,9 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
     @Inject
     lateinit var databaseHolder: DatabaseHolder
 
+    @Inject
+    lateinit var guestMergeCoordinator: GuestMergeCoordinator
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override val workManagerConfiguration: Configuration
@@ -72,9 +76,9 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
         // startup); false only where Firebase isn't configured, e.g.
         // Robolectric tests booting this Application.
         if (FirebaseApp.getApps(this).isNotEmpty()) authSession.observeSignIn(
-            syncScheduler,
             crashReporter,
             switchOwner = { databaseHolder.switchTo(it) },
+            afterSwitch = { guestMergeCoordinator.onOwnerChanged(it) },
             scope = applicationScope
         )
 

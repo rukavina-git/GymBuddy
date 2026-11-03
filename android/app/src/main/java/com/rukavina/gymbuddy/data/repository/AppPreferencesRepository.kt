@@ -24,6 +24,17 @@ class AppPreferencesRepository @Inject constructor(
     private object PreferencesKeys {
         val SHOW_QUOTE_OF_THE_DAY = booleanPreferencesKey("show_quote_of_the_day")
         val PREFERRED_UNITS = stringPreferencesKey("preferred_units")
+        val IS_GUEST = booleanPreferencesKey("is_guest")
+    }
+
+    /**
+     * The user chose "Continue without account" (ADR 0014). Cleared when
+     * the guest's data merges into an account or is erased.
+     */
+    val isGuest: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.IS_GUEST] ?: false }
+
+    suspend fun setGuest(guest: Boolean) {
+        dataStore.edit { it[PreferencesKeys.IS_GUEST] = guest }
     }
 
     val showQuoteOfTheDay: Flow<Boolean> = dataStore.data

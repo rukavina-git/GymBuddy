@@ -60,6 +60,8 @@ import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.auth.PasswordToggleTextField
+import com.rukavina.gymbuddy.ui.guest.countsText
+import com.rukavina.gymbuddy.data.sync.LocalDataCounts
 import com.rukavina.gymbuddy.ui.components.ScreenHeader
 import kotlinx.coroutines.launch
 
@@ -105,6 +107,7 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var passwordDialogState by remember { mutableStateOf(PasswordDialogState()) }
+    var showEraseDialog by remember { mutableStateOf(false) }
     var deleteAccountDialogState by remember { mutableStateOf(DeleteAccountDialogState()) }
     val context = LocalContext.current
 
@@ -170,7 +173,7 @@ fun SettingsScreen(
                         item {
                             ProfileHeaderCard(
                                 name = uiState.userName,
-                                email = uiState.userEmail,
+                                email = if (uiState.isGuest) "Saved on this phone only" else uiState.userEmail,
                                 onClick = {
                                     bottomNavController.navigate(NavRoutes.Profile)
                                 }
@@ -225,8 +228,8 @@ fun SettingsScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
-                        // Account section
-                        item {
+                        // Account section (accounts only, ADR 0014)
+                        if (!uiState.isGuest) item {
                             SettingsSection {
                                 SettingsItemWithValue(
                                     icon = Icons.Default.Lock,
@@ -248,7 +251,7 @@ fun SettingsScreen(
                             }
                         }
 
-                        item {
+                        if (!uiState.isGuest) item {
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
@@ -279,7 +282,35 @@ fun SettingsScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
-                        item {
+                        // A guest signs in (the merge follows) or erases, instead of
+                        // logging out (ADR 0014). Plain entry until Plan 7.4.
+                        if (uiState.isGuest) item {
+                            Button(
+                                onClick = {
+                                    rootNavController.navigate(NavRoutes.Login) {
+                                        popUpTo(NavRoutes.Main) { inclusive = true }
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Sign in or create account")
+                            }
+                        }
+
+                        if (uiState.isGuest) item {
+                            Button(
+                                onClick = {
+                                    viewModel.loadEraseCounts()
+                                    showEraseDialog = true
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Text("Erase data on this phone", color = Color.White)
+                            }
+                        } else item {
                             Button(
                                 onClick = { showLogoutDialog = true },
                                 modifier = Modifier.fillMaxWidth(),
@@ -292,6 +323,18 @@ fun SettingsScreen(
                         }
                     }
             }
+        }
+
+        if (showEraseDialog) {
+            val counts by viewModel.eraseCounts.collectAsState()
+            EraseGuestDataDialog(
+                counts = counts,
+                onConfirm = {
+                    showEraseDialog = false
+                    viewModel.eraseGuestData()
+                },
+                onDismiss = { showEraseDialog = false }
+            )
         }
 
         SnackbarHost(
@@ -847,5 +890,28 @@ private fun DeleteAccountDialog(
                 Text("Cancel")
             }
         }
+    )
+}
+
+/** Plain erase confirmation for a guest; always says what goes ("Erase 14 workouts?"). */
+@Composable
+private fun EraseGuestDataDialog(
+    counts: LocalDataCounts?,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val what = counts?.let { if (it.isEmpty) "all data" else countsText(it) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(what?.let { "Erase $it?" } ?: "Erase data on this phone?") },
+        text = { Text("Everything on this phone is deleted. Without an account there's no other copy. This can't be undone.") },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                enabled = counts != null,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) { Text("Erase", color = Color.White) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }

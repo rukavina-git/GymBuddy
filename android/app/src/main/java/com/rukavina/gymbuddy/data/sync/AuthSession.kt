@@ -3,11 +3,11 @@ package com.rukavina.gymbuddy.data.sync
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.rukavina.gymbuddy.data.crash.CrashReporter
-import com.rukavina.gymbuddy.domain.sync.SyncReason
-import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -38,25 +38,29 @@ class FirebaseAuthSession(authProvider: () -> FirebaseAuth = { FirebaseAuth.getI
 
     override fun signOut() = auth.signOut()
 
+    private val uids = MutableStateFlow<String?>(null)
+
+    /** The signed-in uid as Firebase last reported it; set once [observeSignIn] runs. */
+    val signedInUid: StateFlow<String?> = uids.asStateFlow()
+
     /**
      * On every uid change, first opens that owner's database
-     * ([switchOwner], ADR 0014), then syncs if someone signed in, so a
-     * fresh install or a new account pulls its data straight away. Also
-     * keeps crash reports attributed to the signed-in uid, cleared on
-     * sign-out.
+     * ([switchOwner], ADR 0014), then runs [afterSwitch] (the sign-in
+     * sync and the guest merge). Also keeps crash reports attributed to
+     * the signed-in uid, cleared on sign-out.
      *
      * Changes are handled one at a time, in order; a quick A → B only
      * needs to end on B, so the flow conflates.
      */
     fun observeSignIn(
-        requester: SyncRequester,
         crashReporter: CrashReporter,
         switchOwner: suspend (uid: String?) -> Unit,
+        afterSwitch: suspend (uid: String?) -> Unit,
         scope: CoroutineScope
     ) {
         // Starts at the restored uid, which DatabaseHolder already opened:
-        // a cold start must not pass through the signed-out file.
-        val uids = MutableStateFlow(currentUid)
+        // a cold start must not pass through the guest file.
+        uids.value = currentUid
         var reportedUid: String? = null
         auth.addAuthStateListener { firebaseAuth ->
             val uid = firebaseAuth.currentUser?.uid
@@ -67,7 +71,7 @@ class FirebaseAuthSession(authProvider: () -> FirebaseAuth = { FirebaseAuth.getI
         scope.launch {
             uids.collect { uid ->
                 switchOwner(uid)
-                if (uid != null) requester.requestSync(SyncReason.SIGNED_IN)
+                afterSwitch(uid)
             }
         }
     }

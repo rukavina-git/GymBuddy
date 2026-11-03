@@ -5,7 +5,10 @@ import androidx.room.Room
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
+import com.rukavina.gymbuddy.data.sync.GuestMerge
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
 import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
 import com.rukavina.gymbuddy.data.sync.FakeAuthSession
@@ -80,7 +83,11 @@ class SettingsViewModelTest {
         repository = UserProfileRepository(DatabaseHolder.fixed(db), OutboxRecorder(DatabaseHolder.fixed(db), clock), clock),
         logoutCoordinator = coordinator,
         accountDeletionCoordinator = deletion,
-        appContext = org.robolectric.RuntimeEnvironment.getApplication()
+        appContext = org.robolectric.RuntimeEnvironment.getApplication(),
+        guestMerge = GuestMerge(DatabaseHolder.fixed(db)),
+        preferences = AppPreferencesRepository(
+            PreferenceDataStoreFactory.create(produceFile = { java.io.File.createTempFile("prefs", ".preferences_pb").also { it.delete() } })
+        )
     )
 
     private fun deletionCoordinator(deleteOnServer: suspend () -> Int) =

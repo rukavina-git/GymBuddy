@@ -48,7 +48,11 @@ class ProfileViewModel @Inject constructor(
     private val _logoutEvent = MutableSharedFlow<Unit>()
     val logoutEvent: SharedFlow<Unit> = _logoutEvent.asSharedFlow()
 
-    private val uid: String? = FirebaseAuth.getInstance().currentUser?.uid
+    // Read per call: the owner can change while this ViewModel lives (a
+    // guest signs in, or cancels a merge). A guest's profile is keyed
+    // GUEST_UID until it merges into an account (ADR 0014).
+    private val uid: String?
+        get() = FirebaseAuth.getInstance().currentUser?.uid ?: UserProfileRepository.GUEST_UID
 
     // Store the saved profile state for change tracking
     private var savedProfileState = ProfileUiState()

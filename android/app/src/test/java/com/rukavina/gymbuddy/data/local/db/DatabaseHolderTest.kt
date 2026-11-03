@@ -97,14 +97,16 @@ class DatabaseHolderTest {
     }
 
     @Test
-    fun `the previous file is closed after the switch`() = runBlocking {
+    fun `the previous file stays open until the next switch`() = runBlocking {
         val a = holder.db
         a.syncDao().outboxCount() // Room opens the file lazily
-        assertTrue(a.isOpen)
         holder.switchTo(null)
-        assertFalse(a.isOpen)
+        assertTrue("in-flight work on A can finish", a.isOpen)
         holder.db.syncDao().outboxCount()
-        assertTrue(File(tmp.root, "gym_buddy_signed_out.db").exists())
+        assertTrue(File(tmp.root, "gym_buddy_guest.db").exists())
+
+        holder.switchTo("uid-b")
+        assertFalse(a.isOpen)
     }
 
     @Test
@@ -220,6 +222,30 @@ class DatabaseHolderTest {
 
         assertNotNull(migrated.syncDao().getSessionIncludingDeleted(workout.id))
         assertEquals(1, migrated.syncDao().outboxCount())
+    }
+
+    @Test
+    fun `step 01's signed-out file becomes the guest file, side files first`() {
+        val dir = tmp.newFolder("signed-out")
+        File(dir, DatabaseHolder.SIGNED_OUT_FILE).writeText("main")
+        File(dir, "${DatabaseHolder.SIGNED_OUT_FILE}-wal").writeText("wal")
+
+        DatabaseHolder.migrateSignedOutFile { File(dir, it) }
+
+        assertFalse(File(dir, DatabaseHolder.SIGNED_OUT_FILE).exists())
+        assertEquals("main", File(dir, "gym_buddy_guest.db").readText())
+        assertEquals("wal", File(dir, "gym_buddy_guest.db-wal").readText())
+    }
+
+    @Test
+    fun `signed-out file never overwrites an existing guest file`() {
+        val dir = tmp.newFolder("both")
+        File(dir, DatabaseHolder.SIGNED_OUT_FILE).writeText("old")
+        File(dir, "gym_buddy_guest.db").writeText("guest")
+
+        DatabaseHolder.migrateSignedOutFile { File(dir, it) }
+
+        assertEquals("guest", File(dir, "gym_buddy_guest.db").readText())
     }
 
     private fun recordingApis(requests: MutableList<String>): SyncApis {

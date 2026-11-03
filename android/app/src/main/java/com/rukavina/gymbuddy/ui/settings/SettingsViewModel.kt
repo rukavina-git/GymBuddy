@@ -12,7 +12,10 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
+import com.rukavina.gymbuddy.data.sync.GuestMerge
+import com.rukavina.gymbuddy.data.sync.LocalDataCounts
 import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
 import com.rukavina.gymbuddy.data.sync.AccountDeletionResult
 import com.rukavina.gymbuddy.data.sync.LogoutCoordinator
@@ -35,7 +38,9 @@ data class SettingsUiState(
     val isLoading: Boolean = true,
     val hasPassword: Boolean = false,
     val isGoogleOnly: Boolean = false,
-    val hasGoogle: Boolean = false
+    val hasGoogle: Boolean = false,
+    /** No account (ADR 0014): no sign out, password or delete account; erase instead. */
+    val isGuest: Boolean = false
 )
 
 @HiltViewModel
@@ -43,7 +48,9 @@ class SettingsViewModel @Inject constructor(
     private val repository: UserProfileRepository,
     private val logoutCoordinator: LogoutCoordinator,
     private val accountDeletionCoordinator: AccountDeletionCoordinator,
-    @ApplicationContext private val appContext: Context
+    @ApplicationContext private val appContext: Context,
+    private val guestMerge: GuestMerge,
+    private val preferences: AppPreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -52,7 +59,9 @@ class SettingsViewModel @Inject constructor(
     private val _logoutEvent = MutableSharedFlow<Unit>()
     val logoutEvent: SharedFlow<Unit> = _logoutEvent.asSharedFlow()
 
-    private val uid: String? = FirebaseAuth.getInstance().currentUser?.uid
+    // Read per call: the owner can change while this ViewModel lives.
+    private val uid: String?
+        get() = FirebaseAuth.getInstance().currentUser?.uid ?: UserProfileRepository.GUEST_UID
 
     init {
         loadProfile()
@@ -72,6 +81,7 @@ class SettingsViewModel @Inject constructor(
             val hasPassword = providers.contains(EmailAuthProvider.PROVIDER_ID)
             val hasGoogle = providers.contains(GoogleAuthProvider.PROVIDER_ID)
             val isGoogleOnly = hasGoogle && !hasPassword
+            val isGuest = user == null
 
             uid?.let { userId ->
                 val profile = repository.getProfile(userId)
@@ -82,7 +92,8 @@ class SettingsViewModel @Inject constructor(
                         isLoading = false,
                         hasPassword = hasPassword,
                         isGoogleOnly = isGoogleOnly,
-                        hasGoogle = hasGoogle
+                        hasGoogle = hasGoogle,
+                        isGuest = isGuest
                     )
                 } else {
                     SettingsUiState(
@@ -91,7 +102,8 @@ class SettingsViewModel @Inject constructor(
                         isLoading = false,
                         hasPassword = hasPassword,
                         isGoogleOnly = isGoogleOnly,
-                        hasGoogle = hasGoogle
+                        hasGoogle = hasGoogle,
+                        isGuest = isGuest
                     )
                 }
             } ?: run {
@@ -101,8 +113,37 @@ class SettingsViewModel @Inject constructor(
                     isLoading = false,
                     hasPassword = hasPassword,
                     isGoogleOnly = isGoogleOnly,
-                    hasGoogle = hasGoogle
+                    hasGoogle = hasGoogle,
+                    isGuest = isGuest
                 )
+            }
+        }
+    }
+
+    private val _eraseCounts = MutableStateFlow<LocalDataCounts?>(null)
+    /** The guest's counts for the erase confirmation; null until loaded. */
+    val eraseCounts: StateFlow<LocalDataCounts?> = _eraseCounts
+
+    /** Call when the guest's erase confirmation opens. */
+    fun loadEraseCounts() {
+        _eraseCounts.value = null
+        viewModelScope.launch { _eraseCounts.value = guestMerge.openCounts() }
+    }
+
+    /**
+     * "Erase data on this phone" for a guest (ADR 0014): the logout wipe on
+     * the guest's file. Ends like a logout, on the Login screen.
+     */
+    fun eraseGuestData() {
+        viewModelScope.launch {
+            try {
+                guestMerge.eraseGuest()
+                preferences.setGuest(false)
+                _logoutEvent.emit(Unit)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "erase failed", e)
             }
         }
     }

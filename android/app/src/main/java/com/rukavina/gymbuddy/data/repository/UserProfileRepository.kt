@@ -32,4 +32,11 @@ class UserProfileRepository @Inject constructor(
     suspend fun getProfile(uid: String): UserProfile? =
         holder.db.userProfileDao().getUserProfile(uid)?.let { UserProfileMapper.toDomain(it) }
 
+    companion object {
+        /**
+         * The guest's profile key (ADR 0014). Local only: a guest never
+         * pushes, and a merge re-keys the row to the account's uid.
+         */
+        const val GUEST_UID = "guest"
+    }
 }

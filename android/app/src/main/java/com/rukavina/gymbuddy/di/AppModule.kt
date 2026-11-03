@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.db.applyAppConfig
@@ -35,8 +37,12 @@ object AppModule {
 
     /**
      * One Room file per data owner (ADR 0014). Opens the signed-in uid's
-     * file (or the signed-out one) and moves the pre-Plan-6 file first.
-     * FirebaseAuth restores the signed-in user synchronously at startup.
+     * file (or the guest's) and moves older files first. FirebaseAuth
+     * restores the signed-in user synchronously at startup.
+     *
+     * The pre-Plan-6 file is only moved when Firebase is known to be up:
+     * a null uid then really means signed out, not "Firebase failed", so
+     * deleting it can't lose a signed-in user's data.
      */
     @Provides
     @Singleton
@@ -44,13 +50,21 @@ object AppModule {
         @ApplicationContext appContext: Context,
         auth: AuthSession
     ): DatabaseHolder {
+        val pathOf = { name: String -> appContext.getDatabasePath(name) }
         val uid = auth.currentUid
-        DatabaseHolder.migrateLegacyFile({ appContext.getDatabasePath(it) }, uid)
-        return DatabaseHolder(uid, open = { owner ->
-            Room.databaseBuilder(appContext, AppDatabase::class.java, DatabaseHolder.fileName(owner))
-                .applyAppConfig()
-                .build()
-        })
+        val firebaseUp = FirebaseApp.getApps(appContext).isNotEmpty() &&
+            runCatching { FirebaseAuth.getInstance() }.isSuccess
+        if (firebaseUp) DatabaseHolder.migrateLegacyFile(pathOf, uid)
+        DatabaseHolder.migrateSignedOutFile(pathOf)
+        return DatabaseHolder(
+            uid,
+            open = { owner ->
+                Room.databaseBuilder(appContext, AppDatabase::class.java, DatabaseHolder.fileName(owner))
+                    .applyAppConfig()
+                    .build()
+            },
+            files = DatabaseHolder.OwnerFiles.inDirectory(pathOf)
+        )
     }
 
     // Repositories

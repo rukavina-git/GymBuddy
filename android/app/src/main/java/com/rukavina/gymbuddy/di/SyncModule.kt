@@ -14,6 +14,11 @@ import com.rukavina.gymbuddy.data.sync.SyncLocalStore
 import com.rukavina.gymbuddy.data.sync.SyncScheduler
 import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
+import com.google.firebase.auth.FirebaseAuth
+import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
+import com.rukavina.gymbuddy.data.sync.GuestMerge
+import com.rukavina.gymbuddy.data.sync.GuestMergeCoordinator
+import com.rukavina.gymbuddy.domain.sync.SyncReason
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -95,5 +100,26 @@ object SyncModule {
         deleteProfileImages = { File(context.filesDir, "profile_images").deleteRecursively() },
         auth = auth,
         runExclusive = { block -> engine.exclusive(block) }
+    )
+
+    @Provides
+    @Singleton
+    fun provideGuestMerge(holder: DatabaseHolder) = GuestMerge(holder)
+
+    @Provides
+    @Singleton
+    fun provideGuestMergeCoordinator(
+        merge: GuestMerge,
+        scheduler: SyncScheduler,
+        auth: AuthSession,
+        preferences: AppPreferencesRepository
+    ) = GuestMergeCoordinator(
+        merge,
+        syncNow = { scheduler.syncNow(SyncReason.SIGNED_IN) },
+        requestSync = { scheduler.requestSync(SyncReason.SIGNED_IN) },
+        currentUid = { auth.currentUid },
+        accountEmail = { runCatching { FirebaseAuth.getInstance().currentUser?.email }.getOrNull() },
+        signOut = { auth.signOut() },
+        setGuest = { preferences.setGuest(it) }
     )
 }
