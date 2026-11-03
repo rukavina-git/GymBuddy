@@ -6,7 +6,7 @@
 - [x] 03 App frame (steps/03-app-frame.md) — d69ddbd
 - [x] 04 Onboarding + auth (steps/04-onboarding-auth.md) — 6781df5
 - [x] 05a Home + Workouts tab + template page (steps/05-home-templates.md) — f609339
-- [x] 05b Template editor + exercise picker (steps/05-home-templates.md) — HASH
+- [x] 05b Template editor + exercise picker (steps/05-home-templates.md) — 803691f
 - [ ] 06 Active workout
 - [ ] 07 Exercise page + create
 - [ ] 08 Progress tab
