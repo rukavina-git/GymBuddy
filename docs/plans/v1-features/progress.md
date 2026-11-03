@@ -163,8 +163,13 @@
     CONFLICT (storedContent covers them today).
   - The per-field save path (saveProfileToDatabase) has no test; it
     now also keeps deletedAt from the stored row.
-- Open: push answers 500 (not 400) for an unreadable body. Spec change
-  to fix; candidate for the cleanup before step 08.
+- Fixed (cleanup before 08): an unreadable push body now answers 400
+  VALIDATION_FAILED (GlobalExceptionHandler, SyncUnreadableBodyTest).
+  No spec change: push already listed 400 BadRequest. Android still
+  retries a 400 like any failed sync (no client change).
+  Reviewer nits (not fixed): enum test body lacks required profile
+  fields; no assert on the generic message; handler logs Jackson's
+  message (may echo a sent value) at info, cursor handler uses debug.
 - From 06 (reviewer, not fixed):
   - The seeder only seeds when no version is stored. A guest file seeded
     at v5 never syncs, so it never gets plans or the deprecations. Plan 7
