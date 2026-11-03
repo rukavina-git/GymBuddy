@@ -18,6 +18,17 @@
     <string name="tab_progress">Progress</string>
     <string name="tab_you">You</string>
     <string name="tag_pr">PR</string>
+    <string name="cd_decrease">Decrease</string>
+    <string name="cd_increase">Increase</string>
+    <string name="cd_backspace">Delete last digit</string>
+    <string name="keypad_cancel">Cancel</string>
+    <string name="keypad_next">Next</string>
+    <string name="state_set_done">Done</string>
+    <string name="state_set_upcoming">Not done yet</string>
+    <string name="week_day_rest">%1$s, no workout</string>
+    <string name="week_day_done">%1$s, worked out</string>
+    <string name="week_day_today">%1$s, today, no workout yet</string>
+    <string name="week_day_today_done">%1$s, today, worked out</string>
 
     <string name="default_web_client_id">740806913339-pl47aju2kugtjoih804gcscf2fc26e71.apps.googleusercontent.com</string>
 </resources>

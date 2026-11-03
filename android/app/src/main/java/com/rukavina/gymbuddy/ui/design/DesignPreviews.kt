@@ -147,3 +147,42 @@ private fun BottomSheetPreview() = Board {
         ListRow("Bench press", subtitle = "Chest · Barbell", onClick = {})
     }
 }
+
+@Preview(widthDp = 412)
+@Composable
+private fun WorkoutPreview() = Board {
+    SetRow("Set 1", "80 kg × 8", SetState.Done)
+    RestLine("1:24 rest")
+    SetRow("Set 2", "80 kg × 8", SetState.Upcoming)
+    SetCard("Set 4") {
+        ValuePanel("82.5", "kg", editing = true, onClick = {}, onMinus = {}, onPlus = {},
+            modifier = Modifier.weight(1f), step = "± 2.5 kg")
+        ValuePanel("8", "reps", editing = false, onClick = {}, onMinus = {}, onPlus = {},
+            modifier = Modifier.weight(1f), minusEnabled = false)
+    }
+}
+
+@Preview(widthDp = 412)
+@Composable
+private fun KeypadPreview() = Board {
+    Keypad("Set 3 · weight", "82.5", "kg", onInput = {})
+}
+
+@Preview(widthDp = 412)
+@Composable
+private fun DataPreview() = Board {
+    LiveBar("Push A · Bench press", "Set 3 of 4 · 38:12", progress = 0.22f, onClick = {})
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        StatTile("52 min", "time")
+        StatTile("12 400 kg", "volume")
+    }
+    val states = listOf(
+        WeekDayState.Rest, WeekDayState.Done, WeekDayState.Rest, WeekDayState.Done,
+        WeekDayState.Rest, WeekDayState.Done, WeekDayState.Today,
+    )
+    WeekStrip(
+        days = "MTWTFSS".mapIndexed { i, c -> WeekDayUi(c.toString(), "Day ${i + 1}", states[i]) },
+        summary = "3 workouts · 2 h 41 m",
+        onClick = {},
+    )
+}

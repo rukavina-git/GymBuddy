@@ -2,7 +2,7 @@
 
 - [x] 01 Theme (steps/01-theme.md) — b8a0806
 - [x] 02a Icons + general components (steps/02-components.md) — d8049bc
-- [ ] 02b Workout + data components (steps/02-components.md)
+- [x] 02b Workout + data components (steps/02-components.md) — HASH
 - [ ] 03 App frame
 - [ ] 04 Onboarding + auth
 - [ ] 05 Home + Templates
@@ -43,7 +43,35 @@
   Surface skips it), so it lays out 48 high, drawn 36.
 - 02a: Roadmap 7.2 stays unticked until 02b lands.
 
+- 02b: Steppers live inside `ValuePanel` (Figma), not on `SetCard`;
+  `SetCard` takes a `panels` RowScope slot. Editing panel shows `step`.
+- 02b: No Decimal key type in Figma; `KeypadKey(input)` renders
+  Digit/Decimal as text (locale separator), Backspace as icon.
+- 02b: RestLine is muted `bodySmall` + timer icon (DESIGN.md "quiet
+  muted line" over Figma's text-colour title-small; owner OK).
+- 02b: StatTile uses `stat-value` (DESIGN.md), Figma had title-large.
+- 02b: LiveBar has the Figma lime open pill (not in the step file);
+  progress line drawn along the top edge.
+- 02b: Keypad is sheet content only (no handle/title). AppBottomSheet
+  needs a title, so 7.6 needs a titleless variant or uses the label.
+
 ## Gotchas
+- From 02b (reviewer, not fixed):
+  - ValuePanel steppers on a 360dp phone: two 64dp keys need 128dp but
+    each panel gets ~120dp in SetCard. Fix in 7.6 (smaller gap/keys or
+    stacked panels) before building the workout screen.
+  - ValuePanel steppers have no per-panel content description (TalkBack
+    says "Decrease" twice); add e.g. "Decrease weight" in 7.6.
+  - Raw dp (Keypad 76/20/40, SetMark 28, Rest icon 16, LiveBar 60/44/3,
+    StatTile 14/2, day dot 36) aren't in DESIGN.md §4 yet; add rows.
+    LiveBar 3dp = `dimens.strokeMark`.
+  - Decimal key uses JVM default locale, not LocalConfiguration; the
+    7.6 parser must accept "." and ",".
+  - LiveBar subtitle lacks ellipsis; WeekStrip 7-day require untested.
+- Flaky: ui/workout ViewModel tests sometimes fail with "Dispatchers.Main
+  is used concurrently with setting it" (MainDispatcherRule.resetMain).
+  Reproduces without 02b; likely Robolectric Compose tests leaking a
+  Main reader. Rerun passes; fix before CI gates.
 - From 02a (reviewer): all five fixed after the step (nav icon test via
   `navIcon()`, text field label merged into the field for TalkBack,
   snackbar dismiss ×, focus ring on banner/snackbar actions, previews

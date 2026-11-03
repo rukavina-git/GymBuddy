@@ -70,3 +70,61 @@ logic (7.6). Light mode. Drag reorder library.
 
 ## Done when
 android `testDebugUnitTest` and `assembleDebug` green. No manual checks.
+
+---
+
+# 02b Workout + data components
+
+## Problem
+02a landed the general parts. The workout and data parts from
+"01 System" are still missing, and 7.5, 7.6, 7.8 and 7.9 build from
+them. Roadmap 7.2 (ticked when 02b lands). **No spec change, no Room
+schema change.**
+Figma: Components https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/GymBuddy?node-id=151-3214
+(SetRow, RestLine, ValuePanel, StepperKey, SetCard, KeypadKey, Keypad,
+LiveBar, StatTile, WeekDay/WeekStrip). Active workout frame for
+context: node 67:6561.
+Specs: design/components.md, DESIGN.md §4 (StepperKey 64×56), §5 rest,
+motion.md rows 1, 5, 6 and haptics table.
+
+## Change
+- `ui/design/Workout.kt`:
+  - `SetRow` Done / Upcoming (48 min, D13) · set label · value text;
+    radius 12 (D8). Sets/reps/kg biggest; no swipe yet (7.6).
+  - `RestLine` value only, quieter type/colour than SetRow.
+  - `ValuePanel` Default / Editing (lime line) · number (tnum) · unit;
+    clickable, `onClick`.
+  - `StepperKey` Minus / Plus · enabled · 64×56, `pressScale`,
+    `KEYBOARD_TAP`-style haptic via `rememberHaptics()`.
+  - `SetCard` title + two ValuePanel slots + StepperKeys, cobalt ring.
+- `ui/design/Keypad.kt`:
+  - `KeypadKey` Digit / Decimal / Backspace · 56 high · press scale,
+    keyboard-tap haptic.
+  - `Keypad` content (label, value, unit, 4×3 grid, Cancel + Next 56,
+    D11) as a stateless composable emitting `KeypadInput` events
+    (Digit(n), Decimal, Backspace, Next, Cancel). Sheet wrapping uses
+    02a `AppBottomSheet`. Parsing/validation stays in 7.6.
+- `ui/design/Data.kt`:
+  - `LiveBar` title · subtitle · lime progress line (0..1), clickable.
+  - `StatTile` value (`statValue`) · label · 72 high (D7).
+  - `WeekDay` Rest / Done / Today / TodayDone + `WeekStrip` (7 days).
+- Previews for each in `DesignPreviews.kt`. Tokens only; raw sizes only
+  from DESIGN.md §4.
+- No old `ui/components/` deleted here (NumberPicker goes with 7.6).
+
+## Tests
+- Compose UI tests (Robolectric), added to DesignComponentsTest or a
+  new WorkoutComponentsTest:
+  - Keypad: each key emits the right `KeypadInput`; Next/Cancel too.
+  - StepperKey: click calls onClick; disabled not clickable; 48dp+.
+  - ValuePanel: editing state exposed in semantics (selected).
+  - WeekDay: each state has a distinct content description.
+  - LiveBar: progress semantics (ProgressBarRangeInfo) and click.
+- Existing tests stay green.
+
+## Out of scope
+Using the parts in screens (7.3+). Swipe-to-delete, undo, keypad value
+parsing, the "set lands" animation (7.6). Charts (7.8).
+
+## Done when
+android `testDebugUnitTest` and `assembleDebug` green. No manual checks.
