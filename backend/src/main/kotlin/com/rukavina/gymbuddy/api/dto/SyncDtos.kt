@@ -10,6 +10,8 @@ import com.rukavina.gymbuddy.domain.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.ExerciseType
 import com.rukavina.gymbuddy.domain.FitnessGoal
 import com.rukavina.gymbuddy.domain.Gender
+import com.rukavina.gymbuddy.domain.TrainingDays
+import com.rukavina.gymbuddy.domain.ExperienceLevel
 import com.rukavina.gymbuddy.domain.MuscleGroup
 import com.rukavina.gymbuddy.domain.SetType
 import com.rukavina.gymbuddy.domain.SyncStatus
@@ -149,6 +151,11 @@ data class UserProfileSyncDto(
     val targetWeight: Float?,
     val joinedDate: Long,
     val bio: String?,
+    val experienceLevel: ExperienceLevel? = null,
+    val avatarId: String? = null,
+    val trainingDays: TrainingDays? = null,
+    val healthDataConsentVersion: String? = null,
+    val healthDataConsentAt: Long? = null,
     val revision: Int = 0,
 )
 

@@ -4,7 +4,9 @@ import com.rukavina.gymbuddy.api.dto.UserProfileDto
 import com.rukavina.gymbuddy.api.dto.UserProfileSyncDto
 import com.rukavina.gymbuddy.domain.ActivityLevel
 import com.rukavina.gymbuddy.domain.FitnessGoal
+import com.rukavina.gymbuddy.domain.ExperienceLevel
 import com.rukavina.gymbuddy.domain.Gender
+import com.rukavina.gymbuddy.domain.TrainingDays
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
@@ -24,8 +26,9 @@ class UserProfileRepository(private val jdbcTemplate: NamedParameterJdbcTemplate
     fun findByOwner(ownerId: String): UserProfileDto? {
         val sql = """
             SELECT uid, name, email, profile_image_url, birth_date, weight, height, gender,
-                   fitness_goal, activity_level, target_weight, joined_date, bio, updated_at,
-                   deleted_at, revision
+                   fitness_goal, activity_level, target_weight, joined_date, bio, experience_level,
+                   avatar_id, training_days, health_data_consent_version, health_data_consent_at,
+                   updated_at, deleted_at, revision
             FROM user_profile
             WHERE uid = :ownerId
         """.trimIndent()
@@ -77,7 +80,9 @@ class UserProfileRepository(private val jdbcTemplate: NamedParameterJdbcTemplate
             SET name = :name, email = :email, profile_image_url = :profileImageUrl, birth_date = :birthDate,
                 weight = :weight, height = :height, gender = :gender, fitness_goal = :fitnessGoal,
                 activity_level = :activityLevel, target_weight = :targetWeight, joined_date = :joinedDate,
-                bio = :bio, updated_at = :now, revision = :newRevision
+                bio = :bio, experience_level = :experienceLevel, avatar_id = :avatarId,
+                training_days = :trainingDays, health_data_consent_version = :consentVersion,
+                health_data_consent_at = :consentAt, updated_at = :now, revision = :newRevision
             WHERE uid = :uid
         """.trimIndent()
         val params = MapSqlParameterSource()
@@ -94,6 +99,11 @@ class UserProfileRepository(private val jdbcTemplate: NamedParameterJdbcTemplate
             .addValue("targetWeight", dto.targetWeight)
             .addValue("joinedDate", dto.joinedDate)
             .addValue("bio", dto.bio)
+            .addValue("experienceLevel", dto.experienceLevel?.name)
+            .addValue("avatarId", dto.avatarId)
+            .addValue("trainingDays", dto.trainingDays?.name)
+            .addValue("consentVersion", dto.healthDataConsentVersion)
+            .addValue("consentAt", dto.healthDataConsentAt)
             .addValue("now", now)
             .addValue("newRevision", newRevision)
         jdbcTemplate.update(sql, params)
@@ -113,6 +123,11 @@ class UserProfileRepository(private val jdbcTemplate: NamedParameterJdbcTemplate
         targetWeight = rs.getNullableFloat("target_weight"),
         joinedDate = rs.getLong("joined_date"),
         bio = rs.getString("bio"),
+        experienceLevel = rs.getString("experience_level")?.let { ExperienceLevel.valueOf(it) },
+        avatarId = rs.getString("avatar_id"),
+        trainingDays = rs.getString("training_days")?.let { TrainingDays.valueOf(it) },
+        healthDataConsentVersion = rs.getString("health_data_consent_version"),
+        healthDataConsentAt = rs.getNullableLong("health_data_consent_at"),
         updatedAt = rs.getLong("updated_at"),
         deletedAt = rs.getNullableLong("deleted_at"),
         revision = rs.getInt("revision"),

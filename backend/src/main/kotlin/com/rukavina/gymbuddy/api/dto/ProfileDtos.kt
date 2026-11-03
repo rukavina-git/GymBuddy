@@ -2,7 +2,9 @@ package com.rukavina.gymbuddy.api.dto
 
 import com.rukavina.gymbuddy.domain.ActivityLevel
 import com.rukavina.gymbuddy.domain.FitnessGoal
+import com.rukavina.gymbuddy.domain.ExperienceLevel
 import com.rukavina.gymbuddy.domain.Gender
+import com.rukavina.gymbuddy.domain.TrainingDays
 
 /** Mirrors the UserProfile schema in api/openapi.yaml. */
 data class UserProfileDto(
@@ -19,6 +21,11 @@ data class UserProfileDto(
     val targetWeight: Float?,
     val joinedDate: Long,
     val bio: String?,
+    val experienceLevel: ExperienceLevel? = null,
+    val avatarId: String? = null,
+    val trainingDays: TrainingDays? = null,
+    val healthDataConsentVersion: String? = null,
+    val healthDataConsentAt: Long? = null,
     val updatedAt: Long,
     val deletedAt: Long?,
     val revision: Int,

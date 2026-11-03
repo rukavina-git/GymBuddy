@@ -168,7 +168,9 @@ class ProfileViewModel @Inject constructor(
                 // existing profile first, same as saveProfileToDatabase.
                 val existingProfile = repository.getProfile(userId)
 
-                val profile = UserProfile(
+                // Start from the stored row so fields this screen doesn't
+                // edit (experience, avatar, consent: step 05) survive.
+                val profile = (existingProfile ?: UserProfile(uid = userId, name = "", email = "", joinedDate = clock.millis())).copy(
                     uid = userId,
                     name = currentState.name,
                     email = currentState.email,
@@ -280,7 +282,9 @@ class ProfileViewModel @Inject constructor(
                 // isn't clobbered on every field save.
                 val existingProfile = repository.getProfile(userId)
 
-                val profile = UserProfile(
+                // Start from the stored row so fields this screen doesn't
+                // edit (experience, avatar, consent: step 05) survive.
+                val profile = (existingProfile ?: UserProfile(uid = userId, name = "", email = "", joinedDate = clock.millis())).copy(
                     uid = userId,
                     name = currentState.name.ifBlank { "User" },
                     email = currentState.email,

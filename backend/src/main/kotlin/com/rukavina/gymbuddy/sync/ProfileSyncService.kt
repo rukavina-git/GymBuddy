@@ -44,7 +44,10 @@ class ProfileSyncService(
                         name = it.name, email = it.email, profileImageUrl = it.profileImageUrl,
                         birthDate = it.birthDate, weight = it.weight, height = it.height, gender = it.gender,
                         fitnessGoal = it.fitnessGoal, activityLevel = it.activityLevel, targetWeight = it.targetWeight,
-                        joinedDate = it.joinedDate, bio = it.bio, revision = 0,
+                        joinedDate = it.joinedDate, bio = it.bio, experienceLevel = it.experienceLevel,
+                        avatarId = it.avatarId, trainingDays = it.trainingDays,
+                        healthDataConsentVersion = it.healthDataConsentVersion,
+                        healthDataConsentAt = it.healthDataConsentAt, revision = 0,
                     )
                 }
 
@@ -96,6 +99,12 @@ class ProfileSyncService(
         if ((dto.weight ?: 0f) < 0f) return "weight cannot be negative"
         if ((dto.height ?: 0f) < 0f) return "height cannot be negative"
         if ((dto.targetWeight ?: 0f) < 0f) return "targetWeight cannot be negative"
+        if (dto.avatarId != null && !AVATAR_ID.matches(dto.avatarId)) return "avatarId must match ${AVATAR_ID.pattern}"
+        if ((dto.healthDataConsentVersion?.length ?: 0) > 32) return "healthDataConsentVersion is longer than 32 characters"
         return null
+    }
+
+    private companion object {
+        val AVATAR_ID = Regex("^[a-z0-9-]{1,32}$")
     }
 }

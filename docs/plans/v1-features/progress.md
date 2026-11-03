@@ -4,7 +4,7 @@
 - [x] 02 Guest mode (steps/02-guest-mode.md) — ab07df5
 - [x] 03 Auth gate (steps/03-auth-gate.md) — 12dd9ea
 - [x] 04 Body weight (steps/04-body-weight.md) — c60d997
-- [ ] 05 Profile fields
+- [x] 05 Profile fields (steps/05-profile-fields.md) — HASH
 - [ ] 06 Plans + default templates
 - [ ] 07 Data export
 - [ ] 08 CI green, PR develop → main (me)
@@ -45,6 +45,17 @@
   Flyway V5, Room v28 (MIGRATION_27_28, 28.json).
 - 04: The backend also checks `measuredAt > 0`; the spec has no
   `minimum` for it.
+- 05: Spec (said out loud): UserProfile gains experienceLevel, avatarId,
+  trainingDays, healthDataConsentVersion, healthDataConsentAt; enums
+  ExperienceLevel, TrainingDays; profileImageUrl marked deprecated.
+  Flyway V6, Room v29 (MIGRATION_28_29, 29.json).
+- 05: A bad enum isn't INVALID as the step said: Jackson rejects it
+  first and the server answers 500 for any unreadable push body (also
+  for Gender etc., older than this step). Fixing it needs a 400 on the
+  push endpoint in the spec. Not done; test dropped.
+- 05: ProfileViewModel saves start from the stored row (so new fields
+  survive). The Plan 4 note "inject AuthSession" was already covered by
+  step 03 (uid from the data owner).
 
 ## Gotchas
 - From 01 (reviewer, not fixed):
@@ -119,4 +130,14 @@
   - A tombstone with an out-of-range weight hits the DB CHECK → ERROR
     (retried forever), not INVALID. Android can't send one today.
 - Step 07 (export) must include body weight entries.
+- From 05 (reviewer, not fixed):
+  - A pre-05 app build pushing its profile sends no new fields, and the
+    server overwrites them with null (incl. the consent record). Fine
+    while no such build is out; otherwise keep stored values on omit.
+  - No backend test that a replay changing only a new field is a
+    CONFLICT (storedContent covers them today).
+  - The per-field save path (saveProfileToDatabase) has no test; it
+    now also keeps deletedAt from the stored row.
+- Open: push answers 500 (not 400) for an unreadable body. Spec change
+  to fix; candidate for the cleanup before step 08.
 

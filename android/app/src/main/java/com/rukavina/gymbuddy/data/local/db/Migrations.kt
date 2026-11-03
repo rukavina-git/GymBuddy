@@ -26,9 +26,20 @@ val MIGRATION_27_28 = object : Migration(27, 28) {
     }
 }
 
+/** v29: profile fields for onboarding and You (Plan 6 step 05). All nullable. */
+val MIGRATION_28_29 = object : Migration(28, 29) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `user_profile` ADD COLUMN `experienceLevel` TEXT")
+        db.execSQL("ALTER TABLE `user_profile` ADD COLUMN `avatarId` TEXT")
+        db.execSQL("ALTER TABLE `user_profile` ADD COLUMN `trainingDays` TEXT")
+        db.execSQL("ALTER TABLE `user_profile` ADD COLUMN `healthDataConsentVersion` TEXT")
+        db.execSQL("ALTER TABLE `user_profile` ADD COLUMN `healthDataConsentAt` INTEGER")
+    }
+}
+
 /**
  * Every schema migration, in version order. v26 is the baseline
  * (app/schemas/.../26.json); each version bump adds its Migration here
  * and a MigrationTestHelper test.
  */
-val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_26_27, MIGRATION_27_28)
+val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29)

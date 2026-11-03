@@ -1308,7 +1308,11 @@ components:
         profileImageUrl:
           type: [string, "null"]
           format: uri
-          description: URL to the user's profile image.
+          deprecated: true
+          description: |
+            Deprecated: no photos in v1, profiles use avatarId. The server
+            may still fill it from the sign-in provider; clients send null
+            and don't display it.
         birthDate:
           type: [integer, "null"]
           format: int64
@@ -1344,6 +1348,33 @@ components:
         bio:
           type: [string, "null"]
           description: Free-text profile bio.
+        experienceLevel:
+          oneOf:
+            - $ref: '#/components/schemas/ExperienceLevel'
+            - type: 'null'
+        avatarId:
+          type: [string, "null"]
+          pattern: '^[a-z0-9-]{1,32}$'
+          description: |
+            Preset avatar id, e.g. "cat". The client owns the list of
+            avatars; the server only checks the format. Null means the
+            client's default.
+        trainingDays:
+          oneOf:
+            - $ref: '#/components/schemas/TrainingDays'
+            - type: 'null'
+        healthDataConsentVersion:
+          type: [string, "null"]
+          maxLength: 32
+          description: |
+            Version of the health-data consent text the user agreed to at
+            account creation, e.g. "2026-11". Null: no consent recorded.
+            Recorded only; whether sync requires it is decided in the
+            privacy pass.
+        healthDataConsentAt:
+          type: [integer, "null"]
+          format: int64
+          description: When the user gave that consent, epoch milliseconds (client time).
         updatedAt:
           type: integer
           format: int64
@@ -1501,6 +1532,27 @@ components:
         - MAINTAIN
         - GENERAL_FITNESS
         - IMPROVE_ENDURANCE
+
+    ExperienceLevel:
+      type: string
+      description: |
+        How long the user has been lifting, as asked in onboarding:
+        NEW ("New to lifting", under 6 months), SOME ("Some experience"),
+        EXPERIENCED ("Years of training").
+      enum:
+        - NEW
+        - SOME
+        - EXPERIENCED
+
+    TrainingDays:
+      type: string
+      description: |
+        Days a week the user can train, as the bucket onboarding offers.
+        Null on the profile means "Not sure yet".
+      enum:
+        - ONE_TO_THREE
+        - FOUR
+        - FIVE_TO_SEVEN
 
     ActivityLevel:
       type: string

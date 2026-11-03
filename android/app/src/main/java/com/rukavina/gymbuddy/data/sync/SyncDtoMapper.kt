@@ -25,6 +25,8 @@ import java.util.UUID
 import com.rukavina.gymbuddy.data.local.entity.BodyWeightEntryEntity
 import com.rukavina.gymbuddy.data.remote.generated.models.BodyWeightEntry
 import com.rukavina.gymbuddy.data.remote.generated.models.ActivityLevel as DtoActivityLevel
+import com.rukavina.gymbuddy.data.remote.generated.models.ExperienceLevel as DtoExperienceLevel
+import com.rukavina.gymbuddy.data.remote.generated.models.TrainingDays as DtoTrainingDays
 import com.rukavina.gymbuddy.data.remote.generated.models.DifficultyLevel as DtoDifficultyLevel
 import com.rukavina.gymbuddy.data.remote.generated.models.EntitySource as DtoEntitySource
 import com.rukavina.gymbuddy.data.remote.generated.models.Equipment as DtoEquipment
@@ -349,6 +351,11 @@ object SyncDtoMapper {
         activityLevel = p.activityLevel?.convert<DtoActivityLevel>(),
         targetWeight = p.targetWeight,
         bio = p.bio,
+        experienceLevel = p.experienceLevel?.convert<DtoExperienceLevel>(),
+        avatarId = p.avatarId,
+        trainingDays = p.trainingDays?.convert<DtoTrainingDays>(),
+        healthDataConsentVersion = p.healthDataConsentVersion,
+        healthDataConsentAt = p.healthDataConsentAt,
         deletedAt = p.deletedAt
     )
 
@@ -366,6 +373,11 @@ object SyncDtoMapper {
         targetWeight = d.targetWeight,
         joinedDate = d.joinedDate,
         bio = d.bio,
+        experienceLevel = d.experienceLevel?.convert(),
+        avatarId = d.avatarId,
+        trainingDays = d.trainingDays?.convert(),
+        healthDataConsentVersion = d.healthDataConsentVersion,
+        healthDataConsentAt = d.healthDataConsentAt,
         updatedAt = d.updatedAt,
         deletedAt = d.deletedAt,
         revision = d.revision,
