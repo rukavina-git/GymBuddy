@@ -45,6 +45,11 @@ class WorkoutTemplateSeeder @Inject constructor(
      * reseed on every cold start and the next sync would put the
      * server's library back (D-35).
      *
+     * Exception: the guest's file never syncs, so the bundle is its only
+     * source. A guest whose stored version is older than the bundle gets
+     * the bundle (DEFAULT templates and plans replaced; custom templates
+     * and overlays kept).
+     *
      * @param context Application context for accessing assets
      * @return true if seeding occurred, false if a library was already loaded
      */
@@ -62,6 +67,10 @@ class WorkoutTemplateSeeder @Inject constructor(
             if (currentVersion == null) {
                 Log.i(TAG, "First install: seeding bundled default templates v$bundledVersion")
                 seedAll(json, bundledVersion)
+                return true
+            } else if (isGuestBehindBundle(currentVersion, bundledVersion)) {
+                Log.i(TAG, "Guest file: refreshing default templates v$currentVersion -> v$bundledVersion")
+                seedAll(json, bundledVersion, replaceDefaults = true)
                 return true
             } else {
                 Log.d(TAG, "Default templates already loaded (v$currentVersion); later updates come from the server")
@@ -84,10 +93,15 @@ class WorkoutTemplateSeeder @Inject constructor(
         Log.i(TAG, "Forced reseed of default templates (v$version)")
     }
 
+    // The guest's file has a null owner (DatabaseHolder.fileName).
+    private fun isGuestBehindBundle(current: Int, bundled: Int) = holder.owner == null && bundled > current
+
     /** Templates, starter plans and the version land together, or not at all. */
-    private suspend fun seedAll(json: JSONObject, version: Int) {
+    private suspend fun seedAll(json: JSONObject, version: Int, replaceDefaults: Boolean = false) {
         val db = holder.db
         db.withTransaction {
+            // template_exercises go via ON DELETE CASCADE.
+            if (replaceDefaults) db.syncDao().deleteDefaultTemplates()
             seedDefaultTemplates(db.workoutTemplateDao(), json)
             seedStarterPlans(db.starterPlanDao(), json)
             db.templateVersionDao().setVersion(TemplateVersionEntity(version = version))

@@ -171,9 +171,13 @@
   fields; no assert on the generic message; handler logs Jackson's
   message (may echo a sent value) at info, cursor handler uses debug.
 - From 06 (reviewer, not fixed):
-  - The seeder only seeds when no version is stored. A guest file seeded
-    at v5 never syncs, so it never gets plans or the deprecations. Plan 7
-    onboarding needs it: reseed for the guest when the bundle is newer.
+  - Fixed (cleanup before 08): both seeders replace DEFAULT rows (and
+    plans) from the bundle when the guest file's version is older.
+    Custom rows and overlays kept; accounts unchanged (D-35). Reviewer,
+    not fixed: owner read separately from `holder.db`, so a guest →
+    account switch mid-seed can put the bundle into the account's file
+    (heals on next sync unless versions match); no test for overlays
+    surviving or for templates untouched at equal version.
   - `nextInPlan` doesn't drop sessions with null endedAt (falls back to
     startedAt). Sessions from a copied template (derivedFromId) don't
     advance the rotation; decide before 7.4/7.5.
