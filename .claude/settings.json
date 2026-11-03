@@ -49,5 +49,12 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "frontend-design@anthropic-plugin-directory": true,
+    "code-review-anthropics@anthropic-plugin-directory": true,
+    "playwright@anthropic-plugin-directory": true,
+    "github@anthropic-plugin-directory": true,
+    "impeccable@impeccable": true
   }
 }
