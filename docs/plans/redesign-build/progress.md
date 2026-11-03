@@ -1,6 +1,6 @@
 # Progress
 
-- [x] 01 Theme (steps/01-theme.md) — HASH
+- [x] 01 Theme (steps/01-theme.md) — b8a0806
 - [ ] 02 Icons + components
 - [ ] 03 App frame
 - [ ] 04 Onboarding + auth
