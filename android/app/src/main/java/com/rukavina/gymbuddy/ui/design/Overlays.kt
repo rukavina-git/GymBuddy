@@ -136,13 +136,14 @@ fun AppChoiceDialog(
 
 /**
  * Change lift, Start workout. Surface fill (D3 amended), top corners
- * 28, own handle. Motion stays M3 default (DESIGN.md §7).
+ * 28, own handle. Motion stays M3 default (DESIGN.md §7). [title] null:
+ * the content brings its own label (keypad, R12-11).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBottomSheet(
     onDismiss: () -> Unit,
-    title: String,
+    title: String?,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     sheetState: SheetState = rememberModalBottomSheetState(),
@@ -169,12 +170,12 @@ fun AppBottomSheet(
             modifier = Modifier.padding(start = d.insetDialog, end = d.insetDialog, bottom = d.insetDialog),
             verticalArrangement = Arrangement.spacedBy(d.stackTight),
         ) {
-            Text(title, style = MaterialTheme.typography.titleLarge)
+            if (title != null) Text(title, style = MaterialTheme.typography.titleLarge)
             if (subtitle != null) {
                 Text(subtitle, style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
             }
             Column(
-                modifier = Modifier.padding(top = d.group),
+                modifier = Modifier.padding(top = if (title != null || subtitle != null) d.group else 0.dp),
                 verticalArrangement = Arrangement.spacedBy(d.stackTight),
                 content = content,
             )

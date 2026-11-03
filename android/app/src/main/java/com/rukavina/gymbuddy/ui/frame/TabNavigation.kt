@@ -25,8 +25,9 @@ private val tabByRoute = NavTab.entries.associateBy { it.route }
 fun selectedTab(backStackRoutes: List<String?>): NavTab =
     backStackRoutes.asReversed().firstNotNullOfOrNull { tabByRoute[it] } ?: NavTab.Home
 
-/** The workout runs full screen: no nav bar, no live bar. */
-fun isFullScreen(route: String?): Boolean = route == NavRoutes.ActiveWorkout
+/** The workout, template editor and exercise picker run full screen: no nav bar, no live bar. */
+fun isFullScreen(route: String?): Boolean =
+    route == NavRoutes.ActiveWorkout || route == NavRoutes.TemplateEditor || route == NavRoutes.ExercisePicker
 
 /**
  * Switch tab and keep each tab's own back stack: the old tab's screens

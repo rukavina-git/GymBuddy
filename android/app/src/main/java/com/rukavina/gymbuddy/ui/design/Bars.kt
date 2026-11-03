@@ -63,18 +63,25 @@ private val TopBarHeight = 64.dp
 private val ProgressPillHeight = 40.dp
 private val ProgressIcon = 22.dp
 
-/** Pushed screens: back on the left, optional title, icon actions right. */
+/**
+ * Pushed screens: back on the left, optional title, icon actions right.
+ * [close]: × instead of ← (editor and picker, R12-4/R12-6).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackTopBar(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     title: String? = null,
+    close: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     TopAppBar(
         title = { if (title != null) Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-        navigationIcon = { AppIconButton(AppIcons.Ui.Back, stringResource(R.string.cd_back), onBack) },
+        navigationIcon = {
+            if (close) AppIconButton(AppIcons.Ui.Close, stringResource(R.string.cd_close), onBack)
+            else AppIconButton(AppIcons.Ui.Back, stringResource(R.string.cd_back), onBack)
+        },
         actions = actions,
         modifier = modifier,
         colors = TopAppBarDefaults.topAppBarColors(

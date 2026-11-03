@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -39,7 +40,7 @@ private val DisplayHeight = 76.dp
 private val DisplayPadding = 20.dp
 private val CaretHeight = 40.dp
 
-/** What a keypad press means. Parsing and limits live in 7.6. */
+/** What a keypad press means. Text editing and parsing: [KeypadValue]. */
 sealed interface KeypadInput {
     data class Digit(val n: Int) : KeypadInput {
         init { require(n in 0..9) }
@@ -48,6 +49,13 @@ sealed interface KeypadInput {
     data object Backspace : KeypadInput
     data object Next : KeypadInput
     data object Cancel : KeypadInput
+}
+
+/** Decimal separator of the app's current locale (what the key shows and inserts). */
+@Composable
+fun keypadSeparator(): Char {
+    val locale = LocalConfiguration.current.locales[0]
+    return DecimalFormatSymbols.getInstance(locale).decimalSeparator
 }
 
 /** Grid order: 1–9, then decimal, 0, backspace. */
@@ -88,7 +96,7 @@ fun KeypadKey(
             when (input) {
                 is KeypadInput.Digit -> Text(input.n.toString(), style = MaterialTheme.typography.headlineSmall)
                 KeypadInput.Decimal -> Text(
-                    DecimalFormatSymbols.getInstance().decimalSeparator.toString(),
+                    keypadSeparator().toString(),
                     style = MaterialTheme.typography.headlineSmall,
                 )
                 else -> Icon(
@@ -115,6 +123,7 @@ fun Keypad(
     modifier: Modifier = Modifier,
     decimalEnabled: Boolean = true,
     nextEnabled: Boolean = true,
+    nextLabel: String = stringResource(R.string.keypad_next),
 ) {
     val cs = MaterialTheme.colorScheme
     val d = GymBuddyTheme.dimens
@@ -163,7 +172,7 @@ fun Keypad(
                 Modifier.weight(1f),
             )
             PrimaryButton(
-                stringResource(R.string.keypad_next),
+                nextLabel,
                 { onInput(KeypadInput.Next) },
                 Modifier.weight(1f),
                 enabled = nextEnabled,

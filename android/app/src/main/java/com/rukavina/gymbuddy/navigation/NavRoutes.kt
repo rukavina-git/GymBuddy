@@ -21,8 +21,11 @@ object NavRoutes {
     const val Profile = "profile"
     const val About = "about"
     const val ActiveWorkout = "active_workout"
-    /** Template page; edit = open the editor right away (a starter's fresh copy). */
-    const val TemplatePage = "template/{templateId}?edit={edit}"
+    const val TemplatePage = "template/{templateId}"
+    /** Template editor; no templateId = new template. */
+    const val TemplateEditor = "template_editor?templateId={templateId}"
+    /** Exercise picker; inTemplate = comma-joined exercise ids already in the template. */
+    const val ExercisePicker = "exercise_picker?inTemplate={inTemplate}"
 
     // Profile edit screens
     const val EditName = "edit_name"
@@ -46,7 +49,12 @@ object NavRoutes {
 
     fun createAccount(from: CreateFrom) = "create_account?from=${from.name}"
 
-    fun templatePage(templateId: String, edit: Boolean = false) = "template/$templateId?edit=$edit"
+    fun templatePage(templateId: String) = "template/$templateId"
+
+    fun templateEditor(templateId: String? = null) =
+        if (templateId == null) "template_editor" else "template_editor?templateId=$templateId"
+
+    fun exercisePicker(inTemplate: List<String>) = "exercise_picker?inTemplate=${inTemplate.distinct().joinToString(",")}"
 
     fun exerciseDetailsRoute(exerciseId: String): String {
         return "exercise_details/$exerciseId"

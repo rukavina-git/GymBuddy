@@ -17,8 +17,10 @@ import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.ui.design.LargeTitleTopBar
 import com.rukavina.gymbuddy.ui.home.HomeScreen
 import com.rukavina.gymbuddy.ui.template.TemplateDeleteViewModel
-import com.rukavina.gymbuddy.ui.template.WorkoutTemplateFormDialog
-import com.rukavina.gymbuddy.ui.template.WorkoutTemplateViewModel
+import com.rukavina.gymbuddy.ui.template.editor.TemplateEditorScreen
+import com.rukavina.gymbuddy.ui.template.editor.TemplateEditorViewModel
+import com.rukavina.gymbuddy.ui.template.picker.ExercisePickerScreen
+import com.rukavina.gymbuddy.ui.template.picker.ExercisePickerViewModel
 import com.rukavina.gymbuddy.ui.template.page.TemplatePageScreen
 import com.rukavina.gymbuddy.ui.template.page.TemplatePageViewModel
 import com.rukavina.gymbuddy.ui.workout.WorkoutScreen
@@ -223,46 +225,68 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                 )
             }
             composable(NavRoutes.Workouts) {
-                val templateViewModel: WorkoutTemplateViewModel = hiltViewModel()
-                val templateState by templateViewModel.uiState.collectAsState()
-                var creating by rememberSaveable { mutableStateOf(false) }
                 WorkoutsScreen(
                     onOpenTemplate = openTemplate,
-                    onNewTemplate = { creating = true },
+                    onNewTemplate = { bottomNavController.navigate(NavRoutes.templateEditor()) },
                     onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
                 )
-                // Old dialog until 05b's editor.
-                if (creating) {
-                    WorkoutTemplateFormDialog(
-                        template = null,
-                        availableExercises = templateState.availableExercises,
-                        onDismiss = { creating = false },
-                        onSave = { templateViewModel.createTemplate(it); creating = false },
-                    )
-                }
             }
             composable(
                 route = NavRoutes.TemplatePage,
                 arguments = listOf(
                     navArgument(TemplatePageViewModel.ARG_TEMPLATE_ID) { type = NavType.StringType },
-                    navArgument("edit") { type = NavType.BoolType; defaultValue = false },
                 ),
             ) { entry ->
                 TemplatePageScreen(
-                    openEditor = entry.arguments?.getBoolean("edit") ?: false,
                     workoutRunning = workoutRunning,
                     onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
                     onStart = startTemplate,
+                    onEdit = { id -> bottomNavController.navigate(NavRoutes.templateEditor(id)) },
+                    // A copy replaces this page; a starter's pencil copy then opens its editor on top.
                     onOpenCopy = { id, edit ->
-                        bottomNavController.navigate(NavRoutes.templatePage(id, edit)) {
+                        bottomNavController.navigate(NavRoutes.templatePage(id)) {
                             popUpTo(entry.destination.id) { inclusive = true }
                         }
+                        if (edit) bottomNavController.navigate(NavRoutes.templateEditor(id))
                     },
                     onDeleted = { id, title ->
                         bottomNavController.popBackStack(entry.destination.id, inclusive = true)
                         offerUndoDelete(id, title)
                     },
                     onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                )
+            }
+            composable(
+                route = NavRoutes.TemplateEditor,
+                arguments = listOf(
+                    navArgument(TemplateEditorViewModel.ARG_TEMPLATE_ID) {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                val picked by entry.savedStateHandle
+                    .getStateFlow<ArrayList<String>?>(ExercisePickerViewModel.RESULT_PICKED, null)
+                    .collectAsState()
+                TemplateEditorScreen(
+                    onClose = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    onAddExercises = { ids -> bottomNavController.navigate(NavRoutes.exercisePicker(ids)) },
+                    picked = picked,
+                    onPickedHandled = { entry.savedStateHandle[ExercisePickerViewModel.RESULT_PICKED] = null },
+                )
+            }
+            composable(
+                route = NavRoutes.ExercisePicker,
+                arguments = listOf(
+                    navArgument(ExercisePickerViewModel.ARG_IN_TEMPLATE) { type = NavType.StringType; defaultValue = "" },
+                ),
+            ) { entry ->
+                ExercisePickerScreen(
+                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    onAdd = { ids ->
+                        bottomNavController.previousBackStackEntry?.savedStateHandle
+                            ?.set(ExercisePickerViewModel.RESULT_PICKED, ArrayList(ids))
+                        bottomNavController.popBackStack(entry.destination.id, inclusive = true)
+                    },
                 )
             }
             composable(NavRoutes.Exercises) {

@@ -39,8 +39,6 @@ import com.rukavina.gymbuddy.ui.design.AppMenu
 import com.rukavina.gymbuddy.ui.design.AppMenuItem
 import com.rukavina.gymbuddy.ui.design.BackTopBar
 import com.rukavina.gymbuddy.ui.design.PrimaryButton
-import com.rukavina.gymbuddy.ui.template.WorkoutTemplateFormDialog
-import com.rukavina.gymbuddy.ui.template.WorkoutTemplateViewModel
 import com.rukavina.gymbuddy.ui.template.clock
 import com.rukavina.gymbuddy.ui.template.exerciseCountText
 import com.rukavina.gymbuddy.ui.template.joinDot
@@ -59,24 +57,20 @@ private val IndexColumn = 28.dp
  * a quiet rest on the right, lime Start pinned at the bottom (hidden
  * while a workout runs). Yours: ⋯ Duplicate, Delete (Undo). Starter:
  * ⋯ Make a copy, Hide this plan; the pencil makes a copy and edits it.
- * Editing still uses the old dialog until 05b.
  */
 @Composable
 fun TemplatePageScreen(
-    openEditor: Boolean,
     workoutRunning: Boolean,
     onBack: () -> Unit,
     onStart: (WorkoutTemplate) -> Unit,
+    onEdit: (templateId: String) -> Unit,
     onOpenCopy: (templateId: String, edit: Boolean) -> Unit,
     onDeleted: (templateId: String, title: String) -> Unit,
     onMessage: (String) -> Unit,
     viewModel: TemplatePageViewModel = hiltViewModel(),
-    editViewModel: WorkoutTemplateViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val editState by editViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var editing by rememberSaveable { mutableStateOf(openEditor) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -104,24 +98,13 @@ fun TemplatePageScreen(
         workoutRunning = workoutRunning,
         onBack = onBack,
         onStart = onStart,
-        onEdit = { if (state.line?.isStarter == true) viewModel.copy(edit = true, name = copyName) else editing = true },
+        onEdit = {
+            if (state.line?.isStarter == true) viewModel.copy(edit = true, name = copyName) else onEdit(viewModel.templateId)
+        },
         onCopy = { viewModel.copy(edit = false, name = copyName) },
         onDelete = viewModel::delete,
         onHide = viewModel::hide,
     )
-
-    val template = state.line?.template
-    if (editing && template != null && state.line?.isStarter != true) {
-        WorkoutTemplateFormDialog(
-            template = template,
-            availableExercises = editState.availableExercises,
-            onDismiss = { editing = false },
-            onSave = { draft ->
-                editViewModel.updateTemplate(template, draft)
-                editing = false
-            },
-        )
-    }
 }
 
 @Composable

@@ -91,7 +91,7 @@ roadmap-details.md §3.
 - [x] 7.2 Icons + component library (01 System)
 - [x] 7.3 App frame: 5-tab nav, top bars, predictive back
 - [x] 7.4 Onboarding + auth (UI for 6.2, 6.3)
-- [ ] 7.5 Home + Templates (Workouts tab, plans from 6.6)
+- [x] 7.5 Home + Templates (Workouts tab, plans from 6.6)
 - [ ] 7.6 Active workout (keypad, live bar, swipe + undo, rest)
 - [ ] 7.7 Exercise page + create
 - [ ] 7.8 Progress tab (replaces Sessions + Stats)

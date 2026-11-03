@@ -6,7 +6,7 @@
 - [x] 03 App frame (steps/03-app-frame.md) — d69ddbd
 - [x] 04 Onboarding + auth (steps/04-onboarding-auth.md) — 6781df5
 - [x] 05a Home + Workouts tab + template page (steps/05-home-templates.md) — f609339
-- [ ] 05b Template editor + exercise picker (steps/05-home-templates.md)
+- [x] 05b Template editor + exercise picker (steps/05-home-templates.md) — HASH
 - [ ] 06 Active workout
 - [ ] 07 Exercise page + create
 - [ ] 08 Progress tab
@@ -152,7 +152,49 @@
   scope; ActiveWorkoutViewModelTest also cancels its VMs in @After.
   Full suite green 3 runs in a row.
 
+- 05b: Figma read via the Console MCP (official Figma MCP hit the Starter
+  call limit).
+- 05b: `WorkoutTemplateViewModel` deleted; `HiddenTemplatesScreen` (7.10)
+  now uses a small `HiddenTemplatesViewModel` (unhide only). The template
+  use cases GetAll/Search/GetById/Delete are now unused (domain, left).
+- 05b: Editor and picker are own routes (`template_editor?templateId=`,
+  `exercise_picker?inTemplate=`), full screen. Picks come back through the
+  editor entry's savedStateHandle (`picked_exercises`). TemplatePage lost
+  its `edit` arg: a starter's pencil copy replaces the page, then pushes
+  the editor. New template Save pops back to Workouts (no page opened).
+- 05b: Picker R12-13 'Create "bnch"' row left out (exercise create is 7.7).
+  Muscle chips: All, Chest, Back, Legs, Shoulders, Arms, Core (no Other).
+  Row subtitle = first primary muscle · first equipment.
+- 05b: Save is disabled with no exercises (use case needs ≥ 1); empty name
+  shows "Give it a name" on Save. Discard dialog body for a new template:
+  "This template won't be saved."
+- 05b: Keypad Next walks sets → reps/time/distance → kg → rest → next
+  card; last field says "Done". Rest and time are typed m:ss from the
+  right ("130" = 1:30). 0 sets keeps the old value; empty reps/kg/rest
+  clear it. `KeypadValue` holds the editing + parsing ("." and ",");
+  Decimal key now uses LocalConfiguration's locale.
+- 05b: Titleless sheet = `AppBottomSheet(title = null)`; `Keypad` got
+  `nextLabel`; `BackTopBar(close = true)` shows ×.
+- 05b: Notes edit inline (AppTextField in the card), not a dialog. Undo
+  re-inserts the card with a new list key (the swiped composition kept its
+  dismissed state otherwise).
+- 05b: Muscle/equipment display names in `ui/exercise/ExerciseText.kt`;
+  strings in `res/values/strings_editor.xml`.
+
 ## Gotchas
+- From 05b (reviewer, not fixed):
+  - Picker search text round-trips through `combine(...).stateIn`
+    (async): fast typing can jump the cursor, and text typed before the
+    exercise list loads is wiped. Keep the query as plain sync state.
+  - Editor draft and picker picks aren't in SavedStateHandle: process
+    death loses unsaved edits; a restored `picked` result can race
+    `load()` and be overwritten.
+  - `UnitConverter.weightToDisplayUnit` only trims after "."; comma
+    locales show "100,00 kg" (chips, keypad start text). Fix the helper.
+  - Distance is always metres (no imperial display).
+- Use (05b, for 7.6): `ExercisePickerScreen` + `NavRoutes.exercisePicker
+  (ids)` and `ExercisePickerViewModel.RESULT_PICKED`; `KeypadValue`;
+  `TypoMatcher` (also 7.7 Exercises search); `muscleLabel`/`equipmentLabel`.
 - From 05a (reviewer, not fixed):
   - `TemplateDeleteViewModel.commit` has no catch: a DB/outbox error
     crashes the app. Catch, put the template back, show a message.
