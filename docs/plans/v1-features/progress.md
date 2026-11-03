@@ -1,7 +1,7 @@
 # Progress
 
 - [x] 01 Per-account local data (steps/01-per-account-data.md) — 4b61dce
-- [x] 02 Guest mode (steps/02-guest-mode.md) — HASH
+- [x] 02 Guest mode (steps/02-guest-mode.md) — ab07df5
 - [ ] 03 Auth gate
 - [ ] 04 Body weight
 - [ ] 05 Profile fields
