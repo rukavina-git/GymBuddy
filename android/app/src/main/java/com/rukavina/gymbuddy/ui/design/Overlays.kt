@@ -80,6 +80,60 @@ fun AppDialog(
     }
 }
 
+enum class DialogActionTone { Lime, Plain, Danger }
+
+data class DialogAction(val label: String, val onClick: () -> Unit, val tone: DialogActionTone = DialogActionTone.Plain)
+
+/**
+ * Account questions (Figma 114:20520): title, body and two or three
+ * actions; the one to press is lime. [stacked] puts the actions in a
+ * right-aligned column, for labels too long to sit side by side.
+ * [onDismiss] null: a choice is needed, outside taps do nothing.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppChoiceDialog(
+    title: String,
+    body: String,
+    actions: List<DialogAction>,
+    onDismiss: (() -> Unit)? = null,
+    stacked: Boolean = false,
+) {
+    val d = GymBuddyTheme.dimens
+    BasicAlertDialog(onDismissRequest = { onDismiss?.invoke() }) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            modifier = Modifier.widthIn(max = DialogWidth),
+        ) {
+            Column(
+                modifier = Modifier.padding(start = d.insetDialog, end = d.insetDialog, top = d.insetDialog, bottom = d.group),
+                verticalArrangement = Arrangement.spacedBy(d.group),
+            ) {
+                Text(title, style = MaterialTheme.typography.headlineSmall)
+                Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                val buttons = @Composable {
+                    actions.forEach { action ->
+                        when (action.tone) {
+                            DialogActionTone.Lime -> AppLinkButton(action.label, action.onClick)
+                            DialogActionTone.Plain -> AppTextButton(action.label, action.onClick)
+                            DialogActionTone.Danger -> DangerButton(action.label, action.onClick)
+                        }
+                    }
+                }
+                if (stacked) {
+                    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) { buttons() }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(d.stackTight, Alignment.End),
+                    ) { buttons() }
+                }
+            }
+        }
+    }
+}
+
 /**
  * Change lift, Start workout. Surface fill (D3 amended), top corners
  * 28, own handle. Motion stays M3 default (DESIGN.md §7).

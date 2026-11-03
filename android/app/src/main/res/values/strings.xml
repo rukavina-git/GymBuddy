@@ -1,8 +1,5 @@
 <resources>
     <string name="app_name">Gym Buddy</string>
-    <string name="welcome_auth">Welcome to Gym Buddy</string>
-    <string name="password_visible">Password Visible</string>
-    <string name="password_hidden">Password Hidden</string>
 
     <!-- Design library (ui/design) -->
     <string name="cd_back">Back</string>

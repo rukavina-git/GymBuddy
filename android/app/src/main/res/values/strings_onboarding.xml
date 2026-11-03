@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Onboarding + auth, Figma 114:20520 (Plan 7 step 04). -->
+<resources>
+    <string name="cd_app_name">GymBuddy</string>
+    <string name="cd_close">Close</string>
+    <string name="welcome_line">Log your workouts. Works offline, no account needed.</string>
+    <string name="welcome_get_started">Get started</string>
+    <string name="welcome_have_account">I have an account</string>
+
+    <string name="setup_skip">Skip</string>
+    <string name="setup_progress">Step %1$d of %2$d</string>
+    <string name="setup_selected">Selected</string>
+    <string name="setup_experience_title">How long have you been lifting?</string>
+    <string name="setup_experience_new">New to lifting</string>
+    <string name="setup_experience_new_sub">Less than 6 months. We\'ll show tips and how-tos.</string>
+    <string name="setup_experience_some">Some experience</string>
+    <string name="setup_experience_some_sub">You know the main lifts.</string>
+    <string name="setup_experience_pro">Experienced</string>
+    <string name="setup_experience_pro_sub">Years of training. We stay out of your way.</string>
+    <string name="setup_goal_title">What\'s your main goal?</string>
+    <string name="setup_goal_muscle">Build muscle</string>
+    <string name="setup_goal_strength">Get stronger</string>
+    <string name="setup_goal_weight">Lose weight</string>
+    <string name="setup_goal_fit">Stay fit and healthy</string>
+    <string name="setup_goal_endurance">Improve endurance</string>
+    <string name="setup_days_title">How many days a week can you train?</string>
+    <string name="setup_days_sub">Picks your starting plan. You can change it later.</string>
+    <string name="setup_days_1_3">1–3 days</string>
+    <string name="setup_days_4">4 days</string>
+    <string name="setup_days_5_7">5–7 days</string>
+    <string name="setup_days_unsure">Not sure yet</string>
+    <string name="setup_plan_title">Pick a starting plan</string>
+    <string name="setup_plan_sub">A plan is a set of workouts to rotate through.</string>
+    <string name="setup_plan_suggested">Suggested</string>
+    <string name="setup_plan_none">Start with no plan</string>
+    <string name="setup_plan_none_sub">Build your own or start an empty workout.</string>
+    <string name="setup_plan_days_1_3">1–3 days a week</string>
+    <string name="setup_plan_days_4">4 days a week</string>
+    <string name="setup_plan_days_5_7">5–7 days a week</string>
+    <string name="setup_plan_footer_1_3">Suggested from 1–3 days a week.</string>
+    <string name="setup_plan_footer_4">Suggested from 4 days a week.</string>
+    <string name="setup_plan_footer_5_7">Suggested from 5–7 days a week.</string>
+    <string name="setup_plan_footer_unsure">Suggested from your experience.</string>
+    <plurals name="setup_plan_workouts">
+        <item quantity="one">%d workout</item>
+        <item quantity="other">%d workouts</item>
+    </plurals>
+    <string name="ready_title">You\'re all set</string>
+    <string name="ready_line">No streaks, no feed. Your workouts stay private.</string>
+    <string name="ready_tips">Good to know</string>
+    <string name="ready_tip_keypad">Tap any number in a workout to type it.</string>
+    <string name="ready_tip_swipe">Swipe a set left to delete it. You can undo.</string>
+    <string name="ready_tip_guest">Your workouts are saved on this phone. Back them up from the You tab.</string>
+    <string name="ready_tip_account">Your workouts back up to your account on their own.</string>
+    <string name="ready_go">Let\'s go</string>
+
+    <string name="signin_title">Welcome back</string>
+    <string name="signin_google">Continue with Google</string>
+    <string name="signin_or">or</string>
+    <string name="signin_email">Email</string>
+    <string name="signin_email_hint">you@example.com</string>
+    <string name="signin_password">Password</string>
+    <string name="signin_show">Show</string>
+    <string name="signin_hide">Hide</string>
+    <string name="signin_submit">Sign in with email</string>
+    <string name="signin_forgot">Forgot password?</string>
+    <string name="signin_reset_sent">If %1$s has an account, a reset link is on its way.</string>
+    <string name="signin_offline">No connection. Signing in needs internet. You can keep using GymBuddy and sign in later.</string>
+    <string name="signin_retry">Retry</string>
+    <string name="signin_error_empty">Enter your email and password.</string>
+    <string name="signin_error_wrong">Email or password is wrong. Try again or reset your password.</string>
+    <string name="signin_error_invalid_email">That doesn\'t look like an email address.</string>
+    <string name="signin_error_weak">At least 8 characters.</string>
+    <string name="signin_error_in_use">This email already has an account. Sign in instead.</string>
+    <string name="signin_error_reset_email">Enter your email first, then tap Forgot password.</string>
+    <string name="signin_error_other">Couldn\'t sign in. Try again.</string>
+
+    <string name="create_title">Back up your workouts</string>
+    <string name="create_moves">Your %1$s move into the account. Nothing on this phone is removed.</string>
+    <string name="create_moves_empty">Your workouts will back up to the account. Nothing on this phone is removed.</string>
+    <string name="create_consent">Back up my workouts and body data on GymBuddy servers.</string>
+    <string name="create_why">Why?</string>
+    <string name="create_consent_missing">Tick this box to back up your workouts. Without it, keep using GymBuddy on this phone.</string>
+    <string name="create_password_helper">At least 8 characters</string>
+    <string name="create_submit">Create account with email</string>
+    <string name="create_terms">By creating an account you agree to the Terms and the Privacy policy.</string>
+    <string name="why_title">Why we ask</string>
+    <string name="why_body">Workouts and body data like weight count as health data. We need your OK to keep a copy on our servers. Without it, everything stays on this phone.</string>
+    <string name="ok">OK</string>
+
+    <string name="no_account_title">No account for this email yet</string>
+    <string name="no_account_body">%1$s has no GymBuddy account. Create one, or use another Google account.</string>
+    <string name="no_account_create">Create account</string>
+    <string name="no_account_other">Use another account</string>
+    <string name="other_account_title">Changes from another account</string>
+    <string name="other_account_body">%1$s from %2$s aren\'t backed up. They stay on this phone and back up when that account signs in again. You won\'t see them as %3$s.</string>
+    <plurals name="other_account_changes">
+        <item quantity="one">%d change</item>
+        <item quantity="other">%d changes</item>
+    </plurals>
+    <string name="other_account_continue">Continue as %1$s</string>
+    <string name="other_account_switch">Sign in as %1$s instead</string>
+
+    <string name="merge_title">Add this phone\'s workouts?</string>
+    <string name="merge_add">Add and sign in</string>
+    <string name="merge_stay">Stay signed out</string>
+    <string name="merge_failed">Couldn\'t add this phone\'s workouts. Nothing was lost; we\'ll ask again next time.</string>
+    <string name="expired_banner">Backup paused. Sign in again to keep backing up.</string>
+    <string name="expired_sign_in">Sign in</string>
+    <string name="deleted_title">This account was deleted</string>
+    <string name="deleted_keep">Keep on this phone</string>
+    <string name="deleted_erase">Erase…</string>
+    <string name="erase_body">There\'s no other copy. This can\'t be undone.</string>
+    <string name="erase_confirm">Erase</string>
+    <string name="cancel">Cancel</string>
+</resources>

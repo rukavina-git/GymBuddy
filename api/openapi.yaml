@@ -1571,9 +1571,12 @@ components:
 
     FitnessGoal:
       type: string
-      description: User's primary fitness goal.
+      description: |
+        User's primary fitness goal. GET_STRONGER added for onboarding
+        (Plan 7 step 04); MAINTAIN is kept for older profiles.
       enum:
         - BUILD_MUSCLE
+        - GET_STRONGER
         - LOSE_WEIGHT
         - MAINTAIN
         - GENERAL_FITNESS

@@ -3,6 +3,7 @@ package com.rukavina.gymbuddy.data.repository
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
@@ -25,6 +26,27 @@ class AppPreferencesRepository @Inject constructor(
         val SHOW_QUOTE_OF_THE_DAY = booleanPreferencesKey("show_quote_of_the_day")
         val PREFERRED_UNITS = stringPreferencesKey("preferred_units")
         val IS_GUEST = booleanPreferencesKey("is_guest")
+        val LAST_SIGN_IN_EMAIL = stringPreferencesKey("last_sign_in_email")
+        val PENDING_CONSENT_AT = longPreferencesKey("pending_consent_at")
+    }
+
+    /** The address of the last email sign-in, filled in next time (Figma 114:20520). Phone only. */
+    val lastSignInEmail: Flow<String?> = dataStore.data.map { it[PreferencesKeys.LAST_SIGN_IN_EMAIL] }
+
+    suspend fun setLastSignInEmail(email: String) {
+        dataStore.edit { it[PreferencesKeys.LAST_SIGN_IN_EMAIL] = email }
+    }
+
+    /**
+     * When the user ticked the health-data box on Create account, until
+     * ConsentRecorder writes it onto the new account's profile.
+     */
+    val pendingConsentAt: Flow<Long?> = dataStore.data.map { it[PreferencesKeys.PENDING_CONSENT_AT] }
+
+    suspend fun setPendingConsentAt(at: Long?) {
+        dataStore.edit {
+            if (at == null) it.remove(PreferencesKeys.PENDING_CONSENT_AT) else it[PreferencesKeys.PENDING_CONSENT_AT] = at
+        }
     }
 
     /**

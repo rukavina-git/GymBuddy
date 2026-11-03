@@ -1,11 +1,10 @@
 package com.rukavina.gymbuddy.ui
 
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import com.rukavina.gymbuddy.ui.theme.fadeThroughIn
+import com.rukavina.gymbuddy.ui.theme.fadeThroughOut
+import com.rukavina.gymbuddy.ui.theme.sharedAxisIn
+import com.rukavina.gymbuddy.ui.theme.sharedAxisOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,9 +38,6 @@ import com.rukavina.gymbuddy.ui.frame.navigateToTab
 import com.rukavina.gymbuddy.ui.frame.route
 import com.rukavina.gymbuddy.ui.frame.selectedTab
 import com.rukavina.gymbuddy.ui.frame.toLiveBarState
-import com.rukavina.gymbuddy.ui.theme.Durations
-import com.rukavina.gymbuddy.ui.theme.Easings
-import com.rukavina.gymbuddy.ui.theme.motionTween
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.exercise.ExerciseScreen
 import com.rukavina.gymbuddy.ui.exercise.ExerciseDetailsScreen
@@ -59,6 +55,11 @@ import com.rukavina.gymbuddy.ui.profile.edit.EditTargetWeightScreen
 import com.rukavina.gymbuddy.ui.profile.edit.EditUnitsScreen
 import com.rukavina.gymbuddy.ui.profile.edit.EditWeightScreen
 import com.rukavina.gymbuddy.ui.guest.GuestMergeDialogs
+import com.rukavina.gymbuddy.navigation.openWelcome
+import com.rukavina.gymbuddy.ui.design.AppSnackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
 import com.rukavina.gymbuddy.ui.guest.GuestMergeViewModel
 import com.rukavina.gymbuddy.ui.settings.AboutScreen
 import com.rukavina.gymbuddy.ui.settings.AppPreferencesScreen
@@ -76,8 +77,11 @@ fun MainScreen(rootNavController: NavHostController) {
     val ownerReady by guestMergeViewModel.ownerReady.collectAsState()
     val mergeState by guestMergeViewModel.state.collectAsState()
 
+    // Receipts and failures from the merge (Figma "14 · Receipt") show over the tabs.
+    val snackbar = remember { SnackbarHostState() }
     GuestMergeDialogs(
         state = mergeState,
+        snackbar = snackbar,
         onAdd = guestMergeViewModel::add,
         onCancel = guestMergeViewModel::cancel,
         onDismiss = guestMergeViewModel::dismiss
@@ -88,13 +92,8 @@ fun MainScreen(rootNavController: NavHostController) {
     val authGateViewModel: AuthGateViewModel = hiltViewModel()
     val gateState by authGateViewModel.state.collectAsState()
     val deletedCounts by authGateViewModel.counts.collectAsState()
-    val toLogin = {
-        rootNavController.navigate(NavRoutes.Login) {
-            popUpTo(NavRoutes.Main) { inclusive = true }
-        }
-    }
     LaunchedEffect(Unit) {
-        authGateViewModel.erased.collect { toLogin() }
+        authGateViewModel.erased.collect { rootNavController.openWelcome() }
     }
     (gateState as? AuthGateState.AccountDeleted)?.let { deleted ->
         LaunchedEffect(deleted) { authGateViewModel.loadCounts() }
@@ -109,10 +108,13 @@ fun MainScreen(rootNavController: NavHostController) {
     if (ownerReady) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (gateState is AuthGateState.SessionExpired) {
-                SessionExpiredBanner(onSignIn = toLogin, modifier = Modifier.statusBarsPadding())
+                SessionExpiredBanner(
+                    onSignIn = { rootNavController.navigate(NavRoutes.signIn()) },
+                    modifier = Modifier.statusBarsPadding()
+                )
             }
             Box(modifier = Modifier.weight(1f)) {
-                MainContent(rootNavController)
+                MainContent(rootNavController, snackbar)
             }
         }
     } else {
@@ -123,7 +125,7 @@ fun MainScreen(rootNavController: NavHostController) {
 }
 
 @Composable
-private fun MainContent(rootNavController: NavHostController) {
+private fun MainContent(rootNavController: NavHostController, snackbar: SnackbarHostState) {
     val bottomNavController = rememberNavController()
     val backStackEntry by bottomNavController.currentBackStackEntryAsState()
     val backStack by bottomNavController.currentBackStack.collectAsState()
@@ -148,6 +150,7 @@ private fun MainContent(rootNavController: NavHostController) {
         fullScreen = isFullScreen(currentRoute),
         liveBar = workoutState.toLiveBarState(),
         onLiveBarClick = openWorkout,
+        snackbarHost = { SnackbarHost(snackbar) { AppSnackbar(it) } },
     ) { paddingValues ->
         NavHost(
             navController = bottomNavController,
@@ -344,18 +347,4 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch() =
     NavTab.entries.any { it.route == initialState.destination.route } &&
         NavTab.entries.any { it.route == targetState.destination.route }
 
-// motion.md #14: old fades out, then the new one fades in, medium2 total.
-private val fadeThroughOut = fadeOut(motionTween(Durations.MEDIUM2 / 3))
-private val fadeThroughIn = fadeIn(tween(Durations.MEDIUM2 * 2 / 3, delayMillis = Durations.MEDIUM2 / 3, easing = Easings.Standard))
 
-// motion.md #15: shared axis X; predictive back scrubs these with the gesture.
-private fun sharedAxisIn(forward: Boolean) =
-    slideInHorizontally(motionTween(Durations.MEDIUM2, Easings.Emphasized)) { w -> if (forward) w / SHARED_AXIS_SHIFT else -w / SHARED_AXIS_SHIFT } +
-        fadeIn(motionTween(Durations.MEDIUM2, Easings.Emphasized))
-
-private fun sharedAxisOut(forward: Boolean) =
-    slideOutHorizontally(motionTween(Durations.MEDIUM2, Easings.Emphasized)) { w -> if (forward) -w / SHARED_AXIS_SHIFT else w / SHARED_AXIS_SHIFT } +
-        fadeOut(motionTween(Durations.MEDIUM2, Easings.Emphasized))
-
-/** Screens move a tenth of the width, like M3 shared axis (30dp on a phone). */
-private const val SHARED_AXIS_SHIFT = 10

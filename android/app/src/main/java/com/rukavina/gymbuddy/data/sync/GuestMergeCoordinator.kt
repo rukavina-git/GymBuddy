@@ -47,7 +47,11 @@ class GuestMergeCoordinator(
     private val currentUid: () -> String?,
     private val accountEmail: () -> String?,
     private val signOut: () -> Unit,
-    private val setGuest: suspend (Boolean) -> Unit
+    private val setGuest: suspend (Boolean) -> Unit,
+    /** After a merge landed in [uid]'s file (the consent waits for it, ConsentRecorder). */
+    private val afterMerge: suspend (uid: String) -> Unit = {},
+    /** Cancel: the user stays a guest, so a pending consent is dropped. */
+    private val onCancel: suspend () -> Unit = {}
 ) {
     private val _state = MutableStateFlow<GuestMergeState>(GuestMergeState.Idle)
     val state: StateFlow<GuestMergeState> = _state.asStateFlow()
@@ -81,6 +85,7 @@ class GuestMergeCoordinator(
     suspend fun cancel() {
         if (_state.value !is GuestMergeState.Asking) return
         setGuest(true)
+        onCancel()
         _state.value = GuestMergeState.Idle
         signOut()
     }
@@ -102,6 +107,7 @@ class GuestMergeCoordinator(
                 return
             }
             setGuest(false)
+            afterMerge(uid)
             requestSync()
             _state.value = GuestMergeState.Done(receipt)
         } catch (e: CancellationException) {

@@ -120,6 +120,22 @@ fun AppTextButton(
     )
 }
 
+/** Lime text: the action you're meant to press in a dialog or banner (Figma 114:20520). */
+@Composable
+fun AppLinkButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    PillButton(
+        text = text, onClick = onClick, modifier = modifier, size = ButtonSize.Small, enabled = enabled, icon = null,
+        container = Color.Transparent,
+        content = if (enabled) MaterialTheme.colorScheme.primary else GymBuddyTheme.colors.disabled,
+        horizontalPadding = GymBuddyTheme.dimens.stack,
+    )
+}
+
 /** Discard, Delete. Never the default action, never lime. */
 @Composable
 fun DangerButton(

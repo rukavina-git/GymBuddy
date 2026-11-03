@@ -39,10 +39,12 @@ fun AppFrame(
     liveBar: LiveBarState?,
     onLiveBarClick: () -> Unit,
     modifier: Modifier = Modifier,
+    snackbarHost: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
+        snackbarHost = snackbarHost,
         bottomBar = {
             if (!fullScreen) {
                 Column {

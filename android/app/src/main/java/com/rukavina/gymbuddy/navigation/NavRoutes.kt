@@ -1,11 +1,14 @@
 package com.rukavina.gymbuddy.navigation
 
+import com.rukavina.gymbuddy.ui.auth.SignInMode
+
 object NavRoutes {
     const val Splash = "splash"
     const val Main = "main"
-    const val AuthGraph = "auth_graph"
-    const val Login = "login"
-    const val Registration = "registration"
+    const val Welcome = "welcome"
+    const val Setup = "setup"
+    /** Sign in or create account; [signIn] fills the mode. */
+    const val SignIn = "sign_in?mode={mode}"
     const val Home = "home"
     const val Templates = "templates"
     const val Exercises = "exercises"
@@ -32,6 +35,8 @@ object NavRoutes {
     const val HiddenTemplates = "hidden_templates"
     const val AppPreferences = "app_preferences"
     const val SyncDebug = "sync_debug"
+
+    fun signIn(mode: SignInMode = SignInMode.SIGN_IN) = "sign_in?mode=${mode.name}"
 
     fun exerciseDetailsRoute(exerciseId: String): String {
         return "exercise_details/$exerciseId"

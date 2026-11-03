@@ -62,6 +62,8 @@ import androidx.navigation.NavHostController
 import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.navigation.NavRoutes
+import com.rukavina.gymbuddy.navigation.openWelcome
+import com.rukavina.gymbuddy.ui.auth.SignInMode
 import com.rukavina.gymbuddy.ui.auth.PasswordToggleTextField
 import com.rukavina.gymbuddy.ui.guest.countsText
 import com.rukavina.gymbuddy.data.sync.LocalDataCounts
@@ -145,21 +147,17 @@ fun SettingsScreen(
         }
     }
 
-    // Observe logout event and navigate to login
+    // Logged out: back to Welcome
     LaunchedEffect(Unit) {
         viewModel.logoutEvent.collect {
-            rootNavController.navigate(NavRoutes.Login) {
-                popUpTo(NavRoutes.Main) { inclusive = true }
-            }
+            rootNavController.openWelcome()
         }
     }
 
-    // Observe account deleted event and navigate to login
+    // Account deleted: back to Welcome
     LaunchedEffect(Unit) {
         viewModel.accountDeletedEvent.collect {
-            rootNavController.navigate(NavRoutes.Login) {
-                popUpTo(NavRoutes.Main) { inclusive = true }
-            }
+            rootNavController.openWelcome()
         }
     }
 
@@ -301,18 +299,24 @@ fun SettingsScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
-                        // A guest signs in (the merge follows) or erases, instead of
-                        // logging out (ADR 0014). Plain entry until Plan 7.4.
+                        // A guest backs up (create account, the merge follows), signs
+                        // in, or erases, instead of logging out (ADR 0014). Plain
+                        // entries until the You tab (Plan 7.10).
                         if (uiState.isGuest) item {
                             Button(
-                                onClick = {
-                                    rootNavController.navigate(NavRoutes.Login) {
-                                        popUpTo(NavRoutes.Main) { inclusive = true }
-                                    }
-                                },
+                                onClick = { rootNavController.navigate(NavRoutes.signIn(SignInMode.CREATE)) },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("Sign in or create account")
+                                Text("Back up your workouts")
+                            }
+                        }
+
+                        if (uiState.isGuest) item {
+                            Button(
+                                onClick = { rootNavController.navigate(NavRoutes.signIn()) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Sign in")
                             }
                         }
 

@@ -4,7 +4,7 @@
 - [x] 02a Icons + general components (steps/02-components.md) — d8049bc
 - [x] 02b Workout + data components (steps/02-components.md) — 8263a47
 - [x] 03 App frame (steps/03-app-frame.md) — d69ddbd
-- [ ] 04 Onboarding + auth
+- [x] 04 Onboarding + auth (steps/04-onboarding-auth.md) — HASH
 - [ ] 05 Home + Templates
 - [ ] 06 Active workout
 - [ ] 07 Exercise page + create
@@ -72,7 +72,56 @@
 - 03: Manifest sets `enableOnBackInvokedCallback="true"` (default on
   target 36+, needed for API 33–35).
 
+- 04: Google "no account found" runs on a second FirebaseApp
+  ("sign-in-probe"), so AuthGate never sees an account the user didn't
+  agree to. "Create account" from that dialog deletes the probe account
+  and opens Create account (consent first; one more Google tap).
+- 04: Account collision link dialog (old LoginViewModel) dropped: Google
+  is a trusted provider, Firebase links it itself.
+- 04: Other-account check (R16-13) compares emails (owner vs typed or
+  Google email), not uids; counts = owner file's outbox.
+- 04: Consent parked in DataStore (`pendingConsentAt`) by SignInViewModel,
+  written by `ConsentRecorder.applyTo` from AuthGate.afterSignIn (unless
+  merge is Asking) and `GuestMergeCoordinator.afterMerge`; Cancel clears.
+  Version string `2026-11-03` until the privacy pass (4.6).
+- 04: `GuestMergeDialogs` restyled in place (AppChoiceDialog + snackbar
+  receipt via new `AppFrame(snackbarHost)`), not deleted.
+- 04: `PasswordTextField` kept: SettingsScreen's password dialogs use it
+  (goes in 7.10).
+- 04: Plan rows show "<days> · N workouts" from `suggestedFor` + template
+  count, then the bundled description (Figma copy isn't in the data).
+- 04: New design parts: `AppLinkButton` (lime text), `AppChoiceDialog`
+  (lime/plain/danger actions, stacked option). Transitions moved to
+  `ui/theme/Transitions.kt`; root NavHost uses shared axis.
+- 04: Settings guest entries: "Back up your workouts" (create) and
+  "Sign in"; logout/delete/erase go to Welcome. Splash has no delay.
+- 04: Strings in `res/values/strings_onboarding.xml`.
+
 ## Gotchas
+- From 04 (reviewer, not fixed):
+  - Pending consent can go stale (Add fails after Asking, or process
+    death before AuthGate) and later land on another account at a
+    SIGN_IN sign-in. Near-privacy issue: tie it to the email/uid or
+    clear it on SIGN_IN. Fix before 7.12.
+  - Probe account left behind if the app dies while "No account for
+    this email yet" is open; next Google sign-in then skips the
+    question. Fix: on probe init, delete any signed-in probe user.
+  - `AuthClient.mapped` maps CancellationException to OTHER; rethrow it.
+  - `SignInEvent.Done` / `OnboardingEvent.Done` have no replay; lost if
+    emitted during recreation.
+  - Create + Google on an existing account whose profile isn't pulled
+    yet: ConsentRecorder writes a bare rev-0 profile, server conflict
+    drops the consent.
+  - `OnboardingViewModel.finish()` has no try/finally: a failed save
+    leaves Let's go disabled.
+  - Google button doesn't set busy; double tap can open two sheets.
+  - Older builds can't parse `GET_STRONGER` (fine before release).
+- Use: `AppChoiceDialog` for account questions; `navController.openMain()`
+  / `openWelcome()` (StartNavGraph.kt) instead of raw navigate.
+  `NavRoutes.signIn(SignInMode.CREATE)` is the guest backup entry for
+  7.10's You tab and the 7.6 backup card.
+- Raw dp added (DESIGN.md §4 rows still owed): brand mark 80/64,
+  wordmark 32/24, Google logo 20, choice row 68, suggested tag 24.
 - From 03 (reviewer, not fixed):
   - Tab fade-through only when both ends are tab roots; switching tabs
     from a pushed screen (or to a tab with a saved pushed screen)
