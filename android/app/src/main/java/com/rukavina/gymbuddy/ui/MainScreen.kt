@@ -92,7 +92,11 @@ import com.rukavina.gymbuddy.ui.settings.HiddenExercisesScreen
 import com.rukavina.gymbuddy.ui.settings.HiddenTemplatesScreen
 import com.rukavina.gymbuddy.ui.settings.SettingsScreen
 import com.rukavina.gymbuddy.ui.settings.debug.SyncDebugScreen
-import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutScreen
+import com.rukavina.gymbuddy.ui.workout.active.ActiveWorkoutScreen
+import com.rukavina.gymbuddy.ui.workout.active.WorkoutSummaryScreen
+import com.rukavina.gymbuddy.ui.auth.CreateFrom
+import com.rukavina.gymbuddy.ui.theme.collapseIntoLiveBar
+import com.rukavina.gymbuddy.ui.theme.growFromLiveBar
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
 
 
@@ -163,7 +167,7 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
     val workoutState by activeWorkoutViewModel.uiState.collectAsState()
 
     val openWorkout = { bottomNavController.navigate(NavRoutes.ActiveWorkout) { launchSingleTop = true } }
-    val workoutRunning by remember { derivedStateOf { workoutState.exercises.isNotEmpty() && !workoutState.workoutSaved } }
+    val workoutRunning by remember { derivedStateOf { workoutState.running } }
     val startTemplate: (WorkoutTemplate) -> Unit = { template ->
         // Start is hidden while a workout runs (Figma 85:10122), so there is nothing to replace.
         if (!activeWorkoutViewModel.hasActiveWorkout()) activeWorkoutViewModel.startWorkoutFromTemplate(template)
@@ -192,9 +196,10 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
             }
         }
     }
-    // Pop the workout first so no tab saves it into its back stack.
+    // Pop the workout (or its summary) first so no tab saves it into its back stack.
     val leaveWorkout = {
         bottomNavController.popBackStack(NavRoutes.ActiveWorkout, inclusive = true)
+        bottomNavController.popBackStack(NavRoutes.WorkoutSummary, inclusive = true)
         bottomNavController.navigateToTab(NavTab.Workouts)
     }
 
@@ -454,11 +459,28 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                 }
             }
 
-            composable(NavRoutes.ActiveWorkout) {
+            // ⌄ / Back shrink the workout into the live bar; the bar grows it back (motion.md #10).
+            composable(
+                NavRoutes.ActiveWorkout,
+                enterTransition = { growFromLiveBar },
+                popExitTransition = { collapseIntoLiveBar },
+            ) {
                 ActiveWorkoutScreen(
                     viewModel = activeWorkoutViewModel,
-                    onWorkoutComplete = leaveWorkout,
-                    onWorkoutDiscarded = leaveWorkout
+                    onCollapse = { bottomNavController.popBackStack(NavRoutes.ActiveWorkout, inclusive = true) },
+                    onSaved = {
+                        bottomNavController.navigate(NavRoutes.WorkoutSummary) {
+                            popUpTo(NavRoutes.ActiveWorkout) { inclusive = true }
+                        }
+                    },
+                    onDiscarded = leaveWorkout,
+                )
+            }
+            composable(NavRoutes.WorkoutSummary) {
+                WorkoutSummaryScreen(
+                    viewModel = activeWorkoutViewModel,
+                    onDone = leaveWorkout,
+                    onCreateAccount = { rootNavController.navigate(NavRoutes.createAccount(CreateFrom.SETTINGS)) },
                 )
             }
         }

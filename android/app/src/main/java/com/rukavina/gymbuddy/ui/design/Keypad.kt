@@ -111,7 +111,7 @@ fun KeypadKey(
 
 /**
  * Keypad sheet content: label, value with lime caret, unit, 4×3 keys,
- * Cancel + Next (56, D11). Stateless: emits [KeypadInput] only. Put it
+ * Cancel + Next (56, D11), and an optional rule [message]. Stateless: emits [KeypadInput] only. Put it
  * in a bottom sheet; the sheet gives the handle.
  */
 @Composable
@@ -124,6 +124,7 @@ fun Keypad(
     decimalEnabled: Boolean = true,
     nextEnabled: Boolean = true,
     nextLabel: String = stringResource(R.string.keypad_next),
+    message: String? = null,
 ) {
     val cs = MaterialTheme.colorScheme
     val d = GymBuddyTheme.dimens
@@ -144,6 +145,10 @@ fun Keypad(
                 Box(Modifier.size(d.strokeEmphasis, CaretHeight).background(cs.primary))
                 Text(unit, style = MaterialTheme.typography.titleSmall, color = cs.onSurfaceVariant)
             }
+        }
+        // A rule the value breaks (Figma 53:2873), e.g. "At least 1 rep."
+        if (message != null) {
+            Text(message, style = MaterialTheme.typography.bodySmall, color = cs.error)
         }
         Column(
             Modifier.padding(top = d.stackTight),

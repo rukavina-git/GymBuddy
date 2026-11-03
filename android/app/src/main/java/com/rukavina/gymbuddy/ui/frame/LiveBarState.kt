@@ -20,12 +20,14 @@ data class LiveBarState(
 
 /**
  * Null when no workout runs (no exercises, or saved / discarded). The
- * current exercise is the first one with a set left; when all are done,
- * the last one.
+ * exercise is the one on screen while it has a set left, else the first
+ * one with a set left; when all are done, the last one.
  */
 fun ActiveWorkoutUiState.toLiveBarState(): LiveBarState? {
     if (exercises.isEmpty() || workoutSaved || workoutDiscarded) return null
-    val current = exercises.firstOrNull { ex -> ex.sets.any { !it.isCompleted } } ?: exercises.last()
+    val current = currentExercise?.takeIf { !it.allDone }
+        ?: exercises.firstOrNull { !it.allDone }
+        ?: exercises.last()
     val next = current.sets.indexOfFirst { !it.isCompleted }.takeIf { it >= 0 }
     val total = exercises.sumOf { it.sets.size }
     val done = exercises.sumOf { ex -> ex.sets.count { it.isCompleted } }

@@ -21,6 +21,7 @@ object NavRoutes {
     const val Profile = "profile"
     const val About = "about"
     const val ActiveWorkout = "active_workout"
+    const val WorkoutSummary = "workout_summary"
     const val TemplatePage = "template/{templateId}"
     /** Template editor; no templateId = new template. */
     const val TemplateEditor = "template_editor?templateId={templateId}"

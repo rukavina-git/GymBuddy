@@ -18,8 +18,10 @@ enum class Haptic {
     Confirm,
     /** Swipe crosses its threshold, either way. */
     SwipeThreshold,
-    /** Couldn't save, a hold hits floor/ceiling, invalid keypad Next. */
+    /** A hold hits floor/ceiling, invalid keypad Next. None below API 30. */
     Reject,
+    /** Set or workout couldn't save: REJECT, LONG_PRESS below API 30 (motion.md). */
+    SaveFailed,
     /** − / + press: first tick only, none per repeat. */
     StepperTick,
     /** Keypad key. */
@@ -44,6 +46,7 @@ internal fun hapticConstant(haptic: Haptic, sdkInt: Int): Int? {
             if (u) HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
             else HapticFeedbackConstants.CONTEXT_CLICK
         Haptic.Reject -> if (r) HapticFeedbackConstants.REJECT else null
+        Haptic.SaveFailed -> if (r) HapticFeedbackConstants.REJECT else HapticFeedbackConstants.LONG_PRESS
         Haptic.StepperTick -> HapticFeedbackConstants.CLOCK_TICK
         Haptic.KeypadKey -> HapticFeedbackConstants.KEYBOARD_TAP
         Haptic.DragStart ->

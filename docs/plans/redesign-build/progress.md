@@ -7,7 +7,8 @@
 - [x] 04 Onboarding + auth (steps/04-onboarding-auth.md) — 6781df5
 - [x] 05a Home + Workouts tab + template page (steps/05-home-templates.md) — f609339
 - [x] 05b Template editor + exercise picker (steps/05-home-templates.md) — 803691f
-- [ ] 06 Active workout
+- [x] 06a Active workout: logging (steps/06-active-workout.md) — HASH
+- [ ] 06b Active workout: around the workout (steps/06-active-workout.md)
 - [ ] 07 Exercise page + create
 - [ ] 08 Progress tab
 - [ ] 09 Session detail
@@ -181,7 +182,60 @@
 - 05b: Muscle/equipment display names in `ui/exercise/ExerciseText.kt`;
   strings in `res/values/strings_editor.xml`.
 
+- 06a: Figma read via the Console MCP. All 8 owner decisions as recommended.
+- 06a: `NumberPicker.kt` kept (profile edit screens, 7.10) and
+  `SetTrackingFields.kt` kept (WorkoutScreen manual set entry, 7.8/7.9).
+  WorkoutScreen.kt had no active part left to delete.
+- 06a: A set counts only after Done (`isCompleted`), not when filled.
+  Sets start from the template targets (reps, kg, time, distance); Done
+  copies the set's values to the sets after it.
+- 06a: Steps ± 2.5 kg / 5 lb, ± 1 rep, ± 5 s, ± 100 m (distance step not in
+  Figma). Floors 0 kg, 1 rep, 5 s, 0 m. Rules: ≥ 1 rep, ≥ 1 s, > 0 m; weight
+  may be empty. Times show m:ss everywhere ("1:00", Figma also has "60 s").
+- 06a: Rest runs on the workout clock (`RestState.startedAtElapsed`), in
+  the draft JSON with the current exercise (Moshi defaults; no Room change).
+  Template without rest uses `DEFAULT_REST_SECONDS` (2:00, from 05b).
+- 06a: ⌄ and Back pop the workout with a scale-to-bottom + fade (`long2`
+  `emph`), stand-in for the container transform: the live bar is outside
+  the NavHost. Set lands = in-place content swap (fade + size,
+  `SET_LANDS`), no lime sweep or digit roll. Odometer rolls the whole
+  number, not per digit.
+- 06a: Swipe right on the set card = Done (motion.md #7); swipe left =
+  delete. Long-press → Delete on rows only (on the card it fired under a
+  held − / +, caught by a UI test).
+- 06a: `SetCard(panels = List<(Modifier) -> Unit>)`, stacks below 328dp
+  inner width. `StepperKey` holds to repeat (raw 400/150→50 ms).
+  `Keypad(message)` for rules. `Haptic.SaveFailed` (REJECT, LONG_PRESS
+  below 30). `UnitConverter.formatTrimmed` uses Locale.ROOT (05b gotcha).
+- 06a: Summary is its own route `workout_summary`; Done goes to the Workouts
+  tab. Backup "Create account" uses `createAccount(CreateFrom.SETTINGS)`
+  (no `signIn(CREATE)` route exists).
+- 06a: Left for 06b: Home "Workout in progress" card (53:3414), live bar
+  rest variant, "3 / 15" pill (All exercises). "How to" hidden until 7.7.
+- 06a: Roadmap 7.6 stays unticked until 06b lands.
+
 ## Gotchas
+- From 06a (reviewer, not fixed):
+  - Summary after process death: `workout_summary` comes back with no
+    summary in the new VM and renders blank (only Back leaves). Pop or
+    fall back to Done when null.
+  - Rest isn't shown between exercises: the rest line needs a set left in
+    the shown exercise, and Done jumps to the next exercise. Show it on the
+    next exercise (or keep the old one on screen).
+  - Undo after a newer set restores the old rest over the new one
+    (`rest = d.rest ?: it.rest`).
+  - Hold to the floor/ceiling never plays Reject: disabling cancels the
+    press before the check.
+  - `restText` (counting vs "+0:45") has no test.
+  - Swipe right on the card logs a set; a sideways slip on − / + could too.
+  - Pausing the workout clock freezes rest too (no pause UI today).
+  - Keypad accepts weight/distance over the stepper ceiling (999 kg).
+  - Summary `lifted` reads all exercises, sets from kept ones (differs
+    only for rule-breaking done sets from old drafts).
+- Use (06a, for 06b): `ActiveWorkoutViewModel.selectExercise`,
+  `deleteSet/undoDelete`, `WorkoutEvent`, `SetFields`, `WorkoutText.kt`
+  helpers; `ActiveWorkoutUiTest` sets up a real VM (qualifier
+  w412dp-h915dp, timer paused).
 - From 05b (reviewer, not fixed):
   - Picker search text round-trips through `combine(...).stateIn`
     (async): fast typing can jump the cursor, and text typed before the

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Active workout and summary (Plan 7 06a, Figma 67:6561). -->
+<resources>
+    <string name="workout_set_n">Set %d</string>
+    <string name="workout_target">%1$d × %2$s</string>
+    <string name="workout_rest_target">rest %s</string>
+    <string name="workout_rest_left">%s rest</string>
+    <string name="workout_rest_over">%1$s rest · +%2$s</string>
+    <string name="workout_up_next">Up next</string>
+    <string name="workout_up_next_summary">Workout summary</string>
+    <string name="workout_done_set">Done · set %d</string>
+    <string name="workout_done_finish">Done · finish workout</string>
+    <string name="workout_next_exercise">Next exercise</string>
+    <string name="workout_hint">Tap a number to type</string>
+    <string name="workout_step">± %s</string>
+    <string name="workout_field_weight">weight</string>
+    <string name="workout_field_reps">reps</string>
+    <string name="workout_field_time">time</string>
+    <string name="workout_field_distance">distance</string>
+    <string name="workout_unit_reps">reps</string>
+    <string name="workout_unit_rep">rep</string>
+    <string name="workout_unit_seconds">s</string>
+    <string name="workout_unit_metres">m</string>
+    <string name="workout_keypad_label">Set %1$d · %2$s</string>
+    <string name="workout_keypad_save">Save</string>
+    <string name="workout_rule_rep">At least 1 rep. To skip this set, delete it.</string>
+    <string name="workout_rule_second">At least 1 second. To skip this set, delete it.</string>
+    <string name="workout_rule_distance">More than 0 m. To skip this set, delete it.</string>
+    <string name="workout_cd_decrease">Decrease %s</string>
+    <string name="workout_cd_increase">Increase %s</string>
+    <string name="workout_set_deleted">Set deleted</string>
+    <string name="workout_delete_set">Delete set</string>
+    <string name="workout_done_set_action">Done</string>
+    <string name="workout_menu_finish">Finish workout</string>
+    <string name="workout_menu_discard">Discard workout</string>
+    <string name="workout_finish_title">Finish %s?</string>
+    <string name="workout_minutes">%d min</string>
+    <plurals name="workout_sets">
+        <item quantity="one">%d set</item>
+        <item quantity="other">%d sets</item>
+    </plurals>
+    <plurals name="workout_sets_left">
+        <item quantity="one">%d set not done. It won\'t be saved; the workout plan stays the same.</item>
+        <item quantity="other">%d sets not done. They won\'t be saved; the workout plan stays the same.</item>
+    </plurals>
+    <string name="workout_keep_going">Keep going</string>
+    <string name="workout_finish">Finish</string>
+    <string name="workout_discard_title">Discard this workout?</string>
+    <string name="workout_discard_body">Nothing from it will be saved.</string>
+    <string name="workout_discard">Discard</string>
+    <string name="workout_save_failed">Couldn\'t save the workout. Try again.</string>
+    <string name="workout_nothing_logged">No sets done yet. Log a set or discard the workout.</string>
+    <string name="summary_title">%s done</string>
+    <string name="summary_time">time</string>
+    <string name="summary_sets">sets</string>
+    <string name="summary_lifted">lifted</string>
+    <string name="summary_what_you_did">What you did</string>
+    <string name="summary_top">top %s</string>
+    <string name="summary_best">best %s</string>
+    <string name="summary_more">+ %d more</string>
+    <string name="summary_backup_title">Keep this safe?</string>
+    <string name="summary_backup_body">Your workouts live only on this phone. An account backs them up and syncs your devices.</string>
+    <string name="summary_create_account">Create account</string>
+    <string name="summary_not_now">Not now</string>
+    <string name="summary_done">Done</string>
+</resources>

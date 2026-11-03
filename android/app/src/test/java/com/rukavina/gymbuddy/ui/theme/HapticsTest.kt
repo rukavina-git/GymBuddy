@@ -20,6 +20,7 @@ class HapticsTest {
 
     @Test fun confirm() = check(Haptic.Confirm, H.VIRTUAL_KEY, H.CONFIRM, r)
     @Test fun reject() = check(Haptic.Reject, null, H.REJECT, r)
+    @Test fun saveFailed() = check(Haptic.SaveFailed, H.LONG_PRESS, H.REJECT, r)
     @Test fun swipeThreshold() =
         check(Haptic.SwipeThreshold, H.CONTEXT_CLICK, H.GESTURE_THRESHOLD_ACTIVATE, u)
     @Test fun dragStart() = check(Haptic.DragStart, H.LONG_PRESS, H.DRAG_START, u)

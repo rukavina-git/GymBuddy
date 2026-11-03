@@ -154,12 +154,13 @@ private fun WorkoutPreview() = Board {
     SetRow("Set 1", "80 kg × 8", SetState.Done)
     RestLine("1:24 rest")
     SetRow("Set 2", "80 kg × 8", SetState.Upcoming)
-    SetCard("Set 4") {
-        ValuePanel("82.5", "kg", editing = true, onClick = {}, onMinus = {}, onPlus = {},
-            modifier = Modifier.weight(1f), step = "± 2.5 kg")
-        ValuePanel("8", "reps", editing = false, onClick = {}, onMinus = {}, onPlus = {},
-            modifier = Modifier.weight(1f), minusEnabled = false)
-    }
+    SetCard(
+        "Set 4",
+        panels = listOf(
+            { m -> ValuePanel("82.5", "kg", editing = true, onClick = {}, onMinus = {}, onPlus = {}, modifier = m, step = "± 2.5 kg") },
+            { m -> ValuePanel("8", "reps", editing = false, onClick = {}, onMinus = {}, onPlus = {}, modifier = m, minusEnabled = false) },
+        ),
+    )
 }
 
 @Preview(widthDp = 412)

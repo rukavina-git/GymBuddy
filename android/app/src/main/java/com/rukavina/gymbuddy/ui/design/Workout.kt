@@ -1,6 +1,15 @@
 package com.rukavina.gymbuddy.ui.design
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -8,7 +17,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -19,7 +27,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,13 +42,17 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.theme.AppIcons
+import com.rukavina.gymbuddy.ui.theme.Durations
 import com.rukavina.gymbuddy.ui.theme.FullShape
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 import com.rukavina.gymbuddy.ui.theme.Haptic
+import com.rukavina.gymbuddy.ui.theme.motionTween
 import com.rukavina.gymbuddy.ui.theme.rememberHaptics
+import kotlinx.coroutines.delay
 
 /** Raw sizes from "01 System" (DESIGN.md §4). */
 private val SetMark = 28.dp
@@ -116,8 +132,10 @@ fun RestLine(value: String, modifier: Modifier = Modifier) {
 enum class StepperSign { Minus, Plus }
 
 /**
- * − / + key, 64×56, radius 16. One tick haptic per press; hold-to-repeat
- * comes with 7.6. [contentDescription] defaults to "Decrease"/"Increase".
+ * − / + key, 64×56, radius 16. One tick haptic on the first press; held,
+ * it repeats and speeds up (motion.md #3b), with one reject when it stops
+ * at the floor or ceiling ([enabled] turns false). [contentDescription]
+ * defaults to "Decrease"/"Increase".
  */
 @Composable
 fun StepperKey(
@@ -126,6 +144,7 @@ fun StepperKey(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     contentDescription: String? = null,
+    onHoldChange: (Boolean) -> Unit = {},
 ) {
     val cs = MaterialTheme.colorScheme
     val d = GymBuddyTheme.dimens
@@ -133,11 +152,44 @@ fun StepperKey(
     val haptics = rememberHaptics()
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
+    val click by rememberUpdatedState(onClick)
+    val canRepeat by rememberUpdatedState(enabled)
+    val holdChange by rememberUpdatedState(onHoldChange)
+    // Set while a hold repeated, so the release doesn't add one more step.
+    var repeated by remember { mutableStateOf(false) }
+    LaunchedEffect(pressed) {
+        if (!pressed) {
+            holdChange(false)
+            return@LaunchedEffect
+        }
+        repeated = false
+        delay(HOLD_START_MS)
+        holdChange(true)
+        haptics(Haptic.StepperTick)
+        var interval = HOLD_FIRST_MS
+        while (true) {
+            if (!canRepeat) {
+                haptics(Haptic.Reject)
+                break
+            }
+            repeated = true
+            click()
+            delay(interval)
+            interval = (interval * HOLD_SPEEDUP).toLong().coerceAtLeast(HOLD_FASTEST_MS)
+        }
+    }
     val icon = if (sign == StepperSign.Minus) AppIcons.Ui.Remove else AppIcons.Ui.Add
     val cd = contentDescription
         ?: stringResource(if (sign == StepperSign.Minus) R.string.cd_decrease else R.string.cd_increase)
     Surface(
-        onClick = { haptics(Haptic.StepperTick); onClick() },
+        onClick = {
+            if (repeated) {
+                repeated = false
+            } else {
+                haptics(Haptic.StepperTick)
+                onClick()
+            }
+        },
         enabled = enabled,
         shape = shape,
         color = if (pressed) cs.surfaceContainerHigh else cs.surfaceContainerHighest,
@@ -154,9 +206,18 @@ fun StepperKey(
     }
 }
 
+/** Hold to repeat: raw ms (motion.md #3b has no token). */
+private const val HOLD_START_MS = 400L
+private const val HOLD_FIRST_MS = 150L
+private const val HOLD_FASTEST_MS = 50L
+private const val HOLD_SPEEDUP = 0.85
+
 /**
  * Weight or reps on the set card. Tapping the number opens the keypad
  * ([onClick]); [editing] draws the lime line and shows [step] ("± 2.5 kg").
+ * The number rolls up on + and down on − (motion.md #3), not while held.
+ * [minusDescription]/[plusDescription] name the value for TalkBack
+ * ("Decrease weight").
  */
 @Composable
 fun ValuePanel(
@@ -170,10 +231,13 @@ fun ValuePanel(
     step: String? = null,
     minusEnabled: Boolean = true,
     plusEnabled: Boolean = true,
+    minusDescription: String? = null,
+    plusDescription: String? = null,
 ) {
     val cs = MaterialTheme.colorScheme
     val d = GymBuddyTheme.dimens
     val shape = MaterialTheme.shapes.medium
+    var held by remember { mutableStateOf(false) }
     Surface(
         shape = shape,
         color = cs.surfaceContainerHigh,
@@ -189,10 +253,26 @@ fun ValuePanel(
                     .fillMaxWidth()
                     .heightIn(min = d.target)
                     .selectable(selected = editing, onClick = onClick, role = Role.Button),
-                horizontalArrangement = Arrangement.spacedBy(d.stackTight),
+                horizontalArrangement = Arrangement.spacedBy(d.stackTight, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(number, style = MaterialTheme.typography.displayLarge, modifier = Modifier.alignByBaseline())
+                AnimatedContent(
+                    targetState = number,
+                    transitionSpec = {
+                        if (held) {
+                            EnterTransition.None togetherWith ExitTransition.None
+                        } else {
+                            val up = (initialState.toFloatOrNull() ?: 0f) <= (targetState.toFloatOrNull() ?: 0f)
+                            val tween = motionTween<IntOffset>(Durations.SHORT4)
+                            (slideInVertically(tween) { if (up) it else -it } + fadeIn(motionTween(Durations.SHORT4))) togetherWith
+                                (slideOutVertically(tween) { if (up) -it else it } + fadeOut(motionTween(Durations.SHORT4)))
+                        }
+                    },
+                    label = "odometer",
+                    modifier = Modifier.alignByBaseline(),
+                ) { value ->
+                    Text(value, style = MaterialTheme.typography.displayLarge)
+                }
                 Text(
                     unit,
                     style = MaterialTheme.typography.titleSmall,
@@ -204,22 +284,36 @@ fun ValuePanel(
                 Text(step, style = MaterialTheme.typography.labelSmall, color = cs.onSurfaceVariant)
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                StepperKey(StepperSign.Minus, onMinus, enabled = minusEnabled)
-                StepperKey(StepperSign.Plus, onPlus, enabled = plusEnabled)
+                StepperKey(
+                    StepperSign.Minus, onMinus, enabled = minusEnabled,
+                    contentDescription = minusDescription, onHoldChange = { held = it },
+                )
+                StepperKey(
+                    StepperSign.Plus, onPlus, enabled = plusEnabled,
+                    contentDescription = plusDescription, onHoldChange = { held = it },
+                )
             }
         }
     }
 }
 
+/** Two panels side by side need this much; narrower cards stack them (360dp phones). */
+private val SideBySideMinWidth = 328.dp
+
 /**
- * The current set: title and two [ValuePanel]s, cobalt ring ("you are
- * here"), radius 20. Give each panel `Modifier.weight(1f)`.
+ * The current set: title, optional muted [hint] on the right ("Tap a
+ * number to type"), and one [ValuePanel] per value, cobalt ring ("you
+ * are here"), radius 20. Panels sit side by side, or stacked when the
+ * card is too narrow for two pairs of − / + keys. Each panel lambda gets
+ * the modifier to put on its ValuePanel.
  */
 @Composable
 fun SetCard(
     title: String,
+    panels: List<@Composable (Modifier) -> Unit>,
     modifier: Modifier = Modifier,
-    panels: @Composable RowScope.() -> Unit,
+    hint: String? = null,
+    titleContent: @Composable (String) -> Unit = { Text(it, style = MaterialTheme.typography.titleMedium) },
 ) {
     val d = GymBuddyTheme.dimens
     Surface(
@@ -229,8 +323,23 @@ fun SetCard(
         modifier = modifier,
     ) {
         Column(Modifier.padding(d.insetCard), verticalArrangement = Arrangement.spacedBy(d.stack)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(d.stackTight), content = panels)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(1f)) { titleContent(title) }
+                if (hint != null) {
+                    Text(hint, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                if (panels.size > 1 && maxWidth < SideBySideMinWidth) {
+                    Column(verticalArrangement = Arrangement.spacedBy(d.stackTight)) {
+                        panels.forEach { it(Modifier.fillMaxWidth()) }
+                    }
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(d.stackTight)) {
+                        panels.forEach { it(Modifier.weight(1f)) }
+                    }
+                }
+            }
         }
     }
 }

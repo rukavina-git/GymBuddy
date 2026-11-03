@@ -30,7 +30,8 @@ object UnitConverter {
      * underlying stored value is never touched.
      */
     private fun formatTrimmed(value: Float, decimals: Int): String {
-        val formatted = String.format("%.${decimals}f", value)
+        // Root locale: "." always, so comma locales trim too (was "100,00").
+        val formatted = String.format(java.util.Locale.ROOT, "%.${decimals}f", value)
         return if (formatted.contains('.')) {
             formatted.trimEnd('0').trimEnd('.')
         } else {

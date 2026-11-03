@@ -71,6 +71,23 @@ class ActiveWorkoutDraftRepositoryImplTest {
     }
 
     @Test
+    fun `rest and the current exercise round-trip`() = runTest {
+        val withRest = draft.copy(currentExerciseIndex = 0, rest = ActiveWorkoutDraft.Rest("set-0", 540L, 120))
+        repository.save(withRest)
+        assertEquals(withRest, repository.load())
+    }
+
+    @Test
+    fun `a draft written before rest and current exercise existed still loads`() = runTest {
+        val old = """{"title":"Push Day","templateId":null,"templateTitle":null,"startedAt":1,"elapsedSeconds":60,
+            "isTimerRunning":true,"savedAt":2,"exercises":[]}""".trimIndent()
+        db.activeWorkoutDraftDao().upsert(ActiveWorkoutDraftEntity(payloadJson = old, updatedAt = 0))
+        val loaded = repository.load()!!
+        assertEquals(0, loaded.currentExerciseIndex)
+        assertEquals(null, loaded.rest)
+    }
+
+    @Test
     fun `saving again replaces the single draft`() = runTest {
         repository.save(draft)
         repository.save(draft.copy(title = "Leg Day"))
