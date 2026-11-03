@@ -43,5 +43,7 @@ jobs:
       sonar-project-key: rukavina-git_GymBuddy-backend
       coverage-report-dir: backend/build/reports/jacoco/test
       coverage-exclusions: ${{ needs.exclusions.outputs.backend }}
+      # Seed migrations repeat INSERT shapes by design (generated data).
+      cpd-exclusions: src/main/resources/db/migration/**
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
