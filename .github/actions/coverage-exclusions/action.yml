@@ -65,6 +65,8 @@ runs:
           'app/src/main/java/**/*Dialog.kt'
           'app/src/main/java/**/*BottomSheet.kt'
           'app/src/main/java/**/ui/components/**'
+          # Plan 7 component library (composables, like ui/components).
+          'app/src/main/java/**/ui/design/**'
           'app/src/main/java/**/PasswordTextField.kt'
           'app/src/main/java/**/ProfileTextField.kt'
           'app/src/main/java/**/SettingsComponents.kt'

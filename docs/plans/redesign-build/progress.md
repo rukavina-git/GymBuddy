@@ -1,7 +1,8 @@
 # Progress
 
 - [x] 01 Theme (steps/01-theme.md) — b8a0806
-- [ ] 02 Icons + components
+- [x] 02a Icons + general components (steps/02-components.md) — HASH
+- [ ] 02b Workout + data components (steps/02-components.md)
 - [ ] 03 App frame
 - [ ] 04 Onboarding + auth
 - [ ] 05 Home + Templates
@@ -29,7 +30,34 @@
   danger, Home green day → lime, filter sheet scrim). NumberPicker's
   Color.Black is a DstIn mask, left.
 
+- 02a: Old `AppSnackBar.kt` was still used by Login/Register (function
+  `AppSnackbar`, file `AppSnackBar`); both now use
+  `SnackbarHost { ui.design.AppSnackbar(it) }` instead of keeping it.
+- 02a: Files grouped by family: `Selection.kt` (chip, switch,
+  segmented), `Bars.kt` (top bars, nav bar), plus `Modifiers.kt`
+  (`focusRing`, `pressScale`) and `DesignPreviews.kt`.
+- 02a: `ui/design/**` excluded from coverage (jacoco + Sonar action),
+  like `ui/components/**`; logic is covered by DesignComponentsTest.
+- 02a: `LargeTitleTopBar` is static; scroll collapse comes in 7.3.
+- 02a: Chip gets `minimumInteractiveComponentSize()` (selectable
+  Surface skips it), so it lays out 48 high, drawn 36.
+- 02a: Roadmap 7.2 stays unticked until 02b lands.
+
 ## Gotchas
+- From 02a (reviewer, not fixed):
+  - NavBar filled-icon test only checks the enum; nothing renders the
+    selected tab's `Color.Unspecified` filled icon.
+  - `AppTextField` label isn't tied to the field for TalkBack (reads
+    the value only). Fix before 7.4 forms use it.
+  - `AppSnackbar` ignores `withDismissAction`; `LinkAction` (banner /
+    snackbar action) has no focus ring.
+  - No previews yet for AppSnackbar, AppDialog, AppBottomSheet,
+    AppMenu, BackTopBar.
+  - DESIGN.md §10 UI icons row: stray " ; " and says npm (was npx).
+- Use: `ui/design/*` parts, icons via `AppIcons.Ui/Glyph/Tab/Brand`
+  (`painterResource`). Tabs: `NavTab` enum + `AppNavBar`. Re-convert
+  icons with svg2vectordrawable if design/icons changes;
+  IconParityTest fails otherwise.
 - From 01 (reviewer, not fixed):
   - `Haptic.Reject` has no fallback below API 30, but motion.md wants
     "set couldn't save" to fall back to LONG_PRESS. Split it (e.g.

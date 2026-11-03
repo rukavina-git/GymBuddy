@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,7 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rukavina.gymbuddy.R
-import com.rukavina.gymbuddy.ui.components.AppSnackbar
+import com.rukavina.gymbuddy.ui.design.AppSnackbar
 
 @Composable
 fun LoginScreen(
@@ -102,10 +103,7 @@ fun LoginScreen(
         onContinueAsGuest = onContinueAsGuest
     )
 
-    AppSnackbar(
-        snackbarHostState = snackbarHostState,
-        modifier = Modifier.padding(16.dp)
-    )
+    SnackbarHost(snackbarHostState) { AppSnackbar(it) }
 }
 
 @Composable

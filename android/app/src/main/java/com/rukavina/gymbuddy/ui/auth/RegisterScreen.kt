@@ -17,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -42,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rukavina.gymbuddy.R
-import com.rukavina.gymbuddy.ui.components.AppSnackbar
+import com.rukavina.gymbuddy.ui.design.AppSnackbar
 import com.rukavina.gymbuddy.utils.validation.ValidationResult
 import com.rukavina.gymbuddy.utils.validation.Validators
 import com.rukavina.gymbuddy.utils.validation.isStrongPassword
@@ -313,10 +314,7 @@ fun RegistrationScreen(
         }
     }
 
-    AppSnackbar(
-        snackbarHostState = snackbarHostState,
-        modifier = Modifier.padding(16.dp),
-    )
+    SnackbarHost(snackbarHostState) { AppSnackbar(it) }
 }
 
 

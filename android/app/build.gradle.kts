@@ -105,6 +105,8 @@ android {
                 it.systemProperty("gymbuddy.e2e.baseUrl", findProperty("e2eBaseUrl")?.toString() ?: "")
                 // TokenParityTest reads the committed Figma tokens.
                 it.systemProperty("gymbuddy.tokensJson", rootDir.resolve("../design/tokens.json").absolutePath)
+                // IconParityTest checks design/icons + brand against res/drawable.
+                it.systemProperty("gymbuddy.designDir", rootDir.resolve("../design").absolutePath)
                 // Robolectric loads app classes through its own class
                 // loader, which JaCoCo skips by default: every Robolectric
                 // test then reports 0% coverage for the code it runs.
@@ -223,6 +225,8 @@ dependencies {
     testImplementation(libs.work.testing)
     testImplementation(libs.lifecycle.runtime.testing)
     testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(platform(libs.androidxComposeBom))
+    testImplementation(libs.ui.test.junit)
     androidTestImplementation(libs.testExtJunit)
     androidTestImplementation(libs.espressoCore)
     androidTestImplementation(libs.ui.test.junit)
@@ -256,6 +260,7 @@ val jacocoExcludes = listOf(
     "**/ui/**/*Card*.*",
     "**/ui/**/*BottomSheet*.*",
     "**/ui/components/**",
+    "**/ui/design/**",
     "**/*PasswordTextField*.*",
     "**/*ProfileTextField*.*",
     "**/*SettingsComponents*.*",
