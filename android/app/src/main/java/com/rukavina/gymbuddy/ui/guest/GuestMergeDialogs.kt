@@ -5,9 +5,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import com.rukavina.gymbuddy.data.sync.GuestMergeReceipt
 import com.rukavina.gymbuddy.data.sync.GuestMergeState
-import com.rukavina.gymbuddy.data.sync.LocalDataCounts
 
 /**
  * Plain dialogs for the guest → account merge, worded as Figma
@@ -42,35 +40,3 @@ fun GuestMergeDialogs(
         GuestMergeState.Idle, GuestMergeState.Merging -> Unit
     }
 }
-
-private fun askText(state: GuestMergeState.Asking): String {
-    val account = state.accountEmail ?: "Your account"
-    val has = if (state.accountWorkouts > 0) {
-        "$account already has ${plural(state.accountWorkouts, "workout")}. "
-    } else {
-        "We couldn't check what $account already has. "
-    }
-    return "${has}Add the ${countsText(state.guest)} from this phone to it? Nothing is deleted."
-}
-
-private fun receiptText(receipt: GuestMergeReceipt): String {
-    val added = if (receipt.added.isEmpty) "Added your changes from this phone."
-    else "Added ${countsText(receipt.added)} from this phone."
-    return if (receipt.keptAccountProfile) "$added Kept your account's profile." else added
-}
-
-/** "5 workouts, 1 template and 2 exercises"; zero counts are left out. */
-fun countsText(counts: LocalDataCounts): String {
-    val parts = listOfNotNull(
-        counts.workouts.takeIf { it > 0 }?.let { plural(it, "workout") },
-        counts.templates.takeIf { it > 0 }?.let { plural(it, "template") },
-        counts.exercises.takeIf { it > 0 }?.let { plural(it, "exercise") }
-    )
-    return when (parts.size) {
-        0 -> "changes"
-        1 -> parts[0]
-        else -> parts.dropLast(1).joinToString(", ") + " and " + parts.last()
-    }
-}
-
-private fun plural(n: Int, word: String) = "$n $word" + if (n == 1) "" else "s"

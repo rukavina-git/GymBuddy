@@ -73,6 +73,13 @@ runs:
           'app/src/main/java/**/ExerciseFormAdvanced.kt'
           'app/src/main/java/**/ExerciseFormDetails.kt'
           'app/src/main/java/**/ExerciseFormRequiredFields.kt'
+          # Composable-only files that don't follow the *Screen/*Dialog
+          # naming (their plain text helpers live in GuestText.kt and
+          # ExportSummary.kt, which stay counted).
+          'app/src/main/java/**/ui/guest/AuthGateUi.kt'
+          'app/src/main/java/**/ui/guest/GuestMergeDialogs.kt'
+          'app/src/main/java/**/ui/settings/ExportSheet.kt'
+          'app/src/main/java/**/navigation/AuthNavGraph.kt'
           'app/src/main/java/**/ui/theme/**'
           'app/src/main/java/**/di/**'
           'app/src/main/java/**/GymBuddyApplication.kt'

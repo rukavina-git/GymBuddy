@@ -67,17 +67,17 @@ class WorkoutTemplateSeeder @Inject constructor(
 
             Log.d(TAG, "Bundled version: $bundledVersion, Current version: $currentVersion")
 
-            if (currentVersion == null) {
+            return@withLock if (currentVersion == null) {
                 Log.i(TAG, "First install: seeding bundled default templates v$bundledVersion")
                 seedAll(db, json, bundledVersion)
-                return@withLock true
+                true
             } else if (isGuest && bundledVersion > currentVersion) {
                 Log.i(TAG, "Guest file: refreshing default templates v$currentVersion -> v$bundledVersion")
                 seedAll(db, json, bundledVersion, replaceDefaults = true)
-                return@withLock true
+                true
             } else {
                 Log.d(TAG, "Default templates already loaded (v$currentVersion); later updates come from the server")
-                return@withLock false
+                false
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error seeding templates", e)
