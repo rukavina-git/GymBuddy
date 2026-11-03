@@ -70,37 +70,38 @@ private val QUESTIONS = SetupStep.entries.filter { it != SetupStep.READY }
 @Composable
 fun WelcomeScreen(onGetStarted: () -> Unit, onHaveAccount: () -> Unit) {
     val d = GymBuddyTheme.dimens
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            // Figma: actions sit clear of the system bar, not on it.
-            .padding(start = d.insetScreen, end = d.insetScreen, top = d.insetScreen, bottom = d.insetScreen + d.section),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Spacer(Modifier.weight(1f))
-        Image(painterResource(AppIcons.Brand.AppIcon), null, Modifier.size(BrandMarkLarge))
-        Spacer(Modifier.height(d.section))
-        Image(
-            painterResource(AppIcons.Brand.Wordmark),
-            stringResource(R.string.cd_app_name),
-            Modifier.height(WordmarkLarge).semantics { heading() },
-        )
-        Spacer(Modifier.height(d.stack))
-        Text(
-            stringResource(R.string.welcome_line),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            // One sentence per line: no lone word at any width or font scale.
-            modifier = Modifier.padding(horizontal = d.section),
-        )
-        Spacer(Modifier.weight(1.4f))
-        PrimaryButton(stringResource(R.string.welcome_get_started), onGetStarted, Modifier.fillMaxWidth(), size = ButtonSize.Medium)
-        Spacer(Modifier.height(d.stack))
-        OutlineButton(stringResource(R.string.welcome_have_account), onHaveAccount, Modifier.fillMaxWidth())
+    Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                // Figma: actions sit clear of the system bar, not on it.
+                .padding(start = d.insetScreen, end = d.insetScreen, top = d.insetScreen, bottom = d.insetScreen + d.section),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(Modifier.weight(1f))
+            Image(painterResource(AppIcons.Brand.AppIcon), null, Modifier.size(BrandMarkLarge))
+            Spacer(Modifier.height(d.section))
+            Image(
+                painterResource(AppIcons.Brand.Wordmark),
+                stringResource(R.string.cd_app_name),
+                Modifier.height(WordmarkLarge).semantics { heading() },
+            )
+            Spacer(Modifier.height(d.stack))
+            Text(
+                stringResource(R.string.welcome_line),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                // One sentence per line: no lone word at any width or font scale.
+                modifier = Modifier.padding(horizontal = d.section),
+            )
+            Spacer(Modifier.weight(1.4f))
+            PrimaryButton(stringResource(R.string.welcome_get_started), onGetStarted, Modifier.fillMaxWidth(), size = ButtonSize.Medium)
+            Spacer(Modifier.height(d.stack))
+            OutlineButton(stringResource(R.string.welcome_have_account), onHaveAccount, Modifier.fillMaxWidth())
+        }
     }
 }
 
@@ -135,22 +136,26 @@ internal fun SetupContent(
     onPlan: (String?) -> Unit,
     onFinish: () -> Unit,
 ) {
-    AnimatedContent(
-        targetState = state.step,
-        transitionSpec = { fadeThroughIn togetherWith fadeThroughOut },
-        label = "setup",
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
-    ) { step ->
-        if (step == SetupStep.READY) {
-            ReadyContent(signedIn = false, saving = state.saving, onFinish = onFinish)
-        } else {
-            QuestionFrame(step, onBack, onSkip) {
-                when (step) {
-                    SetupStep.EXPERIENCE -> ExperienceQuestion(state, onExperience)
-                    SetupStep.GOAL -> GoalQuestion(state, onGoal)
-                    SetupStep.DAYS -> DaysQuestion(state, onDays)
-                    SetupStep.PLAN -> PlanQuestion(state, onPlan)
-                    SetupStep.READY -> Unit
+    // Surface, not a plain background: it sets the content colour, or text
+    // without its own colour falls back to black (Compose's default).
+    Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+        AnimatedContent(
+            targetState = state.step,
+            transitionSpec = { fadeThroughIn togetherWith fadeThroughOut },
+            label = "setup",
+            modifier = Modifier.fillMaxSize(),
+        ) { step ->
+            if (step == SetupStep.READY) {
+                ReadyContent(signedIn = false, saving = state.saving, onFinish = onFinish)
+            } else {
+                QuestionFrame(step, onBack, onSkip) {
+                    when (step) {
+                        SetupStep.EXPERIENCE -> ExperienceQuestion(state, onExperience)
+                        SetupStep.GOAL -> GoalQuestion(state, onGoal)
+                        SetupStep.DAYS -> DaysQuestion(state, onDays)
+                        SetupStep.PLAN -> PlanQuestion(state, onPlan)
+                        SetupStep.READY -> Unit
+                    }
                 }
             }
         }

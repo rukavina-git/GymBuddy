@@ -125,6 +125,9 @@
     leaves Let's go disabled.
   - Google button doesn't set busy; double tap can open two sheets.
   - Older builds can't parse `GET_STRONGER` (fine before release).
+- Every full-screen root needs a Surface or Scaffold (not
+  `Modifier.background`): Text without a colour falls back to black.
+  Setup and Ready titles were black on black until fixed after 04.
 - Use: `AppChoiceDialog` for account questions; `navController.openMain()`
   / `openWelcome()` (StartNavGraph.kt) instead of raw navigate.
   `NavRoutes.signIn(SignInMode.CREATE)` is the guest backup entry for
