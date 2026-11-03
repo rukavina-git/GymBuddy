@@ -261,6 +261,17 @@ class OnboardingViewModelTest {
     }
 
     @Test
+    fun `a guest who already said not now gets no second account offer`() = runTest(dispatcher) {
+        val vm = vm(SavedStateHandle(mapOf(OnboardingViewModel.ARG_OFFER_ACCOUNT to false)))
+        val events = mutableListOf<OnboardingEvent>()
+        backgroundScope.launchCollect(vm, events)
+        assertEquals(4, vm.state.value.totalSteps)
+        vm.skip()
+        assertEquals(SetupStep.READY, vm.state.value.step)
+        assertTrue(events.isEmpty())
+    }
+
+    @Test
     fun `answers survive a process restart`() = runTest(dispatcher) {
         val saved = SavedStateHandle()
         val vm = vm(saved)

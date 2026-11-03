@@ -52,9 +52,11 @@ data class OnboardingUiState(
     val saving: Boolean = false,
     /** An account is signed in: no account step, signed-in tip on Ready. */
     val signedIn: Boolean = false,
+    /** Whether guests get the account step after the questions. */
+    val offerAccount: Boolean = true,
 ) {
-    /** Progress bar length: four questions, plus the account step for guests. */
-    val totalSteps: Int get() = if (signedIn) SETUP_QUESTIONS else SETUP_STEPS_WITH_ACCOUNT
+    /** Progress bar length: four questions, plus the account step when it will be offered. */
+    val totalSteps: Int get() = if (signedIn || !offerAccount) SETUP_QUESTIONS else SETUP_STEPS_WITH_ACCOUNT
 
     /** From days a week, or experience for "Not sure yet" (StarterPlans.suggestPlan). */
     val suggested: StarterPlan? get() = StarterPlans.suggestPlan(plans, days.value, experience.value)
@@ -89,7 +91,10 @@ class OnboardingViewModel @Inject constructor(
     private val holder: DatabaseHolder,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(restore().copy(signedIn = auth.currentUid != null))
+    /** False when the guest already said "Not now" to an account before setup. */
+    private val offerAccount: Boolean = savedState.get<Boolean>(ARG_OFFER_ACCOUNT) ?: true
+
+    private val _state = MutableStateFlow(restore().copy(signedIn = auth.currentUid != null, offerAccount = offerAccount))
     val state: StateFlow<OnboardingUiState> = _state.asStateFlow()
 
     private val _events = MutableSharedFlow<OnboardingEvent>(extraBufferCapacity = 2)
@@ -123,7 +128,7 @@ class OnboardingViewModel @Inject constructor(
     private fun questionsDone() {
         val signedIn = auth.currentUid != null
         _state.update { it.copy(signedIn = signedIn) }
-        if (signedIn) set { it.copy(step = SetupStep.READY) } else _events.tryEmit(OnboardingEvent.OpenAccountStep)
+        if (signedIn || !offerAccount) set { it.copy(step = SetupStep.READY) } else _events.tryEmit(OnboardingEvent.OpenAccountStep)
     }
 
     /** System or top-bar back. False on the first question: the caller leaves setup. */
@@ -222,6 +227,7 @@ class OnboardingViewModel @Inject constructor(
     companion object {
         /** How long the tapped row stays cobalt before the next question (motion short3). */
         const val PRESS_HOLD_MS = Durations.SHORT3.toLong()
+        const val ARG_OFFER_ACCOUNT = "offerAccount"
         private const val OWNER_WAIT_MS = 5_000L
         private const val NONE = "-"
         private const val KEY_STEP = "setup_step"

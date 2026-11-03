@@ -6,7 +6,8 @@ object NavRoutes {
     const val Splash = "splash"
     const val Main = "main"
     const val Welcome = "welcome"
-    const val Setup = "setup"
+    /** Setup; [setup] with offerAccount = false skips step 5 (they already said "Not now"). */
+    const val Setup = "setup?offerAccount={offerAccount}"
     const val SignIn = "sign_in"
     /** Create account (method → email → consent); [createAccount] fills where it started. */
     const val CreateAccount = "create_account?from={from}"
@@ -38,6 +39,8 @@ object NavRoutes {
     const val SyncDebug = "sync_debug"
 
     fun signIn() = SignIn
+
+    fun setup(offerAccount: Boolean = true) = "setup?offerAccount=$offerAccount"
 
     fun createAccount(from: CreateFrom) = "create_account?from=${from.name}"
 

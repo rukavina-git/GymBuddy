@@ -121,6 +121,8 @@
   so neither overwrites the other's fields. Setup's finish waits up to 5s
   for the account's file; on timeout it saves nothing and Let's go works
   again.
+- 04 Amendment 1 (owner): "Not now" before setup counts for setup too:
+  `setup?offerAccount=false` skips step 5 (4-step bar).
 - 04 Amendment 1: Settings guest entries are "Create account" and
   "Sign in"; ADR 0014 got an amendment note.
 
@@ -132,8 +134,6 @@
     Not now/back while busy and clear the pending value unless created.
   - `CreateAccountViewModel`: `setLastSignInEmail` after createWithEmail
     is outside the catch; a DataStore IOException would crash.
-  - Consent "Not now" from Welcome/Sign in goes to setup as a guest, and
-    setup then offers the account step again (by design? confirm).
   - New account from Welcome: `popUpTo(Welcome)` isn't inclusive, so back
     from the first setup question shows Welcome to a signed-in user.
   - `afterAccount`'s `insideMain` checks the whole back stack.

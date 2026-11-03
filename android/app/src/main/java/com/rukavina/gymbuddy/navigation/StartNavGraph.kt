@@ -12,6 +12,7 @@ import com.rukavina.gymbuddy.ui.auth.CreateAccountScreen
 import com.rukavina.gymbuddy.ui.auth.CreateAccountViewModel
 import com.rukavina.gymbuddy.ui.auth.CreateFrom
 import com.rukavina.gymbuddy.ui.auth.SignInScreen
+import com.rukavina.gymbuddy.ui.onboarding.OnboardingViewModel
 import com.rukavina.gymbuddy.ui.onboarding.SetupScreen
 import com.rukavina.gymbuddy.ui.onboarding.WelcomeScreen
 
@@ -28,11 +29,19 @@ fun NavGraphBuilder.startNavGraph(navController: NavHostController) {
         WelcomeScreen(
             onCreateAccount = { navController.navigate(NavRoutes.createAccount(CreateFrom.WELCOME)) },
             onHaveAccount = { navController.navigate(NavRoutes.signIn()) },
-            onContinueWithout = { navController.navigate(NavRoutes.Setup) },
+            onContinueWithout = { navController.navigate(NavRoutes.setup()) },
         )
     }
 
-    composable(NavRoutes.Setup) { entry ->
+    composable(
+        NavRoutes.Setup,
+        arguments = listOf(
+            navArgument(OnboardingViewModel.ARG_OFFER_ACCOUNT) {
+                type = NavType.BoolType
+                defaultValue = true
+            }
+        ),
+    ) { entry ->
         val result by entry.savedStateHandle.getStateFlow<Boolean?>(ACCOUNT_RESULT, null).collectAsStateWithLifecycle()
         SetupScreen(
             viewModel = hiltViewModel(),
@@ -82,7 +91,7 @@ fun NavGraphBuilder.startNavGraph(navController: NavHostController) {
  * Where the create flow leads. Setup gets its answer back. A new account
  * from Welcome or Sign in runs setup; an existing one (Google) or one
  * made from inside the app goes to Main. "Not now" from Welcome or Sign
- * in means guest: setup.
+ * in means guest: setup, without asking again at step 5.
  */
 private fun NavHostController.afterAccount(from: CreateFrom, created: Boolean, newAccount: Boolean) {
     // Reached from inside the app (session banner → Sign in → Create one): back to Main.
@@ -97,7 +106,8 @@ private fun NavHostController.afterAccount(from: CreateFrom, created: Boolean, n
         }
         from == CreateFrom.SETTINGS || insideMain -> if (created) openMain() else popBackStack()
         created && !newAccount -> openMain()
-        else -> navigate(NavRoutes.Setup) { popUpTo(NavRoutes.Welcome) }
+        // "Not now" counts for setup too: no second offer at step 5.
+        else -> navigate(NavRoutes.setup(offerAccount = created)) { popUpTo(NavRoutes.Welcome) }
     }
 }
 

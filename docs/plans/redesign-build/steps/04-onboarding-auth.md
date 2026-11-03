@@ -97,7 +97,7 @@ Decisions:
   as before (version + time). Terms line is plain text; links in 9.2.
 - **Setup step 5:** after the plan question, guests see screen (1)
   with back, a 5-segment progress bar and "Not now". Not shown when
-  already signed in. Then "You're all set" (signed-in tip when made).
+  already signed in, or when they said "Not now" before setup (owner). Then "You're all set" (signed-in tip when made).
 - **Sign in:** no logo/wordmark, "Welcome back" as left headline
   (32 Bold), Google and email buttons 48dp, fields 56dp, "Forgot
   password?" small muted, "No account yet? Create one" link.
