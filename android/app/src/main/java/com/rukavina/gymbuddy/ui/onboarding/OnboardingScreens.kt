@@ -59,7 +59,7 @@ import com.rukavina.gymbuddy.ui.theme.fadeThroughOut
 
 /** Raw sizes from the Figma frames (DESIGN.md §4). */
 private val BrandMarkLarge = 80.dp
-private val WordmarkLarge = 32.dp
+private val WordmarkLarge = 41.dp
 private val ChoiceRowHeight = 68.dp
 private val SuggestedTagHeight = 24.dp
 
@@ -76,7 +76,8 @@ fun WelcomeScreen(onGetStarted: () -> Unit, onHaveAccount: () -> Unit) {
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(d.insetScreen),
+            // Figma: actions sit clear of the system bar, not on it.
+            .padding(start = d.insetScreen, end = d.insetScreen, top = d.insetScreen, bottom = d.insetScreen + d.section),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.weight(1f))
@@ -93,6 +94,8 @@ fun WelcomeScreen(onGetStarted: () -> Unit, onHaveAccount: () -> Unit) {
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
+            // One sentence per line: no lone word at any width or font scale.
+            modifier = Modifier.padding(horizontal = d.section),
         )
         Spacer(Modifier.weight(1.4f))
         PrimaryButton(stringResource(R.string.welcome_get_started), onGetStarted, Modifier.fillMaxWidth(), size = ButtonSize.Medium)
@@ -382,7 +385,7 @@ internal fun ReadyContent(signedIn: Boolean, saving: Boolean, onFinish: () -> Un
             .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(d.insetScreen),
+            .padding(start = d.insetScreen, end = d.insetScreen, top = d.insetScreen, bottom = d.insetScreen + d.section),
     ) {
         Spacer(Modifier.weight(1f))
         Text(stringResource(R.string.ready_title), style = MaterialTheme.typography.headlineLarge, modifier = Modifier.semantics { heading() })

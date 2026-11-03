@@ -100,6 +100,11 @@
   dark ECG line only, meant for lime. Added `brand_app_icon` (lime tile,
   converted from design/brand/app-icon.svg) as `AppIcons.Brand.AppIcon`
   for Splash, Welcome and sign-in.
+- 04 (fix after owner device check): spacing to Figma. Wordmark 41/31dp
+  (was 32/24); sign-in header gaps 64/16/24/28; 32dp around "or";
+  Welcome and Ready buttons 40dp above the system bar (Figma had ~3dp
+  over a 3-button bar). Welcome line breaks per sentence, not by width
+  (Figma's break gave an orphan on a 384dp phone).
 
 ## Gotchas
 - From 04 (reviewer, not fixed):

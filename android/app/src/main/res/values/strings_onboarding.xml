@@ -3,7 +3,7 @@
 <resources>
     <string name="cd_app_name">GymBuddy</string>
     <string name="cd_close">Close</string>
-    <string name="welcome_line">Log your workouts. Works offline, no account needed.</string>
+    <string name="welcome_line">Log your workouts.\nWorks offline, no account needed.</string>
     <string name="welcome_get_started">Get started</string>
     <string name="welcome_have_account">I have an account</string>
 

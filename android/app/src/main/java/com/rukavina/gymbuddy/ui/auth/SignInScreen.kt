@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -71,7 +72,7 @@ import kotlinx.coroutines.launch
 
 /** Raw sizes from the Figma frames (DESIGN.md §4). */
 private val BrandMarkSmall = 64.dp
-private val WordmarkSmall = 24.dp
+private val WordmarkSmall = 31.dp
 private val GoogleLogo = 20.dp
 
 /**
@@ -266,13 +267,15 @@ internal fun SignInContent(
 @Composable
 private fun SignInHeader() {
     val d = GymBuddyTheme.dimens
+    // Figma R16-4: 66 above the mark, 16 to the wordmark, 23 to the title, 28 to Google.
     Column(
-        modifier = Modifier.fillMaxWidth().padding(top = d.section),
+        modifier = Modifier.fillMaxWidth().padding(top = d.section + d.section + d.group, bottom = d.stack),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(d.stack),
     ) {
         Image(painterResource(AppIcons.Brand.AppIcon), null, Modifier.size(BrandMarkSmall))
+        Spacer(Modifier.height(d.group))
         Image(painterResource(AppIcons.Brand.Wordmark), stringResource(R.string.cd_app_name), Modifier.height(WordmarkSmall))
+        Spacer(Modifier.height(d.section))
         Text(
             stringResource(R.string.signin_title),
             style = MaterialTheme.typography.titleLarge,
@@ -362,7 +365,8 @@ private fun GoogleButton(onClick: () -> Unit, enabled: Boolean) {
 @Composable
 private fun OrDivider() {
     val d = GymBuddyTheme.dimens
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(d.stack)) {
+    // Figma: about 32dp of air either side of "or".
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(d.section + d.stackTight)) {
         HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
         Text(stringResource(R.string.signin_or), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
