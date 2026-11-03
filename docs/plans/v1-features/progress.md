@@ -3,7 +3,7 @@
 - [x] 01 Per-account local data (steps/01-per-account-data.md) — 4b61dce
 - [x] 02 Guest mode (steps/02-guest-mode.md) — ab07df5
 - [x] 03 Auth gate (steps/03-auth-gate.md) — 12dd9ea
-- [x] 04 Body weight (steps/04-body-weight.md) — HASH
+- [x] 04 Body weight (steps/04-body-weight.md) — c60d997
 - [ ] 05 Profile fields
 - [ ] 06 Plans + default templates
 - [ ] 07 Data export
