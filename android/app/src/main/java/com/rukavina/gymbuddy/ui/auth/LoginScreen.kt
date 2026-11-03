@@ -47,6 +47,7 @@ import com.rukavina.gymbuddy.ui.components.AppSnackbar
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
+    onContinueAsGuest: () -> Unit = {},
     viewModel: LoginViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -97,7 +98,8 @@ fun LoginScreen(
         onTogglePasswordVisibility = { viewModel.togglePasswordVisibility() },
         onLoginClick = { viewModel.loginWithEmailPassword() },
         onGoogleSignInClick = { viewModel.signInWithGoogle(context, webClientId) },
-        onNavigateToRegister = onNavigateToRegister
+        onNavigateToRegister = onNavigateToRegister,
+        onContinueAsGuest = onContinueAsGuest
     )
 
     AppSnackbar(
@@ -118,7 +120,8 @@ private fun LoginContent(
     onTogglePasswordVisibility: () -> Unit,
     onLoginClick: () -> Unit,
     onGoogleSignInClick: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    onContinueAsGuest: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -207,6 +210,14 @@ private fun LoginContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Don't have an account? Sign up")
+        }
+
+        // Guest mode (ADR 0014). Plain entry point until onboarding (Plan 7.4).
+        TextButton(
+            onClick = onContinueAsGuest,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Continue without account")
         }
     }
 }

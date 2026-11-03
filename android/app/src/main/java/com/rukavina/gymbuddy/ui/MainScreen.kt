@@ -15,6 +15,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import com.rukavina.gymbuddy.ui.guest.SessionExpiredBanner
+import com.rukavina.gymbuddy.ui.guest.AuthGateViewModel
+import com.rukavina.gymbuddy.ui.guest.AccountDeletedDialog
+import com.rukavina.gymbuddy.data.sync.AuthGateState
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
@@ -42,6 +53,8 @@ import com.rukavina.gymbuddy.ui.profile.edit.EditNameScreen
 import com.rukavina.gymbuddy.ui.profile.edit.EditTargetWeightScreen
 import com.rukavina.gymbuddy.ui.profile.edit.EditUnitsScreen
 import com.rukavina.gymbuddy.ui.profile.edit.EditWeightScreen
+import com.rukavina.gymbuddy.ui.guest.GuestMergeDialogs
+import com.rukavina.gymbuddy.ui.guest.GuestMergeViewModel
 import com.rukavina.gymbuddy.ui.settings.AboutScreen
 import com.rukavina.gymbuddy.ui.settings.AppPreferencesScreen
 import com.rukavina.gymbuddy.ui.settings.HiddenExercisesScreen
@@ -54,6 +67,58 @@ import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
 
 @Composable
 fun MainScreen(rootNavController: NavHostController) {
+    val guestMergeViewModel: GuestMergeViewModel = hiltViewModel()
+    val ownerReady by guestMergeViewModel.ownerReady.collectAsState()
+    val mergeState by guestMergeViewModel.state.collectAsState()
+
+    GuestMergeDialogs(
+        state = mergeState,
+        onAdd = guestMergeViewModel::add,
+        onCancel = guestMergeViewModel::cancel,
+        onDismiss = guestMergeViewModel::dismiss
+    )
+
+    // Wait for the signed-in owner's file (ADR 0014): never show the
+    // previous owner's data to the new one.
+    val authGateViewModel: AuthGateViewModel = hiltViewModel()
+    val gateState by authGateViewModel.state.collectAsState()
+    val deletedCounts by authGateViewModel.counts.collectAsState()
+    val toLogin = {
+        rootNavController.navigate(NavRoutes.Login) {
+            popUpTo(NavRoutes.Main) { inclusive = true }
+        }
+    }
+    LaunchedEffect(Unit) {
+        authGateViewModel.erased.collect { toLogin() }
+    }
+    (gateState as? AuthGateState.AccountDeleted)?.let { deleted ->
+        LaunchedEffect(deleted) { authGateViewModel.loadCounts() }
+        AccountDeletedDialog(
+            email = deleted.email,
+            counts = deletedCounts,
+            onKeep = authGateViewModel::keep,
+            onErase = authGateViewModel::erase
+        )
+    }
+
+    if (ownerReady) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            if (gateState is AuthGateState.SessionExpired) {
+                SessionExpiredBanner(onSignIn = toLogin, modifier = Modifier.statusBarsPadding())
+            }
+            Box(modifier = Modifier.weight(1f)) {
+                MainContent(rootNavController)
+            }
+        }
+    } else {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    }
+}
+
+@Composable
+private fun MainContent(rootNavController: NavHostController) {
     val bottomNavController = rememberNavController()
     val backStackEntry = bottomNavController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry.value?.destination

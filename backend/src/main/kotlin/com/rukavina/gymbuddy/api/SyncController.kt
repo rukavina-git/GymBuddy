@@ -6,6 +6,7 @@ import com.rukavina.gymbuddy.api.dto.PullResponseDto
 import com.rukavina.gymbuddy.api.dto.PushRequestDto
 import com.rukavina.gymbuddy.api.dto.PushResponseDto
 import com.rukavina.gymbuddy.auth.currentUid
+import com.rukavina.gymbuddy.sync.BodyWeightSyncService
 import com.rukavina.gymbuddy.sync.ExerciseSyncService
 import com.rukavina.gymbuddy.sync.OverlaySyncService
 import com.rukavina.gymbuddy.sync.ProfileSyncService
@@ -47,6 +48,7 @@ class SyncController(
     private val workoutTemplateSyncService: WorkoutTemplateSyncService,
     private val overlaySyncService: OverlaySyncService,
     private val profileSyncService: ProfileSyncService,
+    private val bodyWeightSyncService: BodyWeightSyncService,
     private val syncPullOrchestrator: SyncPullOrchestrator,
     private val syncMetrics: SyncMetrics,
     @Value("\${gymbuddy.sync.read-only:false}") private val readOnly: Boolean,
@@ -74,6 +76,7 @@ class SyncController(
         request.userExerciseStates.forEach { results += overlaySyncService.applyExerciseState(uid, it, traceId) }
         request.userTemplateStates.forEach { results += overlaySyncService.applyTemplateState(uid, it, traceId) }
         request.userProfile?.let { results += profileSyncService.apply(uid, it, traceId) }
+        request.bodyWeightEntries.forEach { results += bodyWeightSyncService.apply(uid, it, traceId) }
 
         syncMetrics.recordPush(results)
         log.info("push: {} results {}", results.size, results.groupingBy { it.status }.eachCount())

@@ -10,6 +10,8 @@ import com.rukavina.gymbuddy.domain.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.ExerciseType
 import com.rukavina.gymbuddy.domain.FitnessGoal
 import com.rukavina.gymbuddy.domain.Gender
+import com.rukavina.gymbuddy.domain.TrainingDays
+import com.rukavina.gymbuddy.domain.ExperienceLevel
 import com.rukavina.gymbuddy.domain.MuscleGroup
 import com.rukavina.gymbuddy.domain.SetType
 import com.rukavina.gymbuddy.domain.SyncStatus
@@ -149,6 +151,12 @@ data class UserProfileSyncDto(
     val targetWeight: Float?,
     val joinedDate: Long,
     val bio: String?,
+    val experienceLevel: ExperienceLevel? = null,
+    val avatarId: String? = null,
+    val trainingDays: TrainingDays? = null,
+    val healthDataConsentVersion: String? = null,
+    val healthDataConsentAt: Long? = null,
+    val activePlanId: String? = null,
     val revision: Int = 0,
 )
 
@@ -174,6 +182,17 @@ fun ExerciseSyncDto.forComparison(): ExerciseSyncDto =
 fun WorkoutTemplateSyncDto.forComparison(): WorkoutTemplateSyncDto =
     copy(revision = 0, deletedAt = deletedAt?.let { DELETED_CONTENT_MARKER })
 
+data class BodyWeightEntrySyncDto(
+    val id: String,
+    val measuredAt: Long,
+    val weightKg: Float,
+    val revision: Int = 0,
+    val deletedAt: Long? = null,
+)
+
+fun BodyWeightEntrySyncDto.forComparison(): BodyWeightEntrySyncDto =
+    copy(revision = 0, deletedAt = deletedAt?.let { DELETED_CONTENT_MARKER })
+
 /** Mirrors the PushRequest schema in api/openapi.yaml. */
 data class PushRequestDto(
     val workoutSessions: List<WorkoutSessionSyncDto> = emptyList(),
@@ -182,6 +201,7 @@ data class PushRequestDto(
     val userExerciseStates: List<UserExerciseStateSyncDto> = emptyList(),
     val userTemplateStates: List<UserTemplateStateSyncDto> = emptyList(),
     val userProfile: UserProfileSyncDto? = null,
+    val bodyWeightEntries: List<BodyWeightEntrySyncDto> = emptyList(),
 )
 
 /** Mirrors the MutationResult schema in api/openapi.yaml. */

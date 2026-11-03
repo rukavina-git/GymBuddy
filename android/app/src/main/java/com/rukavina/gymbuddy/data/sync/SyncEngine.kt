@@ -76,9 +76,11 @@ class SyncEngine(
     private val pageSize: Int = DEFAULT_PAGE_SIZE,
     private val pushBatchSize: Int = DEFAULT_PUSH_BATCH,
     private val pageObserver: PullPageObserver = PullPageObserver { _, _ -> },
-    private val isSignedIn: () -> Boolean = { true }
+    /** True only while the signed-in account owns the open database. Checked under the lock. */
+    private val isSignedIn: () -> Boolean = { true },
+    /** Shared with DatabaseHolder in the app, so a database switch waits for a running cycle. */
+    private val mutex: Mutex = Mutex()
 ) {
-    private val mutex = Mutex()
 
     /** A full cycle: push, pull, reference data. Does nothing if signed out by the time it gets the lock. */
     suspend fun sync(): SyncSummary = mutex.withLock {
@@ -104,7 +106,8 @@ class SyncEngine(
 
     /** Push only, until the outbox is empty or no further progress is possible. Returns true if it's empty. */
     suspend fun flushOutbox(): Boolean = mutex.withLock {
-        pushLocked(mutableSetOf())
+        // Never push one owner's outbox under another account's token.
+        if (isSignedIn()) pushLocked(mutableSetOf())
         store.outboxCount() == 0
     }
 
@@ -192,7 +195,8 @@ class SyncEngine(
         workoutTemplates = prepared.filterIsInstance<PreparedMutation.Template>().map { it.dto }.ifEmpty { null },
         userExerciseStates = prepared.filterIsInstance<PreparedMutation.ExerciseState>().map { it.dto }.ifEmpty { null },
         userTemplateStates = prepared.filterIsInstance<PreparedMutation.TemplateState>().map { it.dto }.ifEmpty { null },
-        userProfile = prepared.filterIsInstance<PreparedMutation.Profile>().firstOrNull()?.dto
+        userProfile = prepared.filterIsInstance<PreparedMutation.Profile>().firstOrNull()?.dto,
+        bodyWeightEntries = prepared.filterIsInstance<PreparedMutation.BodyWeight>().map { it.dto }.ifEmpty { null }
     )
 
     // ---- pull ----
@@ -260,7 +264,7 @@ class SyncEngine(
         }
         if (server.templateLibraryVersion != store.templateLibraryVersion()) {
             val library = call("reference templates") { apis.reference.getReferenceTemplates() }
-            store.replaceDefaultTemplates(library.version, library.templates)
+            store.replaceDefaultTemplates(library.version, library.templates, library.plans)
             templatesReplaced = true
         }
         return ReferenceSummary(exercisesReplaced, templatesReplaced)

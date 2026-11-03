@@ -7,6 +7,7 @@ import com.rukavina.gymbuddy.domain.ExerciseCategory
 import com.rukavina.gymbuddy.domain.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.ExerciseType
 import com.rukavina.gymbuddy.domain.MuscleGroup
+import com.rukavina.gymbuddy.domain.TrainingDays
 
 /** Mirrors the ReferenceVersion schema in api/openapi.yaml. */
 data class ReferenceVersionDto(
@@ -79,4 +80,15 @@ data class WorkoutTemplateDto(
 data class TemplateLibraryResponseDto(
     val version: Int,
     val templates: List<WorkoutTemplateDto>,
+    val plans: List<StarterPlanDto>,
+)
+
+/** Mirrors the StarterPlan schema in api/openapi.yaml. */
+data class StarterPlanDto(
+    val id: String,
+    val title: String,
+    val description: String?,
+    val templateIds: List<String>,
+    val suggestedFor: TrainingDays?,
+    val deprecated: Boolean,
 )

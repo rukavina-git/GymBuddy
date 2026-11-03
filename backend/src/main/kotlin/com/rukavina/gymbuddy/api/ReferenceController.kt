@@ -5,6 +5,7 @@ import com.rukavina.gymbuddy.api.dto.ReferenceVersionDto
 import com.rukavina.gymbuddy.api.dto.TemplateLibraryResponseDto
 import com.rukavina.gymbuddy.persistence.ExerciseReferenceRepository
 import com.rukavina.gymbuddy.persistence.ReferenceVersionRepository
+import com.rukavina.gymbuddy.persistence.StarterPlanReferenceRepository
 import com.rukavina.gymbuddy.persistence.WorkoutTemplateReferenceRepository
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
@@ -20,6 +21,7 @@ class ReferenceController(
     private val referenceVersionRepository: ReferenceVersionRepository,
     private val exerciseReferenceRepository: ExerciseReferenceRepository,
     private val workoutTemplateReferenceRepository: WorkoutTemplateReferenceRepository,
+    private val starterPlanReferenceRepository: StarterPlanReferenceRepository,
 ) {
 
     @GetMapping("/v1/reference/version")
@@ -40,6 +42,7 @@ class ReferenceController(
         return TemplateLibraryResponseDto(
             version = version.templateLibraryVersion,
             templates = workoutTemplateReferenceRepository.findAllDefault(),
+            plans = starterPlanReferenceRepository.findAll(),
         )
     }
 }

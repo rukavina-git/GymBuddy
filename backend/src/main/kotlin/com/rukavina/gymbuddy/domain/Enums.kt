@@ -33,11 +33,17 @@ enum class FitnessGoal { BUILD_MUSCLE, LOSE_WEIGHT, MAINTAIN, GENERAL_FITNESS, I
 
 enum class ActivityLevel { SEDENTARY, LIGHTLY_ACTIVE, MODERATELY_ACTIVE, VERY_ACTIVE, ATHLETE }
 
+/** Mirrors ExperienceLevel in api/openapi.yaml. */
+enum class ExperienceLevel { NEW, SOME, EXPERIENCED }
+
+/** Mirrors TrainingDays in api/openapi.yaml. Null on the profile means "Not sure yet". */
+enum class TrainingDays { ONE_TO_THREE, FOUR, FIVE_TO_SEVEN }
+
 enum class SetType { WARMUP, WORKING, DROP, FAILURE }
 
 /** Mirrors PushRequest/PushResponse's implicit entity discriminator - see MutationResult.entityType in api/openapi.yaml. */
 enum class EntityType {
-    WORKOUT_SESSION, EXERCISE, WORKOUT_TEMPLATE, USER_EXERCISE_STATE, USER_TEMPLATE_STATE, USER_PROFILE
+    WORKOUT_SESSION, EXERCISE, WORKOUT_TEMPLATE, USER_EXERCISE_STATE, USER_TEMPLATE_STATE, USER_PROFILE, BODY_WEIGHT_ENTRY
 }
 
 /**

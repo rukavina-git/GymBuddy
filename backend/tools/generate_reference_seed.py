@@ -11,9 +11,10 @@ ids diverge, a client that seeded locally from the bundle and then syncs
 gets the same exercises back under different ids: silent duplication,
 with templates pointing at rows the server has never heard of.
 
-Re-run after any change to the source JSON:
-
-    python3 backend/tools/generate_reference_seed.py
+V2 is frozen at exercise library 9 / template library 5. Later
+library versions get their own migration and generator (template
+library 6: generate_starter_plans_seed.py, V7). main() refuses to run
+against newer inputs, so V2's Flyway checksum can't move.
 
 The output is deterministic (fixed updated_at, stable row order) so a
 re-run with unchanged inputs produces a byte-identical file and Flyway's
@@ -153,6 +154,8 @@ def reference_version_insert(exercise_version: int, template_version: int) -> st
 def main() -> None:
     exercises_data = json.loads(EXERCISES_JSON.read_text())
     templates_data = json.loads(TEMPLATES_JSON.read_text())
+    if templates_data["version"] != 5 or exercises_data["version"] != 9:
+        raise SystemExit("V2 is frozen at exercise library 9 / template library 5; write a new migration instead")
 
     exercises = exercises_data["exercises"]
     templates = templates_data["templates"]

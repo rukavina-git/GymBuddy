@@ -503,6 +503,9 @@ components:
           items: { $ref: '#/components/schemas/UserTemplateState' }
         userProfile:
           $ref: '#/components/schemas/UserProfile'
+        bodyWeightEntries:
+          type: array
+          items: { $ref: '#/components/schemas/BodyWeightEntry' }
 
     PushResponse:
       type: object
@@ -589,6 +592,9 @@ components:
           items: { $ref: '#/components/schemas/UserTemplateState' }
         userProfile:
           $ref: '#/components/schemas/UserProfile'
+        bodyWeightEntries:
+          type: array
+          items: { $ref: '#/components/schemas/BodyWeightEntry' }
         nextCursor:
           type: string
           description: Persist only after committing this page locally.
@@ -604,6 +610,7 @@ components:
         - USER_EXERCISE_STATE
         - USER_TEMPLATE_STATE
         - USER_PROFILE
+        - BODY_WEIGHT_ENTRY
 
     HealthStatus:
       type: object
@@ -666,7 +673,7 @@ components:
       description: |
         The full default workout template library. Includes deprecated
         entries, for the same reason as ExerciseLibraryResponse.
-      required: [ version, templates ]
+      required: [ version, templates, plans ]
       properties:
         version:
           type: integer
@@ -674,6 +681,46 @@ components:
         templates:
           type: array
           items: { $ref: '#/components/schemas/WorkoutTemplate' }
+        plans:
+          type: array
+          description: |
+            Starter plans, in display order. Server-owned and read-only,
+            versioned together with the templates they point at.
+            Includes deprecated plans.
+          items: { $ref: '#/components/schemas/StarterPlan' }
+
+    StarterPlan:
+      type: object
+      description: |
+        A set of default templates to rotate through, in order (e.g.
+        Upper A, Lower A, Upper B, Lower B). Reference data: users don't
+        create or edit plans; the chosen one is UserProfile.activePlanId.
+      required: [ id, title, templateIds, deprecated ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: [string, "null"]
+        templateIds:
+          type: array
+          description: Ordered ids of DEFAULT workout templates in this plan's rotation.
+          minItems: 1
+          items:
+            type: string
+            format: uuid
+        suggestedFor:
+          description: |
+            The days-a-week bucket onboarding suggests this plan for.
+            Null: not suggested by days.
+          oneOf:
+            - $ref: '#/components/schemas/TrainingDays'
+            - type: 'null'
+        deprecated:
+          type: boolean
+          description: Hidden from browsing; kept so an activePlanId pointing at it still resolves.
 
     WorkoutSession:
       type: object
@@ -1229,6 +1276,52 @@ components:
           readOnly: true
           description: Server-assigned revision number. Clients must not set this.
 
+    BodyWeightEntry:
+      type: object
+      description: |
+        One body weight measurement. A history: the user may log several a
+        day, and each is its own row. Metric only (kg); display units are a
+        client concern. Flat entity, no children.
+      required:
+        - id
+        - measuredAt
+        - weightKg
+        - updatedAt
+        - revision
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated UUIDv7. Doubles as the sync idempotency key.
+        measuredAt:
+          type: integer
+          format: int64
+          description: Epoch milliseconds when the weight was measured, as the user entered it.
+        weightKg:
+          type: number
+          format: float
+          exclusiveMinimum: 0
+          maximum: 700
+          description: Body weight in kilograms.
+        updatedAt:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Server-assigned last-change time, epoch milliseconds. Clients must not set this.
+        deletedAt:
+          type: [integer, "null"]
+          format: int64
+          description: |
+            Tombstone time, epoch milliseconds; non-null means this entry
+            is deleted. Same push semantics as WorkoutSession.deletedAt:
+            any non-null value is the delete signal, the server stamps
+            its own time.
+        revision:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Server-assigned revision number. Clients must not set this.
+
     UserProfile:
       type: object
       description: |
@@ -1255,7 +1348,11 @@ components:
         profileImageUrl:
           type: [string, "null"]
           format: uri
-          description: URL to the user's profile image.
+          deprecated: true
+          description: |
+            Deprecated: no photos in v1, profiles use avatarId. The server
+            may still fill it from the sign-in provider; clients send null
+            and don't display it.
         birthDate:
           type: [integer, "null"]
           format: int64
@@ -1291,6 +1388,39 @@ components:
         bio:
           type: [string, "null"]
           description: Free-text profile bio.
+        experienceLevel:
+          oneOf:
+            - $ref: '#/components/schemas/ExperienceLevel'
+            - type: 'null'
+        avatarId:
+          type: [string, "null"]
+          pattern: '^[a-z0-9-]{1,32}$'
+          description: |
+            Preset avatar id, e.g. "cat". The client owns the list of
+            avatars; the server only checks the format. Null means the
+            client's default.
+        trainingDays:
+          oneOf:
+            - $ref: '#/components/schemas/TrainingDays'
+            - type: 'null'
+        healthDataConsentVersion:
+          type: [string, "null"]
+          maxLength: 32
+          description: |
+            Version of the health-data consent text the user agreed to at
+            account creation, e.g. "2026-11". Null: no consent recorded.
+            Recorded only; whether sync requires it is decided in the
+            privacy pass.
+        healthDataConsentAt:
+          type: [integer, "null"]
+          format: int64
+          description: When the user gave that consent, epoch milliseconds (client time).
+        activePlanId:
+          type: [string, "null"]
+          format: uuid
+          description: |
+            The StarterPlan the user follows. Soft reference: it may name a
+            plan the client doesn't know or that is deprecated. Null: no plan.
         updatedAt:
           type: integer
           format: int64
@@ -1448,6 +1578,27 @@ components:
         - MAINTAIN
         - GENERAL_FITNESS
         - IMPROVE_ENDURANCE
+
+    ExperienceLevel:
+      type: string
+      description: |
+        How long the user has been lifting, as asked in onboarding:
+        NEW ("New to lifting", under 6 months), SOME ("Some experience"),
+        EXPERIENCED ("Years of training").
+      enum:
+        - NEW
+        - SOME
+        - EXPERIENCED
+
+    TrainingDays:
+      type: string
+      description: |
+        Days a week the user can train, as the bucket onboarding offers.
+        Null on the profile means "Not sure yet".
+      enum:
+        - ONE_TO_THREE
+        - FOUR
+        - FIVE_TO_SEVEN
 
     ActivityLevel:
       type: string

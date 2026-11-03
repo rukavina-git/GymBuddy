@@ -35,3 +35,9 @@
 -keep class com.rukavina.gymbuddy.domain.model.ActiveWorkoutDraft { *; }
 -keep class com.rukavina.gymbuddy.domain.model.ActiveWorkoutDraft$* { *; }
 -keep enum com.rukavina.gymbuddy.domain.model.ExerciseTrackingType { *; }
+
+# Data export (Plan 6 step 07, ADR 0015): ExportV1 is written by Moshi's
+# reflective adapter, and its field names and enum names are the v1 file
+# format. R8 must not rename or strip them.
+-keep class com.rukavina.gymbuddy.domain.export.** { *; }
+-keep enum com.rukavina.gymbuddy.domain.model.** { *; }

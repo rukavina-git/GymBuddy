@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.repository
 
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.dao.UserExerciseStateDao
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.entity.ExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.OutboxOperation
 import com.rukavina.gymbuddy.data.local.entity.SyncEntityType
@@ -24,16 +25,19 @@ import javax.inject.Inject
  * would reject them as FORBIDDEN anyway.
  *
  * Writes keep the stored revision - see WorkoutSessionRepositoryImpl.
+ * DAOs come from [DatabaseHolder] per call, as there.
  */
 class ExerciseRepositoryImpl @Inject constructor(
-    private val exerciseDao: ExerciseDao,
-    private val userExerciseStateDao: UserExerciseStateDao,
+    private val holder: DatabaseHolder,
     private val outbox: OutboxRecorder,
     private val clock: Clock
 ) : ExerciseRepository {
 
+    private val exerciseDao: ExerciseDao get() = holder.db.exerciseDao()
+    private val userExerciseStateDao: UserExerciseStateDao get() = holder.db.userExerciseStateDao()
+
     override fun getAllExercises(): Flow<List<Exercise>> {
-        return exerciseDao.getAllExercises().map { entities ->
+        return holder.observe { it.exerciseDao().getAllExercises() }.map { entities ->
             ExerciseMapper.toDomainList(entities)
         }
     }
@@ -44,21 +48,23 @@ class ExerciseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun createExercise(exercise: Exercise) {
-        writeExercise(exercise) { exerciseDao.insertExercise(it) }
+        writeExercise(exercise) { dao, entity -> dao.insertExercise(entity) }
     }
 
     override suspend fun updateExercise(exercise: Exercise) {
-        writeExercise(exercise) { exerciseDao.updateExercise(it) }
+        writeExercise(exercise) { dao, entity -> dao.updateExercise(entity) }
     }
 
-    private suspend fun writeExercise(exercise: Exercise, write: suspend (ExerciseEntity) -> Unit) {
+    private suspend fun writeExercise(exercise: Exercise, write: suspend (ExerciseDao, ExerciseEntity) -> Unit) {
         if (exercise.source == EntitySource.DEFAULT) {
-            write(ExerciseMapper.toEntity(exercise).copy(updatedAt = clock.millis()))
+            write(exerciseDao, ExerciseMapper.toEntity(exercise).copy(updatedAt = clock.millis()))
             return
         }
-        outbox.record(SyncEntityType.EXERCISE, exercise.id) {
-            val revision = exerciseDao.getRevision(exercise.id) ?: 0
+        outbox.record(SyncEntityType.EXERCISE, exercise.id) { db ->
+            val dao = db.exerciseDao()
+            val revision = dao.getRevision(exercise.id) ?: 0
             write(
+                dao,
                 ExerciseMapper.toEntity(exercise)
                     .copy(updatedAt = clock.millis(), revision = revision, syncState = SyncState.PENDING)
             )
@@ -67,33 +73,33 @@ class ExerciseRepositoryImpl @Inject constructor(
 
     override suspend fun deleteExercise(id: String) {
         val now = clock.millis()
-        outbox.record(SyncEntityType.EXERCISE, id, OutboxOperation.DELETE) {
-            exerciseDao.deleteExercise(id, deletedAt = now, updatedAt = now)
+        outbox.record(SyncEntityType.EXERCISE, id, OutboxOperation.DELETE) { db ->
+            db.exerciseDao().deleteExercise(id, deletedAt = now, updatedAt = now)
         }
     }
 
     override suspend fun hideExercise(id: String) {
-        outbox.record(SyncEntityType.USER_EXERCISE_STATE, id) {
-            userExerciseStateDao.setHidden(id, true, clock.millis())
+        outbox.record(SyncEntityType.USER_EXERCISE_STATE, id) { db ->
+            db.userExerciseStateDao().setHidden(id, true, clock.millis())
         }
     }
 
     override suspend fun unhideExercise(id: String) {
-        outbox.record(SyncEntityType.USER_EXERCISE_STATE, id) {
-            userExerciseStateDao.setHidden(id, false, clock.millis())
+        outbox.record(SyncEntityType.USER_EXERCISE_STATE, id) { db ->
+            db.userExerciseStateDao().setHidden(id, false, clock.millis())
         }
     }
 
     override fun getHiddenExercises(): Flow<List<Exercise>> {
-        return exerciseDao.getHiddenExercises().map { entities ->
+        return holder.observe { it.exerciseDao().getHiddenExercises() }.map { entities ->
             ExerciseMapper.toDomainList(entities)
         }
     }
 
     override suspend fun unhideAllExercises() {
         val ids = userExerciseStateDao.getHiddenIds()
-        outbox.recordAll(SyncEntityType.USER_EXERCISE_STATE, ids) {
-            userExerciseStateDao.unhideAll(clock.millis())
+        outbox.recordAll(SyncEntityType.USER_EXERCISE_STATE, ids) { db ->
+            db.userExerciseStateDao().unhideAll(clock.millis())
         }
     }
 
@@ -102,19 +108,19 @@ class ExerciseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateExerciseNote(exerciseId: String, note: String?) {
-        outbox.record(SyncEntityType.USER_EXERCISE_STATE, exerciseId) {
-            userExerciseStateDao.setNote(exerciseId, note, clock.millis())
+        outbox.record(SyncEntityType.USER_EXERCISE_STATE, exerciseId) { db ->
+            db.userExerciseStateDao().setNote(exerciseId, note, clock.millis())
         }
     }
 
     override fun searchExercises(query: String): Flow<List<Exercise>> {
-        return exerciseDao.searchExercises(query).map { entities ->
+        return holder.observe { it.exerciseDao().searchExercises(query) }.map { entities ->
             ExerciseMapper.toDomainList(entities)
         }
     }
 
     override fun getAllExercisesIncludingHidden(): Flow<List<Exercise>> {
-        return exerciseDao.getAllExercisesIncludingHidden().map { entities ->
+        return holder.observe { it.exerciseDao().getAllExercisesIncludingHidden() }.map { entities ->
             ExerciseMapper.toDomainList(entities)
         }
     }

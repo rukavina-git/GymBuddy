@@ -37,6 +37,7 @@ fun unsyncedChangeLines(pendingByType: Map<SyncEntityType, Int>): List<String> =
             SyncEntityType.USER_EXERCISE_STATE -> "exercise preference" to "exercise preferences"
             SyncEntityType.USER_TEMPLATE_STATE -> "template preference" to "template preferences"
             SyncEntityType.USER_PROFILE -> "profile change" to "profile changes"
+            SyncEntityType.BODY_WEIGHT_ENTRY -> "body weight entry" to "body weight entries"
         }
         "$count ${if (count == 1) singular else plural}"
     }

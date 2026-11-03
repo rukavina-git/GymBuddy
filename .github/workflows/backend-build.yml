@@ -43,5 +43,13 @@ jobs:
       sonar-project-key: rukavina-git_GymBuddy-backend
       coverage-report-dir: backend/build/reports/jacoco/test
       coverage-exclusions: ${{ needs.exclusions.outputs.backend }}
+      # Seed migrations repeat INSERT shapes by design (generated data).
+      cpd-exclusions: src/main/resources/db/migration/**
+      # Seed SQL repeats literals ('DEFAULT', ids) by design, and applied
+      # migrations can't change (Flyway checksums): skip S1192 there.
+      extra-args: >-
+        -Dsonar.issue.ignore.multicriteria=e1
+        -Dsonar.issue.ignore.multicriteria.e1.ruleKey=plsql:S1192
+        -Dsonar.issue.ignore.multicriteria.e1.resourceKey=src/main/resources/db/migration/**
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

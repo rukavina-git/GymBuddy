@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.sync
 
+import com.rukavina.gymbuddy.api.dto.BodyWeightEntrySyncDto
 import com.rukavina.gymbuddy.api.dto.ExerciseSyncDto
 import com.rukavina.gymbuddy.api.dto.PerformedExerciseSyncDto
 import com.rukavina.gymbuddy.api.dto.TemplateExerciseSyncDto
@@ -165,6 +166,13 @@ object SyncTestFixtures {
         targetWeight = null,
         joinedDate = 1_700_000_000_000,
         bio = null,
+        revision = revision,
+    )
+
+    fun bodyWeightEntry(weightKg: Float = 80.5f, revision: Int = 0) = BodyWeightEntrySyncDto(
+        id = uuid(),
+        measuredAt = 1_700_000_000_000,
+        weightKg = weightKg,
         revision = revision,
     )
 }

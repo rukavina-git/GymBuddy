@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.repository
 
 import android.util.Log
 import com.rukavina.gymbuddy.data.local.dao.ActiveWorkoutDraftDao
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.entity.ActiveWorkoutDraftEntity
 import com.rukavina.gymbuddy.domain.model.ActiveWorkoutDraft
 import com.rukavina.gymbuddy.domain.repository.ActiveWorkoutDraftRepository
@@ -16,9 +17,12 @@ import java.time.Clock
  * local format and must not change when the OpenAPI client does.
  */
 class ActiveWorkoutDraftRepositoryImpl(
-    private val dao: ActiveWorkoutDraftDao,
+    private val holder: DatabaseHolder,
     private val clock: Clock
 ) : ActiveWorkoutDraftRepository {
+
+    // The current owner's draft; read per call (the owner can switch).
+    private val dao: ActiveWorkoutDraftDao get() = holder.db.activeWorkoutDraftDao()
 
     private val adapter = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())

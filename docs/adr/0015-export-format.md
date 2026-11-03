@@ -33,3 +33,10 @@ stay importable later ("in v3 you can still import some v1").
   need a new version and a migration step.
 - A test fixture of a v1 export is committed once export ships, and
   later importers must pass it.
+
+## Amendment 2026-11-03 (owner)
+
+CSV dropped from v1. The JSON is the backup and the source for any later
+import, including a sets-only import into another account. A CSV for
+spreadsheets can come back later, derived from the same data; it needs
+no change to formatVersion.

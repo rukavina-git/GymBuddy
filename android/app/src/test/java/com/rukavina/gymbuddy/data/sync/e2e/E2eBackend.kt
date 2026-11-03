@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.sync.e2e
 
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
@@ -73,12 +74,12 @@ class TestDevice(val uid: String) {
     val db: AppDatabase = Room.inMemoryDatabaseBuilder(org.robolectric.RuntimeEnvironment.getApplication(), AppDatabase::class.java)
         .allowMainThreadQueries()
         .build()
-    private val outbox = OutboxRecorder(db, clock)
-    val sessions = WorkoutSessionRepositoryImpl(db.workoutSessionDao(), outbox, clock)
-    val exercises = ExerciseRepositoryImpl(db.exerciseDao(), db.userExerciseStateDao(), outbox, clock)
-    val templates = WorkoutTemplateRepositoryImpl(db.workoutTemplateDao(), db.userTemplateStateDao(), outbox, clock)
-    val profiles = UserProfileRepository(db.userProfileDao(), outbox, clock)
-    val store = SyncLocalStore(db, clock)
+    private val outbox = OutboxRecorder(DatabaseHolder.fixed(db), clock)
+    val sessions = WorkoutSessionRepositoryImpl(DatabaseHolder.fixed(db), outbox, clock)
+    val exercises = ExerciseRepositoryImpl(DatabaseHolder.fixed(db), outbox, clock)
+    val templates = WorkoutTemplateRepositoryImpl(DatabaseHolder.fixed(db), outbox, clock)
+    val profiles = UserProfileRepository(DatabaseHolder.fixed(db), outbox, clock)
+    val store = SyncLocalStore(DatabaseHolder.fixed(db), clock)
     val apis: SyncApis = SyncApis.create(E2eBackend.baseUrl, { E2eBackend.token(uid) })
 
     val syncDao get() = db.syncDao()

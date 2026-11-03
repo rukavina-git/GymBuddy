@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.repository
 
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.sync.OutboxRecorder
@@ -34,7 +35,7 @@ class WorkoutTemplateRepositoryImplTest {
         db = Room.inMemoryDatabaseBuilder(org.robolectric.RuntimeEnvironment.getApplication(), AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        repository = WorkoutTemplateRepositoryImpl(db.workoutTemplateDao(), db.userTemplateStateDao(), OutboxRecorder(db, fixedClock), fixedClock)
+        repository = WorkoutTemplateRepositoryImpl(DatabaseHolder.fixed(db), OutboxRecorder(DatabaseHolder.fixed(db), fixedClock), fixedClock)
     }
 
     @After
@@ -120,7 +121,7 @@ class WorkoutTemplateRepositoryImplTest {
         repository.createTemplate(template("template-1"))
 
         val laterClock = Clock.fixed(fixedClock.instant().plusSeconds(3600), ZoneOffset.UTC)
-        val laterRepository = WorkoutTemplateRepositoryImpl(db.workoutTemplateDao(), db.userTemplateStateDao(), OutboxRecorder(db, laterClock), laterClock)
+        val laterRepository = WorkoutTemplateRepositoryImpl(DatabaseHolder.fixed(db), OutboxRecorder(DatabaseHolder.fixed(db), laterClock), laterClock)
         val updated = template("template-1", title = "Push Day (edited)")
         laterRepository.updateTemplate(updated)
 

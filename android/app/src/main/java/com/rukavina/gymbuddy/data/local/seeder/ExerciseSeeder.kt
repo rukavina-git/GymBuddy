@@ -2,6 +2,10 @@ package com.rukavina.gymbuddy.data.local.seeder
 
 import android.content.Context
 import android.util.Log
+import androidx.room.withTransaction
+import com.rukavina.gymbuddy.data.local.db.AppDatabase
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
+import kotlinx.coroutines.sync.withLock
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
 import com.rukavina.gymbuddy.data.local.entity.ExerciseEntity
@@ -22,9 +26,12 @@ import javax.inject.Inject
  * Loads exercises from bundled JSON asset and updates when version changes.
  */
 class ExerciseSeeder @Inject constructor(
-    private val exerciseDao: ExerciseDao,
-    private val versionDao: ExerciseVersionDao
+    private val holder: DatabaseHolder
 ) {
+    // Seeds whichever owner's file is current; the app runs it per new file.
+    private val exerciseDao: ExerciseDao get() = holder.db.exerciseDao()
+    private val versionDao: ExerciseVersionDao get() = holder.db.exerciseVersionDao()
+
     companion object {
         private const val TAG = "ExerciseSeeder"
         private const val DEFAULT_EXERCISES_FILE = "default_exercises.json"
@@ -42,28 +49,39 @@ class ExerciseSeeder @Inject constructor(
      * reseed on every cold start and the next sync would put the
      * server's library back (D-35).
      *
+     * Exception: the guest's file (null owner) never syncs, so a guest
+     * whose stored version is older than the bundle gets the bundle.
+     * Custom exercises and the overlay are kept.
+     *
      * @param context Application context for accessing assets
      * @return true if seeding occurred, false if a library was already loaded
      */
-    suspend fun seedIfNeeded(context: Context): Boolean {
+    suspend fun seedIfNeeded(context: Context): Boolean = holder.lock.withLock {
+        // Under the switch lock, so the file and its owner can't change mid-seed.
+        val db = holder.db
+        val isGuest = holder.owner == null
         try {
             // Load bundled exercise data
             val json = loadJsonFromAssets(context)
             val bundledVersion = json.getInt("version")
 
             // Check current version in database
-            val currentVersion = versionDao.getCurrentVersion()?.version
+            val currentVersion = db.exerciseVersionDao().getCurrentVersion()?.version
 
             Log.d(TAG, "Bundled version: $bundledVersion, Current version: $currentVersion")
 
-            if (currentVersion == null) {
+            return@withLock if (currentVersion == null) {
                 Log.i(TAG, "First install: seeding bundled default exercises v$bundledVersion")
-                seedDefaultExercises(json)
-                versionDao.setVersion(ExerciseVersionEntity(version = bundledVersion))
-                return true
+                replaceAll(db, json, bundledVersion)
+                true
+            } else if (isGuest && bundledVersion > currentVersion) {
+                // The guest's file never syncs; the bundle is its only source.
+                Log.i(TAG, "Guest file: refreshing default exercises v$currentVersion -> v$bundledVersion")
+                replaceAll(db, json, bundledVersion)
+                true
             } else {
                 Log.d(TAG, "Default exercises already loaded (v$currentVersion); later updates come from the server")
-                return false
+                false
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error seeding exercises", e)
@@ -83,6 +101,14 @@ class ExerciseSeeder @Inject constructor(
         Log.i(TAG, "Forced reseed of default exercises (v$version)")
     }
 
+    /** Defaults and their version land together, or not at all. */
+    private suspend fun replaceAll(db: AppDatabase, json: JSONObject, version: Int) {
+        db.withTransaction {
+            seedDefaultExercises(json, db.exerciseDao())
+            db.exerciseVersionDao().setVersion(ExerciseVersionEntity(version = version))
+        }
+    }
+
     /**
      * Load and parse the default exercises JSON from assets.
      */
@@ -97,9 +123,9 @@ class ExerciseSeeder @Inject constructor(
      * Parse and insert default exercises into the database.
      * Deletes existing default exercises first to ensure clean update.
      */
-    private suspend fun seedDefaultExercises(json: JSONObject) {
+    private suspend fun seedDefaultExercises(json: JSONObject, dao: ExerciseDao = exerciseDao) {
         // Delete old default exercises
-        exerciseDao.deleteAllDefaultExercises()
+        dao.deleteAllDefaultExercises()
 
         // Parse exercises from JSON
         val exercisesJson = json.getJSONArray("exercises")
@@ -112,7 +138,7 @@ class ExerciseSeeder @Inject constructor(
         }
 
         // Bulk insert all exercises
-        exerciseDao.insertExercises(exercises)
+        dao.insertExercises(exercises)
         Log.i(TAG, "Seeded ${exercises.size} default exercises")
     }
 

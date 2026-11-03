@@ -31,6 +31,7 @@ class AccountDataDeleter(private val jdbcTemplate: NamedParameterJdbcTemplate) {
         jdbcTemplate.update("DELETE FROM user_exercise_state WHERE owner_id = :uid", params)
         jdbcTemplate.update("DELETE FROM user_template_state WHERE owner_id = :uid", params)
         jdbcTemplate.update("DELETE FROM user_profile WHERE uid = :uid", params)
+        jdbcTemplate.update("DELETE FROM body_weight_entries WHERE owner_id = :uid", params)
         jdbcTemplate.update("DELETE FROM change_log WHERE user_id = :uid", params)
         jdbcTemplate.update("DELETE FROM sync_retention_watermark WHERE user_id = :uid", params)
     }

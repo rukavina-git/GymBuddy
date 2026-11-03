@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
@@ -31,6 +32,21 @@ class GlobalExceptionHandler(private val syncMetrics: SyncMetrics) {
         val traceId = RequestContext.traceId()
         logger.debug("400 VALIDATION_FAILED [traceId={}] {} {}: {}", traceId, request.method, request.requestURI, ex.message)
         val body = ErrorDto(error = "VALIDATION_FAILED", message = "Malformed cursor.", traceId = traceId)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+    }
+
+    /**
+     * A body Jackson can't read (bad JSON, unknown enum value, wrong
+     * type) is the client's fault: 400 VALIDATION_FAILED, not 500. The
+     * message stays generic so parser internals don't leak.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleUnreadableBody(ex: HttpMessageNotReadableException, request: HttpServletRequest): ResponseEntity<ErrorDto> {
+        val traceId = RequestContext.traceId()
+        logger.info("400 VALIDATION_FAILED [traceId={}] {} {}: {}", traceId, request.method, request.requestURI, ex.message)
+        val body = ErrorDto(error = "VALIDATION_FAILED", message = "Malformed request body.", traceId = traceId)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .contentType(MediaType.APPLICATION_JSON)
             .body(body)

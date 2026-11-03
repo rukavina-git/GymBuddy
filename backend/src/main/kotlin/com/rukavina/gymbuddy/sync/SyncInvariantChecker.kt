@@ -84,6 +84,11 @@ class SyncInvariantChecker(private val jdbcTemplate: NamedParameterJdbcTemplate)
             SELECT cl.seq, cl.entity_type, cl.entity_id FROM change_log cl
             WHERE cl.entity_type = 'USER_PROFILE'
               AND NOT EXISTS (SELECT 1 FROM user_profile p WHERE p.uid = cl.user_id)
+
+            UNION ALL
+            SELECT cl.seq, cl.entity_type, cl.entity_id FROM change_log cl
+            WHERE cl.entity_type = 'BODY_WEIGHT_ENTRY'
+              AND NOT EXISTS (SELECT 1 FROM body_weight_entries b WHERE b.id = cl.entity_id::uuid)
         """.trimIndent()
         return jdbcTemplate.query(sql, emptyMap<String, Any>()) { rs, _ ->
             InvariantViolation(
@@ -131,6 +136,11 @@ class SyncInvariantChecker(private val jdbcTemplate: NamedParameterJdbcTemplate)
             SELECT 'USER_PROFILE', uid FROM user_profile
             WHERE deleted_at IS NULL AND revision >= 1
               AND NOT EXISTS (SELECT 1 FROM change_log cl WHERE cl.entity_type = 'USER_PROFILE' AND cl.entity_id = user_profile.uid)
+
+            UNION ALL
+            SELECT 'BODY_WEIGHT_ENTRY', id::text FROM body_weight_entries
+            WHERE deleted_at IS NULL AND revision >= 1
+              AND NOT EXISTS (SELECT 1 FROM change_log cl WHERE cl.entity_type = 'BODY_WEIGHT_ENTRY' AND cl.entity_id = body_weight_entries.id::text)
         """.trimIndent()
         return jdbcTemplate.query(sql, emptyMap<String, Any>()) { rs, _ ->
             InvariantViolation(
@@ -196,6 +206,10 @@ class SyncInvariantChecker(private val jdbcTemplate: NamedParameterJdbcTemplate)
             UNION ALL
             SELECT 'USER_PROFILE', uid FROM user_profile
             WHERE revision = 0 AND EXISTS (SELECT 1 FROM change_log cl WHERE cl.entity_type = 'USER_PROFILE' AND cl.entity_id = user_profile.uid)
+
+            UNION ALL
+            SELECT 'BODY_WEIGHT_ENTRY', id::text FROM body_weight_entries
+            WHERE revision = 0 AND EXISTS (SELECT 1 FROM change_log cl WHERE cl.entity_type = 'BODY_WEIGHT_ENTRY' AND cl.entity_id = body_weight_entries.id::text)
         """.trimIndent()
         return jdbcTemplate.query(sql, emptyMap<String, Any>()) { rs, _ ->
             InvariantViolation(

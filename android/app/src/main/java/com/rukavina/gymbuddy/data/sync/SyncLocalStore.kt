@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.data.sync
 
 import androidx.room.withTransaction
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.entity.ExerciseVersionEntity
 import com.rukavina.gymbuddy.data.local.entity.OutboxEntryEntity
 import com.rukavina.gymbuddy.data.local.entity.OutboxOperation
@@ -11,6 +12,7 @@ import com.rukavina.gymbuddy.data.local.entity.SyncLogOutcome
 import com.rukavina.gymbuddy.data.local.entity.SyncMetaEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateVersionEntity
 import com.rukavina.gymbuddy.data.remote.generated.infrastructure.Serializer
+import com.rukavina.gymbuddy.data.remote.generated.models.BodyWeightEntry
 import com.rukavina.gymbuddy.data.remote.generated.models.EntitySource
 import com.rukavina.gymbuddy.data.remote.generated.models.Exercise
 import com.rukavina.gymbuddy.data.remote.generated.models.PullResponse
@@ -18,6 +20,7 @@ import com.rukavina.gymbuddy.data.remote.generated.models.UserExerciseState
 import com.rukavina.gymbuddy.data.remote.generated.models.UserProfile
 import com.rukavina.gymbuddy.data.remote.generated.models.UserTemplateState
 import com.rukavina.gymbuddy.data.remote.generated.models.WorkoutSession
+import com.rukavina.gymbuddy.data.remote.generated.models.StarterPlan
 import com.rukavina.gymbuddy.data.remote.generated.models.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.model.SyncState
 import kotlinx.coroutines.flow.Flow
@@ -45,6 +48,9 @@ sealed class PreparedMutation(val entry: OutboxEntryEntity) {
     class Profile(entry: OutboxEntryEntity, val dto: UserProfile) : PreparedMutation(entry) {
         override val payloadJson: String get() = json(dto)
     }
+    class BodyWeight(entry: OutboxEntryEntity, val dto: BodyWeightEntry) : PreparedMutation(entry) {
+        override val payloadJson: String get() = json(dto)
+    }
 
     companion object {
         inline fun <reified T> json(value: T): String = Serializer.moshi.adapter(T::class.java).toJson(value)
@@ -68,7 +74,11 @@ data class PageApplyCounts(val applied: Map<SyncEntityType, Int>, val skippedPen
  * in (or is) one transaction, so the engine never leaves a half-applied
  * push result or pull page behind.
  */
-class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
+class SyncLocalStore(private val holder: DatabaseHolder, private val clock: Clock) {
+
+    // The current owner's database. The engine calls this under its lock,
+    // so it can't switch mid-cycle.
+    private val db: AppDatabase get() = holder.db
 
     private val syncDao get() = db.syncDao()
 
@@ -112,6 +122,9 @@ class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
             SyncEntityType.USER_PROFILE -> syncDao.getProfileIncludingDeleted(id)?.let {
                 PreparedMutation.Profile(entry, SyncDtoMapper.toDto(it))
             }
+            SyncEntityType.BODY_WEIGHT_ENTRY -> db.bodyWeightDao().getIncludingDeleted(id)?.let {
+                PreparedMutation.BodyWeight(entry, SyncDtoMapper.toDto(it))
+            }
         }
     }
 
@@ -140,6 +153,7 @@ class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
             SyncEntityType.USER_EXERCISE_STATE -> syncDao.setExerciseStateSyncMeta(id, revision, updatedAt, state)
             SyncEntityType.USER_TEMPLATE_STATE -> syncDao.setTemplateStateSyncMeta(id, revision, updatedAt, state)
             SyncEntityType.USER_PROFILE -> syncDao.setProfileSyncMeta(id, revision, updatedAt, state)
+            SyncEntityType.BODY_WEIGHT_ENTRY -> db.bodyWeightDao().setSyncMeta(id, revision, updatedAt, state)
         }
     }
 
@@ -162,6 +176,7 @@ class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
         SyncEntityType.USER_EXERCISE_STATE -> db.userExerciseStateDao().getState(id)?.syncState
         SyncEntityType.USER_TEMPLATE_STATE -> db.userTemplateStateDao().getState(id)?.syncState
         SyncEntityType.USER_PROFILE -> syncDao.getProfileIncludingDeleted(id)?.syncState
+        SyncEntityType.BODY_WEIGHT_ENTRY -> db.bodyWeightDao().getIncludingDeleted(id)?.syncState
     }
 
     private suspend fun setSyncState(type: SyncEntityType, id: String, state: SyncState) = when (type) {
@@ -171,6 +186,7 @@ class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
         SyncEntityType.USER_EXERCISE_STATE -> syncDao.setExerciseStateSyncState(id, state)
         SyncEntityType.USER_TEMPLATE_STATE -> syncDao.setTemplateStateSyncState(id, state)
         SyncEntityType.USER_PROFILE -> syncDao.setProfileSyncState(id, state)
+        SyncEntityType.BODY_WEIGHT_ENTRY -> db.bodyWeightDao().setSyncState(id, state)
     }
 
     private suspend fun log(type: SyncEntityType, id: String, outcome: SyncLogOutcome, reason: String?, payload: String?) {
@@ -256,6 +272,11 @@ class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
                 db.userProfileDao().insertUserProfile(SyncDtoMapper.toEntity(dto))
             }
         }
+        page.bodyWeightEntries.orEmpty().forEach { dto ->
+            upsert(SyncEntityType.BODY_WEIGHT_ENTRY, dto.id.toString(), dto.revision) {
+                db.bodyWeightDao().upsert(SyncDtoMapper.toEntity(dto))
+            }
+        }
         return PageApplyCounts(applied, skipped)
     }
 
@@ -275,6 +296,7 @@ class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
         SyncEntityType.USER_EXERCISE_STATE -> db.userExerciseStateDao().getState(id)?.revision
         SyncEntityType.USER_TEMPLATE_STATE -> db.userTemplateStateDao().getState(id)?.revision
         SyncEntityType.USER_PROFILE -> syncDao.getProfileIncludingDeleted(id)?.revision
+        SyncEntityType.BODY_WEIGHT_ENTRY -> db.bodyWeightDao().getRevision(id)
     }
 
     // ---- wipe ----
@@ -309,8 +331,19 @@ class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
     }
 
     /** Same as [replaceDefaultExercises] for templates; template_exercises go via ON DELETE CASCADE. */
-    suspend fun replaceDefaultTemplates(version: Int, templates: List<WorkoutTemplate>) = transaction {
+    suspend fun replaceDefaultTemplates(
+        version: Int,
+        templates: List<WorkoutTemplate>,
+        plans: List<StarterPlan>
+    ) = transaction {
         syncDao.deleteDefaultTemplates()
+        // Starter plans are versioned with the templates they point at (Plan 6 step 06).
+        db.starterPlanDao().deleteAll()
+        plans.forEachIndexed { i, dto ->
+            val (plan, rows) = SyncDtoMapper.toEntities(dto, displayOrder = i)
+            db.starterPlanDao().insertPlans(listOf(plan))
+            db.starterPlanDao().insertPlanTemplates(rows)
+        }
         templates.filter { it.source == EntitySource.DEFAULT }.forEach { dto ->
             val aggregate = SyncDtoMapper.toEntities(dto)
             db.workoutTemplateDao().insertTemplate(aggregate.template)
@@ -323,12 +356,12 @@ class SyncLocalStore(private val db: AppDatabase, private val clock: Clock) {
 
     // ---- debug screen ----
 
-    fun observeOutbox(): Flow<List<OutboxEntryEntity>> = syncDao.observeOutbox()
+    fun observeOutbox(): Flow<List<OutboxEntryEntity>> = holder.observe { it.syncDao().observeOutbox() }
 
     /** Newest first. */
-    fun observeLog(): Flow<List<SyncLogEntity>> = syncDao.observeLog()
+    fun observeLog(): Flow<List<SyncLogEntity>> = holder.observe { it.syncDao().observeLog() }
 
-    fun observeCursor(): Flow<String?> = syncDao.observeMeta(KEY_CURSOR)
+    fun observeCursor(): Flow<String?> = holder.observe { it.syncDao().observeMeta(KEY_CURSOR) }
 
     private companion object {
         const val KEY_CURSOR = "pull_cursor"

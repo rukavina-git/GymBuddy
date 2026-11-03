@@ -15,6 +15,21 @@ data class UserProfile(
     val joinedDate: Long,
     val bio: String? = null,
 
+    /** Plan 6 step 05. Set by onboarding and You (Plan 7); kept by every other save. */
+    val experienceLevel: ExperienceLevel? = null,
+
+    /** Preset avatar id, e.g. "cat" (no photos in v1). Null: the default avatar. */
+    val avatarId: String? = null,
+
+    val trainingDays: TrainingDays? = null,
+
+    /** Health-data consent record from account creation (decision 2A: recorded, not enforced). */
+    val healthDataConsentVersion: String? = null,
+    val healthDataConsentAt: Long? = null,
+
+    /** The StarterPlan the user follows (decision 2A: synced with the profile). Soft reference. */
+    val activePlanId: String? = null,
+
     /**
      * When this row last changed locally, in epoch ms. Set from the
      * injected Clock at write time - see Exercise.updatedAt.

@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.ui.profile
 
+import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.room.Room
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
@@ -78,7 +79,7 @@ class ProfileViewModelTest {
             .allowMainThreadQueries()
             .build()
         return ProfileViewModel(
-            repository = UserProfileRepository(db.userProfileDao(), OutboxRecorder(db, fixedClock), fixedClock),
+            repository = UserProfileRepository(DatabaseHolder.fixed(db), OutboxRecorder(DatabaseHolder.fixed(db), fixedClock), fixedClock),
             appPreferencesRepository = AppPreferencesRepository(testPreferencesDataStore()),
             clock = fixedClock
         )

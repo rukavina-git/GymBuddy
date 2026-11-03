@@ -5,7 +5,7 @@
 - [x] 02 Remove custom profile photos (steps/02-image-storage.md) (fd871c3)
 - [x] 03 Active workout failure paths + process death (steps/03-active-workout-tests.md) (aedd05a)
 - [x] 04 Durable push via WorkManager (steps/04-durable-push.md) (3e5c458)
-- [ ] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md)
+- [x] 05 CI green, PR develop → main (me) (steps/05-merge-to-main.md) (61a2de5)
 
 ## Deviations
 - 01 moved out of this plan (owner: not before the core app).
@@ -58,9 +58,8 @@
   loads overwrites it silently (fine until 7.6's resume prompt).
   Draft weights don't record their units. No test of the conflated
   writer's ordering or of a throwing draft repo.
-- 03 manual check still open: "Don't keep activities", leave the app,
-  come back, workout is still there. Also check a release build reads
-  a draft (only R8 mapping was checked, no device run).
+- 03 manual check closed 2026-11-03 (owner): "Don't keep activities"
+  survives; a release build reads a draft.
 - From 04 (reviewer, not fixed): KEEP also keeps a *running* job. A set
   logged during the pull after the push emptied the outbox (0 → 1)
   gets no new job and waits for app open / 6 h periodic. Fix:
@@ -68,5 +67,5 @@
   Untested: backoff policy, syncNow itself returning SIGNED_OUT.
   PushOutboxWorker duplicates SyncWorker; FakeAuth duplicates the
   inline fake in SyncTriggersTest.
-- 04 manual check still open: airplane mode, log a set, swipe away,
-  airplane off, set reaches backend without opening the app.
+- 04 manual check closed 2026-11-03 (owner): set logged offline was
+  pushed; reinstall + login restored it.

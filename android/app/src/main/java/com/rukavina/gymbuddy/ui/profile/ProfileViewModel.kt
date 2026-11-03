@@ -48,7 +48,11 @@ class ProfileViewModel @Inject constructor(
     private val _logoutEvent = MutableSharedFlow<Unit>()
     val logoutEvent: SharedFlow<Unit> = _logoutEvent.asSharedFlow()
 
-    private val uid: String? = FirebaseAuth.getInstance().currentUser?.uid
+    // Read per call: the owner can change while this ViewModel lives (a
+    // guest signs in, or cancels a merge). A guest's profile is keyed
+    // GUEST_UID until it merges into an account (ADR 0014).
+    private val uid: String?
+        get() = repository.ownerUid
 
     // Store the saved profile state for change tracking
     private var savedProfileState = ProfileUiState()
@@ -164,7 +168,9 @@ class ProfileViewModel @Inject constructor(
                 // existing profile first, same as saveProfileToDatabase.
                 val existingProfile = repository.getProfile(userId)
 
-                val profile = UserProfile(
+                // Start from the stored row so fields this screen doesn't
+                // edit (experience, avatar, consent: step 05) survive.
+                val profile = (existingProfile ?: UserProfile(uid = userId, name = "", email = "", joinedDate = clock.millis())).copy(
                     uid = userId,
                     name = currentState.name,
                     email = currentState.email,
@@ -276,7 +282,9 @@ class ProfileViewModel @Inject constructor(
                 // isn't clobbered on every field save.
                 val existingProfile = repository.getProfile(userId)
 
-                val profile = UserProfile(
+                // Start from the stored row so fields this screen doesn't
+                // edit (experience, avatar, consent: step 05) survive.
+                val profile = (existingProfile ?: UserProfile(uid = userId, name = "", email = "", joinedDate = clock.millis())).copy(
                     uid = userId,
                     name = currentState.name.ifBlank { "User" },
                     email = currentState.email,

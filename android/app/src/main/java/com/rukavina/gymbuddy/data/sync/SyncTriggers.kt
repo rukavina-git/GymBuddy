@@ -13,6 +13,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.rukavina.gymbuddy.domain.sync.SyncReason
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
@@ -68,9 +69,12 @@ object SyncTriggers {
 
     /**
      * Each time the outbox goes from empty to non-empty (and once at start
-     * if it already is), enqueue [PushOutboxWorker]. KEEP means a push
-     * already waiting isn't duplicated. The network callback stays for the
-     * app-open case; SyncScheduler's lock stops double runs.
+     * if it already is), enqueue [PushOutboxWorker]. A push still waiting
+     * isn't duplicated (KEEP). A push already running gets a new one
+     * queued behind it (APPEND_OR_REPLACE), so a set logged as it
+     * finishes isn't left for the 6 h periodic sync.
+     * The network callback stays for the app-open case; SyncScheduler's
+     * lock stops double runs.
      */
     fun observeOutbox(outboxCount: Flow<Int>, workManager: WorkManager, scope: CoroutineScope) {
         outboxCount
@@ -86,6 +90,10 @@ object SyncTriggers {
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, PUSH_OUTBOX_BACKOFF_SECONDS, TimeUnit.SECONDS)
             .build()
-        workManager.enqueueUniqueWork(PUSH_OUTBOX_WORK_NAME, ExistingWorkPolicy.KEEP, request)
+        val running = runCatching {
+            workManager.getWorkInfosForUniqueWork(PUSH_OUTBOX_WORK_NAME).get().any { it.state == WorkInfo.State.RUNNING }
+        }.getOrDefault(false)
+        val policy = if (running) ExistingWorkPolicy.APPEND_OR_REPLACE else ExistingWorkPolicy.KEEP
+        workManager.enqueueUniqueWork(PUSH_OUTBOX_WORK_NAME, policy, request)
     }
 }

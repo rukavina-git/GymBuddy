@@ -57,8 +57,9 @@ waiting on me
 - [x] 3.7 Motion and haptics spec
 - [x] 3.8 DESIGN.md + redesign handoff (now Plan 7)
 
-Order (owner, 2026-11-02): fix what's there → test + prod
-environments → features → redesign → CI/CD → legal → release last.
+Order (owner, 2026-11-03): fix what's there → features → redesign →
+test + prod environments → CI/CD → legal → release last. Plan ids
+kept, so Plan 5 comes after Plan 7.
 Old step ids (4.0–4.6, 4.D1–4.D11, old Plan 5) map to the new ones in
 roadmap-details.md §3.
 
@@ -69,29 +70,19 @@ roadmap-details.md §3.
 - [x] 4.2 Remove custom profile photos (preset avatars come in 6.5)
 - [x] 4.3 ViewModel test gaps (active workout failure paths)
 - [x] 4.4 Durable push: WorkManager job when the outbox is non-empty
-- [ ] 4.5 (me) CI green, PR develop → main
+- [x] 4.5 (me) CI green, PR develop → main
 
-## Plan 5: environments (test + prod)
+## Plan 6: v1-features (data + logic)
 
-- [ ] 5.1 ADR: staging + prod split (backend, database, Firebase, app)
-- [ ] 5.2 Backend: staging service in render.yaml, backups prod only
-- [ ] 5.3 Android: `staging` / `prod` flavors (app id suffix, own
-      Firebase config, API URL); CI builds both
-- [ ] 5.4 (me) Staging Firebase project, Neon branch, Render service,
-      DNS api-staging.rukavina.app, secrets
-- [ ] 5.5 (me) CI green, PR develop → main
-
-## Plan 6: v1 features (data + logic)
-
-- [ ] 6.1 Per-account local data + account switching rules (ADR 0014)
-- [ ] 6.2 Guest mode: local-only use, create account / sign in merges (ADR 0014)
-- [ ] 6.3 Auth gate: dead session → "sign in again" banner, no wipe
-- [ ] 6.4 Body weight tracking: new table (spec change)
-- [ ] 6.5 Profile fields: experience, avatar, consent record, days per week
+- [x] 6.1 Per-account local data + account switching rules (ADR 0014)
+- [x] 6.2 Guest mode: local-only use, create account / sign in merges (ADR 0014)
+- [x] 6.3 Auth gate: dead session → "sign in again" banner, no wipe
+- [x] 6.4 Body weight tracking: new table (spec change)
+- [x] 6.5 Profile fields: experience, avatar, consent record, days per week
       (spec change, owner OK 2026-11-02)
-- [ ] 6.6 Plans (templates to rotate through) + rework of the default
+- [x] 6.6 Plans (templates to rotate through) + rework of the default
       templates and starter plans (data model change)
-- [ ] 6.7 Data export: versioned JSON + CSV (ADR 0015)
+- [x] 6.7 Data export: versioned JSON (ADR 0015; CSV dropped)
 - [ ] 6.8 (me) CI green, PR develop → main
 
 ## Plan 7: redesign build (Compose)
@@ -107,7 +98,17 @@ roadmap-details.md §3.
 - [ ] 7.9 Session detail
 - [ ] 7.10 You + Settings (UI for 6.4, 6.5, 6.7)
 - [ ] 7.11 Cross-flow states: error, offline, empty, sync
-- [ ] 7.12 (me) Device pass on staging, CI green, PR develop → main
+- [ ] 7.12 (me) Device pass on the current backend, CI green, PR develop → main
+
+## Plan 5: environments (test + prod), after Plan 7
+
+- [ ] 5.1 ADR: staging + prod split (backend, database, Firebase, app)
+- [ ] 5.2 Backend: staging service in render.yaml, backups prod only
+- [ ] 5.3 Android: `staging` / `prod` flavors (app id suffix, own
+      Firebase config, API URL); CI builds both
+- [ ] 5.4 (me) Staging Firebase project, Neon branch, Render service,
+      DNS api-staging.rukavina.app, secrets
+- [ ] 5.5 (me) CI green, PR develop → main
 
 ## Plan 8: delivery (CI/CD + fastlane)
 

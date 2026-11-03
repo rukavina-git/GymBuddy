@@ -77,6 +77,16 @@ data class UserTemplateStateDto(
     val revision: Int,
 )
 
+/** Mirrors the BodyWeightEntry schema in api/openapi.yaml. */
+data class BodyWeightEntryDto(
+    val id: String,
+    val measuredAt: Long,
+    val weightKg: Float,
+    val updatedAt: Long,
+    val deletedAt: Long?,
+    val revision: Int,
+)
+
 /**
  * Mirrors the PullResponse schema in api/openapi.yaml. exercises/
  * workoutTemplates/userProfile reuse the response DTOs from
@@ -90,6 +100,7 @@ data class PullResponseDto(
     val userExerciseStates: List<UserExerciseStateDto> = emptyList(),
     val userTemplateStates: List<UserTemplateStateDto> = emptyList(),
     val userProfile: UserProfileDto? = null,
+    val bodyWeightEntries: List<BodyWeightEntryDto> = emptyList(),
     val nextCursor: String,
     val hasMore: Boolean,
 )
