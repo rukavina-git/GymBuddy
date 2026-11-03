@@ -23,6 +23,10 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.rukavina.gymbuddy.data.export.DataExporter
+import java.time.Clock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -108,6 +112,23 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     var passwordDialogState by remember { mutableStateOf(PasswordDialogState()) }
     var showEraseDialog by remember { mutableStateOf(false) }
+    var showExportSheet by remember { mutableStateOf(false) }
+    val exportScope = rememberCoroutineScope()
+    val exportState by viewModel.exportState.collectAsState()
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> if (uri != null) viewModel.export(uri) }
+    LaunchedEffect(exportState) {
+        val message = when (exportState) {
+            ExportUiState.Done -> "Export saved"
+            ExportUiState.Failed -> "Couldn't save the export. Try again."
+            else -> null
+        } ?: return@LaunchedEffect
+        showExportSheet = false
+        viewModel.clearExportState()
+        // Not in this effect: clearing the state restarts it.
+        exportScope.launch { snackbarHostState.showSnackbar(message) }
+    }
     var deleteAccountDialogState by remember { mutableStateOf(DeleteAccountDialogState()) }
     val context = LocalContext.current
 
@@ -215,9 +236,8 @@ fun SettingsScreen(
                                     icon = Icons.Default.FileDownload,
                                     label = "Export Data",
                                     onClick = {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar("This feature is not implemented yet")
-                                        }
+                                        viewModel.loadExportCounts()
+                                        showExportSheet = true
                                     },
                                     showDivider = false
                                 )
@@ -334,6 +354,18 @@ fun SettingsScreen(
                     viewModel.eraseGuestData()
                 },
                 onDismiss = { showEraseDialog = false }
+            )
+        }
+
+        if (showExportSheet) {
+            val counts by viewModel.exportCounts.collectAsState()
+            ExportSheet(
+                counts = counts,
+                saving = exportState == ExportUiState.Saving,
+                onSave = {
+                    exportLauncher.launch(DataExporter.fileName(Clock.systemDefaultZone()))
+                },
+                onDismiss = { showExportSheet = false }
             )
         }
 

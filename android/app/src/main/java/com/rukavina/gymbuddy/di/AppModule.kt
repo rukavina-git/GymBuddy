@@ -32,6 +32,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import java.time.Clock
+import com.rukavina.gymbuddy.BuildConfig
+import com.rukavina.gymbuddy.data.export.DataExporter
 import javax.inject.Singleton
 
 @Module
@@ -129,4 +131,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideIdGenerator(clock: Clock): IdGenerator = Uuid7Generator(clock)
+
+    @Provides
+    @Singleton
+    fun provideDataExporter(holder: DatabaseHolder, clock: Clock) =
+        DataExporter(holder, BuildConfig.VERSION_NAME, clock)
 }

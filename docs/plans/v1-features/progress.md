@@ -6,7 +6,7 @@
 - [x] 04 Body weight (steps/04-body-weight.md) — c60d997
 - [x] 05 Profile fields (steps/05-profile-fields.md) — 291c23b
 - [x] 06 Plans + default templates (steps/06-plans.md) — 224ea8e
-- [ ] 07 Data export
+- [x] 07 Data export (steps/07-export.md) — HASH
 - [ ] 08 CI green, PR develop → main (me)
 
 ## Deviations
@@ -71,6 +71,16 @@
 - 06: Backend checks activePlanId is a UUID (INVALID otherwise); the
   plan itself isn't checked (soft reference).
 - 06: Templates picked by Claude (5–6 exercises each, existing defaults).
+- 07: CSV dropped (owner): ADR 0015 amended, roadmap/overview updated,
+  Figma note added beside R15-11 (no checkboxes in 7.10).
+- 07: Sheet follows R15-11 minus checkboxes, plain M3 (ExportSheet.kt).
+  Replaces the old "not implemented" Export Data row.
+- 07: No "owner checked before and after": the read runs under
+  `holder.lock` in one transaction, so no switch can happen meanwhile.
+- 07: New `ExportDao` (one-shot reads). Profile is exported without
+  uid and profileImageUrl; `owner` is "guest" or "account".
+- 07: R8 keep rules for `domain.export.**` and all `domain.model` enums
+  (reviewer BLOCKER: reflective Moshi in release would rename keys).
 
 ## Gotchas
 - From 01 (reviewer, not fixed):
@@ -165,3 +175,15 @@
   - Backend accepts uppercase activePlanId; Postgres returns lowercase,
     so an uppercase replay is a CONFLICT. Android sends lowercase.
   - No test ties the bundled JSON v6 to V7; only the generator does.
+- From 07 (reviewer, not fixed):
+  - `exerciseStates`/`templateStates` include overlays on tombstoned
+    custom rows (dangling ids). Importers must tolerate unknown ids, or
+    filter them before the format is in users' hands.
+  - `exportSummary` (sheet text) has no test.
+  - `loadExportCounts` (like erase counts) doesn't catch a DB error.
+  - The other-owner test only checks the profile; isolation comes from
+    the per-owner file.
+- The v1 fixture `app/src/test/resources/export/v1-sample.json` is the
+  format contract: only add fields; any change to it needs a reason.
+- Release build (R8) not run locally; first CI release build checks
+  the new keep rules.

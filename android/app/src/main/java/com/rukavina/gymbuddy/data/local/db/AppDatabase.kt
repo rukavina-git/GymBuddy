@@ -9,6 +9,7 @@ import com.rukavina.gymbuddy.data.local.converter.ProfileEnumConverters
 import com.rukavina.gymbuddy.data.local.dao.ActiveWorkoutDraftDao
 import com.rukavina.gymbuddy.data.local.dao.BodyWeightDao
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
+import com.rukavina.gymbuddy.data.local.dao.ExportDao
 import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
 import com.rukavina.gymbuddy.data.local.dao.StarterPlanDao
 import com.rukavina.gymbuddy.data.local.dao.TemplateVersionDao
@@ -75,4 +76,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun activeWorkoutDraftDao(): ActiveWorkoutDraftDao
     abstract fun bodyWeightDao(): BodyWeightDao
     abstract fun starterPlanDao(): StarterPlanDao
+    abstract fun exportDao(): ExportDao
 }

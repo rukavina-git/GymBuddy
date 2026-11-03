@@ -82,7 +82,7 @@ roadmap-details.md §3.
       (spec change, owner OK 2026-11-02)
 - [x] 6.6 Plans (templates to rotate through) + rework of the default
       templates and starter plans (data model change)
-- [ ] 6.7 Data export: versioned JSON + CSV (ADR 0015)
+- [x] 6.7 Data export: versioned JSON (ADR 0015; CSV dropped)
 - [ ] 6.8 (me) CI green, PR develop → main
 
 ## Plan 7: redesign build (Compose)

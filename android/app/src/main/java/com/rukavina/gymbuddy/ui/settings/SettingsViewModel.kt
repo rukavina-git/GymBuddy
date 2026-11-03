@@ -1,6 +1,11 @@
 package com.rukavina.gymbuddy.ui.settings
 
 import android.content.Context
+import android.net.Uri
+import com.rukavina.gymbuddy.data.export.DataExporter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.IOException
 import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
@@ -43,6 +48,13 @@ data class SettingsUiState(
     val isGuest: Boolean = false
 )
 
+sealed interface ExportUiState {
+    data object Idle : ExportUiState
+    data object Saving : ExportUiState
+    data object Done : ExportUiState
+    data object Failed : ExportUiState
+}
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: UserProfileRepository,
@@ -50,7 +62,8 @@ class SettingsViewModel @Inject constructor(
     private val accountDeletionCoordinator: AccountDeletionCoordinator,
     @ApplicationContext private val appContext: Context,
     private val guestMerge: GuestMerge,
-    private val preferences: AppPreferencesRepository
+    private val preferences: AppPreferencesRepository,
+    private val dataExporter: DataExporter
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -118,6 +131,46 @@ class SettingsViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private val _exportState = MutableStateFlow<ExportUiState>(ExportUiState.Idle)
+    /** Data export (Plan 6 step 07, ADR 0015). */
+    val exportState: StateFlow<ExportUiState> = _exportState
+
+    private val _exportCounts = MutableStateFlow<LocalDataCounts?>(null)
+    /** What the export holds, for the sheet; null until loaded. */
+    val exportCounts: StateFlow<LocalDataCounts?> = _exportCounts
+
+    /** Call when the export sheet opens. */
+    fun loadExportCounts() {
+        _exportCounts.value = null
+        viewModelScope.launch { _exportCounts.value = guestMerge.openCounts() }
+    }
+
+    /** Writes the export JSON to [uri], the file the user picked in the Save dialog. */
+    fun export(uri: Uri) {
+        if (_exportState.value == ExportUiState.Saving) return
+        _exportState.value = ExportUiState.Saving
+        viewModelScope.launch {
+            _exportState.value = try {
+                withContext(Dispatchers.IO) {
+                    val out = appContext.contentResolver.openOutputStream(uri, "wt")
+                        ?: throw IOException("can't open $uri")
+                    out.use { dataExporter.export(it) }
+                }
+                ExportUiState.Done
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "export failed", e)
+                ExportUiState.Failed
+            }
+        }
+    }
+
+    /** Call once the result was shown. */
+    fun clearExportState() {
+        _exportState.value = ExportUiState.Idle
     }
 
     private val _eraseCounts = MutableStateFlow<LocalDataCounts?>(null)

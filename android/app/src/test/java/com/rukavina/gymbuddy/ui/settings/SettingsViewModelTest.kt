@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.sync.GuestMerge
+import com.rukavina.gymbuddy.data.export.DataExporter
+import android.net.Uri
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
 import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
 import com.rukavina.gymbuddy.data.sync.FakeAuthSession
@@ -24,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -87,7 +90,8 @@ class SettingsViewModelTest {
         guestMerge = GuestMerge(DatabaseHolder.fixed(db)),
         preferences = AppPreferencesRepository(
             PreferenceDataStoreFactory.create(produceFile = { java.io.File.createTempFile("prefs", ".preferences_pb").also { it.delete() } })
-        )
+        ),
+        dataExporter = DataExporter(DatabaseHolder.fixed(db), "test", clock)
     )
 
     private fun deletionCoordinator(deleteOnServer: suspend () -> Int) =
@@ -222,5 +226,30 @@ class SettingsViewModelTest {
         vm.loadDeletionWarning()
 
         assertEquals(listOf("1 custom exercise"), withTimeout(5_000) { vm.deletionUnsyncedLines.first { it.isNotEmpty() } })
+    }
+
+    @Test
+    fun `export writes the JSON to the picked file and reports done`() = runBlocking {
+        addPendingExercise()
+        val file = java.io.File.createTempFile("export", ".json")
+        val vm = buildViewModel()
+
+        vm.export(Uri.fromFile(file))
+
+        assertEquals(ExportUiState.Done, withTimeout(5_000) { vm.exportState.first { it != ExportUiState.Saving } })
+        val json = file.readText()
+        assertTrue(json.contains("\"formatVersion\": 1"))
+        assertTrue(json.contains("Custom Curl"))
+        vm.clearExportState()
+        assertEquals(ExportUiState.Idle, vm.exportState.value)
+    }
+
+    @Test
+    fun `export to a file that can't be opened reports failed`() = runBlocking {
+        val vm = buildViewModel()
+
+        vm.export(Uri.parse("content://no.such.provider/export.json"))
+
+        assertEquals(ExportUiState.Failed, withTimeout(5_000) { vm.exportState.first { it != ExportUiState.Saving } })
     }
 }

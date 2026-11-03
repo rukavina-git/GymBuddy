@@ -157,8 +157,8 @@ until then a feature may have a plain entry point or none.
     MIT), consent record, days per week. **Spec change.**
 6.6 **Plans.** A plan is a set of templates to rotate through. Rework
     the default templates and add starter plans. Data model change.
-6.7 **Data export** (ADR 0015). Versioned JSON + CSV through the
-    system share sheet.
+6.7 **Data export** (ADR 0015). Versioned JSON through the Save
+    dialog (CSV dropped, owner 2026-11-03).
 6.8 **(me)** CI green, PR develop → main.
 
 ### Plan 7: redesign build (Compose)

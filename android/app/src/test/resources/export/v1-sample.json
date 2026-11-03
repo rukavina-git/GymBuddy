@@ -1,0 +1,144 @@
+{
+  "formatVersion": 1,
+  "appVersion": "1.0.0-test",
+  "exportedAt": 1793700000000,
+  "owner": "account",
+  "profile": {
+    "name": "Ana",
+    "email": "ana@example.com",
+    "birthDate": 631152000000,
+    "weightKg": 80.5,
+    "heightCm": 172.0,
+    "targetWeightKg": 75.0,
+    "gender": "FEMALE",
+    "fitnessGoal": "BUILD_MUSCLE",
+    "activityLevel": "SEDENTARY",
+    "experienceLevel": "NEW",
+    "trainingDays": "ONE_TO_THREE",
+    "avatarId": "cat",
+    "bio": null,
+    "joinedDate": 1780000000000,
+    "activePlanId": "019a0000-0000-7000-8000-000000000901",
+    "healthDataConsentVersion": "1",
+    "healthDataConsentAt": 1780000000000
+  },
+  "bodyWeightEntries": [
+    {
+      "id": "019a0000-0000-7000-8000-000000000001",
+      "measuredAt": 1790000000000,
+      "weightKg": 80.5
+    }
+  ],
+  "customExercises": [
+    {
+      "id": "019a0000-0000-7000-8000-000000000101",
+      "name": "Cable \"Fly\", low",
+      "primaryMuscles": [
+        "CHEST"
+      ],
+      "secondaryMuscles": [],
+      "description": null,
+      "instructions": [
+        "Step one"
+      ],
+      "tips": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": [
+        "BARBELL"
+      ],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "trackingType": "WEIGHT_REPS",
+      "derivedFromId": null
+    }
+  ],
+  "templates": [
+    {
+      "id": "019a0000-0000-7000-8000-000000000201",
+      "title": "My Push",
+      "derivedFromId": null,
+      "exercises": [
+        {
+          "id": "019a0000-0000-7000-8000-000000000301",
+          "exerciseId": "019a0000-0000-7000-8000-000000000102",
+          "exerciseName": "Bench Press",
+          "trackingType": "WEIGHT_REPS",
+          "orderIndex": 0,
+          "plannedSets": 3,
+          "plannedReps": 8,
+          "plannedWeightKg": 80.0,
+          "plannedDurationSeconds": null,
+          "plannedDistanceMeters": null,
+          "restSeconds": 120,
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "sessions": [
+    {
+      "id": "019a0000-0000-7000-8000-000000000601",
+      "startedAt": 1790001000000,
+      "endedAt": 1790004600000,
+      "durationSeconds": 3600,
+      "title": "My Push",
+      "notes": "Felt good, line\nbreak",
+      "templateId": "019a0000-0000-7000-8000-000000000201",
+      "templateTitle": "My Push",
+      "exercises": [
+        {
+          "id": "019a0000-0000-7000-8000-000000000401",
+          "exerciseId": "019a0000-0000-7000-8000-000000000102",
+          "orderIndex": 0,
+          "exerciseName": "Bench Press",
+          "category": "STRENGTH",
+          "trackingType": "WEIGHT_REPS",
+          "primaryMuscles": [
+            "CHEST"
+          ],
+          "supersetGroup": null,
+          "sets": [
+            {
+              "id": "019a0000-0000-7000-8000-000000000501",
+              "orderIndex": 0,
+              "setType": "WARMUP",
+              "isCompleted": true,
+              "reps": 8,
+              "weightKg": 60.0,
+              "durationSeconds": null,
+              "distanceMeters": null,
+              "restTakenSeconds": 90
+            },
+            {
+              "id": "019a0000-0000-7000-8000-000000000502",
+              "orderIndex": 1,
+              "setType": "WORKING",
+              "isCompleted": true,
+              "reps": 5,
+              "weightKg": 82.5,
+              "durationSeconds": null,
+              "distanceMeters": null,
+              "restTakenSeconds": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "exerciseStates": [
+    {
+      "exerciseId": "019a0000-0000-7000-8000-000000000102",
+      "isHidden": true,
+      "isFavorite": false,
+      "note": "Elbows in",
+      "defaultRestSeconds": 120
+    }
+  ],
+  "templateStates": [
+    {
+      "templateId": "019a0000-0000-7000-8000-000000000202",
+      "isHidden": false,
+      "isFavorite": true
+    }
+  ]
+}

@@ -15,7 +15,7 @@ ADR 0014, ADR 0015).
    Spec change (owner OK 2026-11-02).
 6. Plans (templates to rotate through) + new default templates and
    starter plans. Data model change.
-7. Data export: versioned JSON + CSV (ADR 0015).
+7. Data export: versioned JSON (ADR 0015; CSV dropped).
 8. (me) CI green, PR develop → main.
 
 Out of scope: new screens and restyling (Plan 7), staging/prod
