@@ -70,23 +70,25 @@ fun AppTextField(
         focused -> c.cobalt
         else -> null
     }
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(d.stackTight)) {
-        Text(label, style = type.labelMedium, color = accent)
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            enabled = enabled,
-            singleLine = singleLine,
-            textStyle = type.bodyLarge.copy(color = if (enabled) cs.onSurface else c.disabled),
-            cursorBrush = SolidColor(c.cobalt),
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            visualTransformation = visualTransformation,
-            interactionSource = interaction,
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics { if (isError && helper != null) error(helper) },
-            decorationBox = { inner ->
+    // Label and helper live in the decoration box, so they merge into the
+    // field's semantics node and TalkBack reads "Email, edit box".
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        enabled = enabled,
+        singleLine = singleLine,
+        textStyle = type.bodyLarge.copy(color = if (enabled) cs.onSurface else c.disabled),
+        cursorBrush = SolidColor(c.cobalt),
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        visualTransformation = visualTransformation,
+        interactionSource = interaction,
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { if (isError && helper != null) error(helper) },
+        decorationBox = { inner ->
+            Column(verticalArrangement = Arrangement.spacedBy(d.stackTight)) {
+                Text(label, style = type.labelMedium, color = accent)
                 Row(
                     modifier = Modifier
                         .heightIn(min = d.control)
@@ -106,10 +108,10 @@ fun AppTextField(
                     }
                     trailing?.invoke()
                 }
-            },
-        )
-        if (helper != null) Text(helper, style = type.bodySmall, color = accent)
-    }
+                if (helper != null) Text(helper, style = type.bodySmall, color = accent)
+            }
+        },
+    )
 }
 
 /** Docked search pill with a clear × once filled. */

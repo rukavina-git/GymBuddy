@@ -44,16 +44,12 @@
 - 02a: Roadmap 7.2 stays unticked until 02b lands.
 
 ## Gotchas
-- From 02a (reviewer, not fixed):
-  - NavBar filled-icon test only checks the enum; nothing renders the
-    selected tab's `Color.Unspecified` filled icon.
-  - `AppTextField` label isn't tied to the field for TalkBack (reads
-    the value only). Fix before 7.4 forms use it.
-  - `AppSnackbar` ignores `withDismissAction`; `LinkAction` (banner /
-    snackbar action) has no focus ring.
-  - No previews yet for AppSnackbar, AppDialog, AppBottomSheet,
-    AppMenu, BackTopBar.
-  - DESIGN.md §10 UI icons row: stray " ; " and says npm (was npx).
+- From 02a (reviewer): all five fixed after the step (nav icon test via
+  `navIcon()`, text field label merged into the field for TalkBack,
+  snackbar dismiss ×, focus ring on banner/snackbar actions, previews
+  for snackbar/dialog/sheet/menu/back bar, DESIGN.md typo).
+- `AppBottomSheet` callers need `@OptIn(ExperimentalMaterial3Api::class)`
+  (its default `rememberModalBottomSheetState()` is experimental).
 - Use: `ui/design/*` parts, icons via `AppIcons.Ui/Glyph/Tab/Brand`
   (`painterResource`). Tabs: `NavTab` enum + `AppNavBar`. Re-convert
   icons with svg2vectordrawable if design/icons changes;

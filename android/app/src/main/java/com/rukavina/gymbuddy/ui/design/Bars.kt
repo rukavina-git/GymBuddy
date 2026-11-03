@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.ui.design
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -157,6 +158,13 @@ enum class NavTab(val icon: AppIcons.Tab, internal val label: Int) {
     You(AppIcons.Tab.You, R.string.tab_you),
 }
 
+/** Which drawable a tab shows, and whether it takes a tint. */
+internal data class NavIcon(@DrawableRes val res: Int, val tinted: Boolean)
+
+/** Selected: filled, never tinted (cut-out detail). Otherwise outline, muted. */
+internal fun navIcon(tab: NavTab, selected: Boolean) =
+    if (selected) NavIcon(tab.icon.filled, tinted = false) else NavIcon(tab.icon.outline, tinted = true)
+
 /**
  * Bottom bar (D14). Active tab: cobalt-tint pill, filled icon drawn
  * untinted, bold label; inactive: outline icon, muted label.
@@ -181,10 +189,11 @@ fun AppNavBar(
                 selected = isSelected,
                 onClick = { onSelect(tab) },
                 icon = {
+                    val icon = navIcon(tab, isSelected)
                     Icon(
-                        painterResource(if (isSelected) tab.icon.filled else tab.icon.outline),
+                        painterResource(icon.res),
                         contentDescription = null,
-                        tint = if (isSelected) Color.Unspecified else cs.onSurfaceVariant,
+                        tint = if (icon.tinted) cs.onSurfaceVariant else Color.Unspecified,
                     )
                 },
                 label = {

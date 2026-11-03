@@ -5,7 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarData
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarVisuals
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -95,4 +99,51 @@ private fun BarsPreview() = Board {
     }
     WorkoutTopBar("Push A", "41:05", "3 / 15", onCollapse = {}, onProgress = {}, onMore = {})
     NavTab.entries.forEach { AppNavBar(selected = it, onSelect = {}) }
+}
+
+private class PreviewSnackbar(
+    override val visuals: SnackbarVisuals = object : SnackbarVisuals {
+        override val message = "Set deleted"
+        override val actionLabel = "Undo"
+        override val withDismissAction = true
+        override val duration = SnackbarDuration.Short
+    },
+) : SnackbarData {
+    override fun performAction() = Unit
+    override fun dismiss() = Unit
+}
+
+@Preview(widthDp = 412)
+@Composable
+private fun SnackbarAndTopBarPreview() = Board {
+    AppSnackbar(PreviewSnackbar())
+    BackTopBar(onBack = {}, title = "Bench press") {
+        AppIconButton(AppIcons.Ui.Edit, "Edit", {})
+        AppIconButton(AppIcons.Ui.More, "More", {})
+    }
+}
+
+@Preview(widthDp = 412, heightDp = 400)
+@Composable
+private fun DialogPreview() = Board {
+    AppDialog("Discard changes?", "Your edits to Push A will be lost.", "Discard", {}, "Keep editing", {}, destructive = true)
+}
+
+@Preview(widthDp = 412, heightDp = 300)
+@Composable
+private fun MenuPreview() = Board {
+    AppMenu(expanded = true, onDismiss = {}) {
+        AppMenuItem("Add to template", {}, icon = AppIcons.Ui.Add)
+        AppMenuItem("Edit note", {}, icon = AppIcons.Ui.Note)
+        AppMenuItem("Delete", {}, icon = AppIcons.Ui.Delete, danger = true)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(widthDp = 412, heightDp = 400)
+@Composable
+private fun BottomSheetPreview() = Board {
+    AppBottomSheet(onDismiss = {}, title = "Lift on Progress", subtitle = "Lifts you have logged 3 or more times") {
+        ListRow("Bench press", subtitle = "Chest · Barbell", onClick = {})
+    }
 }

@@ -8,6 +8,7 @@
     <string name="cd_back">Back</string>
     <string name="cd_clear_search">Clear search</string>
     <string name="cd_more">More options</string>
+    <string name="cd_dismiss">Dismiss</string>
     <string name="cd_collapse_workout">Minimise workout</string>
     <string name="cd_workout_progress">Workout progress</string>
     <string name="cd_start">Start</string>

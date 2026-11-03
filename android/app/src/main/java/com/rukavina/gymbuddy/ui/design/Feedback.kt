@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.ui.design
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,15 +17,20 @@ import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.FullShape
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
@@ -123,6 +129,9 @@ fun AppSnackbar(data: SnackbarData, modifier: Modifier = Modifier) {
         ) {
             Text(data.visuals.message, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
             data.visuals.actionLabel?.let { LinkAction(it, data::performAction, MaterialTheme.typography.labelLarge, d.stackTight) }
+            if (data.visuals.withDismissAction) {
+                AppIconButton(AppIcons.Ui.Close, stringResource(R.string.cd_dismiss), data::dismiss)
+            }
         }
     }
 }
@@ -134,10 +143,14 @@ private fun LinkAction(
     style: TextStyle = MaterialTheme.typography.titleSmall,
     horizontalPadding: Dp = 0.dp,
 ) {
+    val interaction = remember { MutableInteractionSource() }
+    val shape = MaterialTheme.shapes.extraSmall
     Box(
         modifier = Modifier
             .minimumInteractiveComponentSize()
-            .clickable(role = Role.Button, onClick = onClick)
+            .focusRing(interaction, shape)
+            .clip(shape)
+            .clickable(interaction, ripple(), role = Role.Button, onClick = onClick)
             .padding(horizontal = horizontalPadding),
         contentAlignment = Alignment.CenterStart,
     ) {

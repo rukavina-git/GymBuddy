@@ -1,6 +1,9 @@
 package com.rukavina.gymbuddy.ui.design
 
 import android.app.Application
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,7 +15,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -21,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import org.robolectric.RobolectricTestRunner
 import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
+import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -51,8 +56,10 @@ class DesignComponentsTest {
     }
 
     @Test
-    fun navBarUsesFilledIconOnlyForSelectedTab() {
+    fun navBarUsesFilledUntintedIconOnlyForSelectedTab() {
         NavTab.entries.forEach { tab ->
+            assertEquals(NavIcon(tab.icon.filled, tinted = false), navIcon(tab, selected = true))
+            assertEquals(NavIcon(tab.icon.outline, tinted = true), navIcon(tab, selected = false))
             assert(tab.icon.filled != tab.icon.outline) { "$tab has one icon for both states" }
         }
         assertEquals(AppIcons.Tab.entries.toSet(), NavTab.entries.map { it.icon }.toSet())
@@ -131,6 +138,28 @@ class DesignComponentsTest {
         set { AppTextField("you@", {}, label = "Email", helper = "Enter a full email address", isError = true) }
         rule.onNodeWithText("you@")
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Error, "Enter a full email address"))
-        rule.onNodeWithText("Email").assertTextEquals("Email")
+    }
+
+    @Test
+    fun textFieldLabelIsPartOfTheField() {
+        set { AppTextField("", {}, label = "Email", placeholder = "you@example.com") }
+        rule.onNode(hasSetTextAction()).assert(hasText("Email"))
+    }
+
+    @Test
+    fun snackbarDismissShowsOnlyWhenAskedAndDismisses() {
+        val host = SnackbarHostState()
+        var result: SnackbarResult? = null
+        set { SnackbarHost(host) { AppSnackbar(it) } }
+
+        rule.runOnIdle {
+            kotlinx.coroutines.MainScope().launch {
+                result = host.showSnackbar("Set deleted", actionLabel = "Undo", withDismissAction = true)
+            }
+        }
+        rule.onNodeWithText("Undo").assertIsDisplayed()
+        rule.onNodeWithContentDescription("Dismiss").performClick()
+        rule.waitForIdle()
+        assertEquals(SnackbarResult.Dismissed, result)
     }
 }
