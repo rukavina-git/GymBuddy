@@ -16,6 +16,7 @@ import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutSessionRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutTemplateRepositoryImpl
 import com.rukavina.gymbuddy.data.sync.AuthSession
+import com.rukavina.gymbuddy.data.sync.DataOwnerStore
 import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.id.Uuid7Generator
@@ -36,8 +37,8 @@ import javax.inject.Singleton
 object AppModule {
 
     /**
-     * One Room file per data owner (ADR 0014). Opens the signed-in uid's
-     * file (or the guest's) and moves older files first. FirebaseAuth
+     * One Room file per data owner (ADR 0014). Opens the data owner's
+     * file ([DataOwnerStore]; null: the guest's) and moves older files first. FirebaseAuth
      * restores the signed-in user synchronously at startup.
      *
      * The pre-Plan-6 file is only moved when Firebase is known to be up:
@@ -48,7 +49,8 @@ object AppModule {
     @Singleton
     fun provideDatabaseHolder(
         @ApplicationContext appContext: Context,
-        auth: AuthSession
+        auth: AuthSession,
+        owners: DataOwnerStore
     ): DatabaseHolder {
         val pathOf = { name: String -> appContext.getDatabasePath(name) }
         val uid = auth.currentUid
@@ -56,8 +58,9 @@ object AppModule {
             runCatching { FirebaseAuth.getInstance() }.isSuccess
         if (firebaseUp) DatabaseHolder.migrateLegacyFile(pathOf, uid)
         DatabaseHolder.migrateSignedOutFile(pathOf)
+        // The data owner, not Firebase's uid: a dead session keeps its data open (AuthGate).
         return DatabaseHolder(
-            uid,
+            owners.owner,
             open = { owner ->
                 Room.databaseBuilder(appContext, AppDatabase::class.java, DatabaseHolder.fileName(owner))
                     .applyAppConfig()

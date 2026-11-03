@@ -15,6 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import com.rukavina.gymbuddy.ui.guest.SessionExpiredBanner
+import com.rukavina.gymbuddy.ui.guest.AuthGateViewModel
+import com.rukavina.gymbuddy.ui.guest.AccountDeletedDialog
+import com.rukavina.gymbuddy.data.sync.AuthGateState
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.CircularProgressIndicator
@@ -74,8 +80,36 @@ fun MainScreen(rootNavController: NavHostController) {
 
     // Wait for the signed-in owner's file (ADR 0014): never show the
     // previous owner's data to the new one.
+    val authGateViewModel: AuthGateViewModel = hiltViewModel()
+    val gateState by authGateViewModel.state.collectAsState()
+    val deletedCounts by authGateViewModel.counts.collectAsState()
+    val toLogin = {
+        rootNavController.navigate(NavRoutes.Login) {
+            popUpTo(NavRoutes.Main) { inclusive = true }
+        }
+    }
+    LaunchedEffect(Unit) {
+        authGateViewModel.erased.collect { toLogin() }
+    }
+    (gateState as? AuthGateState.AccountDeleted)?.let { deleted ->
+        LaunchedEffect(deleted) { authGateViewModel.loadCounts() }
+        AccountDeletedDialog(
+            email = deleted.email,
+            counts = deletedCounts,
+            onKeep = authGateViewModel::keep,
+            onErase = authGateViewModel::erase
+        )
+    }
+
     if (ownerReady) {
-        MainContent(rootNavController)
+        Column(modifier = Modifier.fillMaxSize()) {
+            if (gateState is AuthGateState.SessionExpired) {
+                SessionExpiredBanner(onSignIn = toLogin, modifier = Modifier.statusBarsPadding())
+            }
+            Box(modifier = Modifier.weight(1f)) {
+                MainContent(rootNavController)
+            }
+        }
     } else {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()

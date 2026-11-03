@@ -44,7 +44,9 @@ class SyncScheduler(
     private val isSignedIn: () -> Boolean,
     private val scope: CoroutineScope,
     private val now: () -> Long = System::currentTimeMillis,
-    private val crashReporter: CrashReporter = NoOpCrashReporter
+    private val crashReporter: CrashReporter = NoOpCrashReporter,
+    /** A cycle got a 401: AuthGate checks whether the session died. */
+    private val onUnauthorized: () -> Unit = {}
 ) : SyncRequester {
 
     private val running = AtomicBoolean(false)
@@ -87,6 +89,7 @@ class SyncScheduler(
         val result = runCatching { runCycle() }.onFailure { Log.w(TAG, "sync ($reason) failed", it) }
         val error = result.exceptionOrNull()
         val outcome = if (error == null) SyncOutcome.SYNCED else SyncOutcome.FAILED
+        if ((error as? SyncException)?.httpStatus == HTTP_UNAUTHORIZED) onUnauthorized()
         if (error != null && isReportable(error)) report(error, reason)
         _status.value = SyncStatus(
             lastSyncAt = now(),
@@ -119,6 +122,7 @@ class SyncScheduler(
     }
 
     private companion object {
+        const val HTTP_UNAUTHORIZED = 401
         const val TAG = "SyncScheduler"
     }
 }

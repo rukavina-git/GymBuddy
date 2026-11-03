@@ -61,7 +61,7 @@ class SettingsViewModel @Inject constructor(
 
     // Read per call: the owner can change while this ViewModel lives.
     private val uid: String?
-        get() = FirebaseAuth.getInstance().currentUser?.uid ?: UserProfileRepository.GUEST_UID
+        get() = repository.ownerUid
 
     init {
         loadProfile()
@@ -81,7 +81,7 @@ class SettingsViewModel @Inject constructor(
             val hasPassword = providers.contains(EmailAuthProvider.PROVIDER_ID)
             val hasGoogle = providers.contains(GoogleAuthProvider.PROVIDER_ID)
             val isGoogleOnly = hasGoogle && !hasPassword
-            val isGuest = user == null
+            val isGuest = repository.isGuest
 
             uid?.let { userId ->
                 val profile = repository.getProfile(userId)

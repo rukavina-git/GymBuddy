@@ -7,8 +7,10 @@ import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
+import com.rukavina.gymbuddy.data.local.entity.OutboxOperation
 import com.rukavina.gymbuddy.data.local.entity.SyncEntityType
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
+import com.rukavina.gymbuddy.domain.model.SyncState
 import kotlinx.coroutines.sync.withLock
 
 /** What a user sees counted: live workouts, own templates, own exercises. */
@@ -28,6 +30,8 @@ data class GuestMergeReceipt(val added: LocalDataCounts, val keptAccountProfile:
  * account already has wins (server-wins, D-12). Guest ids are client
  * UUIDv7s, so in practice only the profile ever meets an existing row.
  * The guest's outbox comes along, so the next sync pushes it all.
+ *
+ * [keepAccountAsGuest] is the reverse, for an account deleted elsewhere.
  */
 class GuestMerge(private val holder: DatabaseHolder) {
 
@@ -67,6 +71,43 @@ class GuestMerge(private val holder: DatabaseHolder) {
         }
         holder.deleteOtherFile(null)
         receipt
+    }
+
+    /**
+     * "Keep on this phone" after the account was deleted elsewhere (step 03,
+     * decision 1A). Copies the account's live rows into the guest's file as
+     * new, never-synced rows: revision 0, PENDING, no owner id, one outbox
+     * entry each, so a later account gets all of them. Rows the guest
+     * already has win. The account's file is left for [deleteOwnerFile].
+     */
+    suspend fun keepAccountAsGuest(owner: String) = holder.lock.withLock {
+        check(holder.owner == owner) { "the account's file must be open" }
+        val account = holder.db
+        val from = account.openHelper.writableDatabase
+        holder.withOtherFile(null) { guest ->
+            guest.withTransaction {
+                val to = guest.openHelper.writableDatabase
+                val now = System.currentTimeMillis()
+                KEPT_TABLES.forEach { kept ->
+                    copy(from, to, kept.table, kept.where) { row ->
+                        if (kept.reset) {
+                            row.put("revision", 0)
+                            row.put("syncState", SyncState.PENDING.name)
+                        }
+                        if (kept.clearOwnerId) row.putNull("ownerId")
+                        kept.outboxType?.let { type ->
+                            to.insert("sync_outbox", SQLiteDatabase.CONFLICT_IGNORE, outboxRow(type, row.getAsString(kept.idColumn), now))
+                        }
+                    }
+                }
+                keepProfile(from, to, owner, now)
+            }
+        }
+    }
+
+    /** Deletes a former owner's file once it's no longer open (after a switch away from it). */
+    suspend fun deleteOwnerFile(owner: String) = holder.lock.withLock {
+        holder.deleteOtherFile(owner)
     }
 
     /** "Erase data on this phone" for a guest: the logout wipe, on the guest's own file. */
@@ -111,10 +152,40 @@ class GuestMerge(private val holder: DatabaseHolder) {
         return true
     }
 
-    private fun copy(from: SupportSQLiteDatabase, to: SupportSQLiteDatabase, table: String, where: String?) {
+    /** The account's profile becomes the guest's, unless the guest already has one. */
+    private fun keepProfile(from: SupportSQLiteDatabase, to: SupportSQLiteDatabase, owner: String, now: Long) {
+        val profile = from.query("SELECT * FROM user_profile WHERE uid = ?", arrayOf(owner)).use { cursor ->
+            if (cursor.moveToFirst()) rowOf(cursor) else null
+        } ?: return
+        profile.put("uid", GUEST)
+        profile.put("revision", 0)
+        profile.put("syncState", SyncState.PENDING.name)
+        if (to.insert("user_profile", SQLiteDatabase.CONFLICT_IGNORE, profile) != -1L) {
+            to.insert("sync_outbox", SQLiteDatabase.CONFLICT_IGNORE, outboxRow(SyncEntityType.USER_PROFILE, GUEST, now))
+        }
+    }
+
+    private fun outboxRow(type: SyncEntityType, id: String, now: Long) = ContentValues().apply {
+        put("entityType", type.name)
+        put("entityId", id)
+        put("operation", OutboxOperation.UPSERT.name)
+        put("changeVersion", 1L)
+        put("enqueuedAt", now)
+    }
+
+    private fun copy(
+        from: SupportSQLiteDatabase,
+        to: SupportSQLiteDatabase,
+        table: String,
+        where: String?,
+        transform: (ContentValues) -> Unit = {}
+    ) {
         val query = "SELECT * FROM $table" + (where?.let { " WHERE $it" } ?: "")
         from.query(query).use { cursor ->
-            while (cursor.moveToNext()) to.insert(table, SQLiteDatabase.CONFLICT_IGNORE, rowOf(cursor))
+            while (cursor.moveToNext()) {
+                val row = rowOf(cursor).also(transform)
+                to.insert(table, SQLiteDatabase.CONFLICT_IGNORE, row)
+            }
         }
     }
 
@@ -132,8 +203,41 @@ class GuestMerge(private val holder: DatabaseHolder) {
         }
     }
 
+    /** One table kept as the guest's: which rows, whether to reset sync fields, which outbox entry. */
+    private class Kept(
+        val table: String,
+        val where: String?,
+        val reset: Boolean = false,
+        val clearOwnerId: Boolean = false,
+        val outboxType: SyncEntityType? = null,
+        val idColumn: String = "id"
+    )
+
     private companion object {
         const val GUEST = UserProfileRepository.GUEST_UID
+
+        const val LIVE_SESSIONS = "SELECT id FROM workout_sessions WHERE deletedAt IS NULL"
+        const val LIVE_CUSTOM_TEMPLATES =
+            "SELECT id FROM workout_templates WHERE source = 'CUSTOM' AND deletedAt IS NULL"
+
+        /**
+         * Live user rows in foreign-key order. Tombstones stay behind: they
+         * were never the guest's, so there is nothing to delete later.
+         */
+        val KEPT_TABLES = listOf(
+            Kept("exercises", "source = 'CUSTOM' AND deletedAt IS NULL", reset = true, clearOwnerId = true, outboxType = SyncEntityType.EXERCISE),
+            Kept("workout_templates", "source = 'CUSTOM' AND deletedAt IS NULL", reset = true, clearOwnerId = true, outboxType = SyncEntityType.WORKOUT_TEMPLATE),
+            Kept("template_exercises", "templateId IN ($LIVE_CUSTOM_TEMPLATES)"),
+            Kept("workout_sessions", "deletedAt IS NULL", reset = true, outboxType = SyncEntityType.WORKOUT_SESSION),
+            Kept("performed_exercises", "workoutSessionId IN ($LIVE_SESSIONS)"),
+            Kept(
+                "workout_sets",
+                "performedExerciseId IN (SELECT id FROM performed_exercises WHERE workoutSessionId IN ($LIVE_SESSIONS))"
+            ),
+            Kept("user_exercise_state", null, reset = true, outboxType = SyncEntityType.USER_EXERCISE_STATE, idColumn = "exerciseId"),
+            Kept("user_template_state", null, reset = true, outboxType = SyncEntityType.USER_TEMPLATE_STATE, idColumn = "templateId"),
+            Kept("active_workout_draft", null)
+        )
 
         /**
          * User tables in foreign-key order, with the guest rows to take.

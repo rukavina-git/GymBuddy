@@ -29,6 +29,12 @@ class UserProfileRepository @Inject constructor(
         }
     }
 
+    /** The profile key of whoever owns the open data: the account's uid, or [GUEST_UID]. */
+    val ownerUid: String get() = holder.owner ?: GUEST_UID
+
+    /** No account owns the open data (ADR 0014). */
+    val isGuest: Boolean get() = holder.owner == null
+
     suspend fun getProfile(uid: String): UserProfile? =
         holder.db.userProfileDao().getUserProfile(uid)?.let { UserProfileMapper.toDomain(it) }
 

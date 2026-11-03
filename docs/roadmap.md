@@ -76,7 +76,7 @@ roadmap-details.md §3.
 
 - [x] 6.1 Per-account local data + account switching rules (ADR 0014)
 - [x] 6.2 Guest mode: local-only use, create account / sign in merges (ADR 0014)
-- [ ] 6.3 Auth gate: dead session → "sign in again" banner, no wipe
+- [x] 6.3 Auth gate: dead session → "sign in again" banner, no wipe
 - [ ] 6.4 Body weight tracking: new table (spec change)
 - [ ] 6.5 Profile fields: experience, avatar, consent record, days per week
       (spec change, owner OK 2026-11-02)

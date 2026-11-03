@@ -2,7 +2,7 @@
 
 - [x] 01 Per-account local data (steps/01-per-account-data.md) — 4b61dce
 - [x] 02 Guest mode (steps/02-guest-mode.md) — ab07df5
-- [ ] 03 Auth gate
+- [x] 03 Auth gate (steps/03-auth-gate.md) — HASH
 - [ ] 04 Body weight
 - [ ] 05 Profile fields
 - [ ] 06 Plans + default templates
@@ -33,6 +33,12 @@
   step file.
 - 02: Profile and Settings read the uid per call (`?: "guest"`), so a
   switch can't leave them writing under the old owner.
+- 03: Firebase's own sign-out can't say why. Without an error seen first
+  (`lastFailure`), it counts as expired.
+- 03: The gate also watches the owner release (reviewer BLOCKER: logout
+  while expired left a spinner, since Firebase's uid was already null).
+- 03: Profile/Settings use `holder.owner` (via UserProfileRepository)
+  instead of Firebase's user, so an expired session isn't a guest.
 
 ## Gotchas
 - From 01 (reviewer, not fixed):
@@ -77,4 +83,23 @@
 - Step 03 should reuse `GuestMerge` for "account deleted elsewhere:
   keep as guest" (copy into the guest file is the reverse direction;
   not built).
+- From 03 (reviewer, not fixed):
+  - A deletion can show as "expired" for good: Firebase's listener can
+    beat `remember()` in the catch, and `lastFailure` is memory only
+    (lost on restart). Persist it with the owner; re-check while expired.
+  - Keep/Erase: no in-flight guard, no try/catch. A double tap or an IO
+    error crashes (`check(holder.owner == owner)` in viewModelScope).
+  - Kept rows keep their ids. If the server still has A's rows
+    (USER_DISABLED, or a console delete without AccountDataDeleter), a
+    later account's push gets FORBIDDEN per row. Re-key or limit Keep
+    to USER_NOT_FOUND.
+  - Untested: SyncScheduler → onUnauthorized, OwnerReleasingAuthSession
+    and LogoutCoordinator releasing, `probe()` with no user, keep-as-guest
+    for templates, PENDING state, tombstones left behind.
+  - ProfileViewModel.logout() calls FirebaseAuth.signOut() directly
+    (unused). Delete it.
+  - `idToken()` remembers EXPIRED for transient FirebaseAuthExceptions
+    until the next sign-in.
+  - The expired banner sits above MainContent's Scaffold; the status bar
+    inset may be doubled. Plain UI, Plan 7.4 replaces it.
 

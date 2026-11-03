@@ -52,7 +52,7 @@ class ProfileViewModel @Inject constructor(
     // guest signs in, or cancels a merge). A guest's profile is keyed
     // GUEST_UID until it merges into an account (ADR 0014).
     private val uid: String?
-        get() = FirebaseAuth.getInstance().currentUser?.uid ?: UserProfileRepository.GUEST_UID
+        get() = repository.ownerUid
 
     // Store the saved profile state for change tracking
     private var savedProfileState = ProfileUiState()
