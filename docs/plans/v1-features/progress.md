@@ -6,7 +6,7 @@
 - [x] 04 Body weight (steps/04-body-weight.md) — c60d997
 - [x] 05 Profile fields (steps/05-profile-fields.md) — 291c23b
 - [x] 06 Plans + default templates (steps/06-plans.md) — 224ea8e
-- [x] 07 Data export (steps/07-export.md) — HASH
+- [x] 07 Data export (steps/07-export.md) — 1f4f248
 - [ ] 08 CI green, PR develop → main (me)
 
 ## Deviations
