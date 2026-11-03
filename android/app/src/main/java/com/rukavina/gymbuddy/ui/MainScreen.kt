@@ -1,6 +1,29 @@
 package com.rukavina.gymbuddy.ui
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.rukavina.gymbuddy.R
+import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
+import com.rukavina.gymbuddy.ui.design.LargeTitleTopBar
+import com.rukavina.gymbuddy.ui.home.HomeScreen
+import com.rukavina.gymbuddy.ui.template.TemplateDeleteViewModel
+import com.rukavina.gymbuddy.ui.template.WorkoutTemplateFormDialog
+import com.rukavina.gymbuddy.ui.template.WorkoutTemplateViewModel
+import com.rukavina.gymbuddy.ui.template.page.TemplatePageScreen
+import com.rukavina.gymbuddy.ui.template.page.TemplatePageViewModel
+import com.rukavina.gymbuddy.ui.workout.WorkoutScreen
+import com.rukavina.gymbuddy.ui.workouts.WorkoutsScreen
+import kotlinx.coroutines.launch
 import com.rukavina.gymbuddy.ui.theme.fadeThroughIn
 import com.rukavina.gymbuddy.ui.theme.fadeThroughOut
 import com.rukavina.gymbuddy.ui.theme.sharedAxisIn
@@ -138,6 +161,35 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
     val workoutState by activeWorkoutViewModel.uiState.collectAsState()
 
     val openWorkout = { bottomNavController.navigate(NavRoutes.ActiveWorkout) { launchSingleTop = true } }
+    val workoutRunning by remember { derivedStateOf { workoutState.exercises.isNotEmpty() && !workoutState.workoutSaved } }
+    val startTemplate: (WorkoutTemplate) -> Unit = { template ->
+        // Start is hidden while a workout runs (Figma 85:10122), so there is nothing to replace.
+        if (!activeWorkoutViewModel.hasActiveWorkout()) activeWorkoutViewModel.startWorkoutFromTemplate(template)
+        openWorkout()
+    }
+    val openTemplate: (String) -> Unit = { id -> bottomNavController.navigate(NavRoutes.templatePage(id)) }
+
+    // Delete (Undo): the tombstone is written only when the snackbar goes without Undo.
+    val scope = rememberCoroutineScope()
+    val templateDeletes: TemplateDeleteViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val offerUndoDelete: (String, String) -> Unit = { id, title ->
+        scope.launch {
+            var settled = false
+            try {
+                val result = snackbar.showSnackbar(
+                    message = context.getString(R.string.template_deleted, title),
+                    actionLabel = context.getString(R.string.undo),
+                    duration = SnackbarDuration.Short,
+                )
+                settled = true
+                if (result == SnackbarResult.ActionPerformed) templateDeletes.undo(id) else templateDeletes.commit(id)
+            } finally {
+                // Main left mid-snackbar (sign-out, owner switch): keep the template.
+                if (!settled) templateDeletes.undo(id)
+            }
+        }
+    }
     // Pop the workout first so no tab saves it into its back stack.
     val leaveWorkout = {
         bottomNavController.popBackStack(NavRoutes.ActiveWorkout, inclusive = true)
@@ -163,16 +215,54 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
         ) {
             composable(NavRoutes.Home) {
                 HomeScreen(
-                    activeWorkoutViewModel = activeWorkoutViewModel,
-                    onNavigateToWorkout = openWorkout,
-                    onNavigateToTemplates = { bottomNavController.navigateToTab(NavTab.Workouts) },
-                    onNavigateToProfile = { bottomNavController.navigateToTab(NavTab.You) }
+                    workoutRunning = workoutRunning,
+                    onStartTemplate = startTemplate,
+                    onOpenTemplate = openTemplate,
+                    onAllTemplates = { bottomNavController.navigateToTab(NavTab.Workouts) },
+                    onOpenWeek = { bottomNavController.navigateToTab(NavTab.Progress) },
                 )
             }
             composable(NavRoutes.Workouts) {
-                CombinedWorkoutsScreen(
-                    activeWorkoutViewModel = activeWorkoutViewModel,
-                    onStartWorkout = openWorkout
+                val templateViewModel: WorkoutTemplateViewModel = hiltViewModel()
+                val templateState by templateViewModel.uiState.collectAsState()
+                var creating by rememberSaveable { mutableStateOf(false) }
+                WorkoutsScreen(
+                    onOpenTemplate = openTemplate,
+                    onNewTemplate = { creating = true },
+                    onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
+                )
+                // Old dialog until 05b's editor.
+                if (creating) {
+                    WorkoutTemplateFormDialog(
+                        template = null,
+                        availableExercises = templateState.availableExercises,
+                        onDismiss = { creating = false },
+                        onSave = { templateViewModel.createTemplate(it); creating = false },
+                    )
+                }
+            }
+            composable(
+                route = NavRoutes.TemplatePage,
+                arguments = listOf(
+                    navArgument(TemplatePageViewModel.ARG_TEMPLATE_ID) { type = NavType.StringType },
+                    navArgument("edit") { type = NavType.BoolType; defaultValue = false },
+                ),
+            ) { entry ->
+                TemplatePageScreen(
+                    openEditor = entry.arguments?.getBoolean("edit") ?: false,
+                    workoutRunning = workoutRunning,
+                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    onStart = startTemplate,
+                    onOpenCopy = { id, edit ->
+                        bottomNavController.navigate(NavRoutes.templatePage(id, edit)) {
+                            popUpTo(entry.destination.id) { inclusive = true }
+                        }
+                    },
+                    onDeleted = { id, title ->
+                        bottomNavController.popBackStack(entry.destination.id, inclusive = true)
+                        offerUndoDelete(id, title)
+                    },
+                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
                 )
             }
             composable(NavRoutes.Exercises) {
@@ -203,7 +293,15 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                     )
                 }
             }
-            composable(NavRoutes.Progress) { StatisticsScreen() }
+            // Old session list until the Progress tab lands (7.8).
+            composable(NavRoutes.Progress) {
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    Column {
+                        LargeTitleTopBar(title = stringResource(R.string.tab_progress))
+                        WorkoutScreen()
+                    }
+                }
+            }
             composable(NavRoutes.You) {
                 SettingsScreen(
                     bottomNavController = bottomNavController,

@@ -21,6 +21,8 @@ object NavRoutes {
     const val Profile = "profile"
     const val About = "about"
     const val ActiveWorkout = "active_workout"
+    /** Template page; edit = open the editor right away (a starter's fresh copy). */
+    const val TemplatePage = "template/{templateId}?edit={edit}"
 
     // Profile edit screens
     const val EditName = "edit_name"
@@ -43,6 +45,8 @@ object NavRoutes {
     fun setup(offerAccount: Boolean = true) = "setup?offerAccount=$offerAccount"
 
     fun createAccount(from: CreateFrom) = "create_account?from=${from.name}"
+
+    fun templatePage(templateId: String, edit: Boolean = false) = "template/$templateId?edit=$edit"
 
     fun exerciseDetailsRoute(exerciseId: String): String {
         return "exercise_details/$exerciseId"

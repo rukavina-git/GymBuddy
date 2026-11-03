@@ -6,6 +6,8 @@ import com.rukavina.gymbuddy.data.local.mapper.UserProfileMapper
 import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.model.SyncState
 import com.rukavina.gymbuddy.domain.model.UserProfile
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.Clock
 import javax.inject.Inject
 
@@ -50,6 +52,11 @@ class UserProfileRepository @Inject constructor(
 
     /** No account owns the open data (ADR 0014). */
     val isGuest: Boolean get() = holder.owner == null
+
+    /** The open owner's profile; follows owner switches (null until one exists). */
+    fun observeProfile(): Flow<UserProfile?> = holder.observe { db ->
+        db.userProfileDao().observeUserProfile(ownerUid).map { it?.let(UserProfileMapper::toDomain) }
+    }
 
     suspend fun getProfile(uid: String): UserProfile? =
         holder.db.userProfileDao().getUserProfile(uid)?.let { UserProfileMapper.toDomain(it) }

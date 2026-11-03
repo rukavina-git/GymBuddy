@@ -23,7 +23,9 @@ import com.rukavina.gymbuddy.testutil.FixedIdGenerator
 import com.rukavina.gymbuddy.testutil.MainDispatcherRule
 import com.rukavina.gymbuddy.testutil.MutableClock
 import com.rukavina.gymbuddy.testutil.testPreferencesDataStore
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -33,6 +35,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 
@@ -114,6 +117,13 @@ class ActiveWorkoutViewModelTest {
         restSeconds = restSeconds
     )
 
+    // DataStore reads hop to IO and resume on Main; cancel the scopes before
+    // MainDispatcherRule resets Main, or they land in the next test class.
+    private val created = mutableListOf<ActiveWorkoutViewModel>()
+
+    @After
+    fun cancelViewModels() = created.forEach { it.viewModelScope.cancel() }
+
     private fun buildViewModel(
         exerciseRepo: FakeExerciseRepository = FakeExerciseRepository(listOf(benchPress, plank, sprint)),
         sessionRepo: FakeWorkoutSessionRepository = FakeWorkoutSessionRepository(),
@@ -136,6 +146,7 @@ class ActiveWorkoutViewModelTest {
             draftRepository = draftRepo,
             clock = clock
         )
+        created += viewModel
         return Triple(viewModel, sessionRepo, idGenerator)
     }
 
@@ -275,6 +286,7 @@ class ActiveWorkoutViewModelTest {
             draftRepository = FakeActiveWorkoutDraftRepository(),
             clock = MutableClock()
         )
+        created += viewModel
 
         val template = WorkoutTemplate(
             id = "template-1",
@@ -497,6 +509,7 @@ class ActiveWorkoutViewModelTest {
             draftRepository = FakeActiveWorkoutDraftRepository(),
             clock = MutableClock()
         )
+        created += vmWithImperialPrefs
 
         // DataStore's read is genuine background-thread I/O, not virtual
         // time - UnconfinedTestDispatcher makes loadUserPreferences()'s

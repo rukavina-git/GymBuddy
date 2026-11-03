@@ -5,7 +5,8 @@
 - [x] 02b Workout + data components (steps/02-components.md) — 8263a47
 - [x] 03 App frame (steps/03-app-frame.md) — d69ddbd
 - [x] 04 Onboarding + auth (steps/04-onboarding-auth.md) — 6781df5
-- [ ] 05 Home + Templates
+- [x] 05a Home + Workouts tab + template page (steps/05-home-templates.md) — b28a139
+- [ ] 05b Template editor + exercise picker (steps/05-home-templates.md)
 - [ ] 06 Active workout
 - [ ] 07 Exercise page + create
 - [ ] 08 Progress tab
@@ -126,7 +127,54 @@
 - 04 Amendment 1: Settings guest entries are "Create account" and
   "Sign in"; ADR 0014 got an amendment note.
 
+- 05a: Start sheet has no "+ Empty workout": the workout can't add
+  exercises until 7.6. Add it there.
+- 05a: Workouts tab ⋯ has one item, "Hidden templates" (Figma doesn't
+  say what ⋯ holds). Search is a plain title filter (typo search is 05b).
+- 05a: Start sheet "Your templates" = templates you made or have done;
+  the Workouts tab splits by source (Figma shows a done starter under
+  Your templates on the sheet, under Starter plans on the tab).
+- 05a: "about N min" = average of finished sessions, rounded to 5 min.
+  Week strip is Monday first.
+- 05a: Delete waits for the snackbar: `PendingTemplateDeletes` hides
+  the id, `TemplateDeleteViewModel` writes the tombstone when the
+  snackbar is dismissed without Undo (the repository has no undelete).
+- 05a: The pencil and "+ New template" still open the old dialog, now in
+  `WorkoutTemplateFormDialog.kt` (renamed from WorkoutTemplateScreen.kt).
+  A starter's pencil makes "<name> (copy)" first and opens it with
+  `edit=true`.
+- 05a: Progress tab shows the old `WorkoutScreen` under a large title
+  until 7.8. StatisticsScreen deleted; SessionsScreen (unused) left for 7.8.
+- 05a: `UserProfileDao.observeUserProfile` + `UserProfileRepository.
+  observeProfile()` added (query only, no schema change).
+- 05a (test-only): the cross-test Main flake was the test DataStore on
+  Dispatchers.IO. `testPreferencesDataStore()` now runs on an Unconfined
+  scope; ActiveWorkoutViewModelTest also cancels its VMs in @After.
+  Full suite green 3 runs in a row.
+
 ## Gotchas
+- From 05a (reviewer, not fixed):
+  - `TemplateDeleteViewModel.commit` has no catch: a DB/outbox error
+    crashes the app. Catch, put the template back, show a message.
+  - The Undo wait lives in MainContent's `rememberCoroutineScope`; a
+    rotation during the snackbar cancels it and the delete is undone
+    (nothing lost, but the delete is dropped). Move it to a VM.
+  - `workoutRunning` (exercises not empty) differs from
+    `hasActiveWorkout()`; matters once 7.6 adds empty workouts.
+  - Template page "gone → back" can race the Deleted event; if it wins,
+    the id stays pending (hidden, never deleted) until restart.
+  - Copy names are checked against visible templates only.
+  - Old edit dialog errors (`WorkoutTemplateViewModel.errorMessage`)
+    are never shown; 05b replaces it.
+  - Home's `today` updates only when a source emits (stale after
+    midnight until something changes).
+  - No tests for commit/copy failure paths.
+- Use (05b): `TemplateSources` (fake in tests: `FakeTemplateSources`,
+  `TemplateFixtures`), `TemplateLine(s)`, text helpers in
+  `ui/template/TemplateText.kt` (`targetText`, `clock`, `relativeDay`,
+  `joinDot`). Route `NavRoutes.templatePage(id, edit)`; 05b's editor
+  should take over the `edit=true` path and the Workouts "+" action.
+  Strings in `res/values/strings_templates.xml`.
 - From 04 Amendment 1 (reviewer, not fixed):
   - Consent "Not now" (and back) stay tappable while Agree is running;
     leaving cancels the VM and `pendingConsentAt` stays parked (also on
