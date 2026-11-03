@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.IOException
 import javax.inject.Inject
@@ -51,7 +52,8 @@ interface AuthClient {
     /** Ends the probe; [delete] removes the account the probe just created. */
     suspend fun endProbe(delete: Boolean)
 
-    suspend fun signInWithGoogle(idToken: String)
+    /** True when Firebase made a new account (the create flow then runs setup). */
+    suspend fun signInWithGoogle(idToken: String): Boolean
     suspend fun signInWithEmail(email: String, password: String)
     suspend fun createWithEmail(email: String, password: String)
     suspend fun sendPasswordReset(email: String)
@@ -80,9 +82,9 @@ class FirebaseAuthClient @Inject constructor(
         probe.signOut()
     }
 
-    override suspend fun signInWithGoogle(idToken: String) = mapped {
-        auth.signInWithCredential(GoogleAuthProvider.getCredential(idToken, null)).await()
-        Unit
+    override suspend fun signInWithGoogle(idToken: String): Boolean = mapped {
+        val result = auth.signInWithCredential(GoogleAuthProvider.getCredential(idToken, null)).await()
+        result.additionalUserInfo?.isNewUser == true
     }
 
     override suspend fun signInWithEmail(email: String, password: String) = mapped {
@@ -103,6 +105,8 @@ class FirebaseAuthClient @Inject constructor(
     private suspend fun <T> mapped(block: suspend () -> T): T = try {
         block()
     } catch (e: AuthException) {
+        throw e
+    } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
         throw AuthException(classifyAuthError(e), e)

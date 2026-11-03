@@ -1,13 +1,8 @@
 package com.rukavina.gymbuddy.ui.auth
 
-import androidx.lifecycle.SavedStateHandle
-import com.rukavina.gymbuddy.data.auth.AuthClient
 import com.rukavina.gymbuddy.data.auth.AuthError
-import com.rukavina.gymbuddy.data.auth.AuthException
-import com.rukavina.gymbuddy.data.auth.GoogleProbe
 import com.rukavina.gymbuddy.data.auth.SignInSupport
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
-import com.rukavina.gymbuddy.data.sync.LocalDataCounts
 import com.rukavina.gymbuddy.testutil.MainDispatcherRule
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import kotlinx.coroutines.CoroutineScope
@@ -27,9 +22,6 @@ import org.junit.Rule
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.cancel
 import org.junit.Test
-import java.time.Clock
-import java.time.Instant
-import java.time.ZoneOffset
 
 class SignInViewModelTest {
 
@@ -38,7 +30,6 @@ class SignInViewModelTest {
     @get:Rule
     val main = MainDispatcherRule(dispatcher)
 
-    private val clock = Clock.fixed(Instant.ofEpochMilli(1_000L), ZoneOffset.UTC)
     // DataStore on an unconfined scope: writes land before the next line runs.
     private val preferences = AppPreferencesRepository(
         PreferenceDataStoreFactory.create(scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())) {
@@ -50,10 +41,7 @@ class SignInViewModelTest {
 
     private val created = mutableListOf<SignInViewModel>()
 
-    private fun vm(mode: SignInMode = SignInMode.SIGN_IN) = SignInViewModel(
-        SavedStateHandle(mapOf(SignInViewModel.ARG_MODE to mode.name)),
-        client, support, preferences, clock,
-    ).also { created += it }
+    private fun vm() = SignInViewModel(client, support, preferences).also { created += it }
 
     // init's DataStore read can still be in flight when a test ends; left
     // alone it resumes on Main after resetMain and fails a later test.
@@ -101,7 +89,7 @@ class SignInViewModelTest {
         vm.onPassword("nope")
         vm.submitEmail()
         assertEquals(FormError.WRONG_CREDENTIALS, vm.state.value.error)
-        assertFalse(vm.state.value.busy)
+        assertNull(vm.state.value.busy)
     }
 
     @Test
@@ -119,65 +107,6 @@ class SignInViewModelTest {
         assertFalse(vm.state.value.offline)
         assertEquals(listOf("email a@example.com", "email a@example.com"), client.calls)
         assertEquals(listOf(SignInEvent.Done), events)
-    }
-
-    @Test
-    fun `create without the consent box shows the reason and does nothing`() = runTest(dispatcher) {
-        val vm = vm(SignInMode.CREATE)
-        vm.onEmail("a@example.com")
-        vm.onPassword("longenough")
-        vm.submitEmail()
-        assertTrue(vm.state.value.consentMissing)
-        assertFalse(vm.canStartGoogle())
-        assertTrue(client.calls.isEmpty())
-
-        vm.onConsent(true)
-        assertFalse(vm.state.value.consentMissing)
-    }
-
-    @Test
-    fun `create needs 8 characters`() = runTest(dispatcher) {
-        val vm = vm(SignInMode.CREATE)
-        vm.onConsent(true)
-        vm.onEmail("a@example.com")
-        vm.onPassword("short")
-        vm.submitEmail()
-        assertEquals(FormError.WEAK_PASSWORD, vm.state.value.error)
-        assertTrue(client.calls.isEmpty())
-    }
-
-    @Test
-    fun `create parks the consent before the account appears`() = runTest(dispatcher) {
-        client.onCall = { assertEquals(1_000L, preferences.pendingConsentAt.first()) }
-        val vm = vm(SignInMode.CREATE)
-        val events = vm.collectEvents(backgroundScope)
-        vm.onConsent(true)
-        vm.onEmail("a@example.com")
-        vm.onPassword("longenough")
-        vm.submitEmail()
-
-        assertEquals(listOf("create a@example.com"), client.calls)
-        assertEquals(listOf(SignInEvent.Done), events)
-        assertEquals(1_000L, preferences.pendingConsentAt.first())
-    }
-
-    @Test
-    fun `a failed create drops the pending consent`() = runTest(dispatcher) {
-        client.failWith = AuthError.EMAIL_IN_USE
-        val vm = vm(SignInMode.CREATE)
-        vm.onConsent(true)
-        vm.onEmail("a@example.com")
-        vm.onPassword("longenough")
-        vm.submitEmail()
-
-        assertEquals(FormError.EMAIL_IN_USE, vm.state.value.error)
-        assertNull(preferences.pendingConsentAt.first())
-    }
-
-    @Test
-    fun `create shows what moves into the account`() = runTest(dispatcher) {
-        support.counts = LocalDataCounts(14, 3, 2)
-        assertEquals(LocalDataCounts(14, 3, 2), vm(SignInMode.CREATE).state.value.counts)
     }
 
     @Test
@@ -213,14 +142,6 @@ class SignInViewModelTest {
         vm.noAccountCreate()
         assertEquals(listOf("probe token", "endProbe(true)"), client.calls)
         assertEquals(listOf(SignInEvent.OpenCreateAccount), events)
-    }
-
-    @Test
-    fun `google in create mode skips the probe`() = runTest(dispatcher) {
-        val vm = vm(SignInMode.CREATE)
-        vm.onConsent(true)
-        vm.onGoogleToken("token", "a@gmail.com")
-        assertEquals(listOf("google token"), client.calls)
     }
 
     @Test
@@ -282,6 +203,16 @@ class SignInViewModelTest {
     }
 
     @Test
+    fun `google spins its button and blocks a second sheet`() = runTest(dispatcher) {
+        val vm = vm()
+        assertTrue(vm.onGoogleStarted())
+        assertEquals(SignInAction.GOOGLE, vm.state.value.busy)
+        assertFalse(vm.onGoogleStarted())
+        vm.onGoogleCancelled()
+        assertNull(vm.state.value.busy)
+    }
+
+    @Test
     fun `google sheet offline shows the box and Retry opens the sheet again`() = runTest(dispatcher) {
         val vm = vm()
         val events = vm.collectEvents(backgroundScope)
@@ -291,38 +222,9 @@ class SignInViewModelTest {
         assertEquals(listOf(SignInEvent.PickAnotherGoogleAccount), events)
     }
 
-    private class FakeAuthClient : AuthClient {
-        val calls = mutableListOf<String>()
-        var failWith: AuthError? = null
-        var probeIsNew = false
-        var onCall: suspend () -> Unit = {}
-
-        private suspend fun call(name: String) {
-            calls += name
-            onCall()
-            failWith?.let { throw AuthException(it) }
-        }
-
-        override suspend fun probeGoogle(idToken: String): GoogleProbe {
-            call("probe $idToken")
-            return GoogleProbe("a@gmail.com", probeIsNew)
-        }
-
-        override suspend fun endProbe(delete: Boolean) {
-            calls += "endProbe($delete)"
-        }
-
-        override suspend fun signInWithGoogle(idToken: String) = call("google $idToken")
-        override suspend fun signInWithEmail(email: String, password: String) = call("email $email")
-        override suspend fun createWithEmail(email: String, password: String) = call("create $email")
-        override suspend fun sendPasswordReset(email: String) = call("reset $email")
-    }
-
     private class FakeSignInSupport : SignInSupport {
         override var ownerEmail: String? = null
         var pending = 0
-        var counts = LocalDataCounts(0, 0, 0)
         override suspend fun pendingChanges() = pending
-        override suspend fun openCounts() = counts
     }
 }

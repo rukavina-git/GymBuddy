@@ -21,7 +21,10 @@ import com.rukavina.gymbuddy.data.sync.LocalDataCounts
 import com.rukavina.gymbuddy.domain.model.ExperienceLevel
 import com.rukavina.gymbuddy.domain.model.FitnessGoal
 import com.rukavina.gymbuddy.ui.auth.SignInContent
-import com.rukavina.gymbuddy.ui.auth.SignInMode
+import com.rukavina.gymbuddy.ui.auth.CreateAccountContent
+import com.rukavina.gymbuddy.ui.auth.CreateAccountUiState
+import com.rukavina.gymbuddy.ui.auth.CreateFrom
+import com.rukavina.gymbuddy.ui.auth.CreateStep
 import com.rukavina.gymbuddy.ui.auth.SignInUiState
 import com.rukavina.gymbuddy.ui.guest.GuestMergeDialogs
 import com.rukavina.gymbuddy.ui.guest.SessionExpiredBanner
@@ -42,14 +45,21 @@ class OnboardingUiTest {
     @get:Rule val rule = createComposeRule()
 
     @Test
-    fun `welcome routes to setup and to sign-in`() {
+    fun `welcome puts create account first, guest last`() {
         val taps = mutableListOf<String>()
         rule.setContent {
-            GymBuddyTheme { WelcomeScreen(onGetStarted = { taps += "setup" }, onHaveAccount = { taps += "signIn" }) }
+            GymBuddyTheme {
+                WelcomeScreen(
+                    onCreateAccount = { taps += "create" },
+                    onHaveAccount = { taps += "signIn" },
+                    onContinueWithout = { taps += "guest" },
+                )
+            }
         }
-        rule.onNodeWithText("Get started").performClick()
+        rule.onNodeWithText("Create account").performClick()
         rule.onNodeWithText("I have an account").performClick()
-        assertEquals(listOf("setup", "signIn"), taps)
+        rule.onNodeWithText("Continue without account").performClick()
+        assertEquals(listOf("create", "signIn", "guest"), taps)
     }
 
     @Test
@@ -65,7 +75,7 @@ class OnboardingUiTest {
                 )
             }
         }
-        rule.onNodeWithContentDescription("Step 1 of 4").assertIsDisplayed()
+        rule.onNodeWithContentDescription("Step 1 of 5").assertIsDisplayed() // guests: 4 questions + account step
         rule.onNodeWithText("Some experience").performClick()
         assertEquals(listOf(ExperienceLevel.SOME), chosen)
         rule.onNode(hasClickAction() and hasText("Some experience", substring = true))
@@ -100,20 +110,26 @@ class OnboardingUiTest {
     }
 
     @Test
-    fun `create account shows what moves and why the box is needed`() {
+    fun `create account steps - method, then consent with agree and not now`() {
+        var state by mutableStateOf(CreateAccountUiState(from = CreateFrom.SETUP))
+        val taps = mutableListOf<String>()
         rule.setContent {
             GymBuddyTheme {
-                SignInContent(
-                    state = SignInUiState(mode = SignInMode.CREATE, counts = LocalDataCounts(14, 3, 2), consentMissing = true),
-                    onBack = {}, onGoogle = {}, onEmail = {}, onPassword = {}, onToggleShow = {},
-                    onConsent = {}, onWhy = {}, onSubmit = {}, onForgot = {}, onRetry = {},
+                CreateAccountContent(
+                    state = state, onBack = {}, onGoogle = { taps += "google" }, onChooseEmail = { taps += "email" },
+                    onSignIn = {}, onEmail = {}, onPassword = {}, onToggleShow = {}, onContinue = {},
+                    onAgree = { taps += "agree" }, onNotNow = { taps += "notNow" }, onRetry = {},
                 )
             }
         }
-        rule.onNodeWithText("Your 14 workouts, 3 templates and 2 exercises move into the account. Nothing on this phone is removed.")
-            .assertIsDisplayed()
-        rule.onNodeWithText("Tick this box to back up your workouts. Without it, keep using GymBuddy on this phone.")
-            .assertIsDisplayed()
+        rule.onNodeWithText("Create your account").assertIsDisplayed()
+        rule.onNodeWithText("Continue with Google").performClick()
+        rule.onNodeWithText("Continue with email").performClick()
+        state = state.copy(step = CreateStep.CONSENT)
+        rule.onNodeWithText("Keep a copy on our servers?").assertIsDisplayed()
+        rule.onNodeWithText("Agree and create account").performClick()
+        rule.onNodeWithText("Not now").performClick()
+        assertEquals(listOf("google", "email", "agree", "notNow"), taps)
     }
 
     @Test
@@ -124,7 +140,7 @@ class OnboardingUiTest {
                 SignInContent(
                     state = SignInUiState(error = com.rukavina.gymbuddy.ui.auth.FormError.WRONG_CREDENTIALS, offline = true),
                     onBack = {}, onGoogle = {}, onEmail = {}, onPassword = {}, onToggleShow = {},
-                    onConsent = {}, onWhy = {}, onSubmit = {}, onForgot = {}, onRetry = { retried = true },
+                    onSubmit = {}, onForgot = {}, onRetry = { retried = true }, onCreateAccount = {},
                     snackbar = SnackbarHostState(),
                 )
             }

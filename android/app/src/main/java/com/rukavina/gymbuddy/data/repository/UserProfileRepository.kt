@@ -29,6 +29,22 @@ class UserProfileRepository @Inject constructor(
         }
     }
 
+    /**
+     * Read-modify-write of [uid]'s profile in one transaction, so two
+     * writers (setup's answers, the consent) can't overwrite each other's
+     * fields. [create] makes the row when there is none.
+     */
+    suspend fun updateProfile(uid: String, create: () -> UserProfile, change: (UserProfile) -> UserProfile) {
+        outbox.record(SyncEntityType.USER_PROFILE, uid) { db ->
+            val dao = db.userProfileDao()
+            val current = dao.getUserProfile(uid)?.let { UserProfileMapper.toDomain(it) } ?: create()
+            val revision = dao.getRevision(uid) ?: 0
+            val entity = UserProfileMapper.toEntity(change(current))
+                .copy(updatedAt = clock.millis(), revision = revision, syncState = SyncState.PENDING)
+            dao.insertUserProfile(entity)
+        }
+    }
+
     /** The profile key of whoever owns the open data: the account's uid, or [GUEST_UID]. */
     val ownerUid: String get() = holder.owner ?: GUEST_UID
 

@@ -22,6 +22,7 @@
     <string name="cd_backspace">Delete last digit</string>
     <string name="keypad_cancel">Cancel</string>
     <string name="keypad_next">Next</string>
+    <string name="state_working">Working</string>
     <string name="state_set_done">Done</string>
     <string name="state_set_upcoming">Not done yet</string>
     <string name="week_day_rest">%1$s, no workout</string>

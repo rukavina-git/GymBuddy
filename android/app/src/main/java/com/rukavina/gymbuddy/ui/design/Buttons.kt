@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -22,8 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import com.rukavina.gymbuddy.R
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -39,6 +44,8 @@ enum class ButtonSize(internal val height: Dp, internal val icon: Dp, internal v
     /** 72: Done, workout only. */
     Large(72.dp, 24.dp, true),
     Medium(56.dp, 24.dp, true),
+    /** 48: form actions under 56dp fields (sign-in, create account; Figma R18). */
+    Form(48.dp, 20.dp, true),
     /** 40: top bar Save, small secondary/outline. */
     Small(40.dp, 20.dp, false),
 }
@@ -52,14 +59,16 @@ fun PrimaryButton(
     size: ButtonSize = ButtonSize.Medium,
     enabled: Boolean = true,
     @DrawableRes icon: Int? = null,
+    loading: Boolean = false,
 ) {
     val cs = MaterialTheme.colorScheme
     val c = GymBuddyTheme.colors
     PillButton(
         text = text, onClick = onClick, modifier = modifier, size = size, enabled = enabled, icon = icon,
-        container = if (enabled) cs.primary else cs.surfaceContainerHigh,
+        container = if (enabled || loading) cs.primary else cs.surfaceContainerHigh,
         pressedContainer = c.limePressed,
-        content = if (enabled) cs.onPrimary else c.disabled,
+        content = if (enabled || loading) cs.onPrimary else c.disabled,
+        loading = loading,
     )
 }
 
@@ -91,6 +100,7 @@ fun OutlineButton(
     size: ButtonSize = ButtonSize.Medium,
     enabled: Boolean = true,
     @DrawableRes icon: Int? = null,
+    loading: Boolean = false,
 ) {
     require(size != ButtonSize.Large) { "Outline is 56 or 40" }
     val cs = MaterialTheme.colorScheme
@@ -98,8 +108,9 @@ fun OutlineButton(
     PillButton(
         text = text, onClick = onClick, modifier = modifier, size = size, enabled = enabled, icon = icon,
         container = Color.Transparent,
-        content = if (enabled) cs.onSurface else disabled,
-        border = BorderStroke(GymBuddyTheme.dimens.strokeOutline, if (enabled) cs.outline else disabled),
+        content = if (enabled || loading) cs.onSurface else disabled,
+        border = BorderStroke(GymBuddyTheme.dimens.strokeOutline, if (enabled || loading) cs.outline else disabled),
+        loading = loading,
     )
 }
 
@@ -212,13 +223,15 @@ private fun PillButton(
     pressedContainer: Color = container,
     border: BorderStroke? = null,
     horizontalPadding: Dp? = null,
+    loading: Boolean = false,
 ) {
     val d = GymBuddyTheme.dimens
+    val working = stringResource(R.string.state_working)
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     Surface(
         onClick = onClick,
-        enabled = enabled,
+        enabled = enabled && !loading,
         shape = FullShape,
         color = if (pressed) pressedContainer else container,
         contentColor = content,
@@ -227,7 +240,10 @@ private fun PillButton(
         modifier = modifier
             .pressScale(interaction)
             .focusRing(interaction, FullShape)
-            .semantics { role = Role.Button },
+            .semantics {
+                role = Role.Button
+                if (loading) stateDescription = working
+            },
     ) {
         val h = horizontalPadding ?: if (size.wide) d.section else d.group
         Row(
@@ -237,8 +253,17 @@ private fun PillButton(
             horizontalArrangement = Arrangement.spacedBy(d.stackTight, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (icon != null) Icon(painterResource(icon), null, Modifier.size(size.icon))
-            Text(text, style = MaterialTheme.typography.labelLarge)
+            if (loading) {
+                // The label stays for TalkBack; the spinner replaces it on screen.
+                CircularProgressIndicator(
+                    color = content,
+                    strokeWidth = d.strokeEmphasis,
+                    modifier = Modifier.size(size.icon).semantics { contentDescription = text },
+                )
+            } else {
+                if (icon != null) Icon(painterResource(icon), null, Modifier.size(size.icon))
+                Text(text, style = MaterialTheme.typography.labelLarge)
+            }
         }
     }
 }

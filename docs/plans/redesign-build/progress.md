@@ -106,7 +106,39 @@
   over a 3-button bar). Welcome line breaks per sentence, not by width
   (Figma's break gave an orphan on a 384dp phone).
 
+- 04 Amendment 1 (account first, owner 2026-11-03): Figma R18-1…R18-7
+  locked (R16-1/4/7/8 removed). Welcome = Create account / I have an
+  account / Continue without account. Create account is its own route
+  (`create_account?from=`) with three steps in one ViewModel
+  (METHOD → EMAIL → CONSENT); Google's token waits for Agree. Setup step
+  5 is that route with from=SETUP, answer passed back via savedStateHandle;
+  an existing Google account from step 5 goes straight to Main (setup
+  would overwrite its plan). SignInViewModel is sign-in only, with a
+  busy `SignInAction` for spinners. `ButtonSize.Form` (48dp) and a
+  `loading` spinner on Primary/Outline buttons. No repeat-password field.
+- 04 Amendment 1: profile edits from setup and ConsentRecorder go through
+  `UserProfileRepository.updateProfile` (read + write in one transaction),
+  so neither overwrites the other's fields. Setup's finish waits up to 5s
+  for the account's file; on timeout it saves nothing and Let's go works
+  again.
+- 04 Amendment 1: Settings guest entries are "Create account" and
+  "Sign in"; ADR 0014 got an amendment note.
+
 ## Gotchas
+- From 04 Amendment 1 (reviewer, not fixed):
+  - Consent "Not now" (and back) stay tappable while Agree is running;
+    leaving cancels the VM and `pendingConsentAt` stays parked (also on
+    process death). Same family as the stale-consent note below: ignore
+    Not now/back while busy and clear the pending value unless created.
+  - `CreateAccountViewModel`: `setLastSignInEmail` after createWithEmail
+    is outside the catch; a DataStore IOException would crash.
+  - Consent "Not now" from Welcome/Sign in goes to setup as a guest, and
+    setup then offers the account step again (by design? confirm).
+  - New account from Welcome: `popUpTo(Welcome)` isn't inclusive, so back
+    from the first setup question shows Welcome to a signed-in user.
+  - `afterAccount`'s `insideMain` checks the whole back stack.
+  - Google Password Manager offers to save the password on the email
+    step's Continue, before the account exists.
 - From 04 (reviewer, not fixed):
   - Pending consent can go stale (Add fails after Asking, or process
     death before AuthGate) and later land on another account at a

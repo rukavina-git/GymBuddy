@@ -1,6 +1,5 @@
 package com.rukavina.gymbuddy.ui.auth
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rukavina.gymbuddy.data.auth.AuthClient
@@ -8,7 +7,6 @@ import com.rukavina.gymbuddy.data.auth.AuthError
 import com.rukavina.gymbuddy.data.auth.AuthException
 import com.rukavina.gymbuddy.data.auth.SignInSupport
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
-import com.rukavina.gymbuddy.data.sync.LocalDataCounts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,14 +17,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Clock
 import javax.inject.Inject
-
-/** "Welcome back" (I have an account) or "Back up your workouts" (create account). */
-enum class SignInMode { SIGN_IN, CREATE }
 
 /** The line under the form. Wrong email and wrong password read the same (enumeration protection). */
 enum class FormError { EMPTY, WRONG_CREDENTIALS, INVALID_EMAIL, WEAK_PASSWORD, EMAIL_IN_USE, NEED_EMAIL_FOR_RESET, OTHER }
+
+/** Which button shows the spinner while Firebase answers. */
+enum class SignInAction { GOOGLE, EMAIL, RESET }
 
 sealed interface SignInDialog {
     /** The Google account has no GymBuddy account; the probe made one, not yet kept. */
@@ -34,30 +31,22 @@ sealed interface SignInDialog {
 
     /** Another account's changes haven't backed up (Figma "Changes from another account"). */
     data class OtherAccount(val ownerEmail: String, val newEmail: String, val changes: Int) : SignInDialog
-
-    /** "Why?" next to the consent box. */
-    data object WhyConsent : SignInDialog
 }
 
 data class SignInUiState(
-    val mode: SignInMode = SignInMode.SIGN_IN,
     val email: String = "",
     val password: String = "",
     val showPassword: Boolean = false,
-    val consent: Boolean = false,
-    /** Tapped create without the box: the reason shows under it. */
-    val consentMissing: Boolean = false,
-    /** What moves into the new account (create mode). */
-    val counts: LocalDataCounts? = null,
     val error: FormError? = null,
     /** "No connection. Signing in needs internet." with Retry. */
     val offline: Boolean = false,
-    val busy: Boolean = false,
+    /** The running action, or null. Everything is disabled while one runs. */
+    val busy: SignInAction? = null,
     val dialog: SignInDialog? = null,
 )
 
 sealed interface SignInEvent {
-    /** Signed in or created: on to Main. */
+    /** Signed in: on to Main. */
     data object Done : SignInEvent
 
     /** "Create account" from "No account for this email yet". */
@@ -70,40 +59,30 @@ sealed interface SignInEvent {
 }
 
 /**
- * One screen for sign-in and create account (Figma 114:20520, Plan 7
- * step 04). Google's sheet runs in the UI (it needs an Activity) and
- * hands the token over with [onGoogleToken].
+ * "Welcome back" (Figma R18-2). Google's sheet runs in the UI (it needs
+ * an Activity) and hands the token over with [onGoogleToken]. Creating
+ * an account is CreateAccountViewModel's job.
  */
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    savedState: SavedStateHandle,
     private val client: AuthClient,
     private val support: SignInSupport,
     private val preferences: AppPreferencesRepository,
-    private val clock: Clock,
 ) : ViewModel() {
 
-    private val mode = savedState.get<String>(ARG_MODE)?.let { runCatching { SignInMode.valueOf(it) }.getOrNull() }
-        ?: SignInMode.SIGN_IN
-
-    private val _state = MutableStateFlow(SignInUiState(mode = mode))
+    private val _state = MutableStateFlow(SignInUiState())
     val state: StateFlow<SignInUiState> = _state.asStateFlow()
 
     private val _events = MutableSharedFlow<SignInEvent>(extraBufferCapacity = 4)
     val events: SharedFlow<SignInEvent> = _events.asSharedFlow()
 
-    /** What Retry and "Continue as …" run again. */
-    private var pending: (suspend () -> Unit)? = null
+    /** What Retry and "Continue as …" run again, with the button it spins. */
+    private var pending: Pair<SignInAction, suspend () -> Unit>? = null
 
     init {
         viewModelScope.launch {
-            if (mode == SignInMode.SIGN_IN) {
-                preferences.lastSignInEmail.first()?.let { last ->
-                    _state.update { if (it.email.isEmpty()) it.copy(email = last) else it }
-                }
-            } else {
-                val counts = runCatching { support.openCounts() }.getOrNull()
-                _state.update { it.copy(counts = counts) }
+            preferences.lastSignInEmail.first()?.let { last ->
+                _state.update { if (it.email.isEmpty()) it.copy(email = last) else it }
             }
         }
     }
@@ -111,33 +90,27 @@ class SignInViewModel @Inject constructor(
     fun onEmail(value: String) = _state.update { it.copy(email = value.trim(), error = null) }
     fun onPassword(value: String) = _state.update { it.copy(password = value, error = null) }
     fun toggleShowPassword() = _state.update { it.copy(showPassword = !it.showPassword) }
-    fun onConsent(checked: Boolean) = _state.update { it.copy(consent = checked, consentMissing = false) }
-    fun showWhy() = _state.update { it.copy(dialog = SignInDialog.WhyConsent) }
     fun dismissDialog() = _state.update { it.copy(dialog = null) }
 
-    /** Create mode needs the box before Google's sheet opens. */
-    fun canStartGoogle(): Boolean {
-        if (mode == SignInMode.CREATE && !_state.value.consent) {
-            _state.update { it.copy(consentMissing = true) }
-            return false
-        }
+    /** Google's sheet is about to open: spin the Google button, block a second tap. */
+    fun onGoogleStarted(): Boolean {
+        if (_state.value.busy != null) return false
+        _state.update { it.copy(busy = SignInAction.GOOGLE, error = null, offline = false) }
         return true
     }
+
+    /** The sheet closed without a token. */
+    fun onGoogleCancelled() = _state.update { it.copy(busy = null) }
 
     /** Google's sheet failed for a reason other than the user closing it. */
     fun onGoogleFailed(offline: Boolean) {
         if (offline) pending = null
-        _state.update { if (offline) it.copy(offline = true) else it.copy(error = FormError.OTHER) }
+        _state.update { (if (offline) it.copy(offline = true) else it.copy(error = FormError.OTHER)).copy(busy = null) }
     }
 
     fun onGoogleToken(idToken: String, email: String?) {
-        if (!canStartGoogle()) return
-        val action: suspend () -> Unit = if (mode == SignInMode.CREATE) {
-            { createWithGoogle(idToken) }
-        } else {
-            { signInWithGoogle(idToken) }
-        }
-        start(email, action)
+        _state.update { it.copy(busy = null) }
+        start(email, SignInAction.GOOGLE) { signInWithGoogle(idToken) }
     }
 
     fun submitEmail() {
@@ -146,19 +119,7 @@ class SignInViewModel @Inject constructor(
             _state.update { it.copy(error = FormError.EMPTY) }
             return
         }
-        if (mode == SignInMode.CREATE) {
-            if (!s.consent) {
-                _state.update { it.copy(consentMissing = true) }
-                return
-            }
-            if (s.password.length < MIN_PASSWORD) {
-                _state.update { it.copy(error = FormError.WEAK_PASSWORD) }
-                return
-            }
-            start(s.email) { createWithEmail(s.email, s.password) }
-        } else {
-            start(s.email) { signInWithEmail(s.email, s.password) }
-        }
+        start(s.email, SignInAction.EMAIL) { signInWithEmail(s.email, s.password) }
     }
 
     fun forgotPassword() {
@@ -167,7 +128,7 @@ class SignInViewModel @Inject constructor(
             _state.update { it.copy(error = FormError.NEED_EMAIL_FOR_RESET) }
             return
         }
-        run({
+        run(SignInAction.RESET) {
             try {
                 client.sendPasswordReset(email)
             } catch (e: AuthException) {
@@ -175,20 +136,20 @@ class SignInViewModel @Inject constructor(
                 // Unknown address or not: the answer is the same.
             }
             _events.emit(SignInEvent.ResetSent(email))
-        })
+        }
     }
 
     fun retry() {
         _state.update { it.copy(offline = false) }
         val action = pending
         // Google's sheet itself failed offline: open it again.
-        if (action == null) _events.tryEmit(SignInEvent.PickAnotherGoogleAccount) else run(action)
+        if (action == null) _events.tryEmit(SignInEvent.PickAnotherGoogleAccount) else run(action.first, action.second)
     }
 
     /** "Continue as …" on the other-account question. */
     fun continueAsNew() {
         _state.update { it.copy(dialog = null) }
-        pending?.let { run(it) }
+        pending?.let { run(it.first, it.second) }
     }
 
     /** "Sign in as … instead": back to the form with the old account's email. */
@@ -216,8 +177,8 @@ class SignInViewModel @Inject constructor(
      * Asks first when another account's changes are still waiting on this
      * phone (they stay apart and back up when that account returns).
      */
-    private fun start(newEmail: String?, action: suspend () -> Unit) {
-        pending = action
+    private fun start(newEmail: String?, action: SignInAction, block: suspend () -> Unit) {
+        pending = action to block
         viewModelScope.launch {
             val owner = support.ownerEmail
             val changes = if (owner != null && newEmail != null && !owner.equals(newEmail, ignoreCase = true)) {
@@ -226,18 +187,18 @@ class SignInViewModel @Inject constructor(
             if (owner != null && newEmail != null && changes > 0) {
                 _state.update { it.copy(dialog = SignInDialog.OtherAccount(owner, newEmail, changes)) }
             } else {
-                run(action)
+                run(action, block)
             }
         }
     }
 
-    private fun run(action: suspend () -> Unit) {
-        if (_state.value.busy) return
-        pending = action
-        _state.update { it.copy(busy = true, error = null, offline = false) }
+    private fun run(action: SignInAction, block: suspend () -> Unit) {
+        if (_state.value.busy != null) return
+        pending = action to block
+        _state.update { it.copy(busy = action, error = null, offline = false) }
         viewModelScope.launch {
             try {
-                action()
+                block()
             } catch (e: AuthException) {
                 _state.update {
                     when (e.error) {
@@ -250,7 +211,7 @@ class SignInViewModel @Inject constructor(
                     }
                 }
             } finally {
-                _state.update { it.copy(busy = false) }
+                _state.update { it.copy(busy = null) }
             }
         }
     }
@@ -272,36 +233,9 @@ class SignInViewModel @Inject constructor(
         _events.emit(SignInEvent.Done)
     }
 
-    private suspend fun createWithGoogle(idToken: String) = withConsent { client.signInWithGoogle(idToken) }
-
     private suspend fun signInWithEmail(email: String, password: String) {
         client.signInWithEmail(email, password)
         preferences.setLastSignInEmail(email)
         _events.emit(SignInEvent.Done)
-    }
-
-    private suspend fun createWithEmail(email: String, password: String) = withConsent {
-        client.createWithEmail(email, password)
-        preferences.setLastSignInEmail(email)
-    }
-
-    /**
-     * The consent must be pending before the account appears: AuthGate
-     * hands it to ConsentRecorder on sign-in.
-     */
-    private suspend fun withConsent(signIn: suspend () -> Unit) {
-        preferences.setPendingConsentAt(clock.millis())
-        try {
-            signIn()
-        } catch (e: Exception) {
-            preferences.setPendingConsentAt(null)
-            throw e
-        }
-        _events.emit(SignInEvent.Done)
-    }
-
-    companion object {
-        const val ARG_MODE = "mode"
-        const val MIN_PASSWORD = 8
     }
 }

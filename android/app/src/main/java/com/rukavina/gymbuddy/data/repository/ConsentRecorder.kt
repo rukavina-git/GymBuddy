@@ -31,8 +31,9 @@ class ConsentRecorder @Inject constructor(
     suspend fun applyTo(uid: String) {
         val at = preferences.pendingConsentAt.first() ?: return
         if (profiles.isGuest || profiles.ownerUid != uid) return
-        val profile = profiles.getProfile(uid) ?: UserProfile(uid = uid, name = "", email = "", joinedDate = clock.millis())
-        profiles.saveProfile(profile.copy(healthDataConsentVersion = CONSENT_VERSION, healthDataConsentAt = at))
+        profiles.updateProfile(uid, { UserProfile(uid = uid, name = "", email = "", joinedDate = clock.millis()) }) {
+            it.copy(healthDataConsentVersion = CONSENT_VERSION, healthDataConsentAt = at)
+        }
         clear()
     }
 

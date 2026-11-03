@@ -9,6 +9,7 @@ import com.rukavina.gymbuddy.data.local.entity.StarterPlanEntity
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.data.repository.StarterPlanRepository
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
+import com.rukavina.gymbuddy.data.sync.AuthSession
 import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.model.ExperienceLevel
 import com.rukavina.gymbuddy.domain.model.FitnessGoal
@@ -89,8 +90,14 @@ class OnboardingViewModelTest {
 
     private val profiles get() = UserProfileRepository(holder, OutboxRecorder(holder, clock), clock)
 
+    private val auth = object : AuthSession {
+        override var currentUid: String? = null
+        override suspend fun idToken(): String? = null
+        override fun signOut() = Unit
+    }
+
     private fun vm(saved: SavedStateHandle = SavedStateHandle()) =
-        OnboardingViewModel(saved, profiles, StarterPlanRepository(holder, clock), preferences, clock)
+        OnboardingViewModel(saved, profiles, StarterPlanRepository(holder, clock), preferences, clock, auth, holder)
 
     @Test
     fun `a tap holds the answer a moment, then moves on`() = runTest(dispatcher) {
@@ -163,7 +170,11 @@ class OnboardingViewModelTest {
     @Test
     fun `start with no plan is an answer, not a skip`() = runTest(dispatcher) {
         val vm = vm()
+        val events = mutableListOf<OnboardingEvent>()
+        backgroundScope.launchCollect(vm, events)
         vm.skip()
+        assertEquals(listOf(OnboardingEvent.OpenAccountStep), events) // guests get the account offer
+        vm.onAccountStep(created = false)
         assertEquals(SetupStep.READY, vm.state.value.step)
         assertEquals(FULL, vm.state.value.finalPlanId) // skipped: the default suggestion
 
@@ -178,6 +189,7 @@ class OnboardingViewModelTest {
         }
         vm2.choosePlan(null)
         advanceTimeBy(OnboardingViewModel.PRESS_HOLD_MS + 1)
+        vm2.onAccountStep(created = false)
         assertEquals(SetupStep.READY, vm2.state.value.step)
         assertNull(vm2.state.value.finalPlanId)
     }
@@ -194,6 +206,7 @@ class OnboardingViewModelTest {
         vm.chooseDays(TrainingDays.FOUR)
         advanceTimeBy(OnboardingViewModel.PRESS_HOLD_MS + 1)
         vm.skip()
+        vm.onAccountStep(created = false)
         vm.finish()
 
         withTimeout(5_000) { preferences.isGuest.first { it } }
@@ -203,7 +216,48 @@ class OnboardingViewModelTest {
         assertEquals(TrainingDays.FOUR, saved.trainingDays)
         assertEquals(UPPER, saved.activePlanId)
         assertEquals(5_000L, saved.joinedDate)
+        assertEquals(listOf(OnboardingEvent.OpenAccountStep, OnboardingEvent.Done), events)
+    }
+
+    @Test
+    fun `signed in - no account step, answers land on the account once its file is open`() = runTest(dispatcher) {
+        auth.currentUid = "uid-1"
+        val vm = vm()
+        val events = mutableListOf<OnboardingEvent>()
+        backgroundScope.launchCollect(vm, events)
+        assertTrue(vm.state.value.signedIn)
+        assertEquals(4, vm.state.value.totalSteps)
+        vm.chooseExperience(ExperienceLevel.NEW)
+        advanceTimeBy(OnboardingViewModel.PRESS_HOLD_MS + 1)
+        vm.skip()
+        assertEquals(SetupStep.READY, vm.state.value.step)
+
+        vm.finish()
+        assertTrue("waits for AuthGate to open the account's file", events.isEmpty())
+        holder.switchTo("uid-1")
+        withTimeout(5_000) { while (events.isEmpty()) kotlinx.coroutines.yield() }
+
         assertEquals(listOf(OnboardingEvent.Done), events)
+        assertEquals(ExperienceLevel.NEW, profiles.getProfile("uid-1")!!.experienceLevel)
+        assertFalse(preferences.isGuest.first())
+    }
+
+    @Test
+    fun `signed in but the account's file never opens - nothing lands in the guest's`() = runTest(dispatcher) {
+        auth.currentUid = "uid-1"
+        val vm = vm()
+        val events = mutableListOf<OnboardingEvent>()
+        backgroundScope.launchCollect(vm, events)
+        vm.chooseExperience(ExperienceLevel.NEW)
+        advanceTimeBy(OnboardingViewModel.PRESS_HOLD_MS + 1)
+        vm.skip()
+        vm.finish()
+        advanceTimeBy(6_000)
+        runCurrent()
+
+        assertTrue(events.isEmpty())
+        assertNull(profiles.getProfile(UserProfileRepository.GUEST_UID))
+        assertFalse("Let's go works again", vm.state.value.saving)
     }
 
     @Test

@@ -1,53 +1,103 @@
 package com.rukavina.gymbuddy.navigation
 
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.rukavina.gymbuddy.ui.auth.SignInMode
+import com.rukavina.gymbuddy.ui.auth.CreateAccountScreen
+import com.rukavina.gymbuddy.ui.auth.CreateAccountViewModel
+import com.rukavina.gymbuddy.ui.auth.CreateFrom
 import com.rukavina.gymbuddy.ui.auth.SignInScreen
-import com.rukavina.gymbuddy.ui.auth.SignInViewModel
 import com.rukavina.gymbuddy.ui.onboarding.SetupScreen
 import com.rukavina.gymbuddy.ui.onboarding.WelcomeScreen
 
+/** Setup's saved-state key for the account step's answer (true = created). */
+private const val ACCOUNT_RESULT = "account_result"
+
 /**
- * Welcome, setup and sign-in (Figma 114:20520, Plan 7 step 04). Setup
- * only follows "Get started" (owner decision 4A); signing in goes
- * straight to Main.
+ * Welcome, setup, sign-in and create account (Figma 114:20520, amended
+ * 2026-11-03: account first). A new account runs setup; signing in, or
+ * Google finding an existing account, goes straight to Main.
  */
 fun NavGraphBuilder.startNavGraph(navController: NavHostController) {
     composable(NavRoutes.Welcome) {
         WelcomeScreen(
-            onGetStarted = { navController.navigate(NavRoutes.Setup) },
+            onCreateAccount = { navController.navigate(NavRoutes.createAccount(CreateFrom.WELCOME)) },
             onHaveAccount = { navController.navigate(NavRoutes.signIn()) },
+            onContinueWithout = { navController.navigate(NavRoutes.Setup) },
         )
     }
 
-    composable(NavRoutes.Setup) {
+    composable(NavRoutes.Setup) { entry ->
+        val result by entry.savedStateHandle.getStateFlow<Boolean?>(ACCOUNT_RESULT, null).collectAsStateWithLifecycle()
         SetupScreen(
             viewModel = hiltViewModel(),
             onExit = { navController.popBackStack() },
             onDone = { navController.openMain() },
+            onOpenAccountStep = { navController.navigate(NavRoutes.createAccount(CreateFrom.SETUP)) },
+            accountResult = result,
+            onAccountResultUsed = { entry.savedStateHandle[ACCOUNT_RESULT] = null },
         )
     }
 
-    composable(
-        NavRoutes.SignIn,
-        arguments = listOf(
-            navArgument(SignInViewModel.ARG_MODE) {
-                type = NavType.StringType
-                defaultValue = SignInMode.SIGN_IN.name
-            }
-        ),
-    ) {
+    composable(NavRoutes.SignIn) {
         SignInScreen(
             viewModel = hiltViewModel(),
             onBack = { navController.popBackStack() },
             onDone = { navController.openMain() },
-            onOpenCreateAccount = { navController.navigate(NavRoutes.signIn(SignInMode.CREATE)) },
+            onOpenCreateAccount = { navController.navigate(NavRoutes.createAccount(CreateFrom.SIGN_IN)) },
         )
+    }
+
+    composable(
+        NavRoutes.CreateAccount,
+        arguments = listOf(
+            navArgument(CreateAccountViewModel.ARG_FROM) {
+                type = NavType.StringType
+                defaultValue = CreateFrom.WELCOME.name
+            }
+        ),
+    ) { entry ->
+        val from = entry.arguments?.getString(CreateAccountViewModel.ARG_FROM)
+            ?.let { runCatching { CreateFrom.valueOf(it) }.getOrNull() } ?: CreateFrom.WELCOME
+        CreateAccountScreen(
+            viewModel = hiltViewModel(),
+            onExit = { navController.popBackStack() },
+            onSignIn = {
+                // From Sign in, "Sign in" is just back.
+                if (from == CreateFrom.SIGN_IN) navController.popBackStack()
+                else navController.navigate(NavRoutes.signIn()) { popUpTo(NavRoutes.CreateAccount) { inclusive = true } }
+            },
+            onCreated = { newAccount -> navController.afterAccount(from, created = true, newAccount = newAccount) },
+            onNotNow = { navController.afterAccount(from, created = false, newAccount = false) },
+        )
+    }
+}
+
+/**
+ * Where the create flow leads. Setup gets its answer back. A new account
+ * from Welcome or Sign in runs setup; an existing one (Google) or one
+ * made from inside the app goes to Main. "Not now" from Welcome or Sign
+ * in means guest: setup.
+ */
+private fun NavHostController.afterAccount(from: CreateFrom, created: Boolean, newAccount: Boolean) {
+    // Reached from inside the app (session banner → Sign in → Create one): back to Main.
+    val insideMain = currentBackStack.value.any { it.destination.route == NavRoutes.Main }
+    when {
+        // Google found an account that already exists: it has its own
+        // profile and plan, so setup must not overwrite them.
+        from == CreateFrom.SETUP && created && !newAccount -> openMain()
+        from == CreateFrom.SETUP -> {
+            previousBackStackEntry?.savedStateHandle?.set(ACCOUNT_RESULT, created)
+            popBackStack()
+        }
+        from == CreateFrom.SETTINGS || insideMain -> if (created) openMain() else popBackStack()
+        created && !newAccount -> openMain()
+        else -> navigate(NavRoutes.Setup) { popUpTo(NavRoutes.Welcome) }
     }
 }
 

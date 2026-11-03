@@ -63,7 +63,7 @@ import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.navigation.openWelcome
-import com.rukavina.gymbuddy.ui.auth.SignInMode
+import com.rukavina.gymbuddy.ui.auth.CreateFrom
 import com.rukavina.gymbuddy.ui.auth.PasswordToggleTextField
 import com.rukavina.gymbuddy.ui.guest.countsText
 import com.rukavina.gymbuddy.data.sync.LocalDataCounts
@@ -304,10 +304,10 @@ fun SettingsScreen(
                         // entries until the You tab (Plan 7.10).
                         if (uiState.isGuest) item {
                             Button(
-                                onClick = { rootNavController.navigate(NavRoutes.signIn(SignInMode.CREATE)) },
+                                onClick = { rootNavController.navigate(NavRoutes.createAccount(CreateFrom.SETTINGS)) },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("Back up your workouts")
+                                Text("Create account")
                             }
                         }
 

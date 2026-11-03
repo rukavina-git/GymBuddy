@@ -4,8 +4,9 @@
     <string name="cd_app_name">GymBuddy</string>
     <string name="cd_close">Close</string>
     <string name="welcome_line">Log your workouts.\nWorks offline, no account needed.</string>
-    <string name="welcome_get_started">Get started</string>
     <string name="welcome_have_account">I have an account</string>
+    <string name="welcome_create">Create account</string>
+    <string name="welcome_without">Continue without account</string>
 
     <string name="setup_skip">Skip</string>
     <string name="setup_progress">Step %1$d of %2$d</string>
@@ -64,6 +65,8 @@
     <string name="signin_hide">Hide</string>
     <string name="signin_submit">Sign in with email</string>
     <string name="signin_forgot">Forgot password?</string>
+    <string name="signin_no_account">No account yet?</string>
+    <string name="signin_create_one">Create one</string>
     <string name="signin_reset_sent">If %1$s has an account, a reset link is on its way.</string>
     <string name="signin_offline">No connection. Signing in needs internet. You can keep using GymBuddy and sign in later.</string>
     <string name="signin_retry">Retry</string>
@@ -74,19 +77,18 @@
     <string name="signin_error_in_use">This email already has an account. Sign in instead.</string>
     <string name="signin_error_reset_email">Enter your email first, then tap Forgot password.</string>
     <string name="signin_error_other">Couldn\'t sign in. Try again.</string>
-
-    <string name="create_title">Back up your workouts</string>
-    <string name="create_moves">Your %1$s move into the account. Nothing on this phone is removed.</string>
-    <string name="create_moves_empty">Your workouts will back up to the account. Nothing on this phone is removed.</string>
-    <string name="create_consent">Back up my workouts and body data on GymBuddy servers.</string>
-    <string name="create_why">Why?</string>
-    <string name="create_consent_missing">Tick this box to back up your workouts. Without it, keep using GymBuddy on this phone.</string>
+    <string name="create_title">Create your account</string>
+    <string name="create_line">Your workouts back up and stay with you when you change phones.</string>
+    <string name="create_with_email">Continue with email</string>
+    <string name="create_have_account">Already have an account?</string>
+    <string name="create_sign_in">Sign in</string>
+    <string name="create_not_now">Not now</string>
+    <string name="create_continue">Continue</string>
     <string name="create_password_helper">At least 8 characters</string>
-    <string name="create_submit">Create account with email</string>
+    <string name="consent_title">Keep a copy on our servers?</string>
+    <string name="consent_body">Workouts and body data like weight count as health data, so we need your OK to store them. We use them only to back up and sync your account. You can delete the account at any time.</string>
+    <string name="consent_agree">Agree and create account</string>
     <string name="create_terms">By creating an account you agree to the Terms and the Privacy policy.</string>
-    <string name="why_title">Why we ask</string>
-    <string name="why_body">Workouts and body data like weight count as health data. We need your OK to keep a copy on our servers. Without it, everything stays on this phone.</string>
-    <string name="ok">OK</string>
 
     <string name="no_account_title">No account for this email yet</string>
     <string name="no_account_body">%1$s has no GymBuddy account. Create one, or use another Google account.</string>

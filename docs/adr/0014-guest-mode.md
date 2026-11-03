@@ -62,3 +62,15 @@ docs/council/2026-11-02-you-settings.md).
   account only show for signed-in users.
 - Android Auto Backup rules should include the Room database so a
   guest's data survives a phone change.
+
+## Amendment (2026-11-03, owner)
+
+Accounts are encouraged first; guest mode stays, as the secondary path.
+Welcome leads with "Create account", then "I have an account", then a
+"Continue without account" link. Guests who finish setup get one
+"Create your account" step with "Not now" before the app opens. Sign in
+links to Create account. Health-data consent is its own screen; tapping
+"Agree and create account" is the consent. Everything else above holds:
+the app works fully without an account, and guest data merges once.
+Figma: Onboarding + auth, frames R18-1 to R18-7. Plan 7 step 04,
+Amendment 1.

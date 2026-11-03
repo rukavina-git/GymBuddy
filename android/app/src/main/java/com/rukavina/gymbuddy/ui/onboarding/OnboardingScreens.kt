@@ -51,6 +51,7 @@ import com.rukavina.gymbuddy.ui.design.AppTextButton
 import com.rukavina.gymbuddy.ui.design.ButtonSize
 import com.rukavina.gymbuddy.ui.design.OutlineButton
 import com.rukavina.gymbuddy.ui.design.PrimaryButton
+import com.rukavina.gymbuddy.ui.auth.QuietLink
 import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.FullShape
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
@@ -66,9 +67,12 @@ private val SuggestedTagHeight = 24.dp
 /** Setup questions with a progress bar; Ready has none. */
 private val QUESTIONS = SetupStep.entries.filter { it != SetupStep.READY }
 
-/** R16-1 Welcome: Get started (setup, then guest) or I have an account. */
+/**
+ * R18-1 Welcome, account first (amendment 1): Create account (lime),
+ * I have an account, and "Continue without account" (setup as a guest).
+ */
 @Composable
-fun WelcomeScreen(onGetStarted: () -> Unit, onHaveAccount: () -> Unit) {
+fun WelcomeScreen(onCreateAccount: () -> Unit, onHaveAccount: () -> Unit, onContinueWithout: () -> Unit) {
     val d = GymBuddyTheme.dimens
     Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
         Column(
@@ -98,19 +102,40 @@ fun WelcomeScreen(onGetStarted: () -> Unit, onHaveAccount: () -> Unit) {
                 modifier = Modifier.padding(horizontal = d.section),
             )
             Spacer(Modifier.weight(1.4f))
-            PrimaryButton(stringResource(R.string.welcome_get_started), onGetStarted, Modifier.fillMaxWidth(), size = ButtonSize.Medium)
+            PrimaryButton(stringResource(R.string.welcome_create), onCreateAccount, Modifier.fillMaxWidth(), size = ButtonSize.Medium)
             Spacer(Modifier.height(d.stack))
             OutlineButton(stringResource(R.string.welcome_have_account), onHaveAccount, Modifier.fillMaxWidth())
+            Spacer(Modifier.height(d.hairline))
+            QuietLink(stringResource(R.string.welcome_without), onContinueWithout)
         }
     }
 }
 
 /** R16-2 … R16-6b: one route; back walks the questions, then leaves. */
 @Composable
-fun SetupScreen(viewModel: OnboardingViewModel, onExit: () -> Unit, onDone: () -> Unit) {
+fun SetupScreen(
+    viewModel: OnboardingViewModel,
+    onExit: () -> Unit,
+    onDone: () -> Unit,
+    onOpenAccountStep: () -> Unit,
+    /** The account step's answer (true = created), once; consumed by [onAccountResultUsed]. */
+    accountResult: Boolean?,
+    onAccountResultUsed: () -> Unit,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) {
-        viewModel.events.collect { if (it == OnboardingEvent.Done) onDone() }
+        viewModel.events.collect {
+            when (it) {
+                OnboardingEvent.Done -> onDone()
+                OnboardingEvent.OpenAccountStep -> onOpenAccountStep()
+            }
+        }
+    }
+    LaunchedEffect(accountResult) {
+        if (accountResult != null) {
+            viewModel.onAccountStep(accountResult)
+            onAccountResultUsed()
+        }
     }
     BackHandler(enabled = state.step != SetupStep.EXPERIENCE) { viewModel.back() }
     SetupContent(
@@ -146,9 +171,9 @@ internal fun SetupContent(
             modifier = Modifier.fillMaxSize(),
         ) { step ->
             if (step == SetupStep.READY) {
-                ReadyContent(signedIn = false, saving = state.saving, onFinish = onFinish)
+                ReadyContent(signedIn = state.signedIn, saving = state.saving, onFinish = onFinish)
             } else {
-                QuestionFrame(step, onBack, onSkip) {
+                QuestionFrame(step, state.totalSteps, onBack, onSkip) {
                     when (step) {
                         SetupStep.EXPERIENCE -> ExperienceQuestion(state, onExperience)
                         SetupStep.GOAL -> GoalQuestion(state, onGoal)
@@ -163,7 +188,7 @@ internal fun SetupContent(
 }
 
 @Composable
-private fun QuestionFrame(step: SetupStep, onBack: () -> Unit, onSkip: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+private fun QuestionFrame(step: SetupStep, totalSteps: Int, onBack: () -> Unit, onSkip: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     val d = GymBuddyTheme.dimens
     Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
         Row(
@@ -174,7 +199,7 @@ private fun QuestionFrame(step: SetupStep, onBack: () -> Unit, onSkip: () -> Uni
             Spacer(Modifier.weight(1f))
             AppTextButton(stringResource(R.string.setup_skip), onSkip)
         }
-        SetupProgress(QUESTIONS.indexOf(step) + 1, QUESTIONS.size)
+        SetupProgress(QUESTIONS.indexOf(step) + 1, totalSteps)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -186,8 +211,9 @@ private fun QuestionFrame(step: SetupStep, onBack: () -> Unit, onSkip: () -> Uni
     }
 }
 
+/** Setup's segmented bar; the account step (CreateAccountScreen) shows it full. */
 @Composable
-private fun SetupProgress(current: Int, total: Int) {
+internal fun SetupProgress(current: Int, total: Int) {
     val d = GymBuddyTheme.dimens
     val label = stringResource(R.string.setup_progress, current, total)
     Row(

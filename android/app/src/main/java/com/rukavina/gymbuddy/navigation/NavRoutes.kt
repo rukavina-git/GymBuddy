@@ -1,14 +1,15 @@
 package com.rukavina.gymbuddy.navigation
 
-import com.rukavina.gymbuddy.ui.auth.SignInMode
+import com.rukavina.gymbuddy.ui.auth.CreateFrom
 
 object NavRoutes {
     const val Splash = "splash"
     const val Main = "main"
     const val Welcome = "welcome"
     const val Setup = "setup"
-    /** Sign in or create account; [signIn] fills the mode. */
-    const val SignIn = "sign_in?mode={mode}"
+    const val SignIn = "sign_in"
+    /** Create account (method → email → consent); [createAccount] fills where it started. */
+    const val CreateAccount = "create_account?from={from}"
     const val Home = "home"
     const val Templates = "templates"
     const val Exercises = "exercises"
@@ -36,7 +37,9 @@ object NavRoutes {
     const val AppPreferences = "app_preferences"
     const val SyncDebug = "sync_debug"
 
-    fun signIn(mode: SignInMode = SignInMode.SIGN_IN) = "sign_in?mode=${mode.name}"
+    fun signIn() = SignIn
+
+    fun createAccount(from: CreateFrom) = "create_account?from=${from.name}"
 
     fun exerciseDetailsRoute(exerciseId: String): String {
         return "exercise_details/$exerciseId"
