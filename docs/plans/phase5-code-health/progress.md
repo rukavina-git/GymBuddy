@@ -58,9 +58,8 @@
   loads overwrites it silently (fine until 7.6's resume prompt).
   Draft weights don't record their units. No test of the conflated
   writer's ordering or of a throwing draft repo.
-- 03 manual check still open: "Don't keep activities", leave the app,
-  come back, workout is still there. Also check a release build reads
-  a draft (only R8 mapping was checked, no device run).
+- 03 manual check closed 2026-11-03 (owner): "Don't keep activities"
+  survives; a release build reads a draft.
 - From 04 (reviewer, not fixed): KEEP also keeps a *running* job. A set
   logged during the pull after the push emptied the outbox (0 → 1)
   gets no new job and waits for app open / 6 h periodic. Fix:
@@ -68,5 +67,5 @@
   Untested: backoff policy, syncNow itself returning SIGNED_OUT.
   PushOutboxWorker duplicates SyncWorker; FakeAuth duplicates the
   inline fake in SyncTriggersTest.
-- 04 manual check still open: airplane mode, log a set, swipe away,
-  airplane off, set reaches backend without opening the app.
+- 04 manual check closed 2026-11-03 (owner): set logged offline was
+  pushed; reinstall + login restored it.

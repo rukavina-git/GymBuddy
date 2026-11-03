@@ -101,9 +101,10 @@
   - `observeSignIn` has no test (switch before SIGNED_IN, no flip
     through the signed-out file on cold start).
 - Repos/stores take `DatabaseHolder`; tests use `DatabaseHolder.fixed(db)`.
-- Open from Plan 4 (manual, owner): step 03 "Don't keep activities"
-  check and a release build reading a draft; step 04 airplane-mode
-  push check.
+- Closed 2026-11-03 (owner, device): Plan 4 step 03 "Don't keep
+  activities" (workout survives) and release build reads a draft;
+  step 04 airplane-mode push (set pushed; after reinstall + login the
+  data was all there).
 - From Plan 4 step 04: `push-outbox` uses KEEP, so a set logged while
   the job is still running can wait up to 6 h. Fix it if step 01
   touches the workers anyway.
