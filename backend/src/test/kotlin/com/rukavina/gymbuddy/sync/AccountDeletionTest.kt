@@ -79,6 +79,7 @@ class AccountDeletionTest : AbstractPostgresIntegrationTest() {
                 userExerciseStates = listOf(SyncTestFixtures.userExerciseState(exerciseId = exercise.id)),
                 userTemplateStates = listOf(SyncTestFixtures.userTemplateState(templateId = template.id)),
                 userProfile = SyncTestFixtures.userProfile(),
+                bodyWeightEntries = listOf(SyncTestFixtures.bodyWeightEntry()),
             ),
         )
         return Triple(session.id, exercise.id, template.id)
@@ -101,6 +102,7 @@ class AccountDeletionTest : AbstractPostgresIntegrationTest() {
         "user_exercise_state" to count("user_exercise_state", "owner_id", uid),
         "user_template_state" to count("user_template_state", "owner_id", uid),
         "user_profile" to count("user_profile", "uid", uid),
+        "body_weight_entries" to count("body_weight_entries", "owner_id", uid),
         "change_log" to count("change_log", "user_id", uid),
     )
 

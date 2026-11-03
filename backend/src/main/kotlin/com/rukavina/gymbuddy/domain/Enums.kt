@@ -37,7 +37,7 @@ enum class SetType { WARMUP, WORKING, DROP, FAILURE }
 
 /** Mirrors PushRequest/PushResponse's implicit entity discriminator - see MutationResult.entityType in api/openapi.yaml. */
 enum class EntityType {
-    WORKOUT_SESSION, EXERCISE, WORKOUT_TEMPLATE, USER_EXERCISE_STATE, USER_TEMPLATE_STATE, USER_PROFILE
+    WORKOUT_SESSION, EXERCISE, WORKOUT_TEMPLATE, USER_EXERCISE_STATE, USER_TEMPLATE_STATE, USER_PROFILE, BODY_WEIGHT_ENTRY
 }
 
 /**

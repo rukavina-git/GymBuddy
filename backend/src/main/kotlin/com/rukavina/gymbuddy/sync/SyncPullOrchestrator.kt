@@ -33,6 +33,7 @@ class SyncPullOrchestrator(
     private val workoutTemplatePullService: WorkoutTemplatePullService,
     private val overlayPullService: OverlayPullService,
     private val profilePullService: ProfilePullService,
+    private val bodyWeightSyncService: BodyWeightSyncService,
 ) {
 
     fun pull(uid: String, cursorParam: String?, limit: Int): PullResponseDto {
@@ -71,6 +72,7 @@ class SyncPullOrchestrator(
             userExerciseStates = overlayPullService.findAllExerciseStatesByIds(uid, idsByType[EntityType.USER_EXERCISE_STATE].orEmpty()),
             userTemplateStates = overlayPullService.findAllTemplateStatesByIds(uid, idsByType[EntityType.USER_TEMPLATE_STATE].orEmpty()),
             userProfile = if (idsByType.containsKey(EntityType.USER_PROFILE)) profilePullService.find(uid) else null,
+            bodyWeightEntries = bodyWeightSyncService.findAllByIds(uid, idsByType[EntityType.BODY_WEIGHT_ENTRY].orEmpty()),
             nextCursor = nextCursor,
             hasMore = hasMore,
         )

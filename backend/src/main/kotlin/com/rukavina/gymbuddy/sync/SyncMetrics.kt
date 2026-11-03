@@ -28,6 +28,7 @@ class SyncMetrics(private val registry: MeterRegistry) {
         pulled(EntityType.USER_EXERCISE_STATE, response.userExerciseStates.size)
         pulled(EntityType.USER_TEMPLATE_STATE, response.userTemplateStates.size)
         pulled(EntityType.USER_PROFILE, if (response.userProfile != null) 1 else 0)
+        pulled(EntityType.BODY_WEIGHT_ENTRY, response.bodyWeightEntries.size)
     }
 
     fun recordCursorExpired() {

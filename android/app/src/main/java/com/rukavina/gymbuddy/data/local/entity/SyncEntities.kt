@@ -10,7 +10,8 @@ enum class SyncEntityType {
     WORKOUT_TEMPLATE,
     USER_EXERCISE_STATE,
     USER_TEMPLATE_STATE,
-    USER_PROFILE
+    USER_PROFILE,
+    BODY_WEIGHT_ENTRY
 }
 
 enum class OutboxOperation { UPSERT, DELETE }

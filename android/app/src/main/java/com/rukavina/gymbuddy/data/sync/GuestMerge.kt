@@ -236,7 +236,8 @@ class GuestMerge(private val holder: DatabaseHolder) {
             ),
             Kept("user_exercise_state", null, reset = true, outboxType = SyncEntityType.USER_EXERCISE_STATE, idColumn = "exerciseId"),
             Kept("user_template_state", null, reset = true, outboxType = SyncEntityType.USER_TEMPLATE_STATE, idColumn = "templateId"),
-            Kept("active_workout_draft", null)
+            Kept("active_workout_draft", null),
+            Kept("body_weight_entries", "deletedAt IS NULL", reset = true, outboxType = SyncEntityType.BODY_WEIGHT_ENTRY)
         )
 
         /**
@@ -255,6 +256,7 @@ class GuestMerge(private val holder: DatabaseHolder) {
             "user_exercise_state" to null,
             "user_template_state" to null,
             "active_workout_draft" to null,
+            "body_weight_entries" to null,
             "sync_outbox" to "NOT (entityType = '${SyncEntityType.USER_PROFILE.name}' AND entityId = '$GUEST')"
         )
     }

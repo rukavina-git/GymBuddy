@@ -195,7 +195,8 @@ class SyncEngine(
         workoutTemplates = prepared.filterIsInstance<PreparedMutation.Template>().map { it.dto }.ifEmpty { null },
         userExerciseStates = prepared.filterIsInstance<PreparedMutation.ExerciseState>().map { it.dto }.ifEmpty { null },
         userTemplateStates = prepared.filterIsInstance<PreparedMutation.TemplateState>().map { it.dto }.ifEmpty { null },
-        userProfile = prepared.filterIsInstance<PreparedMutation.Profile>().firstOrNull()?.dto
+        userProfile = prepared.filterIsInstance<PreparedMutation.Profile>().firstOrNull()?.dto,
+        bodyWeightEntries = prepared.filterIsInstance<PreparedMutation.BodyWeight>().map { it.dto }.ifEmpty { null }
     )
 
     // ---- pull ----

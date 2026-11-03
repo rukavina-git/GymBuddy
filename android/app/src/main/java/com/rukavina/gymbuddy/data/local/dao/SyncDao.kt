@@ -191,6 +191,9 @@ interface SyncDao {
     @Query("DELETE FROM active_workout_draft")
     suspend fun wipeActiveWorkoutDraft()
 
+    @Query("DELETE FROM body_weight_entries")
+    suspend fun wipeBodyWeightEntries()
+
     /**
      * Removes everything that belongs to the signed-in user, plus the
      * outbox, cursor and the in-progress workout draft, leaving the DEFAULT reference library (and its
@@ -209,5 +212,6 @@ interface SyncDao {
         wipeOutbox()
         wipeMeta()
         wipeActiveWorkoutDraft()
+        wipeBodyWeightEntries()
     }
 }

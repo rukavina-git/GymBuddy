@@ -157,6 +157,19 @@ class GuestMergeTest {
     }
 
     @Test
+    fun `a merge carries body weight entries and their outbox entries`() = runBlocking {
+        val weights = com.rukavina.gymbuddy.data.repository.BodyWeightRepositoryImpl(holder, OutboxRecorder(holder, clock), clock)
+        val id = SyncFixtures.id()
+        weights.save(com.rukavina.gymbuddy.domain.model.BodyWeightEntry(id, 1_000, 72f))
+        holder.switchTo("uid-a")
+
+        merge.mergeInto("uid-a")
+
+        assertEquals(72f, holder.db.bodyWeightDao().getIncludingDeleted(id)!!.weightKg)
+        assertTrue(store.outbox().any { it.entityType == SyncEntityType.BODY_WEIGHT_ENTRY && it.entityId == id })
+    }
+
+    @Test
     fun `the first sync after a merge pushes the guest's changes`() = runBlocking {
         guestWritesOneOfEach()
         holder.switchTo("uid-a")

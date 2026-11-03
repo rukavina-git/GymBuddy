@@ -7,6 +7,7 @@ import com.rukavina.gymbuddy.data.local.converter.ExerciseConverters
 import com.rukavina.gymbuddy.data.local.converter.MuscleGroupConverter
 import com.rukavina.gymbuddy.data.local.converter.ProfileEnumConverters
 import com.rukavina.gymbuddy.data.local.dao.ActiveWorkoutDraftDao
+import com.rukavina.gymbuddy.data.local.dao.BodyWeightDao
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
 import com.rukavina.gymbuddy.data.local.dao.TemplateVersionDao
@@ -17,6 +18,7 @@ import com.rukavina.gymbuddy.data.local.dao.UserTemplateStateDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutSessionDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.entity.ActiveWorkoutDraftEntity
+import com.rukavina.gymbuddy.data.local.entity.BodyWeightEntryEntity
 import com.rukavina.gymbuddy.data.local.entity.ExerciseEntity
 import com.rukavina.gymbuddy.data.local.entity.ExerciseVersionEntity
 import com.rukavina.gymbuddy.data.local.entity.OutboxEntryEntity
@@ -47,9 +49,10 @@ import com.rukavina.gymbuddy.data.local.entity.WorkoutTemplateEntity
         OutboxEntryEntity::class,
         SyncLogEntity::class,
         SyncMetaEntity::class,
-        ActiveWorkoutDraftEntity::class
+        ActiveWorkoutDraftEntity::class,
+        BodyWeightEntryEntity::class
     ],
-    version = 27,
+    version = 28,
     exportSchema = true
 )
 @TypeConverters(MuscleGroupConverter::class, ProfileEnumConverters::class, ExerciseConverters::class)
@@ -65,4 +68,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userTemplateStateDao(): UserTemplateStateDao
     abstract fun syncDao(): SyncDao
     abstract fun activeWorkoutDraftDao(): ActiveWorkoutDraftDao
+    abstract fun bodyWeightDao(): BodyWeightDao
 }

@@ -21,7 +21,7 @@ data class FullSyncPage(val entities: List<EntityRef>, val hasMore: Boolean)
 class FullSyncEntityDiscovery(private val jdbcTemplate: NamedParameterJdbcTemplate) {
 
     /**
-     * Deterministic order across all six tables combined: entity type
+     * Deterministic order across all seven tables combined: entity type
      * name, then id (point 4). offset/limit apply to that single
      * combined sequence, not per type - a user with 300 exercises and 0
      * sessions fills whole pages with EXERCISE before a WORKOUT_SESSION
@@ -44,6 +44,8 @@ class FullSyncEntityDiscovery(private val jdbcTemplate: NamedParameterJdbcTempla
                 SELECT 'USER_TEMPLATE_STATE' AS entity_type, template_id::text AS entity_id FROM user_template_state WHERE owner_id = :userId
                 UNION ALL
                 SELECT 'USER_PROFILE' AS entity_type, uid AS entity_id FROM user_profile WHERE uid = :userId
+                UNION ALL
+                SELECT 'BODY_WEIGHT_ENTRY' AS entity_type, id::text AS entity_id FROM body_weight_entries WHERE owner_id = :userId
             ) owned_entities
             ORDER BY entity_type, entity_id
             LIMIT :fetchLimit OFFSET :offset

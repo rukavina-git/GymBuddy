@@ -297,6 +297,24 @@ class AuthGateTest {
     }
 
     @Test
+    fun `keep on this phone carries body weight entries as new rows`() = runBlocking {
+        val weights = com.rukavina.gymbuddy.data.repository.BodyWeightRepositoryImpl(holder, OutboxRecorder(holder, clock), clock)
+        val id = SyncFixtures.id()
+        weights.save(com.rukavina.gymbuddy.domain.model.BodyWeightEntry(id, 1_000, 72f))
+        holder.db.openHelper.writableDatabase.execSQL("UPDATE body_weight_entries SET revision = 5, syncState = 'SYNCED'")
+        probeResult = AuthProbe.DELETED
+        gate.checkSession()
+        firebase(null)
+
+        gate.keepAsGuest()
+
+        val row = holder.db.bodyWeightDao().getIncludingDeleted(id)!!
+        assertEquals(0, row.revision)
+        assertEquals(com.rukavina.gymbuddy.domain.model.SyncState.PENDING, row.syncState)
+        assertTrue(store.outbox().any { it.entityType == SyncEntityType.BODY_WEIGHT_ENTRY && it.entityId == id })
+    }
+
+    @Test
     fun `erase after a deletion deletes the account's file`() = runBlocking {
         deletedWithData()
 

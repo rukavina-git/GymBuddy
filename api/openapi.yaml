@@ -503,6 +503,9 @@ components:
           items: { $ref: '#/components/schemas/UserTemplateState' }
         userProfile:
           $ref: '#/components/schemas/UserProfile'
+        bodyWeightEntries:
+          type: array
+          items: { $ref: '#/components/schemas/BodyWeightEntry' }
 
     PushResponse:
       type: object
@@ -589,6 +592,9 @@ components:
           items: { $ref: '#/components/schemas/UserTemplateState' }
         userProfile:
           $ref: '#/components/schemas/UserProfile'
+        bodyWeightEntries:
+          type: array
+          items: { $ref: '#/components/schemas/BodyWeightEntry' }
         nextCursor:
           type: string
           description: Persist only after committing this page locally.
@@ -604,6 +610,7 @@ components:
         - USER_EXERCISE_STATE
         - USER_TEMPLATE_STATE
         - USER_PROFILE
+        - BODY_WEIGHT_ENTRY
 
     HealthStatus:
       type: object
@@ -1223,6 +1230,52 @@ components:
           format: int64
           readOnly: true
           description: Server-assigned last-change time, epoch milliseconds. Clients must not set this.
+        revision:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Server-assigned revision number. Clients must not set this.
+
+    BodyWeightEntry:
+      type: object
+      description: |
+        One body weight measurement. A history: the user may log several a
+        day, and each is its own row. Metric only (kg); display units are a
+        client concern. Flat entity, no children.
+      required:
+        - id
+        - measuredAt
+        - weightKg
+        - updatedAt
+        - revision
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated UUIDv7. Doubles as the sync idempotency key.
+        measuredAt:
+          type: integer
+          format: int64
+          description: Epoch milliseconds when the weight was measured, as the user entered it.
+        weightKg:
+          type: number
+          format: float
+          exclusiveMinimum: 0
+          maximum: 700
+          description: Body weight in kilograms.
+        updatedAt:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Server-assigned last-change time, epoch milliseconds. Clients must not set this.
+        deletedAt:
+          type: [integer, "null"]
+          format: int64
+          description: |
+            Tombstone time, epoch milliseconds; non-null means this entry
+            is deleted. Same push semantics as WorkoutSession.deletedAt:
+            any non-null value is the delete signal, the server stamps
+            its own time.
         revision:
           type: integer
           format: int32

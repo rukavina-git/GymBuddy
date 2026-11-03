@@ -3,7 +3,7 @@
 - [x] 01 Per-account local data (steps/01-per-account-data.md) — 4b61dce
 - [x] 02 Guest mode (steps/02-guest-mode.md) — ab07df5
 - [x] 03 Auth gate (steps/03-auth-gate.md) — 12dd9ea
-- [ ] 04 Body weight
+- [x] 04 Body weight (steps/04-body-weight.md) — HASH
 - [ ] 05 Profile fields
 - [ ] 06 Plans + default templates
 - [ ] 07 Data export
@@ -39,6 +39,12 @@
   while expired left a spinner, since Firebase's uid was already null).
 - 03: Profile/Settings use `holder.owner` (via UserProfileRepository)
   instead of Firebase's user, so an expired session isn't a guest.
+- 04: No body weight count in Sync debug (the step file mentioned it).
+- 04: Spec (said out loud): `BodyWeightEntry` schema, `bodyWeightEntries`
+  in PushRequest/PullResponse, `BODY_WEIGHT_ENTRY` in EntityType.
+  Flyway V5, Room v28 (MIGRATION_27_28, 28.json).
+- 04: The backend also checks `measuredAt > 0`; the spec has no
+  `minimum` for it.
 
 ## Gotchas
 - From 01 (reviewer, not fixed):
@@ -102,4 +108,15 @@
     until the next sign-in.
   - The expired banner sits above MainContent's Scaffold; the status bar
     inset may be doubled. Plain UI, Plan 7.4 replaces it.
+- From 04 (reviewer, not fixed):
+  - BodyWeightRepositoryImpl reads `holder.owner` for the profile uid
+    before the transaction; a switch in between can skip the 1A profile
+    update or queue USER_PROFILE under the wrong key. Read it inside.
+  - 1A only sets profile.weight on save of the newest entry. Deleting
+    it or back-dating it leaves the profile at the old value.
+  - Untested: 1A for a guest ("guest" profile), backend idempotent
+    replay for body weight, deleting an id the server never saw.
+  - A tombstone with an out-of-range weight hits the DB CHECK → ERROR
+    (retried forever), not INVALID. Android can't send one today.
+- Step 07 (export) must include body weight entries.
 

@@ -12,6 +12,7 @@ import com.rukavina.gymbuddy.data.local.entity.SyncLogOutcome
 import com.rukavina.gymbuddy.data.local.entity.SyncMetaEntity
 import com.rukavina.gymbuddy.data.local.entity.TemplateVersionEntity
 import com.rukavina.gymbuddy.data.remote.generated.infrastructure.Serializer
+import com.rukavina.gymbuddy.data.remote.generated.models.BodyWeightEntry
 import com.rukavina.gymbuddy.data.remote.generated.models.EntitySource
 import com.rukavina.gymbuddy.data.remote.generated.models.Exercise
 import com.rukavina.gymbuddy.data.remote.generated.models.PullResponse
@@ -44,6 +45,9 @@ sealed class PreparedMutation(val entry: OutboxEntryEntity) {
         override val payloadJson: String get() = json(dto)
     }
     class Profile(entry: OutboxEntryEntity, val dto: UserProfile) : PreparedMutation(entry) {
+        override val payloadJson: String get() = json(dto)
+    }
+    class BodyWeight(entry: OutboxEntryEntity, val dto: BodyWeightEntry) : PreparedMutation(entry) {
         override val payloadJson: String get() = json(dto)
     }
 
@@ -117,6 +121,9 @@ class SyncLocalStore(private val holder: DatabaseHolder, private val clock: Cloc
             SyncEntityType.USER_PROFILE -> syncDao.getProfileIncludingDeleted(id)?.let {
                 PreparedMutation.Profile(entry, SyncDtoMapper.toDto(it))
             }
+            SyncEntityType.BODY_WEIGHT_ENTRY -> db.bodyWeightDao().getIncludingDeleted(id)?.let {
+                PreparedMutation.BodyWeight(entry, SyncDtoMapper.toDto(it))
+            }
         }
     }
 
@@ -145,6 +152,7 @@ class SyncLocalStore(private val holder: DatabaseHolder, private val clock: Cloc
             SyncEntityType.USER_EXERCISE_STATE -> syncDao.setExerciseStateSyncMeta(id, revision, updatedAt, state)
             SyncEntityType.USER_TEMPLATE_STATE -> syncDao.setTemplateStateSyncMeta(id, revision, updatedAt, state)
             SyncEntityType.USER_PROFILE -> syncDao.setProfileSyncMeta(id, revision, updatedAt, state)
+            SyncEntityType.BODY_WEIGHT_ENTRY -> db.bodyWeightDao().setSyncMeta(id, revision, updatedAt, state)
         }
     }
 
@@ -167,6 +175,7 @@ class SyncLocalStore(private val holder: DatabaseHolder, private val clock: Cloc
         SyncEntityType.USER_EXERCISE_STATE -> db.userExerciseStateDao().getState(id)?.syncState
         SyncEntityType.USER_TEMPLATE_STATE -> db.userTemplateStateDao().getState(id)?.syncState
         SyncEntityType.USER_PROFILE -> syncDao.getProfileIncludingDeleted(id)?.syncState
+        SyncEntityType.BODY_WEIGHT_ENTRY -> db.bodyWeightDao().getIncludingDeleted(id)?.syncState
     }
 
     private suspend fun setSyncState(type: SyncEntityType, id: String, state: SyncState) = when (type) {
@@ -176,6 +185,7 @@ class SyncLocalStore(private val holder: DatabaseHolder, private val clock: Cloc
         SyncEntityType.USER_EXERCISE_STATE -> syncDao.setExerciseStateSyncState(id, state)
         SyncEntityType.USER_TEMPLATE_STATE -> syncDao.setTemplateStateSyncState(id, state)
         SyncEntityType.USER_PROFILE -> syncDao.setProfileSyncState(id, state)
+        SyncEntityType.BODY_WEIGHT_ENTRY -> db.bodyWeightDao().setSyncState(id, state)
     }
 
     private suspend fun log(type: SyncEntityType, id: String, outcome: SyncLogOutcome, reason: String?, payload: String?) {
@@ -261,6 +271,11 @@ class SyncLocalStore(private val holder: DatabaseHolder, private val clock: Cloc
                 db.userProfileDao().insertUserProfile(SyncDtoMapper.toEntity(dto))
             }
         }
+        page.bodyWeightEntries.orEmpty().forEach { dto ->
+            upsert(SyncEntityType.BODY_WEIGHT_ENTRY, dto.id.toString(), dto.revision) {
+                db.bodyWeightDao().upsert(SyncDtoMapper.toEntity(dto))
+            }
+        }
         return PageApplyCounts(applied, skipped)
     }
 
@@ -280,6 +295,7 @@ class SyncLocalStore(private val holder: DatabaseHolder, private val clock: Cloc
         SyncEntityType.USER_EXERCISE_STATE -> db.userExerciseStateDao().getState(id)?.revision
         SyncEntityType.USER_TEMPLATE_STATE -> db.userTemplateStateDao().getState(id)?.revision
         SyncEntityType.USER_PROFILE -> syncDao.getProfileIncludingDeleted(id)?.revision
+        SyncEntityType.BODY_WEIGHT_ENTRY -> db.bodyWeightDao().getRevision(id)
     }
 
     // ---- wipe ----

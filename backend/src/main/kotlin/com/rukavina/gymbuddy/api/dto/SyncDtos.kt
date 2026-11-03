@@ -174,6 +174,17 @@ fun ExerciseSyncDto.forComparison(): ExerciseSyncDto =
 fun WorkoutTemplateSyncDto.forComparison(): WorkoutTemplateSyncDto =
     copy(revision = 0, deletedAt = deletedAt?.let { DELETED_CONTENT_MARKER })
 
+data class BodyWeightEntrySyncDto(
+    val id: String,
+    val measuredAt: Long,
+    val weightKg: Float,
+    val revision: Int = 0,
+    val deletedAt: Long? = null,
+)
+
+fun BodyWeightEntrySyncDto.forComparison(): BodyWeightEntrySyncDto =
+    copy(revision = 0, deletedAt = deletedAt?.let { DELETED_CONTENT_MARKER })
+
 /** Mirrors the PushRequest schema in api/openapi.yaml. */
 data class PushRequestDto(
     val workoutSessions: List<WorkoutSessionSyncDto> = emptyList(),
@@ -182,6 +193,7 @@ data class PushRequestDto(
     val userExerciseStates: List<UserExerciseStateSyncDto> = emptyList(),
     val userTemplateStates: List<UserTemplateStateSyncDto> = emptyList(),
     val userProfile: UserProfileSyncDto? = null,
+    val bodyWeightEntries: List<BodyWeightEntrySyncDto> = emptyList(),
 )
 
 /** Mirrors the MutationResult schema in api/openapi.yaml. */

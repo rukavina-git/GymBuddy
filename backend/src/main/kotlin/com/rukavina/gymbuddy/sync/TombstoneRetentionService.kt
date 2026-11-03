@@ -48,6 +48,7 @@ class TombstoneRetentionService(
             TombstonedTable(EntityType.WORKOUT_SESSION, "workout_sessions", "id"),
             TombstonedTable(EntityType.EXERCISE, "exercises", "id"),
             TombstonedTable(EntityType.WORKOUT_TEMPLATE, "workout_templates", "id"),
+            TombstonedTable(EntityType.BODY_WEIGHT_ENTRY, "body_weight_entries", "id"),
         )
     }
 

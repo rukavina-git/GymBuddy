@@ -22,6 +22,8 @@ import com.rukavina.gymbuddy.data.remote.generated.models.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.model.SyncState
 import java.net.URI
 import java.util.UUID
+import com.rukavina.gymbuddy.data.local.entity.BodyWeightEntryEntity
+import com.rukavina.gymbuddy.data.remote.generated.models.BodyWeightEntry
 import com.rukavina.gymbuddy.data.remote.generated.models.ActivityLevel as DtoActivityLevel
 import com.rukavina.gymbuddy.data.remote.generated.models.DifficultyLevel as DtoDifficultyLevel
 import com.rukavina.gymbuddy.data.remote.generated.models.EntitySource as DtoEntitySource
@@ -62,6 +64,27 @@ data class TemplateAggregate(
  * one side is a contract break and fails loudly.
  */
 object SyncDtoMapper {
+
+    // ---- BodyWeightEntry ----
+
+    fun toDto(e: BodyWeightEntryEntity) = BodyWeightEntry(
+        id = uuid(e.id),
+        measuredAt = e.measuredAt,
+        weightKg = e.weightKg,
+        updatedAt = e.updatedAt,
+        revision = e.revision,
+        deletedAt = e.deletedAt
+    )
+
+    fun toEntity(dto: BodyWeightEntry) = BodyWeightEntryEntity(
+        id = dto.id.toString(),
+        measuredAt = dto.measuredAt,
+        weightKg = dto.weightKg,
+        updatedAt = dto.updatedAt,
+        deletedAt = dto.deletedAt,
+        revision = dto.revision,
+        syncState = SyncState.SYNCED
+    )
 
     // ---- Exercise ----
 

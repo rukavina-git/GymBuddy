@@ -12,6 +12,7 @@ import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.local.db.applyAppConfig
 import com.rukavina.gymbuddy.data.repository.ActiveWorkoutDraftRepositoryImpl
+import com.rukavina.gymbuddy.data.repository.BodyWeightRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutSessionRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutTemplateRepositoryImpl
@@ -21,6 +22,7 @@ import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.id.Uuid7Generator
 import com.rukavina.gymbuddy.domain.repository.ActiveWorkoutDraftRepository
+import com.rukavina.gymbuddy.domain.repository.BodyWeightRepository
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
 import com.rukavina.gymbuddy.domain.repository.WorkoutTemplateRepository
@@ -94,6 +96,14 @@ object AppModule {
         outbox: OutboxRecorder,
         clock: Clock
     ): WorkoutTemplateRepository = WorkoutTemplateRepositoryImpl(holder, outbox, clock)
+
+    @Provides
+    @Singleton
+    fun provideBodyWeightRepository(
+        holder: DatabaseHolder,
+        outbox: OutboxRecorder,
+        clock: Clock
+    ): BodyWeightRepository = BodyWeightRepositoryImpl(holder, outbox, clock)
 
     @Provides
     @Singleton

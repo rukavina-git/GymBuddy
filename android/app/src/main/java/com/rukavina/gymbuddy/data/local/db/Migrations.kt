@@ -14,9 +14,21 @@ val MIGRATION_26_27 = object : Migration(26, 27) {
     }
 }
 
+/** v28: body weight history (Plan 6 step 04), synced like workouts. */
+val MIGRATION_27_28 = object : Migration(27, 28) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `body_weight_entries` (" +
+                "`id` TEXT NOT NULL, `measuredAt` INTEGER NOT NULL, `weightKg` REAL NOT NULL, " +
+                "`updatedAt` INTEGER NOT NULL, `deletedAt` INTEGER, `revision` INTEGER NOT NULL, " +
+                "`syncState` TEXT NOT NULL, PRIMARY KEY(`id`))"
+        )
+    }
+}
+
 /**
  * Every schema migration, in version order. v26 is the baseline
  * (app/schemas/.../26.json); each version bump adds its Migration here
  * and a MigrationTestHelper test.
  */
-val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_26_27)
+val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_26_27, MIGRATION_27_28)
