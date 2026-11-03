@@ -41,8 +41,6 @@ import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
  * 48dp even for [Small] (Surface applies the minimum touch target).
  */
 enum class ButtonSize(internal val height: Dp, internal val icon: Dp, internal val wide: Boolean) {
-    /** 72: Done, workout only. */
-    Large(72.dp, 24.dp, true),
     Medium(56.dp, 24.dp, true),
     /** 48: form actions under 56dp fields (sign-in, create account; Figma R18). */
     Form(48.dp, 20.dp, true),
@@ -82,7 +80,6 @@ fun SecondaryButton(
     enabled: Boolean = true,
     @DrawableRes icon: Int? = null,
 ) {
-    require(size != ButtonSize.Large) { "Secondary is 56 or 40" }
     val cs = MaterialTheme.colorScheme
     PillButton(
         text = text, onClick = onClick, modifier = modifier, size = size, enabled = enabled, icon = icon,
@@ -102,7 +99,6 @@ fun OutlineButton(
     @DrawableRes icon: Int? = null,
     loading: Boolean = false,
 ) {
-    require(size != ButtonSize.Large) { "Outline is 56 or 40" }
     val cs = MaterialTheme.colorScheme
     val disabled = GymBuddyTheme.colors.disabled
     PillButton(

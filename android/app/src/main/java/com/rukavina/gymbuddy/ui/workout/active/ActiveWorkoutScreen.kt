@@ -63,7 +63,6 @@ import com.rukavina.gymbuddy.ui.design.AppDialog
 import com.rukavina.gymbuddy.ui.design.AppMenu
 import com.rukavina.gymbuddy.ui.design.AppMenuItem
 import com.rukavina.gymbuddy.ui.design.AppSnackbar
-import com.rukavina.gymbuddy.ui.design.ButtonSize
 import com.rukavina.gymbuddy.ui.design.InfoRow
 import com.rukavina.gymbuddy.ui.design.Keypad
 import com.rukavina.gymbuddy.ui.design.KeypadInput
@@ -225,8 +224,8 @@ internal fun ActiveWorkoutContent(
                         elapsed = formatElapsed(state.elapsedSeconds),
                         progress = "${state.currentExerciseIndex + 1} / ${state.exercises.size}",
                         onCollapse = actions.onCollapse,
-                        // The exercise list sheet comes with 06b.
-                        onProgress = {},
+                        // Hidden until 06b adds the exercise list sheet.
+                        onProgress = null,
                         onMore = { menuOpen = true },
                     )
                     Box(Modifier.align(Alignment.TopEnd)) {
@@ -250,11 +249,10 @@ internal fun ActiveWorkoutContent(
                     .padding(horizontal = d.insetScreen, vertical = d.group),
                 verticalArrangement = Arrangement.spacedBy(d.stack),
             ) {
-                if (exercise != null) UpNextRow(state, actions.onUpNext)
+                UpNextRow(state, actions.onUpNext)
                 PrimaryButton(
                     text = doneLabel(state),
                     onClick = actions.onDone,
-                    size = ButtonSize.Large,
                     icon = AppIcons.Ui.Check,
                     loading = state.isLoading,
                     enabled = exercise != null && !state.isLoading,
@@ -487,10 +485,11 @@ private fun CurrentSetCard(
 
 @Composable
 private fun UpNextRow(state: ActiveWorkoutUiState, onClick: () -> Unit) {
-    val next = state.exercises.getOrNull(state.currentExerciseIndex + 1)
+    // Nothing after the last exercise: Done already says "finish workout".
+    val next = state.exercises.getOrNull(state.currentExerciseIndex + 1) ?: return
     InfoRow(
         label = stringResource(R.string.workout_up_next),
-        value = next?.exerciseName ?: stringResource(R.string.workout_up_next_summary),
+        value = next.exerciseName,
         onClick = onClick,
     )
 }

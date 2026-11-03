@@ -19,6 +19,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.rememberTextMeasurer
+import com.rukavina.gymbuddy.ui.theme.TABULAR_FIGURES
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
@@ -58,6 +66,8 @@ import kotlinx.coroutines.delay
 private val SetMark = 28.dp
 private val RestIcon = 16.dp
 private val StepperWidth = 64.dp
+/** Panels narrower than this use the smaller number style (360dp phones). */
+private val WideNumberMinWidth = 176.dp
 
 enum class SetState { Done, Upcoming }
 
@@ -200,7 +210,7 @@ fun StepperKey(
             .focusRing(interaction, shape)
             .semantics { role = Role.Button },
     ) {
-        Box(Modifier.size(StepperWidth, d.key), contentAlignment = Alignment.Center) {
+        Box(Modifier.widthIn(min = StepperWidth).height(d.target), contentAlignment = Alignment.Center) {
             Icon(painterResource(icon), cd, Modifier.size(d.icon))
         }
     }
@@ -244,61 +254,120 @@ fun ValuePanel(
         border = if (editing) BorderStroke(d.strokeEmphasis, cs.primary) else null,
         modifier = modifier,
     ) {
-        Column(
-            Modifier.padding(horizontal = d.stack, vertical = d.group),
-            verticalArrangement = Arrangement.spacedBy(d.stack),
-        ) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = d.target)
-                    .selectable(selected = editing, onClick = onClick, role = Role.Button),
-                horizontalArrangement = Arrangement.spacedBy(d.stackTight, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically,
+        BoxWithConstraints {
+            // Big digits only where "102.5 kg" fits; 360dp phones get the smaller style.
+            val numberStyle = if (maxWidth >= WideNumberMinWidth) {
+                MaterialTheme.typography.displayMedium
+            } else {
+                MaterialTheme.typography.headlineLarge.copy(fontFeatureSettings = TABULAR_FIGURES)
+            }
+            val unitStyle = MaterialTheme.typography.titleSmall
+            Column(
+                Modifier.padding(d.stack),
+                verticalArrangement = Arrangement.spacedBy(d.stackTight),
             ) {
-                AnimatedContent(
-                    targetState = number,
-                    transitionSpec = {
-                        if (held) {
-                            EnterTransition.None togetherWith ExitTransition.None
-                        } else {
-                            val up = (initialState.toFloatOrNull() ?: 0f) <= (targetState.toFloatOrNull() ?: 0f)
-                            val tween = motionTween<IntOffset>(Durations.SHORT4)
-                            (slideInVertically(tween) { if (up) it else -it } + fadeIn(motionTween(Durations.SHORT4))) togetherWith
-                                (slideOutVertically(tween) { if (up) -it else it } + fadeOut(motionTween(Durations.SHORT4)))
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = d.target)
+                        .selectable(selected = editing, onClick = onClick, role = Role.Button),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // The number box is at least as wide as "00.0", right-aligned, so
+                    // the unit stays put while the number changes ("17.5" -> "20", 8 -> 10).
+                    Box(Modifier.widthIn(min = numberSlot(numberStyle)), contentAlignment = Alignment.CenterEnd) {
+                        AnimatedContent(
+                            targetState = number,
+                            transitionSpec = {
+                                if (held) {
+                                    EnterTransition.None togetherWith ExitTransition.None
+                                } else {
+                                    val up = (initialState.toFloatOrNull() ?: 0f) <= (targetState.toFloatOrNull() ?: 0f)
+                                    val tween = motionTween<IntOffset>(Durations.SHORT4)
+                                    (slideInVertically(tween) { if (up) it else -it } + fadeIn(motionTween(Durations.SHORT4))) togetherWith
+                                        (slideOutVertically(tween) { if (up) -it else it } + fadeOut(motionTween(Durations.SHORT4)))
+                                }
+                            },
+                            contentAlignment = Alignment.CenterEnd,
+                            label = "odometer",
+                        ) { value ->
+                            Text(value, style = numberStyle, maxLines = 1, softWrap = false)
                         }
-                    },
-                    label = "odometer",
-                    modifier = Modifier.alignByBaseline(),
-                ) { value ->
-                    Text(value, style = MaterialTheme.typography.displayLarge)
+                    }
+                    // AnimatedContent passes no baseline up, so alignByBaseline put the unit
+                    // on its edge. Line the baselines up by measuring both styles instead.
+                    Text(
+                        unit,
+                        style = unitStyle,
+                        color = cs.onSurfaceVariant,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .padding(start = d.hairline)
+                            .baselineOffset(numberStyle, unitStyle),
+                    )
                 }
-                Text(
-                    unit,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = cs.onSurfaceVariant,
-                    modifier = Modifier.alignByBaseline(),
-                )
-            }
-            if (editing && step != null) {
-                Text(step, style = MaterialTheme.typography.labelSmall, color = cs.onSurfaceVariant)
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                StepperKey(
-                    StepperSign.Minus, onMinus, enabled = minusEnabled,
-                    contentDescription = minusDescription, onHoldChange = { held = it },
-                )
-                StepperKey(
-                    StepperSign.Plus, onPlus, enabled = plusEnabled,
-                    contentDescription = plusDescription, onHoldChange = { held = it },
-                )
+                if (editing && step != null) {
+                    Text(step, style = MaterialTheme.typography.labelSmall, color = cs.onSurfaceVariant)
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(d.stackTight)) {
+                    StepperKey(
+                        StepperSign.Minus, onMinus, enabled = minusEnabled,
+                        contentDescription = minusDescription, onHoldChange = { held = it },
+                        modifier = Modifier.weight(1f),
+                    )
+                    StepperKey(
+                        StepperSign.Plus, onPlus, enabled = plusEnabled,
+                        contentDescription = plusDescription, onHoldChange = { held = it },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
         }
     }
 }
 
-/** Two panels side by side need this much; narrower cards stack them (360dp phones). */
-private val SideBySideMinWidth = 328.dp
+/**
+ * Moves the unit down so its baseline sits on the number's, both centred
+ * in the row: half the difference of the two "top to baseline" gaps
+ * shifted by half the height difference.
+ */
+@Composable
+private fun Modifier.baselineOffset(numberStyle: TextStyle, unitStyle: TextStyle): Modifier {
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val offset = remember(numberStyle, unitStyle, density) {
+        val n = measurer.measure("0", numberStyle)
+        val u = measurer.measure("0", unitStyle)
+        val dy = baselineShift(n.firstBaseline, n.size.height.toFloat(), u.firstBaseline, u.size.height.toFloat())
+        with(density) { dy.toDp() }
+    }
+    return this.offset(y = offset)
+}
+
+/**
+ * How far to move a vertically centred unit so its baseline meets the
+ * centred number's: (number baseline - its centre) - (unit baseline - its centre).
+ */
+internal fun baselineShift(numberBaseline: Float, numberHeight: Float, unitBaseline: Float, unitHeight: Float): Float =
+    (numberBaseline - numberHeight / 2f) - (unitBaseline - unitHeight / 2f)
+
+/** Width of [NUMBER_SLOT] in [style]: the number box never gets narrower. */
+@Composable
+private fun numberSlot(style: TextStyle): Dp {
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    return remember(style, density) {
+        with(density) { measurer.measure(NUMBER_SLOT, style).size.width.toDp() }
+    }
+}
+
+/** Covers 0–99.5 kg and any reps; wider numbers push the unit right. */
+private const val NUMBER_SLOT = "00.0"
+
+
+/** Two panels of two 48dp keys each need this much; narrower cards stack them. */
+private val SideBySideMinWidth = 264.dp
 
 /**
  * The current set: title, optional muted [hint] on the right ("Tap a

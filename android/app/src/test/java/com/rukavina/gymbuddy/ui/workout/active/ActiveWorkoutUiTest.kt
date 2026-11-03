@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -43,7 +44,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Workout interaction: Done, swipe delete + Undo, keypad Next, stepper hold, 360dp (Plan 7 06a). */
+/** Workout interaction: Done, swipe delete + Undo, keypad Next, stepper hold, panel layout (Plan 7 06a). */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, qualifiers = "w412dp-h915dp")
 class ActiveWorkoutUiTest {
@@ -149,11 +150,27 @@ class ActiveWorkoutUiTest {
     }
 
     @Test
-    fun panelsStackOnA360dpPhone() {
+    fun panelsSitSideBySideOnA360dpPhone() {
         show(width = 360)
         val kg = rule.onNodeWithText("80").fetchSemanticsNode().boundsInRoot
         val reps = rule.onNodeWithText("8").fetchSemanticsNode().boundsInRoot
+        assertTrue("reps panel right of weight panel: $kg / $reps", reps.left > kg.right)
+        assertEquals(kg.top, reps.top, 1f)
+    }
+
+    @Test
+    fun panelsStackBelow296dp() {
+        show(width = 280)
+        val kg = rule.onNodeWithText("80").fetchSemanticsNode().boundsInRoot
+        val reps = rule.onNodeWithText("8").fetchSemanticsNode().boundsInRoot
         assertTrue("reps panel below weight panel: $kg / $reps", reps.top > kg.bottom)
-        assertEquals(kg.left, reps.left, 1f)
+    }
+
+    @Test
+    fun noUpNextAndNoProgressPillWithNothingToShow() {
+        show()
+        // One exercise: nothing is next. The pill waits for the 06b exercise sheet.
+        rule.onAllNodesWithText("Up next").assertCountEquals(0)
+        rule.onAllNodesWithContentDescription("Workout progress", substring = true).assertCountEquals(0)
     }
 }

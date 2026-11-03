@@ -202,7 +202,8 @@ fun LargeTitleTopBar(
 
 /**
  * Running workout: minimise, title + elapsed, progress pill (opens the
- * exercise list), ⋯. Elapsed is formatted by the caller.
+ * exercise list; hidden when [onProgress] is null), ⋯. Elapsed is
+ * formatted by the caller.
  */
 @Composable
 fun WorkoutTopBar(
@@ -210,7 +211,7 @@ fun WorkoutTopBar(
     elapsed: String,
     progress: String,
     onCollapse: () -> Unit,
-    onProgress: () -> Unit,
+    onProgress: (() -> Unit)?,
     onMore: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -230,22 +231,24 @@ fun WorkoutTopBar(
             Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(elapsed, style = MaterialTheme.typography.labelMedium, color = cs.onSurfaceVariant)
         }
-        val interaction = remember { MutableInteractionSource() }
-        val label = stringResource(R.string.cd_workout_progress)
-        Surface(
-            onClick = onProgress,
-            shape = FullShape,
-            color = cs.surfaceContainerHigh,
-            interactionSource = interaction,
-            modifier = Modifier.focusRing(interaction, FullShape).semantics { this.contentDescription = "$label $progress" },
-        ) {
-            Row(
-                Modifier.heightIn(min = ProgressPillHeight).padding(horizontal = d.stack),
-                horizontalArrangement = Arrangement.spacedBy(d.stackTight),
-                verticalAlignment = Alignment.CenterVertically,
+        if (onProgress != null) {
+            val interaction = remember { MutableInteractionSource() }
+            val label = stringResource(R.string.cd_workout_progress)
+            Surface(
+                onClick = onProgress,
+                shape = FullShape,
+                color = cs.surfaceContainerHigh,
+                interactionSource = interaction,
+                modifier = Modifier.focusRing(interaction, FullShape).semantics { this.contentDescription = "$label $progress" },
             ) {
-                Icon(painterResource(AppIcons.Ui.List), null, Modifier.size(ProgressIcon))
-                Text(progress, style = MaterialTheme.typography.labelMedium)
+                Row(
+                    Modifier.heightIn(min = ProgressPillHeight).padding(horizontal = d.stack),
+                    horizontalArrangement = Arrangement.spacedBy(d.stackTight),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(painterResource(AppIcons.Ui.List), null, Modifier.size(ProgressIcon))
+                    Text(progress, style = MaterialTheme.typography.labelMedium)
+                }
             }
         }
         AppIconButton(AppIcons.Ui.More, stringResource(R.string.cd_more), onMore)

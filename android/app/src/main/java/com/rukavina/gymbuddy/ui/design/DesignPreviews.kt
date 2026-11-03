@@ -31,7 +31,7 @@ private fun Board(content: @Composable () -> Unit) {
 @Preview(widthDp = 412)
 @Composable
 private fun ButtonsPreview() = Board {
-    PrimaryButton("Done · set 4", {}, size = ButtonSize.Large, icon = AppIcons.Ui.Check)
+    PrimaryButton("Done · set 4", {}, icon = AppIcons.Ui.Check)
     PrimaryButton("Start", {})
     PrimaryButton("Save", {}, size = ButtonSize.Small)
     PrimaryButton("Start", {}, enabled = false)

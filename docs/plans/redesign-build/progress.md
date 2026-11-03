@@ -213,8 +213,21 @@
 - 06a: Left for 06b: Home "Workout in progress" card (53:3414), live bar
   rest variant, "3 / 15" pill (All exercises). "How to" hidden until 7.7.
 - 06a: Roadmap 7.6 stays unticked until 06b lands.
+- 06a (fix after owner device check, Figma not binding): Done is 56dp
+  (`ButtonSize.Large` removed; summary Done too). ValuePanel: number
+  `displayMedium` (44) only when the panel is ≥ 176dp wide, else
+  `headlineLarge` + tnum; padding 12, − / + keys share the panel width
+  (48 high). Panels stack only below 264dp card width (was 328).
+  Number box at least "00.0" wide, right-aligned, so the unit stays put;
+  unit baseline lined up by measuring (`baselineShift`), since
+  AnimatedContent passes no baseline. "Up next" hidden after the last
+  exercise; progress pill hidden (`onProgress = null`) until 06b.
 
 ## Gotchas
+- Robolectric fakes text metrics (every text ~4px wide, same height):
+  baselines and text widths can't be asserted in Compose UI tests. Test
+  the maths as plain functions; layout tests by dp widths are fine.
+- 06b: give `WorkoutTopBar(onProgress = …)` back when the sheet lands.
 - From 06a (reviewer, not fixed):
   - Summary after process death: `workout_summary` comes back with no
     summary in the new VM and renders blank (only Back leaves). Pop or

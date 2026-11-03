@@ -167,4 +167,14 @@ class WorkoutComponentsTest {
         rule.onNodeWithText("80 kg × 6")
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Not done yet"))
     }
+
+    // Robolectric fakes text metrics (every text the same size), so the
+    // baseline maths is tested as a function, not on a laid-out panel.
+    @Test
+    fun baselineShiftLinesUpCentredTexts() {
+        // Number 48 high, baseline 38; unit 22 high, baseline 17. Centres at 0:
+        // number baseline +14, unit baseline +6, so the unit moves down 8.
+        assertEquals(8f, baselineShift(38f, 48f, 17f, 22f), 0.001f)
+        assertEquals(0f, baselineShift(17f, 22f, 17f, 22f), 0.001f)
+    }
 }

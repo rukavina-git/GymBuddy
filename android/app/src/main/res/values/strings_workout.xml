@@ -7,7 +7,6 @@
     <string name="workout_rest_left">%s rest</string>
     <string name="workout_rest_over">%1$s rest · +%2$s</string>
     <string name="workout_up_next">Up next</string>
-    <string name="workout_up_next_summary">Workout summary</string>
     <string name="workout_done_set">Done · set %d</string>
     <string name="workout_done_finish">Done · finish workout</string>
     <string name="workout_next_exercise">Next exercise</string>

@@ -33,7 +33,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.design.AppLinkButton
 import com.rukavina.gymbuddy.ui.design.AppTextButton
-import com.rukavina.gymbuddy.ui.design.ButtonSize
 import com.rukavina.gymbuddy.ui.design.ListRow
 import com.rukavina.gymbuddy.ui.design.PrimaryButton
 import com.rukavina.gymbuddy.ui.design.StatTile
@@ -97,7 +96,6 @@ internal fun WorkoutSummaryContent(
             PrimaryButton(
                 text = stringResource(R.string.summary_done),
                 onClick = onDone,
-                size = ButtonSize.Large,
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
