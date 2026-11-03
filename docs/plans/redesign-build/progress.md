@@ -7,7 +7,7 @@
 - [x] 04 Onboarding + auth (steps/04-onboarding-auth.md) — 6781df5
 - [x] 05a Home + Workouts tab + template page (steps/05-home-templates.md) — f609339
 - [x] 05b Template editor + exercise picker (steps/05-home-templates.md) — 803691f
-- [x] 06a Active workout: logging (steps/06-active-workout.md) — HASH
+- [x] 06a Active workout: logging (steps/06-active-workout.md) — 0d33cb5
 - [ ] 06b Active workout: around the workout (steps/06-active-workout.md)
 - [ ] 07 Exercise page + create
 - [ ] 08 Progress tab
