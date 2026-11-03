@@ -52,7 +52,7 @@ fun FilterBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f)
+        scrimColor = MaterialTheme.colorScheme.scrim
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

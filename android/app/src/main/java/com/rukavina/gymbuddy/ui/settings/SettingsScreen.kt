@@ -54,7 +54,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -328,7 +327,7 @@ fun SettingsScreen(
                                     containerColor = MaterialTheme.colorScheme.error
                                 )
                             ) {
-                                Text("Erase data on this phone", color = Color.White)
+                                Text("Erase data on this phone", color = MaterialTheme.colorScheme.onError)
                             }
                         } else item {
                             Button(
@@ -338,7 +337,7 @@ fun SettingsScreen(
                                     containerColor = MaterialTheme.colorScheme.error
                                 )
                             ) {
-                                Text(LOG_OUT, color = Color.White)
+                                Text(LOG_OUT, color = MaterialTheme.colorScheme.onError)
                             }
                         }
                     }
@@ -942,7 +941,7 @@ private fun EraseGuestDataDialog(
                 onClick = onConfirm,
                 enabled = counts != null,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-            ) { Text("Erase", color = Color.White) }
+            ) { Text("Erase", color = MaterialTheme.colorScheme.onError) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )

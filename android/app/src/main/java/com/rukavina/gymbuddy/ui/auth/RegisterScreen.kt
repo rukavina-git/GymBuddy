@@ -32,6 +32,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import com.rukavina.gymbuddy.ui.theme.ColorTokens
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -96,7 +97,7 @@ fun RegistrationScreen(
                 if (!isEmailValid) {
                     Text(
                         text = "Invalid email format",
-                        color = Color.Red,
+                        color = MaterialTheme.colorScheme.error,
                         fontSize = 12.sp,
                         modifier = Modifier
                             .padding(start = 8.dp)
@@ -114,7 +115,7 @@ fun RegistrationScreen(
                         .padding(8.dp)
                         .border(
                             width = 1.dp,
-                            color = if (isEmailValid) Color.Gray else Color.Red,
+                            color = if (isEmailValid) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
                             shape = RoundedCornerShape(4.dp)
                         ),
                     singleLine = true,
@@ -132,7 +133,7 @@ fun RegistrationScreen(
         if (!isUsernameValid) {
             Text(
                 text = "Username should be at least 4 characters long and contain only lowercase letters and numbers.",
-                color = Color.Red,
+                color = MaterialTheme.colorScheme.error,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .padding(start = 8.dp)
@@ -207,7 +208,7 @@ fun RegistrationScreen(
                 if (!doPasswordsMatch) {
                     Text(
                         text = "Passwords do not match",
-                        color = Color.Red,
+                        color = MaterialTheme.colorScheme.error,
                         fontSize = 12.sp,
                         modifier = Modifier
                             .padding(start = 8.dp)
@@ -333,7 +334,7 @@ private fun getPasswordStrengthMessage(password: String): String {
 }
 
 private fun getPasswordStrengthColor(password: String): Color {
-    return if (password.isStrongPassword()) Color.Unspecified else Color.Red
+    return if (password.isStrongPassword()) Color.Unspecified else ColorTokens.Danger
 }
 
 

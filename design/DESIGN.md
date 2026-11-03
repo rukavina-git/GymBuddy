@@ -236,7 +236,7 @@ Never NC, ND, SA or GPL/AGPL. Record every third-party asset here.
 | Asset | Source | Licence | Note |
 |---|---|---|---|
 | UI icons | Material Symbols Rounded, weight 400, `@material-symbols/svg-400` 0.27.0 | Apache 2.0 | List in the app's open-source licences screen |
-| Font | Figtree | OFL 1.1 | Record where the font files come from when they are bundled |
+| Font | Figtree | OFL 1.1 | Bundled 2026-11-03: Regular, Medium, SemiBold, Bold static TTFs from github.com/erikdkennedy/figtree (upstream, commit 032dfa7) in android/app/src/main/res/font; licence text in assets/licenses/figtree-OFL.txt |
 | Profile animals (20) | Fluent Emoji | MIT | Pictures, not icons; stored as an id |
 | Google sign-in button + G logo | Google | Google's brand rules | Use Google's own dark button; never recolour or tokenise |
 | Mark, wordmark, app icon, gym glyphs, tab icons | Own drawing | Ours | Wordmark is Figtree Bold outlined (OFL) |

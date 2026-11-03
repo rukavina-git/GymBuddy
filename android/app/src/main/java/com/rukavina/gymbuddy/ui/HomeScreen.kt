@@ -473,7 +473,7 @@ private fun Day(
             .clip(CircleShape)
             .background(
                 when {
-                    isWorkoutDay && isCurrentMonth -> Color(0xFF81C784) // Softer green for workout days
+                    isWorkoutDay && isCurrentMonth -> MaterialTheme.colorScheme.primary
                     isToday && isCurrentMonth -> MaterialTheme.colorScheme.primaryContainer
                     else -> Color.Transparent
                 }
@@ -489,7 +489,7 @@ private fun Day(
             style = MaterialTheme.typography.bodyMedium,
             color = when {
                 !isCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                isWorkoutDay -> Color.White // White text on green background
+                isWorkoutDay -> MaterialTheme.colorScheme.onPrimary
                 isToday -> MaterialTheme.colorScheme.onPrimaryContainer
                 else -> MaterialTheme.colorScheme.onSurfaceVariant
             },
