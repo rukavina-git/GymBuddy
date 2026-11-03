@@ -83,6 +83,9 @@ object AppIcons {
     /** Own brand drawing. Scale, never redraw. Wordmark is never tinted (lime dot). */
     object Brand {
         @DrawableRes val Mark = R.drawable.brand_mark
+
+        /** Lime tile with the mark (Figma brand/app-icon). The mark alone is dark: only use it on lime. */
+        @DrawableRes val AppIcon = R.drawable.brand_app_icon
         @DrawableRes val Wordmark = R.drawable.brand_wordmark
     }
 }

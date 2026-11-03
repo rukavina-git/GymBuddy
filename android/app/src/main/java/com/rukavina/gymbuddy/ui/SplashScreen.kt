@@ -35,6 +35,6 @@ fun SplashScreen(navController: NavHostController, guestViewModel: GuestViewMode
         if (guestViewModel.opensMain()) navController.openMain() else navController.openWelcome()
     }
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
-        Image(painterResource(AppIcons.Brand.Mark), stringResource(R.string.cd_app_name), Modifier.size(SplashMark))
+        Image(painterResource(AppIcons.Brand.AppIcon), stringResource(R.string.cd_app_name), Modifier.size(SplashMark))
     }
 }

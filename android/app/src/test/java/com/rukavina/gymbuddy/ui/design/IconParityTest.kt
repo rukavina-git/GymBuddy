@@ -6,7 +6,7 @@ import org.junit.Test
 import java.io.File
 
 /**
- * design/icons + design/brand (mark, wordmark) vs res/drawable. Every
+ * design/icons + design/brand (mark, wordmark, app icon) vs res/drawable. Every
  * exported SVG has its converted drawable, and no own-icon drawable
  * exists without an SVG behind it (design/icons.md: re-export, don't
  * hand-edit).
@@ -27,7 +27,7 @@ class IconParityTest {
             svgNames("icons/ui", "ic_ui_") +
                 svgNames("icons/glyphs", "ic_glyph_") +
                 svgNames("icons/tabs", "ic_tab_") +
-                listOf("brand_mark", "brand_wordmark")
+                listOf("brand_mark", "brand_wordmark", "brand_app_icon")
             ).toSortedSet()
         val actual = drawable.listFiles().orEmpty()
             .map { it.nameWithoutExtension }
@@ -35,6 +35,6 @@ class IconParityTest {
             .toSortedSet()
         assertEquals(expected, actual)
         // design/icons.md: 35 UI, 12 glyphs, 10 tab states.
-        assertEquals(35 + 12 + 10 + 2, actual.size)
+        assertEquals(35 + 12 + 10 + 3, actual.size)
     }
 }

@@ -96,6 +96,10 @@
 - 04: Settings guest entries: "Back up your workouts" (create) and
   "Sign in"; logout/delete/erase go to Welcome. Splash has no delay.
 - 04: Strings in `res/values/strings_onboarding.xml`.
+- 04 (fix after owner check): logo was invisible: `brand_mark` is the
+  dark ECG line only, meant for lime. Added `brand_app_icon` (lime tile,
+  converted from design/brand/app-icon.svg) as `AppIcons.Brand.AppIcon`
+  for Splash, Welcome and sign-in.
 
 ## Gotchas
 - From 04 (reviewer, not fixed):

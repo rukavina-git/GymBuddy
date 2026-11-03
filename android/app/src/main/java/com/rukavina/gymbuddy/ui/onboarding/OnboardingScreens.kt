@@ -80,7 +80,7 @@ fun WelcomeScreen(onGetStarted: () -> Unit, onHaveAccount: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.weight(1f))
-        Image(painterResource(AppIcons.Brand.Mark), null, Modifier.size(BrandMarkLarge))
+        Image(painterResource(AppIcons.Brand.AppIcon), null, Modifier.size(BrandMarkLarge))
         Spacer(Modifier.height(d.section))
         Image(
             painterResource(AppIcons.Brand.Wordmark),

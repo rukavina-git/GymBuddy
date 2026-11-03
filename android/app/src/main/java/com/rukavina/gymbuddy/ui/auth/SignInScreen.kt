@@ -271,7 +271,7 @@ private fun SignInHeader() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(d.stack),
     ) {
-        Image(painterResource(AppIcons.Brand.Mark), null, Modifier.size(BrandMarkSmall))
+        Image(painterResource(AppIcons.Brand.AppIcon), null, Modifier.size(BrandMarkSmall))
         Image(painterResource(AppIcons.Brand.Wordmark), stringResource(R.string.cd_app_name), Modifier.height(WordmarkSmall))
         Text(
             stringResource(R.string.signin_title),
