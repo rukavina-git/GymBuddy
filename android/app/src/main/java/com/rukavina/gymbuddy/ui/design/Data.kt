@@ -1,5 +1,9 @@
 package com.rukavina.gymbuddy.ui.design
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -33,8 +37,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.theme.AppIcons
+import com.rukavina.gymbuddy.ui.theme.Durations
 import com.rukavina.gymbuddy.ui.theme.FullShape
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
+import com.rukavina.gymbuddy.ui.theme.motionTween
 
 /** Raw sizes from "01 System" (DESIGN.md §4). */
 private val OpenPillWidth = 60.dp
@@ -48,6 +54,9 @@ private val DayDot = 36.dp
  * Running workout, on every tab. Title, subtitle, lime open pill and a
  * lime progress line along the top edge ([progress] 0..1). The whole
  * bar opens the workout.
+ *
+ * Text crossfades when it changes (Figma 85:10756). [subtitleKey] says
+ * which subtitle changes count: pass the set, not the ticking clock.
  */
 @Composable
 fun LiveBar(
@@ -56,6 +65,7 @@ fun LiveBar(
     progress: Float,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    subtitleKey: Any? = subtitle,
 ) {
     val cs = MaterialTheme.colorScheme
     val d = GymBuddyTheme.dimens
@@ -91,8 +101,17 @@ fun LiveBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(d.hairline)) {
-                Text(title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant, maxLines = 1)
+                AnimatedContent(title, transitionSpec = { textFade() }, label = "liveBarTitle") {
+                    Text(it, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                AnimatedContent(
+                    subtitleKey to subtitle,
+                    transitionSpec = { textFade() },
+                    contentKey = { it.first },
+                    label = "liveBarSubtitle",
+                ) { (_, text) ->
+                    Text(text, style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant, maxLines = 1)
+                }
             }
             Surface(shape = FullShape, color = lime, contentColor = cs.onPrimary) {
                 Box(Modifier.size(OpenPillWidth, OpenPillHeight), contentAlignment = Alignment.Center) {
@@ -102,6 +121,9 @@ fun LiveBar(
         }
     }
 }
+
+private fun textFade() =
+    fadeIn(motionTween(Durations.SHORT4)) togetherWith fadeOut(motionTween(Durations.SHORT4))
 
 /** Summary number: value (`stat-value`) over a muted label, min 72 (D7). */
 @Composable

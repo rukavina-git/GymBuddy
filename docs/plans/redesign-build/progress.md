@@ -3,7 +3,7 @@
 - [x] 01 Theme (steps/01-theme.md) — b8a0806
 - [x] 02a Icons + general components (steps/02-components.md) — d8049bc
 - [x] 02b Workout + data components (steps/02-components.md) — 8263a47
-- [ ] 03 App frame
+- [x] 03 App frame (steps/03-app-frame.md) — HASH
 - [ ] 04 Onboarding + auth
 - [ ] 05 Home + Templates
 - [ ] 06 Active workout
@@ -55,7 +55,42 @@
 - 02b: Keypad is sheet content only (no handle/title). AppBottomSheet
   needs a title, so 7.6 needs a titleless variant or uses the label.
 
+- 03: Collapsed title uses `titleLarge` (20/600); Figma has 22 Bold, no
+  matching token. Collapsed bar is `surfaceContainerHigh` (surface/raised).
+- 03: Own `LargeTitleState` (nestedScroll) instead of M3 `LargeTopAppBar`
+  (its expanded style can't take headline-large + actions row on top).
+- 03: Live bar enter is expand-from-bottom `long2` `emph`, a stand-in
+  for the ⌄ container transform (motion.md #10) until 7.6. Exit is
+  motion.md #12. Only text crossfades; the clock ticks without fading
+  (`LiveBar(subtitleKey)`).
+- 03: Icons-only nav bar from fontScale 1.3 (`NAV_ICONS_ONLY_FONT_SCALE`,
+  estimate); tooltip on long-press via M3 `TooltipBox`.
+- 03: Live bar text from the old workout state: "Workout · exercise",
+  "Set x of y · mm:ss", "All sets done" when finished.
+- 03: Workout complete/discard pops the workout, then switches to the
+  Workouts tab (old code could stack Workouts on top of the workout).
+- 03: Manifest sets `enableOnBackInvokedCallback="true"` (default on
+  target 36+, needed for API 33–35).
+
 ## Gotchas
+- From 03 (reviewer, not fixed):
+  - Tab fade-through only when both ends are tab roots; switching tabs
+    from a pushed screen (or to a tab with a saved pushed screen)
+    slides instead. Decide by `selectedTab` of both back stacks.
+  - MainContent wiring (live bar opens workout, leaveWorkout pops
+    before tab switch) has no test; AppFrameTest covers the parts.
+  - `workoutState` read in MainContent recomposes the frame every
+    second; `AppFrame` LiveBarSlot writes `last` in composition.
+  - `LargeTitleState` collapses even when content can't scroll, and
+    isn't saveable (title re-expands after tab restore/rotation).
+  - " · " separators are hard-coded, not string resources.
+  - Icons-only tooltip anchors on the icon, not the whole item.
+- Use: tab roots from 7.5 on take `rememberLargeTitleState()` and
+  `Modifier.nestedScroll(state.nestedScrollConnection)` on their list.
+  Switch tabs with `navController.navigateToTab(tab)`; never
+  `navigate(tabRoute)` (breaks per-tab stacks). Routes `progress`
+  (StatisticsScreen) and `you` (SettingsScreen) until 7.8 / 7.10.
+- Old ActiveWorkoutScreen has no ⌄; leaving is system Back until 7.6.
 - From 02b (reviewer, not fixed):
   - ValuePanel steppers on a 360dp phone: two 64dp keys need 128dp but
     each panel gets ~120dp in SetCard. Fix in 7.6 (smaller gap/keys or

@@ -36,6 +36,24 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import kotlin.math.roundToInt
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.FullShape
@@ -67,32 +85,110 @@ fun BackTopBar(
 }
 
 /**
- * Tab roots: actions row, large title, optional muted subtitle. Static
- * here; the scroll collapse comes with the app frame (7.3).
+ * Scroll state for [LargeTitleTopBar] (motion.md #16). Scrolling up
+ * collapses the title first; it grows back only once the content is at
+ * the top again (exit until collapsed). Hook [nestedScrollConnection]
+ * to the scrolling content with `Modifier.nestedScroll`.
+ */
+@Stable
+class LargeTitleState {
+    internal var limit by mutableFloatStateOf(0f)
+    /** 0 expanded … [limit] (negative px) collapsed. */
+    internal var offset by mutableFloatStateOf(0f)
+
+    /** 0 = big title, 1 = small bar. */
+    val collapsedFraction: Float
+        get() = if (limit == 0f || offset == 0f) 0f else (offset / limit).coerceIn(0f, 1f)
+
+    val nestedScrollConnection: NestedScrollConnection = object : NestedScrollConnection {
+        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset =
+            if (available.y < 0f) consume(available.y) else Offset.Zero
+
+        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
+            if (available.y > 0f) consume(available.y) else Offset.Zero
+    }
+
+    private fun consume(dy: Float): Offset {
+        val old = offset
+        offset = (offset + dy).coerceIn(limit, 0f)
+        return Offset(0f, offset - old)
+    }
+}
+
+@Composable
+fun rememberLargeTitleState(): LargeTitleState = remember { LargeTitleState() }
+
+/**
+ * Tab roots: actions row, large title, optional muted subtitle. With a
+ * [state], the big title shrinks away as content scrolls and a small
+ * title fades into the actions row on a raised background (Figma
+ * 85:10257). TalkBack sees one heading: the big title.
  */
 @Composable
 fun LargeTitleTopBar(
     title: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    state: LargeTitleState? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     val d = GymBuddyTheme.dimens
+    val raised = MaterialTheme.colorScheme.surfaceContainerHigh
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(start = d.section, end = d.hairline, bottom = d.group),
-        verticalArrangement = Arrangement.spacedBy(d.hairline),
+            .drawBehind {
+                val f = state?.collapsedFraction ?: 0f
+                if (f > 0f) drawRect(raised.copy(alpha = f))
+            }
+            .statusBarsPadding(),
     ) {
-        Row(Modifier.fillMaxWidth().heightIn(min = d.target), horizontalArrangement = Arrangement.End, content = actions)
-        Text(
-            title,
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(end = d.section).semantics { heading() },
-        )
-        if (subtitle != null) {
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = TopBarHeight).padding(end = d.hairline),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = d.section, end = d.stackTight)
+                    .graphicsLayer { alpha = state?.collapsedFraction ?: 0f }
+                    .clearAndSetSemantics {},
+            )
+            actions()
+        }
+        Column(
+            modifier = Modifier
+                .clipToBounds()
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    val full = placeable.height
+                    val shown = if (state == null) {
+                        full
+                    } else {
+                        if (state.limit != -full.toFloat()) {
+                            state.limit = -full.toFloat()
+                            state.offset = state.offset.coerceAtLeast(state.limit)
+                        }
+                        (full + state.offset).roundToInt().coerceIn(0, full)
+                    }
+                    layout(placeable.width, shown) { placeable.place(0, shown - full) }
+                }
+                .graphicsLayer { alpha = 1f - (state?.collapsedFraction ?: 0f) }
+                .padding(start = d.section, end = d.section, bottom = d.group),
+            verticalArrangement = Arrangement.spacedBy(d.hairline),
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.semantics { heading() },
+            )
+            if (subtitle != null) {
+                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
     }
 }
@@ -149,6 +245,9 @@ fun WorkoutTopBar(
     }
 }
 
+/** "Exercises" overflows a fifth of a 360dp bar from about here. */
+const val NAV_ICONS_ONLY_FONT_SCALE = 1.3f
+
 /** The five tabs, in order. */
 enum class NavTab(val icon: AppIcons.Tab, internal val label: Int) {
     Home(AppIcons.Tab.Home, R.string.tab_home),
@@ -167,8 +266,11 @@ internal fun navIcon(tab: NavTab, selected: Boolean) =
 
 /**
  * Bottom bar (D14). Active tab: cobalt-tint pill, filled icon drawn
- * untinted, bold label; inactive: outline icon, muted label.
+ * untinted, bold label; inactive: outline icon, muted label. From
+ * [NAV_ICONS_ONLY_FONT_SCALE] the labels no longer fit: icons only,
+ * named for TalkBack, long-press shows the name (Figma 85:9892).
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavBar(
     selected: NavTab,
@@ -177,6 +279,7 @@ fun AppNavBar(
     windowInsets: WindowInsets = NavigationBarDefaults.windowInsets,
 ) {
     val cs = MaterialTheme.colorScheme
+    val iconsOnly = LocalDensity.current.fontScale >= NAV_ICONS_ONLY_FONT_SCALE
     NavigationBar(
         modifier = modifier,
         containerColor = cs.surfaceContainer,
@@ -190,20 +293,36 @@ fun AppNavBar(
                 onClick = { onSelect(tab) },
                 icon = {
                     val icon = navIcon(tab, isSelected)
-                    Icon(
-                        painterResource(icon.res),
-                        contentDescription = null,
-                        tint = if (icon.tinted) cs.onSurfaceVariant else Color.Unspecified,
-                    )
+                    val name = stringResource(tab.label)
+                    val drawn = @Composable {
+                        Icon(
+                            painterResource(icon.res),
+                            contentDescription = if (iconsOnly) name else null,
+                            tint = if (icon.tinted) cs.onSurfaceVariant else Color.Unspecified,
+                        )
+                    }
+                    if (iconsOnly) {
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            tooltip = { PlainTooltip { Text(name) } },
+                            state = rememberTooltipState(),
+                        ) { drawn() }
+                    } else {
+                        drawn()
+                    }
                 },
-                label = {
-                    Text(
-                        stringResource(tab.label),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = if (isSelected) FontWeight.Bold else null,
-                    )
+                label = if (iconsOnly) {
+                    null
+                } else {
+                    {
+                        Text(
+                            stringResource(tab.label),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (isSelected) FontWeight.Bold else null,
+                        )
+                    }
                 },
-                alwaysShowLabel = true,
+                alwaysShowLabel = !iconsOnly,
                 colors = NavigationBarItemDefaults.colors(
                     indicatorColor = GymBuddyTheme.colors.cobaltTint,
                     selectedTextColor = cs.onSurface,

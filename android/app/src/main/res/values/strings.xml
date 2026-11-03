@@ -17,6 +17,8 @@
     <string name="tab_exercises">Exercises</string>
     <string name="tab_progress">Progress</string>
     <string name="tab_you">You</string>
+    <string name="live_bar_set">Set %1$d of %2$d</string>
+    <string name="live_bar_all_done">All sets done</string>
     <string name="tag_pr">PR</string>
     <string name="cd_decrease">Decrease</string>
     <string name="cd_increase">Increase</string>

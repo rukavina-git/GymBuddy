@@ -1,16 +1,12 @@
 package com.rukavina.gymbuddy.ui
 
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,7 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Box
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,7 +32,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import com.rukavina.gymbuddy.BuildConfig
-import com.rukavina.gymbuddy.navigation.BottomNavItem
+import com.rukavina.gymbuddy.ui.design.NavTab
+import com.rukavina.gymbuddy.ui.frame.AppFrame
+import com.rukavina.gymbuddy.ui.frame.isFullScreen
+import com.rukavina.gymbuddy.ui.frame.navigateToTab
+import com.rukavina.gymbuddy.ui.frame.route
+import com.rukavina.gymbuddy.ui.frame.selectedTab
+import com.rukavina.gymbuddy.ui.frame.toLiveBarState
+import com.rukavina.gymbuddy.ui.theme.Durations
+import com.rukavina.gymbuddy.ui.theme.Easings
+import com.rukavina.gymbuddy.ui.theme.motionTween
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.ui.exercise.ExerciseScreen
 import com.rukavina.gymbuddy.ui.exercise.ExerciseDetailsScreen
@@ -120,70 +125,51 @@ fun MainScreen(rootNavController: NavHostController) {
 @Composable
 private fun MainContent(rootNavController: NavHostController) {
     val bottomNavController = rememberNavController()
-    val backStackEntry = bottomNavController.currentBackStackEntryAsState()
-    val currentDestination = backStackEntry.value?.destination
+    val backStackEntry by bottomNavController.currentBackStackEntryAsState()
+    val backStack by bottomNavController.currentBackStack.collectAsState()
+    val currentRoute = backStackEntry?.destination?.route
+    val tab = selectedTab(backStack.map { it.destination.route })
 
     // Create ViewModels at MainScreen level so they survive navigation
     val activeWorkoutViewModel: ActiveWorkoutViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
+    val workoutState by activeWorkoutViewModel.uiState.collectAsState()
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                val bottomNavItems = listOf(
-                    BottomNavItem.Home,
-                    BottomNavItem.Workouts,
-                    BottomNavItem.Exercises,
-                    BottomNavItem.Statistics,
-                    BottomNavItem.Settings
-                )
-                bottomNavItems.forEach { item ->
-                    val selected =
-                        currentDestination?.hierarchy?.any { it.route == item.route } == true
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            bottomNavController.navigate(item.route) {
-                                // Pop up to the main graph start destination to avoid building a big back stack
-                                popUpTo(NavRoutes.Home) { inclusive = false }
-                                launchSingleTop = true
-                            }
-                        },
-                        icon = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label) },
-                        alwaysShowLabel = true
-                    )
-                }
-            }
-        }
+    val openWorkout = { bottomNavController.navigate(NavRoutes.ActiveWorkout) { launchSingleTop = true } }
+    // Pop the workout first so no tab saves it into its back stack.
+    val leaveWorkout = {
+        bottomNavController.popBackStack(NavRoutes.ActiveWorkout, inclusive = true)
+        bottomNavController.navigateToTab(NavTab.Workouts)
+    }
+
+    AppFrame(
+        selectedTab = tab,
+        onSelectTab = bottomNavController::navigateToTab,
+        fullScreen = isFullScreen(currentRoute),
+        liveBar = workoutState.toLiveBarState(),
+        onLiveBarClick = openWorkout,
     ) { paddingValues ->
         NavHost(
             navController = bottomNavController,
             startDestination = NavRoutes.Home,
             modifier = Modifier.padding(paddingValues),
-            enterTransition = { fadeIn(animationSpec = tween(300)) + slideInHorizontally(animationSpec = tween(300)) { it / 4 } },
-            exitTransition = { fadeOut(animationSpec = tween(300)) },
-            popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-            popExitTransition = { fadeOut(animationSpec = tween(300)) + slideOutHorizontally(animationSpec = tween(300)) { it / 4 } }
+            enterTransition = { if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward = true) },
+            exitTransition = { if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward = true) },
+            popEnterTransition = { if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward = false) },
+            popExitTransition = { if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward = false) },
         ) {
             composable(NavRoutes.Home) {
                 HomeScreen(
                     activeWorkoutViewModel = activeWorkoutViewModel,
-                    onNavigateToWorkout = {
-                        bottomNavController.navigate(NavRoutes.ActiveWorkout)
-                    },
-                    onNavigateToTemplates = {
-                        bottomNavController.navigate(NavRoutes.Workouts)
-                    },
-                    onNavigateToProfile = {
-                        bottomNavController.navigate(NavRoutes.Settings)
-                    }
+                    onNavigateToWorkout = openWorkout,
+                    onNavigateToTemplates = { bottomNavController.navigateToTab(NavTab.Workouts) },
+                    onNavigateToProfile = { bottomNavController.navigateToTab(NavTab.You) }
                 )
             }
             composable(NavRoutes.Workouts) {
                 CombinedWorkoutsScreen(
                     activeWorkoutViewModel = activeWorkoutViewModel,
-                    onStartWorkout = { bottomNavController.navigate(NavRoutes.ActiveWorkout) }
+                    onStartWorkout = openWorkout
                 )
             }
             composable(NavRoutes.Exercises) {
@@ -214,8 +200,8 @@ private fun MainContent(rootNavController: NavHostController) {
                     )
                 }
             }
-            composable(NavRoutes.Statistics) { StatisticsScreen() }
-            composable(NavRoutes.Settings) {
+            composable(NavRoutes.Progress) { StatisticsScreen() }
+            composable(NavRoutes.You) {
                 SettingsScreen(
                     bottomNavController = bottomNavController,
                     rootNavController = rootNavController
@@ -346,18 +332,30 @@ private fun MainContent(rootNavController: NavHostController) {
             composable(NavRoutes.ActiveWorkout) {
                 ActiveWorkoutScreen(
                     viewModel = activeWorkoutViewModel,
-                    onWorkoutComplete = {
-                        bottomNavController.navigate(NavRoutes.Workouts) {
-                            popUpTo(NavRoutes.Workouts) { inclusive = false }
-                        }
-                    },
-                    onWorkoutDiscarded = {
-                        bottomNavController.navigate(NavRoutes.Workouts) {
-                            popUpTo(NavRoutes.Workouts) { inclusive = false }
-                        }
-                    }
+                    onWorkoutComplete = leaveWorkout,
+                    onWorkoutDiscarded = leaveWorkout
                 )
             }
         }
     }
 }
+/** Both ends are tab roots: fade-through, no slide (tabs have no order). */
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch() =
+    NavTab.entries.any { it.route == initialState.destination.route } &&
+        NavTab.entries.any { it.route == targetState.destination.route }
+
+// motion.md #14: old fades out, then the new one fades in, medium2 total.
+private val fadeThroughOut = fadeOut(motionTween(Durations.MEDIUM2 / 3))
+private val fadeThroughIn = fadeIn(tween(Durations.MEDIUM2 * 2 / 3, delayMillis = Durations.MEDIUM2 / 3, easing = Easings.Standard))
+
+// motion.md #15: shared axis X; predictive back scrubs these with the gesture.
+private fun sharedAxisIn(forward: Boolean) =
+    slideInHorizontally(motionTween(Durations.MEDIUM2, Easings.Emphasized)) { w -> if (forward) w / SHARED_AXIS_SHIFT else -w / SHARED_AXIS_SHIFT } +
+        fadeIn(motionTween(Durations.MEDIUM2, Easings.Emphasized))
+
+private fun sharedAxisOut(forward: Boolean) =
+    slideOutHorizontally(motionTween(Durations.MEDIUM2, Easings.Emphasized)) { w -> if (forward) -w / SHARED_AXIS_SHIFT else w / SHARED_AXIS_SHIFT } +
+        fadeOut(motionTween(Durations.MEDIUM2, Easings.Emphasized))
+
+/** Screens move a tenth of the width, like M3 shared axis (30dp on a phone). */
+private const val SHARED_AXIS_SHIFT = 10
