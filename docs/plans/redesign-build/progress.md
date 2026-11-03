@@ -161,6 +161,9 @@
   - Decimal key uses JVM default locale, not LocalConfiguration; the
     7.6 parser must accept "." and ",".
   - LiveBar subtitle lacks ellipsis; WeekStrip 7-day require untested.
+- 04: SignInViewModelTest cancels its ViewModels' scopes in @After (init's
+  DataStore read leaked onto Main after resetMain). The workout flake
+  below is separate: a withContext(IO) inside ActiveWorkoutViewModelTest.
 - Flaky: ui/workout ViewModel tests sometimes fail with "Dispatchers.Main
   is used concurrently with setting it" (MainDispatcherRule.resetMain).
   Reproduces without 02b; likely Robolectric Compose tests leaking a

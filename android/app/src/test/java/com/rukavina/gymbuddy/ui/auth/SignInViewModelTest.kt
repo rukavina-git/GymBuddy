@@ -22,7 +22,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.After
 import org.junit.Rule
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.cancel
 import org.junit.Test
 import java.time.Clock
 import java.time.Instant
@@ -45,10 +48,17 @@ class SignInViewModelTest {
     private val client = FakeAuthClient()
     private val support = FakeSignInSupport()
 
+    private val created = mutableListOf<SignInViewModel>()
+
     private fun vm(mode: SignInMode = SignInMode.SIGN_IN) = SignInViewModel(
         SavedStateHandle(mapOf(SignInViewModel.ARG_MODE to mode.name)),
         client, support, preferences, clock,
-    )
+    ).also { created += it }
+
+    // init's DataStore read can still be in flight when a test ends; left
+    // alone it resumes on Main after resetMain and fails a later test.
+    @After
+    fun cancelViewModels() = created.forEach { it.viewModelScope.cancel() }
 
     private fun SignInViewModel.collectEvents(scope: kotlinx.coroutines.CoroutineScope): MutableList<SignInEvent> {
         val out = mutableListOf<SignInEvent>()
