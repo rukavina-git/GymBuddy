@@ -61,6 +61,9 @@ jobs:
             -Dsonar.java.binaries=backend/build/classes,android/app/build/intermediates/built_in_kotlinc
             -Dsonar.coverage.exclusions=${{ steps.exclusions.outputs.backend-root }},${{ steps.exclusions.outputs.android-root }}
             -Dsonar.cpd.exclusions=backend/src/main/resources/db/migration/**
+            -Dsonar.issue.ignore.multicriteria=e1
+            -Dsonar.issue.ignore.multicriteria.e1.ruleKey=plsql:S1192
+            -Dsonar.issue.ignore.multicriteria.e1.resourceKey=backend/src/main/resources/db/migration/**
           # No -Dsonar.qualitygate.wait - report only, same as the
           # per-module analysis; this workflow exists to widen what gets
           # scanned, not to add a second blocking gate.

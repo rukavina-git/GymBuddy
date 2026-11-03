@@ -49,6 +49,11 @@ on:
         required: false
         type: string
         default: ''
+      extra-args:
+        description: "Extra scanner args, space-separated -D flags (e.g. sonar.issue.ignore.multicriteria for rules that don't fit generated files)."
+        required: false
+        type: string
+        default: ''
     secrets:
       SONAR_TOKEN:
         required: true
@@ -93,6 +98,7 @@ jobs:
             -Dsonar.java.binaries=${{ inputs.java-binaries-path }}
             -Dsonar.coverage.exclusions=${{ inputs.coverage-exclusions }}
             -Dsonar.cpd.exclusions=${{ inputs.cpd-exclusions }}
+            ${{ inputs.extra-args }}
             -Dsonar.projectBaseDir=${{ inputs.module-path }}
           # No -Dsonar.qualitygate.wait, deliberately: a failing gate
           # must show on the dashboard and any PR check annotation
