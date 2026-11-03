@@ -12,6 +12,9 @@ import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.ExerciseType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
@@ -143,5 +146,18 @@ class ReferenceSeederTest {
         assertFalse(ExerciseSeeder(guest()).seedIfNeeded(context))
         assertFalse(WorkoutTemplateSeeder(guest()).seedIfNeeded(context))
         assertEquals(0, db.exerciseDao().getDefaultExerciseCount())
+    }
+
+    @Test
+    fun `seeding waits for the switch lock, so the owner can't change mid-seed`() = runBlocking {
+        val holder = guest()
+        holder.lock.lock()
+        val seeding = async(Dispatchers.Default) { ExerciseSeeder(holder).seedIfNeeded(context) }
+        delay(200)
+        assertFalse(seeding.isCompleted)
+        assertEquals(0, db.exerciseDao().getDefaultExerciseCount())
+
+        holder.lock.unlock()
+        assertTrue(seeding.await())
     }
 }

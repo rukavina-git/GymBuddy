@@ -173,11 +173,12 @@
 - From 06 (reviewer, not fixed):
   - Fixed (cleanup before 08): both seeders replace DEFAULT rows (and
     plans) from the bundle when the guest file's version is older.
-    Custom rows and overlays kept; accounts unchanged (D-35). Reviewer,
-    not fixed: owner read separately from `holder.db`, so a guest →
-    account switch mid-seed can put the bundle into the account's file
-    (heals on next sync unless versions match); no test for overlays
-    surviving or for templates untouched at equal version.
+    Custom rows and overlays kept; accounts unchanged (D-35). Seeding
+    runs under `holder.lock` and reads db + owner once, so a switch
+    can't land mid-seed (reviewer should-fix, fixed). First install now
+    also writes in one transaction. Seeding holds the sync lock briefly
+    at each file open. Not fixed: no test for overlays surviving or for
+    templates untouched at equal version.
   - `nextInPlan` doesn't drop sessions with null endedAt (falls back to
     startedAt). Sessions from a copied template (derivedFromId) don't
     advance the rotation; decide before 7.4/7.5.

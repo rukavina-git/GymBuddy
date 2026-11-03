@@ -2,10 +2,11 @@ package com.rukavina.gymbuddy.data.local.seeder
 
 import android.content.Context
 import android.util.Log
+import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
+import kotlinx.coroutines.sync.withLock
 import androidx.room.withTransaction
 import com.rukavina.gymbuddy.data.local.dao.StarterPlanDao
-import com.rukavina.gymbuddy.data.local.dao.TemplateVersionDao
 import com.rukavina.gymbuddy.data.local.dao.WorkoutTemplateDao
 import com.rukavina.gymbuddy.data.local.entity.StarterPlanEntity
 import com.rukavina.gymbuddy.data.local.entity.StarterPlanTemplateEntity
@@ -26,7 +27,6 @@ class WorkoutTemplateSeeder @Inject constructor(
     private val holder: DatabaseHolder
 ) {
     // Seeds whichever owner's file is current; the app runs it per new file.
-    private val versionDao: TemplateVersionDao get() = holder.db.templateVersionDao()
 
     companion object {
         private const val TAG = "WorkoutTemplateSeeder"
@@ -53,28 +53,31 @@ class WorkoutTemplateSeeder @Inject constructor(
      * @param context Application context for accessing assets
      * @return true if seeding occurred, false if a library was already loaded
      */
-    suspend fun seedIfNeeded(context: Context): Boolean {
+    suspend fun seedIfNeeded(context: Context): Boolean = holder.lock.withLock {
+        // Under the switch lock, so the file and its owner can't change mid-seed.
+        val db = holder.db
+        val isGuest = holder.owner == null
         try {
             // Load bundled template data
             val json = loadJsonFromAssets(context)
             val bundledVersion = json.getInt("version")
 
             // Check current version in database
-            val currentVersion = versionDao.getCurrentVersion()?.version
+            val currentVersion = db.templateVersionDao().getCurrentVersion()?.version
 
             Log.d(TAG, "Bundled version: $bundledVersion, Current version: $currentVersion")
 
             if (currentVersion == null) {
                 Log.i(TAG, "First install: seeding bundled default templates v$bundledVersion")
-                seedAll(json, bundledVersion)
-                return true
-            } else if (isGuestBehindBundle(currentVersion, bundledVersion)) {
+                seedAll(db, json, bundledVersion)
+                return@withLock true
+            } else if (isGuest && bundledVersion > currentVersion) {
                 Log.i(TAG, "Guest file: refreshing default templates v$currentVersion -> v$bundledVersion")
-                seedAll(json, bundledVersion, replaceDefaults = true)
-                return true
+                seedAll(db, json, bundledVersion, replaceDefaults = true)
+                return@withLock true
             } else {
                 Log.d(TAG, "Default templates already loaded (v$currentVersion); later updates come from the server")
-                return false
+                return@withLock false
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error seeding templates", e)
@@ -89,16 +92,12 @@ class WorkoutTemplateSeeder @Inject constructor(
     suspend fun forceReseed(context: Context) {
         val json = loadJsonFromAssets(context)
         val version = json.getInt("version")
-        seedAll(json, version)
+        seedAll(holder.db, json, version)
         Log.i(TAG, "Forced reseed of default templates (v$version)")
     }
 
-    // The guest's file has a null owner (DatabaseHolder.fileName).
-    private fun isGuestBehindBundle(current: Int, bundled: Int) = holder.owner == null && bundled > current
-
     /** Templates, starter plans and the version land together, or not at all. */
-    private suspend fun seedAll(json: JSONObject, version: Int, replaceDefaults: Boolean = false) {
-        val db = holder.db
+    private suspend fun seedAll(db: AppDatabase, json: JSONObject, version: Int, replaceDefaults: Boolean = false) {
         db.withTransaction {
             // template_exercises go via ON DELETE CASCADE.
             if (replaceDefaults) db.syncDao().deleteDefaultTemplates()

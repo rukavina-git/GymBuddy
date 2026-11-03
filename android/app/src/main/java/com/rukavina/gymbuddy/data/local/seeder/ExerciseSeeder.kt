@@ -3,7 +3,9 @@ package com.rukavina.gymbuddy.data.local.seeder
 import android.content.Context
 import android.util.Log
 import androidx.room.withTransaction
+import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
+import kotlinx.coroutines.sync.withLock
 import com.rukavina.gymbuddy.data.local.dao.ExerciseDao
 import com.rukavina.gymbuddy.data.local.dao.ExerciseVersionDao
 import com.rukavina.gymbuddy.data.local.entity.ExerciseEntity
@@ -54,30 +56,32 @@ class ExerciseSeeder @Inject constructor(
      * @param context Application context for accessing assets
      * @return true if seeding occurred, false if a library was already loaded
      */
-    suspend fun seedIfNeeded(context: Context): Boolean {
+    suspend fun seedIfNeeded(context: Context): Boolean = holder.lock.withLock {
+        // Under the switch lock, so the file and its owner can't change mid-seed.
+        val db = holder.db
+        val isGuest = holder.owner == null
         try {
             // Load bundled exercise data
             val json = loadJsonFromAssets(context)
             val bundledVersion = json.getInt("version")
 
             // Check current version in database
-            val currentVersion = versionDao.getCurrentVersion()?.version
+            val currentVersion = db.exerciseVersionDao().getCurrentVersion()?.version
 
             Log.d(TAG, "Bundled version: $bundledVersion, Current version: $currentVersion")
 
             if (currentVersion == null) {
                 Log.i(TAG, "First install: seeding bundled default exercises v$bundledVersion")
-                seedDefaultExercises(json)
-                versionDao.setVersion(ExerciseVersionEntity(version = bundledVersion))
-                return true
-            } else if (holder.owner == null && bundledVersion > currentVersion) {
+                replaceAll(db, json, bundledVersion)
+                return@withLock true
+            } else if (isGuest && bundledVersion > currentVersion) {
                 // The guest's file never syncs; the bundle is its only source.
                 Log.i(TAG, "Guest file: refreshing default exercises v$currentVersion -> v$bundledVersion")
-                replaceAll(json, bundledVersion)
-                return true
+                replaceAll(db, json, bundledVersion)
+                return@withLock true
             } else {
                 Log.d(TAG, "Default exercises already loaded (v$currentVersion); later updates come from the server")
-                return false
+                return@withLock false
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error seeding exercises", e)
@@ -98,8 +102,7 @@ class ExerciseSeeder @Inject constructor(
     }
 
     /** Defaults and their version land together, or not at all. */
-    private suspend fun replaceAll(json: JSONObject, version: Int) {
-        val db = holder.db
+    private suspend fun replaceAll(db: AppDatabase, json: JSONObject, version: Int) {
         db.withTransaction {
             seedDefaultExercises(json, db.exerciseDao())
             db.exerciseVersionDao().setVersion(ExerciseVersionEntity(version = version))
