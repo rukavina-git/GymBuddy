@@ -5,7 +5,7 @@
 - [x] 02b Workout + data components (steps/02-components.md) — 8263a47
 - [x] 03 App frame (steps/03-app-frame.md) — d69ddbd
 - [x] 04 Onboarding + auth (steps/04-onboarding-auth.md) — 6781df5
-- [x] 05a Home + Workouts tab + template page (steps/05-home-templates.md) — b28a139
+- [x] 05a Home + Workouts tab + template page (steps/05-home-templates.md) — f609339
 - [ ] 05b Template editor + exercise picker (steps/05-home-templates.md)
 - [ ] 06 Active workout
 - [ ] 07 Exercise page + create
