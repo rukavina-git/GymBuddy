@@ -72,9 +72,3 @@ fun AccountDeletedDialog(
         )
     }
 }
-
-/** "k…@gmail.com", as in the Figma frames. */
-fun maskEmail(email: String): String {
-    val at = email.indexOf('@')
-    return if (at <= 1) email else email.first() + "…" + email.substring(at)
-}

@@ -45,8 +45,12 @@ class DatabaseHolder(
                 override fun delete(owner: String?) {
                     val main = pathOf(fileName(owner))
                     // Side files first: a main file without its WAL is still valid.
-                    SIDE_FILES.forEach { File(main.path + it).delete() }
-                    main.delete()
+                    SIDE_FILES.forEach { deleteIfPresent(File(main.path + it)) }
+                    deleteIfPresent(main)
+                }
+
+                private fun deleteIfPresent(file: File) {
+                    if (!file.delete() && file.exists()) Log.w(TAG, "Couldn't delete ${file.name}")
                 }
             }
         }

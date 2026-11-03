@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.rukavina.gymbuddy.data.sync.LocalDataCounts
-import com.rukavina.gymbuddy.ui.guest.countsText
 
 /**
  * Export sheet, plain until Plan 7.10. Structure from Figma R15-11
@@ -53,14 +52,4 @@ fun ExportSheet(
             }
         }
     }
-}
-
-/** "84 workouts, 6 templates, your exercises, notes and settings for rest." */
-internal fun exportSummary(counts: LocalDataCounts?): String {
-    val head = if (counts == null || counts.workouts == 0 && counts.templates == 0) {
-        "Your profile"
-    } else {
-        countsText(counts.copy(exercises = 0))
-    }
-    return "$head, your exercises, notes and settings for rest."
 }
