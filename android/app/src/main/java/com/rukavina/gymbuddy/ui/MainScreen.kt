@@ -16,6 +16,7 @@ import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.ui.design.LargeTitleTopBar
 import com.rukavina.gymbuddy.ui.home.HomeScreen
+import com.rukavina.gymbuddy.ui.home.toRunningWorkout
 import com.rukavina.gymbuddy.ui.template.TemplateDeleteViewModel
 import com.rukavina.gymbuddy.ui.template.editor.TemplateEditorScreen
 import com.rukavina.gymbuddy.ui.template.editor.TemplateEditorViewModel
@@ -227,6 +228,14 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                     onOpenTemplate = openTemplate,
                     onAllTemplates = { bottomNavController.navigateToTab(NavTab.Workouts) },
                     onOpenWeek = { bottomNavController.navigateToTab(NavTab.Progress) },
+                    workout = workoutState.toRunningWorkout(),
+                    onOpenWorkout = openWorkout,
+                    onEmptyWorkout = {
+                        if (!activeWorkoutViewModel.hasActiveWorkout()) {
+                            activeWorkoutViewModel.startEmptyWorkout(context.getString(R.string.workout_empty_title))
+                        }
+                        openWorkout()
+                    },
                 )
             }
             composable(NavRoutes.Workouts) {
@@ -464,9 +473,15 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                 NavRoutes.ActiveWorkout,
                 enterTransition = { growFromLiveBar },
                 popExitTransition = { collapseIntoLiveBar },
-            ) {
+            ) { entry ->
+                val picked by entry.savedStateHandle
+                    .getStateFlow<ArrayList<String>?>(ExercisePickerViewModel.RESULT_PICKED, null)
+                    .collectAsState()
                 ActiveWorkoutScreen(
                     viewModel = activeWorkoutViewModel,
+                    onAddExercises = { ids -> bottomNavController.navigate(NavRoutes.exercisePicker(ids)) },
+                    picked = picked,
+                    onPickedHandled = { entry.savedStateHandle[ExercisePickerViewModel.RESULT_PICKED] = null },
                     onCollapse = { bottomNavController.popBackStack(NavRoutes.ActiveWorkout, inclusive = true) },
                     onSaved = {
                         bottomNavController.navigate(NavRoutes.WorkoutSummary) {

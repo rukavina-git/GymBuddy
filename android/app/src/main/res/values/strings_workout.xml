@@ -62,4 +62,25 @@
     <string name="summary_create_account">Create account</string>
     <string name="summary_not_now">Not now</string>
     <string name="summary_done">Done</string>
+    <!-- 06b: around the workout -->
+    <string name="workout_menu_add_exercise">Add exercise</string>
+    <string name="workout_menu_reorder">Reorder exercises</string>
+    <string name="workout_menu_note">Workout note</string>
+    <string name="workout_menu_rest">Rest timer · %s</string>
+    <string name="workout_exercises_done">%d done</string>
+    <string name="workout_sets_progress">%1$d/%2$d</string>
+    <string name="workout_add_exercise_button">+ Add exercise</string>
+    <string name="workout_reorder">Reorder</string>
+    <string name="workout_reorder_done">Done</string>
+    <string name="workout_add_set">Add set</string>
+    <string name="workout_empty">No exercises yet. Add one to start logging.</string>
+    <string name="workout_note_title">Workout note</string>
+    <string name="workout_note_label">Note</string>
+    <string name="workout_note_placeholder">How did it go?</string>
+    <string name="workout_note_save">Save note</string>
+    <string name="workout_rest_keypad_label">%s · rest</string>
+    <string name="workout_empty_title">Workout</string>
+    <string name="start_sheet_empty">+ Empty workout</string>
+    <string name="home_in_progress">Workout in progress</string>
+    <string name="home_in_progress_line">Started %1$s · %2$d of %3$d exercises done</string>
 </resources>

@@ -958,4 +958,138 @@ class ActiveWorkoutViewModelTest {
         )
         assertFalse(buildViewModel(sessionRepo = many).first.uiState.value.showHint)
     }
+
+    // --- around the workout (06b) ---
+
+    @Test
+    fun `an empty workout runs with no exercises and survives process death`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo)
+        first.startEmptyWorkout("Workout")
+
+        val state = first.uiState.value
+        assertTrue(state.running)
+        assertTrue(first.hasActiveWorkout())
+        assertTrue(state.exercises.isEmpty())
+        assertNull(state.templateId)
+        assertNotNull(draftRepo.draft)
+
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo)
+        assertTrue(second.hasActiveWorkout())
+        assertEquals("Workout", second.uiState.value.workoutTitle)
+    }
+
+    @Test
+    fun `adding exercises from the picker appends them with defaults and shows the first`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+
+        viewModel.addExercises(listOf("ex-plank", "unknown", "ex-bench"))
+
+        val state = viewModel.uiState.value
+        assertEquals(listOf("ex-bench", "ex-plank", "ex-bench"), state.exercises.map { it.exerciseId })
+        assertEquals(1, state.currentExerciseIndex)
+        val plank = state.exercises[1]
+        assertEquals(3, plank.sets.size)
+        // Plank is timed: no reps target. Bench gets 10 reps, no weight.
+        assertTrue(plank.sets.all { it.reps.isEmpty() })
+        assertTrue(state.exercises[2].sets.all { it.reps == "10" && it.weight.isEmpty() })
+        assertEquals(3, state.exercises.map { it.id }.toSet().size)
+    }
+
+    @Test
+    fun `adding an exercise to an empty workout makes it loggable`() {
+        val (viewModel, sessionRepo, _) = buildViewModel()
+        viewModel.startEmptyWorkout("Workout")
+        viewModel.addExercises(listOf("ex-bench"))
+
+        viewModel.done()
+        viewModel.saveWorkout()
+
+        val saved = sessionRepo.created.single()
+        assertEquals("Workout", saved.title)
+        assertNull(saved.templateId)
+        assertEquals(1, saved.performedExercises.single().sets.size)
+    }
+
+    @Test
+    fun `add set copies the last set's values and numbers it`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.fillFirstSet("8", "60")
+
+        viewModel.addSet()
+
+        val sets = viewModel.uiState.value.exercises[0].sets
+        assertEquals(2, sets.size)
+        assertEquals(2, sets[1].setNumber)
+        assertEquals("8", sets[1].reps)
+        assertEquals("60", sets[1].weight)
+        assertFalse(sets[1].isCompleted)
+    }
+
+    @Test
+    fun `reorder moves an exercise and the shown one stays shown`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (viewModel, _, _) = buildViewModel(draftRepo = draftRepo)
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        val bench = viewModel.uiState.value.exercises[0].id
+
+        viewModel.moveExercise(bench, 1)
+
+        val state = viewModel.uiState.value
+        assertEquals(listOf("ex-plank", "ex-bench"), state.exercises.map { it.exerciseId })
+        assertEquals(1, state.currentExerciseIndex)
+        assertEquals(listOf("ex-plank", "ex-bench"), draftRepo.draft!!.exercises.map { it.exerciseId })
+
+        // Past either end: nothing happens.
+        viewModel.moveExercise(bench, 1)
+        viewModel.moveExercise(state.exercises[0].id, -1)
+        assertEquals(state.exercises, viewModel.uiState.value.exercises)
+    }
+
+    @Test
+    fun `the workout note is kept in the draft and saved as the session's notes`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.updateNote("  shoulder was tight  ")
+
+        val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo)
+        assertEquals("  shoulder was tight  ", second.uiState.value.note)
+        second.done()
+        second.saveWorkout()
+        assertEquals("shoulder was tight", sessionRepo.created.single().notes)
+    }
+
+    @Test
+    fun `a blank note saves no notes`() {
+        val (viewModel, sessionRepo, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.updateNote("   ")
+        viewModel.fillFirstSet("8", "60")
+        viewModel.saveWorkout()
+        assertNull(sessionRepo.created.single().notes)
+    }
+
+    @Test
+    fun `rest timer changes this exercise's rest and the rest running after it`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.done()
+
+        viewModel.setRest(150)
+        viewModel.setRest(0) // ignored
+
+        val state = viewModel.uiState.value
+        assertEquals(150, state.exercises[0].restSeconds)
+        assertEquals(150, state.rest!!.seconds)
+        assertNull(state.exercises[1].restSeconds)
+
+        // A rest after another exercise's set keeps its length.
+        viewModel.selectExercise(1)
+        viewModel.setRest(60)
+        assertEquals(150, viewModel.uiState.value.rest!!.seconds)
+        assertEquals(60, viewModel.uiState.value.exercises[1].restSeconds)
+    }
 }

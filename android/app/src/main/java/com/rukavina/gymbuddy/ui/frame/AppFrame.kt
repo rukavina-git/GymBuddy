@@ -21,6 +21,7 @@ import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.design.AppNavBar
 import com.rukavina.gymbuddy.ui.design.LiveBar
 import com.rukavina.gymbuddy.ui.design.NavTab
+import com.rukavina.gymbuddy.ui.template.clock
 import com.rukavina.gymbuddy.ui.theme.Durations
 import com.rukavina.gymbuddy.ui.theme.Easings
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
@@ -76,7 +77,7 @@ private fun LiveBarSlot(state: LiveBarState?, onClick: () -> Unit) {
         LiveBar(
             title = bar.title,
             subtitle = subtitleFor(bar),
-            subtitleKey = bar.setNumber to bar.allDone,
+            subtitleKey = Triple(bar.setNumber, bar.allDone, bar.rest?.let { it.setNumber to (it.leftSeconds < 0) }),
             progress = bar.progress,
             onClick = onClick,
             modifier = Modifier.padding(start = d.insetScreen, end = d.insetScreen, bottom = d.group),
@@ -86,6 +87,15 @@ private fun LiveBarSlot(state: LiveBarState?, onClick: () -> Unit) {
 
 @Composable
 private fun subtitleFor(bar: LiveBarState): String {
+    bar.rest?.let { rest ->
+        val done = stringResource(R.string.live_bar_set_done, rest.setNumber, rest.setCount)
+        val time = if (rest.leftSeconds >= 0) {
+            stringResource(R.string.live_bar_rest, clock(rest.leftSeconds.toInt()))
+        } else {
+            stringResource(R.string.live_bar_rest_over, clock((-rest.leftSeconds).toInt()))
+        }
+        return "$done · $time"
+    }
     val elapsed = formatElapsed(bar.elapsedSeconds)
     val set = when {
         bar.setNumber != null -> stringResource(R.string.live_bar_set, bar.setNumber, bar.setCount)

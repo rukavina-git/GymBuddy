@@ -3,6 +3,7 @@ package com.rukavina.gymbuddy.ui.frame
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.ui.workout.ActiveExercise
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutUiState
+import com.rukavina.gymbuddy.ui.workout.RestState
 import com.rukavina.gymbuddy.ui.workout.WorkoutSet
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -71,5 +72,31 @@ class LiveBarStateTest {
         assertEquals("0:00", formatElapsed(-5))
         assertEquals("38:12", formatElapsed(2292))
         assertEquals("1:02:03", formatElapsed(3723))
+    }
+
+    @Test
+    fun emptyWorkoutShowsTitleAndClockOnly() {
+        val bar = ActiveWorkoutUiState(workoutTitle = "Workout", workoutStartTime = 1L, elapsedSeconds = 30).toLiveBarState()!!
+        assertEquals("Workout", bar.title)
+        assertNull(bar.setNumber)
+        assertFalse(bar.allDone)
+        assertNull(bar.rest)
+    }
+
+    @Test
+    fun restCountsDownThenPasses() {
+        val running = state(exercise("Bench press", true, true, true, false))
+            .copy(rest = RestState(afterSetId = "Bench press2", startedAtElapsed = 2292 - 48, seconds = 120))
+        assertEquals(LiveBarRest(setNumber = 3, setCount = 4, leftSeconds = 72), running.toLiveBarState()!!.rest)
+
+        val passed = running.copy(elapsedSeconds = 2292 + 117)
+        assertEquals(-45L, passed.toLiveBarState()!!.rest!!.leftSeconds)
+    }
+
+    @Test
+    fun noRestOnceEverySetIsDone() {
+        val done = state(exercise("Bench press", true, true))
+            .copy(rest = RestState(afterSetId = "Bench press1", startedAtElapsed = 2290, seconds = 120))
+        assertNull(done.toLiveBarState()!!.rest)
     }
 }

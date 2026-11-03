@@ -4,10 +4,12 @@ import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutUiState
 
 /**
  * What the live bar shows while a workout runs (Figma 85:10033, "On a
- * set"). Resting and timed variants come with 7.6.
+ * set" and "Resting").
  *
  * [setNumber] is the next set to do in the current exercise, null once
- * every set is done. [progress] is done sets over all sets, 0..1.
+ * every set is done (or when there are no exercises yet). [progress] is
+ * done sets over all sets, 0..1. [rest] replaces the set line while a
+ * rest runs and sets are left.
  */
 data class LiveBarState(
     val title: String,
@@ -16,7 +18,14 @@ data class LiveBarState(
     val allDone: Boolean,
     val elapsedSeconds: Long,
     val progress: Float,
+    val rest: LiveBarRest? = null,
 )
+
+/**
+ * "Set 3 of 4 done · rest 1:12" counting down; [leftSeconds] below 0 is
+ * "rest +0:45" (no colour change, no buzz: Figma 85:10033).
+ */
+data class LiveBarRest(val setNumber: Int, val setCount: Int, val leftSeconds: Long)
 
 /**
  * Null when no workout runs (no exercises, or saved / discarded). The
@@ -24,7 +33,10 @@ data class LiveBarState(
  * one with a set left; when all are done, the last one.
  */
 fun ActiveWorkoutUiState.toLiveBarState(): LiveBarState? {
-    if (exercises.isEmpty() || workoutSaved || workoutDiscarded) return null
+    if (!running) return null
+    if (exercises.isEmpty()) {
+        return LiveBarState(workoutTitle, setNumber = null, setCount = 0, allDone = false, elapsedSeconds = elapsedSeconds, progress = 0f)
+    }
     val current = currentExercise?.takeIf { !it.allDone }
         ?: exercises.firstOrNull { !it.allDone }
         ?: exercises.last()
@@ -38,7 +50,15 @@ fun ActiveWorkoutUiState.toLiveBarState(): LiveBarState? {
         allDone = total > 0 && done == total,
         elapsedSeconds = elapsedSeconds,
         progress = if (total == 0) 0f else done.toFloat() / total,
+        rest = if (done < total) liveBarRest() else null,
     )
+}
+
+private fun ActiveWorkoutUiState.liveBarRest(): LiveBarRest? {
+    val rest = rest ?: return null
+    val exercise = exercises.firstOrNull { ex -> ex.sets.any { it.id == rest.afterSetId } } ?: return null
+    val set = exercise.sets.first { it.id == rest.afterSetId }
+    return LiveBarRest(set.setNumber, exercise.sets.size, rest.seconds - (elapsedSeconds - rest.startedAtElapsed))
 }
 
 /** 38:12, or 1:02:03 from an hour on. */

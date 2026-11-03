@@ -53,6 +53,11 @@ import com.rukavina.gymbuddy.ui.template.joinDot
 import com.rukavina.gymbuddy.ui.template.relativeDay
 import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
+import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutUiState
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -75,11 +80,27 @@ fun HomeScreen(
     onOpenTemplate: (String) -> Unit,
     onAllTemplates: () -> Unit,
     onOpenWeek: () -> Unit,
+    workout: RunningWorkout? = null,
+    onOpenWorkout: () -> Unit = {},
+    onEmptyWorkout: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HomeContent(state, workoutRunning, onStartTemplate, onOpenTemplate, onAllTemplates, onOpenWeek)
+    HomeContent(state, workoutRunning, onStartTemplate, onOpenTemplate, onAllTemplates, onOpenWeek, workout, onOpenWorkout, onEmptyWorkout)
 }
+
+/** The running workout for Home's "Workout in progress" card (Figma 53:3414). */
+data class RunningWorkout(val title: String, val startedAt: Long, val exercisesDone: Int, val exerciseCount: Int)
+
+/** Null when no workout runs. An exercise counts as done once all its sets are. */
+fun ActiveWorkoutUiState.toRunningWorkout(): RunningWorkout? =
+    if (!running) null
+    else RunningWorkout(
+        title = workoutTitle,
+        startedAt = workoutStartTime,
+        exercisesDone = exercises.count { it.allDone && it.sets.isNotEmpty() },
+        exerciseCount = exercises.size,
+    )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,6 +111,9 @@ internal fun HomeContent(
     onOpenTemplate: (String) -> Unit,
     onAllTemplates: () -> Unit,
     onOpenWeek: () -> Unit,
+    workout: RunningWorkout? = null,
+    onOpenWorkout: () -> Unit = {},
+    onEmptyWorkout: () -> Unit = {},
 ) {
     val d = GymBuddyTheme.dimens
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
@@ -108,6 +132,9 @@ internal fun HomeContent(
                     contentDescription = stringResource(R.string.app_name),
                     modifier = Modifier.height(WordmarkHome).semantics { heading() },
                 )
+            }
+            if (workoutRunning && workout != null) {
+                InProgressCard(workout, state.zone, onOpenWorkout)
             }
             state.week?.let { week ->
                 WeekStrip(
@@ -155,7 +182,34 @@ internal fun HomeContent(
             state = state,
             onDismiss = { sheetOpen = false },
             onStart = { sheetOpen = false; onStartTemplate(it) },
+            onEmpty = { sheetOpen = false; onEmptyWorkout() },
         )
+    }
+}
+
+/** "Workout in progress · Push A · Started 18:24 · 2 of 15 exercises done"; tap opens it. */
+@Composable
+private fun InProgressCard(workout: RunningWorkout, zone: ZoneId, onClick: () -> Unit) {
+    val cs = MaterialTheme.colorScheme
+    val d = GymBuddyTheme.dimens
+    val locale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
+    val started = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
+        .format(Instant.ofEpochMilli(workout.startedAt).atZone(zone))
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.large,
+        color = cs.surfaceContainer,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(d.insetCard), verticalArrangement = Arrangement.spacedBy(d.hairline)) {
+            Text(stringResource(R.string.home_in_progress), style = MaterialTheme.typography.labelMedium, color = cs.onSurfaceVariant)
+            Text(workout.title, style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                stringResource(R.string.home_in_progress_line, started, workout.exercisesDone, workout.exerciseCount),
+                style = MaterialTheme.typography.bodySmall,
+                color = cs.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -166,14 +220,14 @@ private fun rowSubtitle(line: TemplateLine, state: HomeUiState): String =
 /**
  * Start sheet (Figma R11-3): your templates by recency (last done right),
  * then starter templates with a one-liner (plan, day, about N min) and
- * "N ex". "+ Empty workout" waits for 7.6 (the workout can't add
- * exercises yet).
+ * "N ex". "+ Empty workout" on top starts one with no exercises.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StartSheet(state: HomeUiState, onDismiss: () -> Unit, onStart: (WorkoutTemplate) -> Unit) {
+private fun StartSheet(state: HomeUiState, onDismiss: () -> Unit, onStart: (WorkoutTemplate) -> Unit, onEmpty: () -> Unit) {
     AppBottomSheet(onDismiss = onDismiss, title = stringResource(R.string.start_sheet_title)) {
         Column(Modifier.verticalScroll(rememberScrollState())) {
+            SheetRow(title = stringResource(R.string.start_sheet_empty), subtitle = null, trailing = null, onClick = onEmpty)
             if (state.sheetYours.isNotEmpty()) {
                 SheetHeader(stringResource(R.string.home_your_templates))
                 state.sheetYours.forEach { line ->

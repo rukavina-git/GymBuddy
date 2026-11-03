@@ -21,7 +21,9 @@ data class ActiveWorkoutDraft(
     /** Exercise on screen. Drafts from before Plan 7 06a lack it: 0. */
     val currentExerciseIndex: Int = 0,
     /** Rest running after the last done set, null when none. */
-    val rest: Rest? = null
+    val rest: Rest? = null,
+    /** Workout note (Plan 7 06b); saved as the session's notes. */
+    val note: String = ""
 ) {
     /**
      * Rest after set [afterSetId], counted on the workout clock: it began

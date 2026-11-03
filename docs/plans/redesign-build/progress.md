@@ -8,7 +8,8 @@
 - [x] 05a Home + Workouts tab + template page (steps/05-home-templates.md) — f609339
 - [x] 05b Template editor + exercise picker (steps/05-home-templates.md) — 803691f
 - [x] 06a Active workout: logging (steps/06-active-workout.md) — 0d33cb5
-- [ ] 06b Active workout: around the workout (steps/06-active-workout.md)
+- [x] 06b Active workout: around the workout (steps/06-active-workout.md) — HASH
+- [ ] 06c Active workout: rest buzz + lock screen (steps/06-active-workout.md)
 - [ ] 07 Exercise page + create
 - [ ] 08 Progress tab
 - [ ] 09 Session detail
@@ -223,7 +224,47 @@
   AnimatedContent passes no baseline. "Up next" hidden after the last
   exercise; progress pill hidden (`onProgress = null`) until 06b.
 
+- 06b: Split: rest buzz + lock screen notification moved to 06c (owner
+  said "go" to the plan that proposed it). Roadmap 7.6 stays unticked
+  until 06c lands.
+- 06b: Figma read via the Console MCP. The live bar's rest text comes from
+  85:10033 ("Set 3 of 4 done · rest 1:12", then "rest +0:45"). It counts
+  down, while the in-workout rest line counts up as before. No rest text
+  once every set is done.
+- 06b: All exercises sheet lists every exercise (scrolls); Figma's
+  "+ 5 more" left out. Reorder = the sheet in reorder mode with Move
+  up / Move down buttons per row (chevrons), not Figma's drag dots. ⋯ →
+  Reorder exercises opens that mode. Reorder hidden with < 2 exercises.
+- 06b: Added exercises get the editor defaults: 3 sets, 10 reps where reps
+  count, no weight, rest = default (2:00). The picker marks the workout's
+  exercises as "In template" (reused `ARG_IN_TEMPLATE`).
+- 06b: Rest timer = titleless Keypad sheet (m:ss from the right, like 05b),
+  changes only this workout's exercise (template unchanged) and a rest
+  running after one of its sets.
+- 06b: Workout note = sheet with a multi-line AppTextField + "Save note";
+  saved trimmed as `WorkoutSession.notes` (blank → null). Draft JSON got
+  `note` (default ""); no Room or spec change.
+- 06b: `ActiveWorkoutUiState.running` = (exercises or start time) and not
+  saved/discarded; `hasActiveWorkout()`, live bar, Home card and draft
+  persist/restore all use it (05a gotcha closed). Empty workout title
+  "Workout", no templateId.
+- 06b: Home card "Workout in progress · title · Started 18:24 · N of M
+  exercises done" (locale short time), tap opens the workout. Start sheet
+  "+ Empty workout" is the first row.
+- 06b: "Add set" = lime text link under the set list, copies the last
+  set's values.
+
 ## Gotchas
+- From 06b (reviewer, not fixed):
+  - No Home tests for "+ Empty workout", the in-progress card or
+    `toRunningWorkout` (0-set exercise not counted as done).
+  - Picker says "In template" for exercises already in the workout.
+  - Reordering the shown exercise changes `currentExerciseIndex`, so the
+    same exercise slides in sideways (AnimatedContent keyed by index).
+  - Empty workout shows a disabled "Next exercise" under "+ Add exercise".
+- 06c: rest state is `RestState(afterSetId, startedAtElapsed, seconds)` on
+  the workout clock; `LiveBarRest` / `liveBarRest()` already compute the
+  remaining time. Pausing the clock freezes rest (06a gotcha).
 - Robolectric fakes text metrics (every text ~4px wide, same height):
   baselines and text widths can't be asserted in Compose UI tests. Test
   the maths as plain functions; layout tests by dp widths are fine.

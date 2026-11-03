@@ -10,7 +10,9 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
@@ -53,8 +55,8 @@ class ActiveWorkoutUiTest {
 
     private lateinit var vm: ActiveWorkoutViewModel
 
-    private fun show(width: Int? = null) {
-        val exercises = FakeExerciseRepository(listOf(exercise("bench", "Bench Press")))
+    private fun show(width: Int? = null, second: Boolean = false) {
+        val exercises = FakeExerciseRepository(listOf(exercise("bench", "Bench Press"), exercise("row", "Barbell Row")))
         val sessions = FakeWorkoutSessionRepository()
         val ids = FixedIdGenerator((0..20).map { "id-$it" })
         vm = ActiveWorkoutViewModel(
@@ -75,7 +77,12 @@ class ActiveWorkoutUiTest {
                         id = "te", exerciseId = "bench", exerciseName = "", exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
                         plannedSets = 3, plannedReps = 8, orderIndex = 0, restSeconds = 120, plannedWeightKg = 80f,
                     ),
-                ),
+                ) + if (second) listOf(
+                    TemplateExercise(
+                        id = "te2", exerciseId = "row", exerciseName = "", exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
+                        plannedSets = 2, plannedReps = 10, orderIndex = 1, restSeconds = 90,
+                    ),
+                ) else emptyList(),
             ),
         )
         rule.waitUntil(3_000) { vm.uiState.value.exercises.isNotEmpty() }
@@ -167,10 +174,53 @@ class ActiveWorkoutUiTest {
     }
 
     @Test
-    fun noUpNextAndNoProgressPillWithNothingToShow() {
+    fun noUpNextWithOneExercise() {
         show()
-        // One exercise: nothing is next. The pill waits for the 06b exercise sheet.
         rule.onAllNodesWithText("Up next").assertCountEquals(0)
-        rule.onAllNodesWithContentDescription("Workout progress", substring = true).assertCountEquals(0)
+    }
+
+    // --- 06b ---
+
+    @Test
+    fun progressPillOpensAllExercisesAndReorderMovesDown() {
+        show(second = true)
+        rule.onNodeWithContentDescription("Workout progress", substring = true).performClick()
+        rule.onNodeWithText("2 exercises · 0 done").assertExists()
+        rule.onNodeWithText("0/3").assertExists()
+        rule.onNodeWithText("Reorder").performClick()
+        // Bench is first: its Move up is off, Move down on.
+        rule.onAllNodesWithContentDescription("Move down")[0].performClick()
+        rule.waitUntil(3_000) { vm.uiState.value.exercises.map { it.exerciseId } == listOf("row", "bench") }
+        // Now Row is first (its Move up is off); Bench goes back up.
+        rule.onAllNodesWithContentDescription("Move up")[1].performClick()
+        rule.waitUntil(3_000) { vm.uiState.value.exercises.map { it.exerciseId } == listOf("bench", "row") }
+    }
+
+    @Test
+    fun tappingAnExerciseInTheSheetShowsIt() {
+        show(second = true)
+        rule.onNodeWithContentDescription("Workout progress", substring = true).performClick()
+        rule.onAllNodesWithText("Barbell Row").onLast().performClick()
+        rule.waitUntil(3_000) { vm.uiState.value.currentExerciseIndex == 1 }
+    }
+
+    @Test
+    fun addSetAddsAFourthSet() {
+        show()
+        rule.onNodeWithText("Add set").performScrollTo().performClick()
+        rule.waitUntil(3_000) { sets().size == 4 }
+    }
+
+    @Test
+    fun menuRestTimerSetsTheExercisesRest() {
+        show()
+        rule.onNodeWithContentDescription("More options").performClick()
+        rule.onNodeWithText("Rest timer · 2:00").performClick()
+        rule.onNodeWithText("Bench Press · rest").assertExists()
+        repeat(3) { rule.onNodeWithContentDescription("Delete last digit").performClick() }
+        listOf("1", "3", "0").forEach { rule.onNodeWithText(it).performClick() }
+        rule.onNodeWithText("1:30").assertExists()
+        rule.onNodeWithText("Save").performClick()
+        rule.waitUntil(3_000) { vm.uiState.value.exercises[0].restSeconds == 90 }
     }
 }

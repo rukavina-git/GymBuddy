@@ -25,8 +25,12 @@ Figma (03 Locked designs) https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/Gy
   old screen; app usable.
 - **06b Around the workout**: ⋯ menu (Add exercise via 05b picker,
   Reorder, Workout note, Rest timer), All exercises sheet + Add set,
-  "+ Empty workout" on the Start sheet (05a deviation), rest buzz
-  (VIBRATE + channel), lock screen notification.
+  "+ Empty workout" on the Start sheet (05a deviation), Home "Workout
+  in progress" card, live bar rest variant.
+- **06c Rest buzz + lock screen** (split from 06b, 2026-11-03): rest buzz
+  (VIBRATE + channel), ongoing lock screen notification with Open only
+  (foreground service, POST_NOTIFICATIONS). Step section written when
+  06c starts.
 
 ## Owner decisions: all as recommended (2026-11-03)
 1. **Split** 06a/06b? (yes)
@@ -87,7 +91,8 @@ Figma (03 Locked designs) https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/Gy
 - 06a Compose UI: keypad Next order, stepper hold, swipe delete + Undo,
   Done lands the set.
 - 06b unit: add exercise from picker, add set, reorder, note, rest
-  override; buzz scheduling (fake). Compose UI: Move up/down.
+  override. Compose UI: Move up/down.
+- 06c unit: buzz scheduling (fake).
 - Existing ActiveWorkoutViewModelTest moves with the code or stays green.
 
 ## Out of scope

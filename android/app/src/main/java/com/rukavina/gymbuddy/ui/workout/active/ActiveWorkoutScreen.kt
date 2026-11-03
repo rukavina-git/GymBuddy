@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -43,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +61,8 @@ import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.domain.model.Equipment
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.ui.design.AppBottomSheet
+import com.rukavina.gymbuddy.ui.design.AppLinkButton
+import com.rukavina.gymbuddy.ui.design.OutlineButton
 import com.rukavina.gymbuddy.ui.design.AppDialog
 import com.rukavina.gymbuddy.ui.design.AppMenu
 import com.rukavina.gymbuddy.ui.design.AppMenuItem
@@ -112,8 +116,18 @@ fun ActiveWorkoutScreen(
     onCollapse: () -> Unit,
     onSaved: () -> Unit,
     onDiscarded: () -> Unit,
+    onAddExercises: (inWorkout: List<String>) -> Unit = {},
+    picked: List<String>? = null,
+    onPickedHandled: () -> Unit = {},
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    // Picks from the exercise picker come back through the entry's savedStateHandle.
+    LaunchedEffect(picked) {
+        if (picked != null) {
+            viewModel.addExercises(picked)
+            onPickedHandled()
+        }
+    }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -164,6 +178,11 @@ fun ActiveWorkoutScreen(
             onUpNext = viewModel::nextExercise,
             onFinish = viewModel::requestFinish,
             onDiscard = viewModel::requestDiscard,
+            onAddExercises = { onAddExercises(state.exercises.map { it.exerciseId }) },
+            onAddSet = viewModel::addSet,
+            onMove = viewModel::moveExercise,
+            onNote = viewModel::updateNote,
+            onRest = viewModel::setRest,
         ),
         snackbar = snackbar,
     )
@@ -203,6 +222,11 @@ internal data class WorkoutActions(
     val onUpNext: () -> Unit = {},
     val onFinish: () -> Unit = {},
     val onDiscard: () -> Unit = {},
+    val onAddExercises: () -> Unit = {},
+    val onAddSet: () -> Unit = {},
+    val onMove: (exerciseId: String, delta: Int) -> Unit = { _, _ -> },
+    val onNote: (String) -> Unit = {},
+    val onRest: (Int) -> Unit = {},
 )
 
 @Composable
@@ -214,6 +238,7 @@ internal fun ActiveWorkoutContent(
     val d = GymBuddyTheme.dimens
     val exercise = state.currentExercise
     var menuOpen by remember { mutableStateOf(false) }
+    var sheet by rememberSaveable { mutableStateOf<WorkoutSheet?>(null) }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -222,21 +247,22 @@ internal fun ActiveWorkoutContent(
                     WorkoutTopBar(
                         title = state.workoutTitle,
                         elapsed = formatElapsed(state.elapsedSeconds),
-                        progress = "${state.currentExerciseIndex + 1} / ${state.exercises.size}",
+                        progress = "${if (state.exercises.isEmpty()) 0 else state.currentExerciseIndex + 1} / ${state.exercises.size}",
                         onCollapse = actions.onCollapse,
-                        // Hidden until 06b adds the exercise list sheet.
-                        onProgress = null,
+                        onProgress = { sheet = WorkoutSheet.Exercises },
                         onMore = { menuOpen = true },
                     )
                     Box(Modifier.align(Alignment.TopEnd)) {
-                        AppMenu(expanded = menuOpen, onDismiss = { menuOpen = false }) {
-                            AppMenuItem(stringResource(R.string.workout_menu_finish), { menuOpen = false; actions.onFinish() })
-                            AppMenuItem(
-                                stringResource(R.string.workout_menu_discard),
-                                { menuOpen = false; actions.onDiscard() },
-                                danger = true,
-                            )
-                        }
+                        WorkoutMenu(
+                            expanded = menuOpen,
+                            exercise = exercise,
+                            canReorder = state.exercises.size > 1,
+                            onDismiss = { menuOpen = false },
+                            onAddExercise = actions.onAddExercises,
+                            onSheet = { sheet = it },
+                            onFinish = actions.onFinish,
+                            onDiscard = actions.onDiscard,
+                        )
                     }
                 }
                 ExerciseTabs(state.exercises, state.currentExerciseIndex, actions.onSelectExercise)
@@ -270,8 +296,90 @@ internal fun ActiveWorkoutContent(
             modifier = Modifier.padding(padding),
         ) { index ->
             val shown = state.exercises.getOrNull(index)
-            if (shown != null) ExerciseSets(shown, state, actions)
+            if (shown != null) ExerciseSets(shown, state, actions) else NoExercises(actions.onAddExercises)
         }
+    }
+
+    when (sheet) {
+        WorkoutSheet.Exercises, WorkoutSheet.Reorder -> ExercisesSheet(
+            title = state.workoutTitle,
+            exercises = state.exercises,
+            currentIndex = state.currentExerciseIndex,
+            reorder = sheet == WorkoutSheet.Reorder,
+            onSelect = { sheet = null; actions.onSelectExercise(it) },
+            onMove = actions.onMove,
+            onAddExercise = { sheet = null; actions.onAddExercises() },
+            onReorder = { sheet = if (it) WorkoutSheet.Reorder else WorkoutSheet.Exercises },
+            onDismiss = { sheet = null },
+        )
+        WorkoutSheet.Note -> NoteSheet(
+            note = state.note,
+            onSave = { sheet = null; actions.onNote(it) },
+            onDismiss = { sheet = null },
+        )
+        WorkoutSheet.Rest -> exercise?.let { ex ->
+            RestSheet(
+                exerciseName = ex.exerciseName,
+                seconds = ex.restSeconds ?: ActiveWorkoutViewModel.DEFAULT_REST_SECONDS,
+                onSave = { sheet = null; actions.onRest(it) },
+                onDismiss = { sheet = null },
+            )
+        }
+        null -> Unit
+    }
+}
+
+/** ⋯ (Figma 53:3154): Add exercise, Reorder, Workout note, Rest timer · 2:00 | Finish | Discard. */
+@Composable
+private fun WorkoutMenu(
+    expanded: Boolean,
+    exercise: ActiveExercise?,
+    canReorder: Boolean,
+    onDismiss: () -> Unit,
+    onAddExercise: () -> Unit,
+    onSheet: (WorkoutSheet) -> Unit,
+    onFinish: () -> Unit,
+    onDiscard: () -> Unit,
+) {
+    AppMenu(expanded = expanded, onDismiss = onDismiss) {
+        AppMenuItem(stringResource(R.string.workout_menu_add_exercise), { onDismiss(); onAddExercise() }, icon = AppIcons.Ui.Add)
+        if (canReorder) {
+            AppMenuItem(stringResource(R.string.workout_menu_reorder), { onDismiss(); onSheet(WorkoutSheet.Reorder) }, icon = AppIcons.Ui.Swap)
+        }
+        AppMenuItem(stringResource(R.string.workout_menu_note), { onDismiss(); onSheet(WorkoutSheet.Note) }, icon = AppIcons.Ui.Note)
+        if (exercise != null) {
+            AppMenuItem(
+                stringResource(R.string.workout_menu_rest, clock(exercise.restSeconds ?: ActiveWorkoutViewModel.DEFAULT_REST_SECONDS)),
+                { onDismiss(); onSheet(WorkoutSheet.Rest) },
+                icon = AppIcons.Ui.Timer,
+            )
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        AppMenuItem(stringResource(R.string.workout_menu_finish), { onDismiss(); onFinish() })
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        AppMenuItem(stringResource(R.string.workout_menu_discard), { onDismiss(); onDiscard() }, icon = AppIcons.Ui.Delete, danger = true)
+    }
+}
+
+/** Empty workout: nothing to log until an exercise is added. */
+@Composable
+private fun NoExercises(onAdd: () -> Unit) {
+    val d = GymBuddyTheme.dimens
+    Column(
+        Modifier.fillMaxSize().padding(horizontal = d.insetScreen, vertical = d.section),
+        verticalArrangement = Arrangement.spacedBy(d.group),
+    ) {
+        Text(
+            stringResource(R.string.workout_empty),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlineButton(
+            text = stringResource(R.string.workout_add_exercise_button),
+            onClick = onAdd,
+            icon = AppIcons.Ui.Add,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
@@ -330,6 +438,11 @@ private fun ExerciseSets(exercise: ActiveExercise, state: ActiveWorkoutUiState, 
                 if (rest != null && rest.afterSetId == set.id && current != null) {
                     RestLine(restText(rest, state.elapsedSeconds), Modifier.align(Alignment.CenterHorizontally))
                 }
+            }
+        }
+        item(key = "addSet") {
+            Box(Modifier.fillMaxWidth().animateItem(), contentAlignment = Alignment.Center) {
+                AppLinkButton(stringResource(R.string.workout_add_set), actions.onAddSet)
             }
         }
     }

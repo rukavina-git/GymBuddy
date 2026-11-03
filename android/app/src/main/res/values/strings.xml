@@ -16,6 +16,9 @@
     <string name="tab_you">You</string>
     <string name="live_bar_set">Set %1$d of %2$d</string>
     <string name="live_bar_all_done">All sets done</string>
+    <string name="live_bar_set_done">Set %1$d of %2$d done</string>
+    <string name="live_bar_rest">rest %s</string>
+    <string name="live_bar_rest_over">rest +%s</string>
     <string name="tag_pr">PR</string>
     <string name="cd_decrease">Decrease</string>
     <string name="cd_increase">Increase</string>

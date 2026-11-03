@@ -132,8 +132,14 @@ data class ActiveWorkoutUiState(
     val equipment: Map<String, Equipment> = emptyMap(),
     /** "Tap a number to type" in the user's first workouts (decision 5). */
     val showHint: Boolean = false,
+    /** Workout note (⋯ → Workout note), saved as the session's notes. */
+    val note: String = "",
 ) {
-    val running: Boolean get() = exercises.isNotEmpty() && !workoutSaved && !workoutDiscarded
+    /**
+     * A workout runs: started (an empty workout has no exercises yet) and
+     * not saved or discarded. The one "is a workout running" source.
+     */
+    val running: Boolean get() = (exercises.isNotEmpty() || workoutStartTime > 0L) && !workoutSaved && !workoutDiscarded
     val currentExercise: ActiveExercise? get() = exercises.getOrNull(currentExerciseIndex)
     val doneSets: Int get() = exercises.sumOf { ex -> ex.sets.count { it.isCompleted } }
     val setsLeft: Int get() = exercises.sumOf { ex -> ex.sets.count { !it.isCompleted } }
@@ -221,7 +227,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         viewModelScope.launch {
             val draft = draftRepository.load() ?: return@launch
             val current = _uiState.value
-            if (current.exercises.isNotEmpty() || current.workoutSaved || current.workoutDiscarded) {
+            if (current.running || current.workoutSaved || current.workoutDiscarded) {
                 return@launch
             }
             // A running timer kept counting while the app was gone.
@@ -242,6 +248,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                     templateTitle = draft.templateTitle,
                     currentExerciseIndex = draft.currentExerciseIndex.coerceIn(0, (exercises.size - 1).coerceAtLeast(0)),
                     rest = draft.rest?.let { RestState(it.afterSetId, it.startedAtElapsed, it.seconds) },
+                    note = draft.note,
                 )
             }
             if (draft.isTimerRunning) startTimer()
@@ -250,7 +257,7 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     private fun persistDraft() {
         val state = _uiState.value
-        if (state.exercises.isEmpty()) return
+        if (!state.running) return
         draftWrites.tryEmit(DraftWrite.Save(state.toDraft(clock.millis())))
     }
 
@@ -339,26 +346,32 @@ class ActiveWorkoutViewModel @Inject constructor(
                     )
                 }
 
-            // Reset state completely when starting a new workout, except
-            // what the long-lived collectors loaded (units, equipment,
-            // hint): they won't re-emit just because a workout started.
-            val old = _uiState.value
-            deleted = null
-            _uiState.value = ActiveWorkoutUiState(
-                workoutTitle = template.title,
-                workoutStartTime = clock.millis(),
-                exercises = activeExercises,
-                preferredUnits = old.preferredUnits,
-                equipment = old.equipment,
-                showHint = old.showHint,
-                isTimerRunning = true,
-                templateId = template.id,
-                templateTitle = template.title
-            )
-
-            startTimer()
-            persistDraft()
+            begin(template.title, activeExercises, template.id)
         }
+    }
+
+    /** "+ Empty workout" on the Start sheet: no exercises, add them from ⋯. */
+    fun startEmptyWorkout(title: String) = begin(title, emptyList(), null)
+
+    // Reset state completely when starting a new workout, except what the
+    // long-lived collectors loaded (units, equipment, hint): they won't
+    // re-emit just because a workout started.
+    private fun begin(title: String, exercises: List<ActiveExercise>, templateId: String?) {
+        val old = _uiState.value
+        deleted = null
+        _uiState.value = ActiveWorkoutUiState(
+            workoutTitle = title,
+            workoutStartTime = clock.millis(),
+            exercises = exercises,
+            preferredUnits = old.preferredUnits,
+            equipment = old.equipment,
+            showHint = old.showHint,
+            isTimerRunning = true,
+            templateId = templateId,
+            templateTitle = templateId?.let { title },
+        )
+        startTimer()
+        persistDraft()
     }
 
     /**
@@ -552,6 +565,99 @@ class ActiveWorkoutViewModel @Inject constructor(
         return order.firstOrNull { !exercises[it].allDone } ?: from
     }
 
+    // --- around the workout (06b) ---
+
+    /**
+     * ⋯ → Add exercise / sheet "+ Add exercise": appends the picked
+     * exercises with the editor's defaults (3 sets, 10 reps where reps
+     * count, no weight) and shows the first one. Unknown ids are skipped.
+     */
+    fun addExercises(exerciseIds: List<String>) {
+        if (exerciseIds.isEmpty()) return
+        viewModelScope.launch {
+            if (availableExercises.isEmpty()) setExercises(getAllExercisesIncludingHiddenUseCase().first())
+            val byId = availableExercises.associateBy { it.id }
+            val added = exerciseIds.mapNotNull { byId[it] }.map { exercise ->
+                val reps = SetField.Reps in SetFields.of(exercise.trackingType)
+                ActiveExercise(
+                    id = idGenerator.newId(),
+                    exerciseId = exercise.id,
+                    exerciseName = exercise.name,
+                    exerciseTrackingType = exercise.trackingType,
+                    sets = (1..TemplateEditorViewModel.DEFAULT_SETS).map { n ->
+                        WorkoutSet(
+                            id = idGenerator.newId(),
+                            setNumber = n,
+                            reps = if (reps) TemplateEditorViewModel.DEFAULT_REPS.toString() else "",
+                        )
+                    },
+                    plannedSets = TemplateEditorViewModel.DEFAULT_SETS,
+                    plannedReps = if (reps) TemplateEditorViewModel.DEFAULT_REPS else null,
+                    restSeconds = null,
+                )
+            }
+            if (added.isEmpty()) return@launch
+            _uiState.update { it.copy(exercises = it.exercises + added, currentExerciseIndex = it.exercises.size, keypad = null) }
+            persistDraft()
+        }
+    }
+
+    /** "Add set" under the set list: a new set with the last set's values. */
+    fun addSet() {
+        val exercise = _uiState.value.currentExercise ?: return
+        val last = exercise.sets.lastOrNull()
+        val set = WorkoutSet(
+            id = idGenerator.newId(),
+            setNumber = exercise.sets.size + 1,
+            reps = last?.reps.orEmpty(),
+            weight = last?.weight.orEmpty(),
+            duration = last?.duration.orEmpty(),
+            distance = last?.distance.orEmpty(),
+        )
+        _uiState.update { s ->
+            s.copy(exercises = s.exercises.map { if (it.id == exercise.id) it.copy(sets = it.sets + set) else it })
+        }
+        persistDraft()
+    }
+
+    /** Reorder: Move up (-1) / Move down (+1). The shown exercise stays shown. */
+    fun moveExercise(exerciseId: String, delta: Int) {
+        val state = _uiState.value
+        val from = state.exercises.indexOfFirst { it.id == exerciseId }
+        val to = from + delta
+        if (from < 0 || to !in state.exercises.indices) return
+        val shown = state.currentExercise?.id
+        val list = state.exercises.toMutableList().apply { add(to, removeAt(from)) }
+        _uiState.update {
+            it.copy(exercises = list, currentExerciseIndex = list.indexOfFirst { e -> e.id == shown }.coerceAtLeast(0))
+        }
+        persistDraft()
+    }
+
+    /** ⋯ → Workout note. */
+    fun updateNote(note: String) {
+        _uiState.update { it.copy(note = note) }
+        persistDraft()
+    }
+
+    /**
+     * ⋯ → Rest timer: this exercise's rest for the rest of the workout
+     * (the template is unchanged). A rest running after one of its sets
+     * takes the new length too.
+     */
+    fun setRest(seconds: Int) {
+        if (seconds <= 0) return
+        val exercise = _uiState.value.currentExercise ?: return
+        _uiState.update { s ->
+            val rest = s.rest?.takeIf { r -> exercise.sets.any { it.id == r.afterSetId } }
+            s.copy(
+                exercises = s.exercises.map { if (it.id == exercise.id) it.copy(restSeconds = seconds) else it },
+                rest = if (rest != null) rest.copy(seconds = seconds) else s.rest,
+            )
+        }
+        persistDraft()
+    }
+
     // --- delete + undo ---
 
     /** Swipe or long-press → Delete: no confirm, Undo on the snackbar. */
@@ -678,6 +784,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 title = state.workoutTitle.ifBlank { "Workout" },
                 templateId = state.templateId,
                 templateTitle = state.templateTitle,
+                notes = state.note.trim().ifEmpty { null },
                 performedExercises = performedExercises
             )
 
@@ -706,6 +813,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                             exercises = emptyList(),
                             elapsedSeconds = 0L,
                             workoutTitle = "",
+                            note = "",
                             rest = null,
                             keypad = null,
                             summary = summary,
@@ -804,6 +912,7 @@ private fun ActiveWorkoutUiState.toDraft(now: Long) = ActiveWorkoutDraft(
     savedAt = now,
     currentExerciseIndex = currentExerciseIndex,
     rest = rest?.let { ActiveWorkoutDraft.Rest(it.afterSetId, it.startedAtElapsed, it.seconds) },
+    note = note,
     exercises = exercises.map { exercise ->
         ActiveWorkoutDraft.Exercise(
             id = exercise.id,
