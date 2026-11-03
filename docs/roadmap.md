@@ -83,7 +83,7 @@ roadmap-details.md §3.
 - [x] 6.6 Plans (templates to rotate through) + rework of the default
       templates and starter plans (data model change)
 - [x] 6.7 Data export: versioned JSON (ADR 0015; CSV dropped)
-- [ ] 6.8 (me) CI green, PR develop → main
+- [x] 6.8 (me) CI green, PR develop → main (PR #6, 596850c)
 
 ## Plan 7: redesign build (Compose)
 

@@ -52,4 +52,4 @@ summaries, weekly schedule), staging/prod (Plan 5), CI gates (8.1).
 - Tests: ViewModel/unit tests for new logic; Compose UI tests where a
   step adds interaction logic (swipe/undo, keypad). No manual device
   checks until 7.12 (owner).
-- Branch: feature/plan7-redesign until PR #6 is merged (then develop).
+- Branch: develop (PR #6 merged 2026-11-03).
