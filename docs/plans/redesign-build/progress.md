@@ -2,7 +2,7 @@
 
 - [x] 01 Theme (steps/01-theme.md) — b8a0806
 - [x] 02a Icons + general components (steps/02-components.md) — d8049bc
-- [x] 02b Workout + data components (steps/02-components.md) — HASH
+- [x] 02b Workout + data components (steps/02-components.md) — 8263a47
 - [ ] 03 App frame
 - [ ] 04 Onboarding + auth
 - [ ] 05 Home + Templates
