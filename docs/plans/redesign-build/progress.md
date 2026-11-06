@@ -14,7 +14,7 @@
 - [x] 08 Progress tab + All sessions (steps/08-progress.md) — c5dc7c7
 - [x] 09a Session detail (steps/09-session-detail.md) — 453d555
 - [x] 09b Edit workout (steps/09-session-detail.md) — 5135a08
-- [x] 10a You page (steps/10-you-settings.md) — HASH
+- [x] 10a You page (steps/10-you-settings.md) — 86974f2
 - [ ] 10b Profile, picture, body weight (steps/10-you-settings.md)
 - [ ] 11 Cross-flow states
 - [ ] 12 Device pass, CI green, PR develop → main (me)
