@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.ui.workout.active
 
+import android.content.res.Resources
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rukavina.gymbuddy.R
@@ -19,12 +20,20 @@ import java.text.NumberFormat
 
 /** "kg" / "lbs", "reps", "" (time is m:ss), "m". */
 @Composable
-internal fun unitText(field: SetField, units: PreferredUnits, value: String = ""): String = when (field) {
-    SetField.Weight -> UnitConverter.getWeightUnitLabel(units)
-    SetField.Reps -> stringResource(if (value == "1") R.string.workout_unit_rep else R.string.workout_unit_reps)
-    SetField.Duration -> ""
-    SetField.Distance -> stringResource(R.string.workout_unit_metres)
-}
+internal fun unitText(field: SetField, units: PreferredUnits, value: String = ""): String =
+    unitText(field, units, value) { stringResource(it) }
+
+/** [unitText] outside Compose (the workout notification). */
+internal fun unitText(res: Resources, field: SetField, units: PreferredUnits, value: String = ""): String =
+    unitText(field, units, value) { res.getString(it) }
+
+private inline fun unitText(field: SetField, units: PreferredUnits, value: String, string: (Int) -> String): String =
+    when (field) {
+        SetField.Weight -> UnitConverter.getWeightUnitLabel(units)
+        SetField.Reps -> string(if (value == "1") R.string.workout_unit_rep else R.string.workout_unit_reps)
+        SetField.Duration -> ""
+        SetField.Distance -> string(R.string.workout_unit_metres)
+    }
 
 @Composable
 internal fun fieldWord(field: SetField): String = stringResource(
@@ -58,12 +67,19 @@ internal fun stepText(field: SetField, units: PreferredUnits): String {
 
 /** A logged or upcoming set as one line: "80 kg × 8", "8 reps", "1:00", "400 m · 1:30". */
 @Composable
-internal fun setValueText(type: ExerciseTrackingType, set: WorkoutSet, units: PreferredUnits): String {
+internal fun setValueText(type: ExerciseTrackingType, set: WorkoutSet, units: PreferredUnits): String =
+    setValueText(type, set) { field, number -> unitText(field, units, number) }
+
+/** [setValueText] outside Compose (the workout notification). */
+internal fun setValueText(res: Resources, type: ExerciseTrackingType, set: WorkoutSet, units: PreferredUnits): String =
+    setValueText(type, set) { field, number -> unitText(res, field, units, number) }
+
+private inline fun setValueText(type: ExerciseTrackingType, set: WorkoutSet, unitOf: (SetField, String) -> String): String {
     val fields = SetFields.of(type)
     val parts = fields.map { field ->
         val number = panelNumber(set, field)
         // "80 kg × 8": reps after a weight go without their word.
-        val unit = if (field == SetField.Reps && SetField.Weight in fields) "" else unitText(field, units, number)
+        val unit = if (field == SetField.Reps && SetField.Weight in fields) "" else unitOf(field, number)
         if (unit.isEmpty()) number else "$number $unit"
     }
     val joiner = if (type == ExerciseTrackingType.DISTANCE_DURATION) " · " else " × "

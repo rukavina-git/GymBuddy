@@ -82,6 +82,35 @@ Figma (03 Locked designs) https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/Gy
   `components/NumberPicker.kt`, the active part of `WorkoutScreen.kt`
   (Sessions part stays until 7.8).
 
+## Change (06c)
+Figma: Lock screen 53:3470 (incl. ring 53:3478). motion.md "Rest buzz",
+DESIGN.md open questions (VIBRATE, channel, raw 80/120/80 ms).
+- `WorkoutService` (foreground, `specialUse` type with a
+  `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` "workout timer"): runs while
+  `ActiveWorkoutUiState.running`, stops on finish/discard. Ongoing
+  notification per 53:3470: title, "Set 3 of 4 done · rest 1:12"
+  (`liveBarRest()` text, countdown via `setUsesChronometer` +
+  `setChronometerCountDown`, no per-second posts), else the workout
+  clock; one action "Open" (content intent too). Channel "Workout"
+  (low importance, silent).
+- Rest buzz: opt-in, off by default. `AppPreferencesRepository.restBuzz`
+  (DataStore) + a switch "Buzz when rest ends" in the 06b Rest timer
+  sheet (Settings row comes in 7.10). `RestBuzzScheduler` interface:
+  VM calls `schedule(leftSeconds)` / `cancel()` on rest start, rest
+  timer change, undo, next set, finish/discard, pause. Real impl in the
+  service: one-shot coroutine, then `Vibrator` waveform 80·120·80 with
+  `USAGE_NOTIFICATION` attributes (silent/DND = no buzz). `VIBRATE`
+  permission. Raw ms constants named, DESIGN.md §4 row added.
+- POST_NOTIFICATIONS (33+): asked once on the first workout start; no
+  = no notification, workout and in-app buzz still work (service still
+  runs; Android hides its notification).
+- Manifest: service, `FOREGROUND_SERVICE`,
+  `FOREGROUND_SERVICE_SPECIAL_USE`, `POST_NOTIFICATIONS`, `VIBRATE`.
+- No Done from the lock screen (decision 2). No Room/spec change;
+  `restBuzz` is DataStore only.
+- Flag: `specialUse` needs a Play Console justification at release
+  (5.x). Alternative `health` type needs sensor permissions; not used.
+
 ## Tests
 - 06a unit: VM Done advances set/exercise, rest start/elapsed/passed
   (fake clock), stepper bounds and steps per unit, keypad rules (0 reps
@@ -92,7 +121,10 @@ Figma (03 Locked designs) https://www.figma.com/design/MdD33rDNKJ3S82azTOYfEk/Gy
   Done lands the set.
 - 06b unit: add exercise from picker, add set, reorder, note, rest
   override. Compose UI: Move up/down.
-- 06c unit: buzz scheduling (fake).
+- 06c unit: buzz scheduling with a fake `RestBuzzScheduler` (rest
+  start, change, undo, finish, buzz off = never scheduled); notification
+  text builder; service start/stop follows `running` (fake starter).
+  No instrumented service test.
 - Existing ActiveWorkoutViewModelTest moves with the code or stays green.
 
 ## Out of scope

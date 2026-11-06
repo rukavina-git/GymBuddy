@@ -21,6 +21,11 @@ import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.ui.design.KeypadInput
 import com.rukavina.gymbuddy.ui.design.KeypadValue
 import com.rukavina.gymbuddy.ui.template.editor.TemplateEditorViewModel
+import com.rukavina.gymbuddy.ui.workout.service.RestBuzzScheduler
+import com.rukavina.gymbuddy.ui.workout.service.WorkoutServiceStarter
+import com.rukavina.gymbuddy.ui.workout.service.buzzTarget
+import com.rukavina.gymbuddy.ui.workout.service.counterSeconds
+import com.rukavina.gymbuddy.ui.workout.service.toNotice
 import com.rukavina.gymbuddy.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -32,6 +37,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.dropWhile
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -134,6 +142,8 @@ data class ActiveWorkoutUiState(
     val showHint: Boolean = false,
     /** Workout note (⋯ → Workout note), saved as the session's notes. */
     val note: String = "",
+    /** Buzz when rest ends (06c), a device preference. */
+    val restBuzz: Boolean = false,
 ) {
     /**
      * A workout runs: started (an empty workout has no exercises yet) and
@@ -173,7 +183,9 @@ class ActiveWorkoutViewModel @Inject constructor(
     private val draftRepository: ActiveWorkoutDraftRepository,
     private val sessionRepository: WorkoutSessionRepository,
     private val owners: DataOwnerStore,
-    private val clock: Clock
+    private val clock: Clock,
+    private val workoutService: WorkoutServiceStarter,
+    private val restBuzz: RestBuzzScheduler,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ActiveWorkoutUiState())
@@ -205,6 +217,63 @@ class ActiveWorkoutViewModel @Inject constructor(
         loadExercises()
         loadUserPreferences()
         restoreDraft()
+        followService()
+        followRestBuzz()
+    }
+
+    /**
+     * The workout notification follows the state (06c). Ticks don't count:
+     * the notice holds no clock, the system chronometer counts from the
+     * base worked out when something else changes. Leading nulls are
+     * skipped, so a new ViewModel doesn't stop the service a restored
+     * draft is about to keep.
+     */
+    private fun followService() {
+        viewModelScope.launch {
+            _uiState.map { it.toNotice() }
+                .distinctUntilChanged()
+                .dropWhile { it == null }
+                .collect { notice ->
+                    val base = notice?.takeIf { !it.paused }?.let {
+                        clock.millis() - _uiState.value.counterSeconds() * 1000
+                    }
+                    workoutService.update(notice?.copy(counterBase = base))
+                }
+        }
+    }
+
+    /**
+     * Rest buzz (06c): scheduled for the rest that runs, if the buzz is on.
+     * A new rest, a changed length, undo, pause, finish or discard changes
+     * (or clears) the target; a rest already over doesn't buzz.
+     */
+    private fun followRestBuzz() {
+        viewModelScope.launch {
+            _uiState.map { it.buzzTarget() }
+                .distinctUntilChanged()
+                .collect { target ->
+                    val left = target?.let { it.seconds - (_uiState.value.elapsedSeconds - it.startedAtElapsed) }
+                    if (left != null && left > 0) restBuzz.schedule(left) else restBuzz.cancel()
+                }
+        }
+    }
+
+    /** Rest timer sheet switch "Buzz when rest ends". */
+    fun setRestBuzz(on: Boolean) {
+        // The state follows the preference's flow (loadUserPreferences).
+        viewModelScope.launch { appPreferencesRepository.setRestBuzz(on) }
+    }
+
+    /**
+     * The notification permission is asked once, on the first workout
+     * start; [ask] runs only the first time.
+     */
+    fun askNotificationsOnce(ask: () -> Unit) {
+        viewModelScope.launch {
+            if (appPreferencesRepository.notificationsAsked.first()) return@launch
+            appPreferencesRepository.setNotificationsAsked()
+            ask()
+        }
     }
 
     /** One sequential writer, so writes land in the order they were made. */
@@ -274,6 +343,9 @@ class ActiveWorkoutViewModel @Inject constructor(
             appPreferencesRepository.preferredUnits.collect { units ->
                 _uiState.update { state -> state.copy(preferredUnits = units) }
             }
+        }
+        viewModelScope.launch {
+            appPreferencesRepository.restBuzz.collect { on -> _uiState.update { it.copy(restBuzz = on) } }
         }
     }
 
@@ -364,6 +436,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             workoutStartTime = clock.millis(),
             exercises = exercises,
             preferredUnits = old.preferredUnits,
+            restBuzz = old.restBuzz,
             equipment = old.equipment,
             showHint = old.showHint,
             isTimerRunning = true,
@@ -851,6 +924,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             workoutDiscarded = true,
             isTimerRunning = false,
             preferredUnits = old.preferredUnits,
+            restBuzz = old.restBuzz,
             equipment = old.equipment,
             showHint = old.showHint,
         )

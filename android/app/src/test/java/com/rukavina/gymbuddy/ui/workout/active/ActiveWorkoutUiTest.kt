@@ -29,6 +29,8 @@ import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.ValidateWorkoutSessionSetsUseCase
 import com.rukavina.gymbuddy.testutil.ExerciseFixtures.exercise
 import com.rukavina.gymbuddy.testutil.FakeActiveWorkoutDraftRepository
+import com.rukavina.gymbuddy.testutil.FakeRestBuzzScheduler
+import com.rukavina.gymbuddy.testutil.FakeWorkoutServiceStarter
 import com.rukavina.gymbuddy.testutil.FakeExerciseRepository
 import com.rukavina.gymbuddy.testutil.FakeWorkoutSessionRepository
 import com.rukavina.gymbuddy.testutil.FixedIdGenerator
@@ -68,6 +70,8 @@ class ActiveWorkoutUiTest {
             sessions,
             InMemoryDataOwnerStore(),
             MutableClock(),
+            FakeWorkoutServiceStarter(),
+            FakeRestBuzzScheduler(),
         )
         vm.startWorkoutFromTemplate(
             WorkoutTemplate(

@@ -119,6 +119,8 @@ No token yet; the Figma component is right. Reconcile in Plan 7.
 | ListRow | 68 min height | `size.row` says 72; component wins |
 | StepperKey | 64 wide × 56 | `size.stepper-width` says 60; component wins |
 | Dialog | 356 wide | |
+| Rest buzz | 80 on · 120 off · 80 on (ms) | `RestBuzz.PULSE_MS` / `GAP_MS` (Plan 7 06c) |
+| Notification ring | 24 (18 drawn) | `ic_notification_workout`, white, tinted lime by the system |
 
 All heights are minimums: rows and buttons grow with font scale.
 
@@ -184,8 +186,8 @@ motion.md):
 - Navigation Compose 2.8+ already does predictive back: drop
   `PredictiveBackHandler` from row 15.
 - `ModalBottomSheet` motion can't take our tokens: keep M3 defaults.
-- Rest buzz needs the `VIBRATE` permission; consider a notification
-  channel so it respects Do Not Disturb.
+- Rest buzz: done in Plan 7 06c (`VIBRATE`, `USAGE_NOTIFICATION`, skips
+  silent and Do Not Disturb). Notification channel "Workout" is silent.
 - Rows without an easing default to `std` (`easing.standard`).
 - Done followed by "Couldn't save" fires two pulses (CONFIRM then
   REJECT); decide if that's wanted.
@@ -239,7 +241,7 @@ Never NC, ND, SA or GPL/AGPL. Record every third-party asset here.
 | Font | Figtree | OFL 1.1 | Bundled 2026-11-03: Regular, Medium, SemiBold, Bold static TTFs from github.com/erikdkennedy/figtree (upstream, commit 032dfa7) in android/app/src/main/res/font; licence text in assets/licenses/figtree-OFL.txt |
 | Profile animals (20) | Fluent Emoji | MIT | Pictures, not icons; stored as an id |
 | Google sign-in button + G logo | Google | Google's brand rules | Use Google's own dark button; never recolour or tokenise |
-| Mark, wordmark, app icon, gym glyphs, tab icons | Own drawing | Ours | Wordmark is Figtree Bold outlined (OFL) |
+| Mark, wordmark, app icon, gym glyphs, tab icons, notification ring | Own drawing | Ours | Wordmark is Figtree Bold outlined (OFL) |
 
 Not yet recorded: the licence of the stock reference exercise photos
 (PRODUCT.md "Evidence on Hand").

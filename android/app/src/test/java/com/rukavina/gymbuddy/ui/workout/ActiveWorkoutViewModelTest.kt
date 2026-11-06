@@ -18,6 +18,8 @@ import com.rukavina.gymbuddy.domain.usecase.workout.ValidateWorkoutSessionSetsUs
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
 import com.rukavina.gymbuddy.testutil.FakeActiveWorkoutDraftRepository
+import com.rukavina.gymbuddy.testutil.FakeRestBuzzScheduler
+import com.rukavina.gymbuddy.testutil.FakeWorkoutServiceStarter
 import com.rukavina.gymbuddy.testutil.FakeExerciseRepository
 import com.rukavina.gymbuddy.testutil.FakeWorkoutSessionRepository
 import com.rukavina.gymbuddy.testutil.FixedIdGenerator
@@ -132,7 +134,9 @@ class ActiveWorkoutViewModelTest {
         sessionRepository: WorkoutSessionRepository = sessionRepo,
         draftRepo: FakeActiveWorkoutDraftRepository = FakeActiveWorkoutDraftRepository(),
         clock: MutableClock = MutableClock(),
-        owners: InMemoryDataOwnerStore = InMemoryDataOwnerStore()
+        owners: InMemoryDataOwnerStore = InMemoryDataOwnerStore(),
+        service: FakeWorkoutServiceStarter = FakeWorkoutServiceStarter(),
+        buzz: FakeRestBuzzScheduler = FakeRestBuzzScheduler(),
     ): Triple<ActiveWorkoutViewModel, FakeWorkoutSessionRepository, FixedIdGenerator> {
         val appPreferencesRepository = AppPreferencesRepository(testPreferencesDataStore())
         val viewModel = ActiveWorkoutViewModel(
@@ -148,7 +152,9 @@ class ActiveWorkoutViewModelTest {
             draftRepository = draftRepo,
             sessionRepository = sessionRepository,
             owners = owners,
-            clock = clock
+            clock = clock,
+            workoutService = service,
+            restBuzz = buzz,
         )
         created += viewModel
         return Triple(viewModel, sessionRepo, idGenerator)
@@ -291,7 +297,9 @@ class ActiveWorkoutViewModelTest {
             draftRepository = FakeActiveWorkoutDraftRepository(),
             sessionRepository = FakeWorkoutSessionRepository(),
             owners = InMemoryDataOwnerStore(),
-            clock = MutableClock()
+            clock = MutableClock(),
+            workoutService = FakeWorkoutServiceStarter(),
+            restBuzz = FakeRestBuzzScheduler(),
         )
         created += viewModel
 
@@ -522,7 +530,9 @@ class ActiveWorkoutViewModelTest {
             draftRepository = FakeActiveWorkoutDraftRepository(),
             sessionRepository = FakeWorkoutSessionRepository(),
             owners = InMemoryDataOwnerStore(),
-            clock = MutableClock()
+            clock = MutableClock(),
+            workoutService = FakeWorkoutServiceStarter(),
+            restBuzz = FakeRestBuzzScheduler(),
         )
         created += vmWithImperialPrefs
 
@@ -1091,5 +1101,114 @@ class ActiveWorkoutViewModelTest {
         viewModel.setRest(60)
         assertEquals(150, viewModel.uiState.value.rest!!.seconds)
         assertEquals(60, viewModel.uiState.value.exercises[1].restSeconds)
+    }
+
+    // --- 06c: workout service + rest buzz ---
+
+    private fun ActiveWorkoutViewModel.awaitBuzz(on: Boolean) = kotlinx.coroutines.runBlocking {
+        kotlinx.coroutines.withTimeout(2_000) { uiState.first { it.restBuzz == on } }
+    }
+
+    @Test
+    fun `the service follows the running workout and stops on discard`() {
+        val service = FakeWorkoutServiceStarter()
+        val clock = MutableClock()
+        val (viewModel, _, _) = buildViewModel(service = service, clock = clock)
+        assertTrue("no workout yet: nothing pushed", service.notices.isEmpty())
+
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        var notice = service.last!!
+        assertEquals("Push A", notice.workoutTitle)
+        assertEquals("Bench Press", notice.exerciseName)
+        assertEquals(1, notice.set!!.setNumber)
+        assertEquals(2, notice.setCount)
+        assertFalse(notice.resting)
+        assertEquals(clock.millis, notice.counterBase)
+
+        viewModel.done()
+        notice = service.last!!
+        assertTrue(notice.resting)
+        assertEquals(2, notice.set!!.setNumber)
+
+        viewModel.toggleTimer()
+        assertTrue(service.last!!.paused)
+        assertNull(service.last!!.counterBase)
+
+        viewModel.discardWorkout()
+        assertNull(service.last)
+    }
+
+    @Test
+    fun `the service stops once the workout is saved`() {
+        val service = FakeWorkoutServiceStarter()
+        val (viewModel, _, _) = buildViewModel(service = service)
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.done()
+        viewModel.saveWorkout()
+        assertTrue(viewModel.uiState.value.workoutSaved)
+        assertNull(service.last)
+    }
+
+    @Test
+    fun `buzz off never schedules`() {
+        val buzz = FakeRestBuzzScheduler()
+        val (viewModel, _, _) = buildViewModel(buzz = buzz)
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.done()
+        viewModel.setRest(60)
+        assertTrue(buzz.calls.none { it.startsWith("schedule") })
+        assertNull(buzz.pending)
+    }
+
+    @Test
+    fun `buzz follows rest start, change, undo, pause and discard`() {
+        val buzz = FakeRestBuzzScheduler()
+        val (viewModel, _, _) = buildViewModel(buzz = buzz)
+        viewModel.setRestBuzz(true)
+        viewModel.awaitBuzz(true)
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        assertNull("no rest yet", buzz.pending)
+
+        viewModel.done()
+        assertEquals(90L, buzz.pending)
+
+        viewModel.setRest(60)
+        assertEquals(60L, buzz.pending)
+
+        val bench = viewModel.uiState.value.exercises[0]
+        viewModel.deleteSet(bench.id, bench.sets[0].id)
+        assertNull("its set is gone", buzz.pending)
+        viewModel.undoDelete(bench.sets[0].id)
+        assertEquals(60L, buzz.pending)
+
+        viewModel.toggleTimer()
+        assertNull("paused", buzz.pending)
+        viewModel.toggleTimer()
+        assertEquals(60L, buzz.pending)
+
+        viewModel.discardWorkout()
+        assertNull(buzz.pending)
+    }
+
+    @Test
+    fun `turning the buzz off cancels it, and no buzz once every set is done`() {
+        val buzz = FakeRestBuzzScheduler()
+        val (viewModel, _, _) = buildViewModel(buzz = buzz)
+        viewModel.setRestBuzz(true)
+        viewModel.awaitBuzz(true)
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.done()
+        assertEquals(90L, buzz.pending)
+        viewModel.setRestBuzz(false)
+        viewModel.awaitBuzz(false)
+        assertNull(buzz.pending)
+
+        viewModel.setRestBuzz(true)
+        viewModel.awaitBuzz(true)
+        viewModel.done() // bench done, rest before the plank
+        assertEquals(90L, buzz.pending)
+        viewModel.step(SetField.Duration, plus = true)
+        viewModel.done() // last set: nothing to rest for
+        assertNull(buzz.pending)
     }
 }

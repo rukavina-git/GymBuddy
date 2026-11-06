@@ -28,6 +28,22 @@ class AppPreferencesRepository @Inject constructor(
         val IS_GUEST = booleanPreferencesKey("is_guest")
         val LAST_SIGN_IN_EMAIL = stringPreferencesKey("last_sign_in_email")
         val PENDING_CONSENT_AT = longPreferencesKey("pending_consent_at")
+        val REST_BUZZ = booleanPreferencesKey("rest_buzz")
+        val NOTIFICATIONS_ASKED = booleanPreferencesKey("notifications_asked")
+    }
+
+    /** Buzz when a rest ends (motion.md "Rest buzz"): opt-in, off by default. Phone only. */
+    val restBuzz: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.REST_BUZZ] ?: false }
+
+    suspend fun setRestBuzz(on: Boolean) {
+        dataStore.edit { it[PreferencesKeys.REST_BUZZ] = on }
+    }
+
+    /** The notification permission was asked once, on the first workout start (Plan 7 06c). */
+    val notificationsAsked: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.NOTIFICATIONS_ASKED] ?: false }
+
+    suspend fun setNotificationsAsked() {
+        dataStore.edit { it[PreferencesKeys.NOTIFICATIONS_ASKED] = true }
     }
 
     /** The address of the last email sign-in, filled in next time (Figma 114:20520). Phone only. */

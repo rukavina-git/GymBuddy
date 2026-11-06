@@ -1,6 +1,8 @@
 package com.rukavina.gymbuddy.ui.frame
 
+import com.rukavina.gymbuddy.ui.workout.ActiveExercise
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutUiState
+import com.rukavina.gymbuddy.ui.workout.RestState
 
 /**
  * What the live bar shows while a workout runs (Figma 85:10033, "On a
@@ -37,9 +39,7 @@ fun ActiveWorkoutUiState.toLiveBarState(): LiveBarState? {
     if (exercises.isEmpty()) {
         return LiveBarState(workoutTitle, setNumber = null, setCount = 0, allDone = false, elapsedSeconds = elapsedSeconds, progress = 0f)
     }
-    val current = currentExercise?.takeIf { !it.allDone }
-        ?: exercises.firstOrNull { !it.allDone }
-        ?: exercises.last()
+    val current = liveExercise() ?: return null
     val next = current.sets.indexOfFirst { !it.isCompleted }.takeIf { it >= 0 }
     val total = exercises.sumOf { it.sets.size }
     val done = exercises.sumOf { ex -> ex.sets.count { it.isCompleted } }
@@ -50,13 +50,32 @@ fun ActiveWorkoutUiState.toLiveBarState(): LiveBarState? {
         allDone = total > 0 && done == total,
         elapsedSeconds = elapsedSeconds,
         progress = if (total == 0) 0f else done.toFloat() / total,
-        rest = if (done < total) liveBarRest() else null,
+        rest = liveBarRest(),
     )
 }
 
-private fun ActiveWorkoutUiState.liveBarRest(): LiveBarRest? {
+/**
+ * The exercise the live bar and the notification show: the one on screen
+ * while it has a set left, else the first with a set left; when all are
+ * done, the last one. Null without exercises.
+ */
+internal fun ActiveWorkoutUiState.liveExercise(): ActiveExercise? {
+    if (exercises.isEmpty()) return null
+    return currentExercise?.takeIf { !it.allDone }
+        ?: exercises.firstOrNull { !it.allDone }
+        ?: exercises.last()
+}
+
+/** The rest that's running: its set still exists and sets are left. */
+internal fun ActiveWorkoutUiState.liveRest(): RestState? {
     val rest = rest ?: return null
-    val exercise = exercises.firstOrNull { ex -> ex.sets.any { it.id == rest.afterSetId } } ?: return null
+    if (setsLeft == 0) return null
+    return rest.takeIf { exercises.any { ex -> ex.sets.any { it.id == rest.afterSetId } } }
+}
+
+private fun ActiveWorkoutUiState.liveBarRest(): LiveBarRest? {
+    val rest = liveRest() ?: return null
+    val exercise = exercises.first { ex -> ex.sets.any { it.id == rest.afterSetId } }
     val set = exercise.sets.first { it.id == rest.afterSetId }
     return LiveBarRest(set.setNumber, exercise.sets.size, rest.seconds - (elapsedSeconds - rest.startedAtElapsed))
 }

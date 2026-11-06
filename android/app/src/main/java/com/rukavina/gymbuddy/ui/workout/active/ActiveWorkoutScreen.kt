@@ -39,7 +39,13 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
+import androidx.core.content.ContextCompat
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -165,6 +171,7 @@ fun ActiveWorkoutScreen(
     LaunchedEffect(state.summary != null) { if (state.summary != null) onSaved() }
     LaunchedEffect(state.workoutDiscarded) { if (state.workoutDiscarded) onDiscarded() }
     BackHandler(enabled = state.running) { onCollapse() }
+    AskNotificationsOnce(running = state.running, viewModel = viewModel)
 
     ActiveWorkoutContent(
         state = state,
@@ -183,6 +190,7 @@ fun ActiveWorkoutScreen(
             onMove = viewModel::moveExercise,
             onNote = viewModel::updateNote,
             onRest = viewModel::setRest,
+            onRestBuzz = viewModel::setRestBuzz,
         ),
         snackbar = snackbar,
     )
@@ -227,6 +235,7 @@ internal data class WorkoutActions(
     val onMove: (exerciseId: String, delta: Int) -> Unit = { _, _ -> },
     val onNote: (String) -> Unit = {},
     val onRest: (Int) -> Unit = {},
+    val onRestBuzz: (Boolean) -> Unit = {},
 )
 
 @Composable
@@ -321,6 +330,8 @@ internal fun ActiveWorkoutContent(
             RestSheet(
                 exerciseName = ex.exerciseName,
                 seconds = ex.restSeconds ?: ActiveWorkoutViewModel.DEFAULT_REST_SECONDS,
+                buzz = state.restBuzz,
+                onBuzzChange = actions.onRestBuzz,
                 onSave = { sheet = null; actions.onRest(it) },
                 onDismiss = { sheet = null },
             )
@@ -666,4 +677,22 @@ private fun FinishDialog(
         dismissLabel = stringResource(R.string.workout_keep_going),
         onDismiss = onKeepGoing,
     )
+}
+
+/**
+ * POST_NOTIFICATIONS (API 33+), asked once on the first workout start
+ * (06c). No = no notification; the workout and the buzz still work.
+ */
+@Composable
+private fun AskNotificationsOnce(running: Boolean, viewModel: ActiveWorkoutViewModel) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    LaunchedEffect(running) {
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (running && !granted) {
+            viewModel.askNotificationsOnce { launcher.launch(Manifest.permission.POST_NOTIFICATIONS) }
+        }
+    }
 }

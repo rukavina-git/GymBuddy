@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.design.AppBottomSheet
 import com.rukavina.gymbuddy.ui.design.AppIconButton
+import com.rukavina.gymbuddy.ui.design.AppSwitch
 import com.rukavina.gymbuddy.ui.design.AppTextField
 import com.rukavina.gymbuddy.ui.design.Keypad
 import com.rukavina.gymbuddy.ui.design.KeypadInput
@@ -225,14 +226,34 @@ internal fun NoteSheet(note: String, onSave: (String) -> Unit, onDismiss: () -> 
 
 /**
  * ⋯ → Rest timer: the shown exercise's rest, typed m:ss from the right
- * like the 05b editor ("130" = 1:30). Below 0:01 Save is off.
+ * like the 05b editor ("130" = 1:30). Below 0:01 Save is off. The switch
+ * on top is the opt-in rest buzz (06c; the Settings row comes in 7.10).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun RestSheet(exerciseName: String, seconds: Int, onSave: (Int) -> Unit, onDismiss: () -> Unit) {
+internal fun RestSheet(
+    exerciseName: String,
+    seconds: Int,
+    buzz: Boolean,
+    onBuzzChange: (Boolean) -> Unit,
+    onSave: (Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val d = GymBuddyTheme.dimens
     var text by rememberSaveable { mutableStateOf(KeypadValue.clockDigits(seconds)) }
     val parsed = KeypadValue.parseClock(text)
     AppBottomSheet(onDismiss = onDismiss, title = null) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = d.group),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.workout_rest_buzz),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+            )
+            AppSwitch(checked = buzz, onCheckedChange = onBuzzChange)
+        }
         Keypad(
             label = stringResource(R.string.workout_rest_keypad_label, exerciseName),
             value = KeypadValue.clockText(text),

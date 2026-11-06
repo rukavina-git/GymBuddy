@@ -9,7 +9,7 @@
 - [x] 05b Template editor + exercise picker (steps/05-home-templates.md) — 803691f
 - [x] 06a Active workout: logging (steps/06-active-workout.md) — 0d33cb5
 - [x] 06b Active workout: around the workout (steps/06-active-workout.md) — bd61611
-- [ ] 06c Active workout: rest buzz + lock screen (steps/06-active-workout.md)
+- [x] 06c Active workout: rest buzz + lock screen (steps/06-active-workout.md) — HASH
 - [ ] 07 Exercise page + create
 - [ ] 08 Progress tab
 - [ ] 09 Session detail
@@ -254,7 +254,46 @@
 - 06b: "Add set" = lime text link under the set list, copies the last
   set's values.
 
+- 06c: Figma read via the Console MCP. Notification text follows 53:3470,
+  not the step file: title "Bench Press · set 4 of 4", text "82.5 kg × 8",
+  subtext "Push A" ("· rest" / "· paused"). One system chronometer
+  counting up: the rest while resting, else the workout clock. No
+  countdown, no per-second posts. Empty workout: "No exercises yet".
+- 06c: Buzz timer lives in `WorkoutServiceController` (@Singleton, binds
+  `WorkoutServiceStarter` + `RestBuzzScheduler`), not in the Service; the
+  service only keeps the process in the foreground. Holds a PARTIAL wake
+  lock until the buzz (new `WAKE_LOCK` permission), or a locked phone
+  could sleep through the rest.
+- 06c: The VM doesn't call schedule/cancel per action: it derives them from
+  its state (`buzzTarget()`, `toNotice()` + distinctUntilChanged). Covers
+  start, change, delete/undo, pause, finish, discard, buzz off. The service
+  follow skips leading nulls, so a new VM doesn't stop a restored workout.
+- 06c: "Open" (and tap) brings the app task back like the launcher; no
+  deep link to the workout screen (live bar is one tap).
+- 06c: Notification icon `ic_notification_workout` is our own drawing of
+  ring 53:3478 (two circles), white, tinted lime. DESIGN.md §4 rows for
+  the buzz ms and the ring; licence table updated.
+- 06c: `liveExercise()` / `liveRest()` pulled out of LiveBarState for the
+  notice. `setValueText` / `unitText` got `Resources` variants.
+- 06c: Rest timer sheet has the switch on top; state follows the
+  DataStore flow (no optimistic update, avoids a flip back on first read).
+
 ## Gotchas
+- From 06c (reviewer, not fixed):
+  - The workout clock ticks with `delay(1000)` and stops while the phone
+    sleeps, so the notification chronometer base (`now - elapsed`) jumps
+    back after a locked spell. Derive elapsed from the wall clock
+    (start + pauses) instead of counting ticks.
+  - Wake lock race: an old buzz job past its delay can release the lock a
+    new `schedule()` just took (single non-counted lock). Release only if
+    still the current job.
+  - Chronometer base drops part-seconds: may shift up to 1 s per notice
+    change (e.g. stepper taps).
+  - If the VM is cleared mid-workout and the new one finds no draft,
+    nothing sends null; the notification stays until process death.
+  - `askNotificationsOnce` stores "asked" before launching; if the screen
+    leaves in between the one ask is lost. No test for it.
+  - `specialUse` FGS needs a Play Console justification at release (5.x).
 - From 06b (reviewer, not fixed):
   - No Home tests for "+ Empty workout", the in-progress card or
     `toRunningWorkout` (0-set exercise not counted as done).
