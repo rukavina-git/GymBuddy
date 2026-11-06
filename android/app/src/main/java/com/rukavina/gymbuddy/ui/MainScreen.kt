@@ -24,7 +24,10 @@ import com.rukavina.gymbuddy.ui.template.picker.ExercisePickerScreen
 import com.rukavina.gymbuddy.ui.template.picker.ExercisePickerViewModel
 import com.rukavina.gymbuddy.ui.template.page.TemplatePageScreen
 import com.rukavina.gymbuddy.ui.template.page.TemplatePageViewModel
-import com.rukavina.gymbuddy.ui.workout.WorkoutScreen
+import com.rukavina.gymbuddy.ui.workout.SessionEditBridge
+import com.rukavina.gymbuddy.ui.progress.AllSessionsScreen
+import com.rukavina.gymbuddy.ui.progress.AllSessionsViewModel
+import com.rukavina.gymbuddy.ui.progress.ProgressScreen
 import com.rukavina.gymbuddy.ui.workouts.WorkoutsScreen
 import kotlinx.coroutines.launch
 import com.rukavina.gymbuddy.ui.theme.fadeThroughIn
@@ -177,6 +180,10 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
         openWorkout()
     }
     val openTemplate: (String) -> Unit = { id -> bottomNavController.navigate(NavRoutes.templatePage(id)) }
+    // Past sessions open the old edit dialog until session detail (step 09).
+    var editingSession by rememberSaveable { mutableStateOf<String?>(null) }
+    val openSession: (String) -> Unit = { id -> editingSession = id }
+    editingSession?.let { id -> SessionEditBridge(sessionId = id, onClose = { editingSession = null }) }
 
     // Delete (Undo): the tombstone is written only when the snackbar goes without Undo.
     val scope = rememberCoroutineScope()
@@ -315,9 +322,14 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
             }
             composable(
                 route = NavRoutes.ExercisePage,
-                arguments = listOf(navArgument(ExercisePageViewModel.ARG_EXERCISE_ID) { type = NavType.StringType }),
+                arguments = listOf(
+                    navArgument(ExercisePageViewModel.ARG_EXERCISE_ID) { type = NavType.StringType },
+                    navArgument(ExercisePageViewModel.ARG_AT_PROGRESS) { type = NavType.BoolType; defaultValue = false },
+                ),
             ) { entry ->
                 ExercisePageScreen(
+                    onOpenSession = openSession,
+                    onAllSessions = { id -> bottomNavController.navigate(NavRoutes.allSessions(id)) },
                     onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
                     onEdit = { id -> bottomNavController.navigate(NavRoutes.exerciseEdit(id)) },
                     onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
@@ -346,14 +358,26 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                     onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
                 )
             }
-            // Old session list until the Progress tab lands (7.8).
             composable(NavRoutes.Progress) {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    Column {
-                        LargeTitleTopBar(title = stringResource(R.string.tab_progress))
-                        WorkoutScreen()
-                    }
-                }
+                ProgressScreen(
+                    onOpenLift = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id, atProgress = true)) },
+                    onOpenSession = openSession,
+                    onAllSessions = { bottomNavController.navigate(NavRoutes.allSessions()) },
+                    onStartWorkout = { bottomNavController.navigateToTab(NavTab.Workouts) },
+                )
+            }
+            composable(
+                route = NavRoutes.AllSessions,
+                arguments = listOf(
+                    navArgument(AllSessionsViewModel.ARG_EXERCISE_ID) {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                AllSessionsScreen(
+                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    onOpenSession = openSession,
+                )
             }
             composable(NavRoutes.You) {
                 SettingsScreen(

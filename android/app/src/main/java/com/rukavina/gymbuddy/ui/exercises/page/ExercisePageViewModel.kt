@@ -3,7 +3,11 @@ package com.rukavina.gymbuddy.ui.exercises.page
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.domain.exercise.ExerciseHistory
+import com.rukavina.gymbuddy.domain.progress.Lift
+import com.rukavina.gymbuddy.domain.progress.LiftProgress
+import com.rukavina.gymbuddy.domain.progress.ProgressStats
 import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.Exercise
@@ -42,6 +46,12 @@ data class ExercisePageUiState(
     val templates: List<TemplateChoice> = emptyList(),
     /** Titles of visible templates that use it (delete dialog, R13-11). */
     val usedIn: List<String> = emptyList(),
+    /** Progress block (R7-5): only for a lift that can be charted (step 08). */
+    val progress: LiftProgress? = null,
+    /** This lift is the one on the Progress tab. */
+    val onProgress: Boolean = false,
+    /** Off needs another chartable lift to show instead. */
+    val canTurnOff: Boolean = false,
 ) {
     /** Your own exercise: no photo, Edit and Delete in ⋯ (R13-7, R13-9). */
     val own: Boolean get() = exercise?.source == EntitySource.CUSTOM
@@ -60,7 +70,7 @@ sealed interface ExercisePageEvent {
 /**
  * Exercise page (Figma R13-1 one scroll, R13-7 your own, R13-8 never
  * done): what it is, your numbers (Last / Best, History), your settings
- * (rest, note), how to do it. Progress chart comes with 7.8.
+ * (rest, note), Progress block for a chartable lift (R7-5), how to do it.
  */
 @HiltViewModel
 class ExercisePageViewModel @Inject constructor(
@@ -70,9 +80,13 @@ class ExercisePageViewModel @Inject constructor(
     private val templates: WorkoutTemplateRepository,
     private val updateTemplate: UpdateWorkoutTemplateUseCase,
     private val ids: IdGenerator,
+    private val preferences: AppPreferencesRepository,
 ) : ViewModel() {
 
     private val exerciseId: String = checkNotNull(savedState.get<String>(ARG_EXERCISE_ID))
+
+    /** Opened from the Progress card: scroll to the Progress block once (R7-5). */
+    val atProgress: Boolean = savedState.get<Boolean>(ARG_AT_PROGRESS) ?: false
 
     private val _uiState = MutableStateFlow(ExercisePageUiState(user = ExerciseUserState(exerciseId)))
     val uiState: StateFlow<ExercisePageUiState> = _uiState.asStateFlow()
@@ -83,15 +97,23 @@ class ExercisePageViewModel @Inject constructor(
     /** Set once we delete it ourselves, so the null that follows is not "gone". */
     private var leaving = false
 
+    /** Eligible lifts for "Show on Progress" (decision 4). */
+    private var lifts: List<Lift> = emptyList()
+
     init {
+        val lifted = combine(sources.sessions, preferences.progressLiftId) { sessions, stored ->
+            val eligible = ProgressStats.eligibleLifts(sessions)
+            Triple(sessions, eligible, ProgressStats.chosenLift(eligible, stored)?.exerciseId)
+        }
         viewModelScope.launch {
             combine(
                 exercises.observeExercise(exerciseId),
                 exercises.observeUserState(exerciseId),
-                sources.sessions,
+                lifted,
                 sources.templates,
                 sources.units,
-            ) { exercise, user, sessions, all, units ->
+            ) { exercise, user, (sessions, eligible, shownId), all, units ->
+                lifts = eligible
                 val usedIn = all.filter { t -> t.templateExercises.any { it.exerciseId == exerciseId } }
                 ExercisePageUiState(
                     loaded = true,
@@ -103,6 +125,9 @@ class ExercisePageViewModel @Inject constructor(
                         .sortedBy { it.title.lowercase() }
                         .map { TemplateChoice(it.id, it.title) },
                     usedIn = usedIn.map { it.title },
+                    progress = eligible.firstOrNull { it.exerciseId == exerciseId }?.let { ProgressStats.progress(it, sessions) },
+                    onProgress = shownId == exerciseId,
+                    canTurnOff = eligible.any { it.exerciseId != exerciseId },
                 )
             }.collect { next ->
                 if (next.exercise == null) {
@@ -115,6 +140,15 @@ class ExercisePageViewModel @Inject constructor(
                 _uiState.value = next
             }
         }
+    }
+
+    /**
+     * "Show on Progress" (R7-5, same choice as Change lift): on shows this
+     * lift; off shows the most-logged other one.
+     */
+    fun setShowOnProgress(on: Boolean) {
+        val id = if (on) exerciseId else lifts.firstOrNull { it.exerciseId != exerciseId }?.exerciseId ?: return
+        write { preferences.setProgressLiftId(id) }
     }
 
     /** Rest sheet (R13-10); null = "Use my default". */
@@ -172,6 +206,7 @@ class ExercisePageViewModel @Inject constructor(
 
     companion object {
         const val ARG_EXERCISE_ID = "exerciseId"
+        const val ARG_AT_PROGRESS = "atProgress"
     }
 }
 

@@ -30,6 +30,7 @@ class AppPreferencesRepository @Inject constructor(
         val PENDING_CONSENT_AT = longPreferencesKey("pending_consent_at")
         val REST_BUZZ = booleanPreferencesKey("rest_buzz")
         val NOTIFICATIONS_ASKED = booleanPreferencesKey("notifications_asked")
+        val PROGRESS_LIFT_ID = stringPreferencesKey("progress_lift_id")
     }
 
     /** Buzz when a rest ends (motion.md "Rest buzz"): opt-in, off by default. Phone only. */
@@ -40,6 +41,19 @@ class AppPreferencesRepository @Inject constructor(
     }
 
     /** The notification permission was asked once, on the first workout start (Plan 7 06c). */
+    /**
+     * The lift on the Progress chart (Plan 7 step 08). Null = the most
+     * logged one. A device preference like units; an id that no longer
+     * fits (other account, deleted) falls back to the default.
+     */
+    val progressLiftId: Flow<String?> = dataStore.data.map { it[PreferencesKeys.PROGRESS_LIFT_ID] }
+
+    suspend fun setProgressLiftId(id: String?) {
+        dataStore.edit {
+            if (id == null) it.remove(PreferencesKeys.PROGRESS_LIFT_ID) else it[PreferencesKeys.PROGRESS_LIFT_ID] = id
+        }
+    }
+
     val notificationsAsked: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.NOTIFICATIONS_ASKED] ?: false }
 
     suspend fun setNotificationsAsked() {

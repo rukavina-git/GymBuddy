@@ -30,260 +30,34 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Workout session management screen with CRUD operations.
- * Shows list of workout sessions and allows create, edit, delete.
+ * Bridge until session detail (Plan 7 step 09): a past session opens the
+ * old edit dialog, so it can still be fixed or deleted. Goes with 09.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WorkoutScreen(
+fun SessionEditBridge(
+    sessionId: String,
+    onClose: () -> Unit,
     viewModel: WorkoutSessionViewModel = hiltViewModel(),
-    exerciseViewModel: ExercisesViewModel = hiltViewModel()
+    exerciseViewModel: ExercisesViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val exerciseUiState by exerciseViewModel.uiState.collectAsState()
-    var showDialog by remember { mutableStateOf(false) }
-    var editingWorkoutSession by remember { mutableStateOf<WorkoutSession?>(null) }
-    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
-    var workoutToDelete by remember { mutableStateOf<WorkoutSession?>(null) }
-    var showSortMenu by remember { mutableStateOf(false) }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Sort control
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Sort by: ${getSortOrderLabel(uiState.sortOrder)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                IconButton(onClick = { showSortMenu = true }) {
-                    Icon(Icons.Default.Sort, "Sort")
-                }
-
-                DropdownMenu(
-                    expanded = showSortMenu,
-                    onDismissRequest = { showSortMenu = false }
-                ) {
-                    WorkoutSessionSortOrder.entries.forEach { sortOrder ->
-                        DropdownMenuItem(
-                            text = { Text(getSortOrderLabel(sortOrder)) },
-                            onClick = {
-                                viewModel.setSortOrder(sortOrder)
-                                showSortMenu = false
-                            },
-                            leadingIcon = if (uiState.sortOrder == sortOrder) {
-                                { Icon(Icons.Default.Add, null) } // Using Add as checkmark
-                            } else null
-                        )
-                    }
-                }
-            }
-
-            androidx.compose.material3.pulltorefresh.PullToRefreshBox(
-                isRefreshing = uiState.isRefreshing,
-                onRefresh = { viewModel.refresh() },
-                modifier = Modifier.fillMaxSize()
-            ) {
-                when {
-                    uiState.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                uiState.workoutSessions.isEmpty() -> {
-                    Text(
-                        "No workout sessions yet. Tap + to add one!",
-                        modifier = Modifier.align(Alignment.Center),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(uiState.workoutSessions) { workoutSession ->
-                            WorkoutSessionItem(
-                                workoutSession = workoutSession,
-                                onEdit = {
-                                    editingWorkoutSession = workoutSession
-                                    showDialog = true
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-            }
-        }
-
-        // Floating Action Button
-        FloatingActionButton(
-            onClick = {
-                editingWorkoutSession = null
-                showDialog = true
-            },
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(Icons.Default.Add, "Add Workout Session")
-        }
-
-        // Show success/error messages
-        uiState.errorMessage?.let { error ->
-            LaunchedEffect(error) {
-                kotlinx.coroutines.delay(3000)
-                viewModel.clearError()
-            }
-            Snackbar(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(error)
-            }
-        }
-
-        uiState.successMessage?.let { success ->
-            LaunchedEffect(success) {
-                kotlinx.coroutines.delay(2000)
-                viewModel.clearSuccess()
-            }
-            Snackbar(
-                modifier = Modifier.padding(16.dp),
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Text(success)
-            }
-        }
-
-        // Delete Confirmation Dialog
-        if (showDeleteConfirmDialog && workoutToDelete != null) {
-            AlertDialog(
-                onDismissRequest = { showDeleteConfirmDialog = false },
-                title = { Text("Delete Workout Session") },
-                text = {
-                    Text("Are you sure you want to delete this workout session? This action cannot be undone.")
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            workoutToDelete?.let { viewModel.deleteWorkoutSession(it.id) }
-                            showDeleteConfirmDialog = false
-                            workoutToDelete = null
-                        }
-                    ) {
-                        Text("Delete", color = MaterialTheme.colorScheme.error)
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            showDeleteConfirmDialog = false
-                            workoutToDelete = null
-                        }
-                    ) {
-                        Text("Cancel")
-                    }
-                }
-            )
-        }
-
-        // Create/Edit Dialog
-        if (showDialog) {
-            WorkoutSessionFormDialog(
-                workoutSession = editingWorkoutSession,
-                availableExercises = exerciseUiState.rows,
-                preferredUnits = uiState.preferredUnits,
-                onDismiss = { showDialog = false },
-                onSave = { draft ->
-                    val existing = editingWorkoutSession
-                    if (existing != null) {
-                        viewModel.updateWorkoutSession(existing, draft)
-                    } else {
-                        viewModel.createWorkoutSession(draft)
-                    }
-                    showDialog = false
-                },
-                onDelete = if (editingWorkoutSession != null) {
-                    {
-                        viewModel.deleteWorkoutSession(editingWorkoutSession!!.id)
-                        showDialog = false
-                        editingWorkoutSession = null
-                    }
-                } else null
-            )
-        }
-    }
-}
-
-@Composable
-fun WorkoutSessionItem(
-    workoutSession: WorkoutSession,
-    onEdit: () -> Unit
-) {
-    val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
-    val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
-    val date = remember(workoutSession.startedAt) { dateFormat.format(Date(workoutSession.startedAt)) }
-    val time = remember(workoutSession.startedAt) { timeFormat.format(Date(workoutSession.startedAt)) }
-
-    // Format duration as HH:MM:SS
-    val hours = workoutSession.durationSeconds / 3600
-    val minutes = (workoutSession.durationSeconds % 3600) / 60
-    val seconds = workoutSession.durationSeconds % 60
-    val durationText = String.format("%02d:%02d:%02d", hours, minutes, seconds)
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onEdit() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = workoutSession.title ?: "Workout",
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = ValidationConstants.MAX_TITLE_LINES,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "$date $time",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = durationText,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "${workoutSession.performedExercises.size} exercises",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
+    // Not loaded yet, or deleted meanwhile: nothing shows.
+    val session = uiState.workoutSessions.firstOrNull { it.id == sessionId } ?: return
+    WorkoutSessionFormDialog(
+        workoutSession = session,
+        availableExercises = exerciseUiState.rows,
+        preferredUnits = uiState.preferredUnits,
+        onDismiss = onClose,
+        onSave = { draft ->
+            viewModel.updateWorkoutSession(session, draft)
+            onClose()
+        },
+        onDelete = {
+            viewModel.deleteWorkoutSession(session.id)
+            onClose()
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1039,18 +813,4 @@ fun ExerciseEditDialog(
             }
         }
     )
-}
-
-/**
- * Get a human-readable label for a sort order.
- */
-private fun getSortOrderLabel(sortOrder: WorkoutSessionSortOrder): String {
-    return when (sortOrder) {
-        WorkoutSessionSortOrder.DATE_NEWEST_FIRST -> "Date (Newest First)"
-        WorkoutSessionSortOrder.DATE_OLDEST_FIRST -> "Date (Oldest First)"
-        WorkoutSessionSortOrder.DURATION_LONGEST_FIRST -> "Duration (Longest First)"
-        WorkoutSessionSortOrder.DURATION_SHORTEST_FIRST -> "Duration (Shortest First)"
-        WorkoutSessionSortOrder.TITLE_A_TO_Z -> "Title (A-Z)"
-        WorkoutSessionSortOrder.TITLE_Z_TO_A -> "Title (Z-A)"
-    }
 }

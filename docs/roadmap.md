@@ -94,7 +94,7 @@ roadmap-details.md §3.
 - [x] 7.5 Home + Templates (Workouts tab, plans from 6.6)
 - [x] 7.6 Active workout (keypad, live bar, swipe + undo, rest)
 - [x] 7.7 Exercise page + create
-- [ ] 7.8 Progress tab (replaces Sessions + Stats)
+- [x] 7.8 Progress tab (replaces Sessions + Stats)
 - [ ] 7.9 Session detail
 - [ ] 7.10 You + Settings (UI for 6.4, 6.5, 6.7)
 - [ ] 7.11 Cross-flow states: error, offline, empty, sync

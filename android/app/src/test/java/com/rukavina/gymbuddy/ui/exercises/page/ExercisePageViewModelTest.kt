@@ -9,7 +9,9 @@ import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.model.WorkoutSet
 import com.rukavina.gymbuddy.domain.usecase.template.StampTemplateExerciseSnapshotsUseCase
 import com.rukavina.gymbuddy.domain.usecase.template.UpdateWorkoutTemplateUseCase
+import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.testutil.CountingIds
+import com.rukavina.gymbuddy.testutil.testPreferencesDataStore
 import com.rukavina.gymbuddy.testutil.ExerciseFixtures.exercise
 import com.rukavina.gymbuddy.testutil.FakeExerciseRepository
 import com.rukavina.gymbuddy.testutil.FakeTemplateSources
@@ -39,6 +41,7 @@ class ExercisePageViewModelTest {
     private val starter = template("full", "Full Body", source = EntitySource.DEFAULT)
     private val templateRepo = FakeWorkoutTemplateRepository(listOf(abs, starter))
     private val sources = FakeTemplateSources(templates = listOf(abs, starter))
+    private val preferences = AppPreferencesRepository(testPreferencesDataStore())
 
     private fun session(id: String, at: Long, kg: Float, reps: Int) = WorkoutSession(
         id = id, startedAt = at, endedAt = at + 1, durationSeconds = 1, title = id,
@@ -55,6 +58,7 @@ class ExercisePageViewModelTest {
         sources, exercises, templateRepo,
         UpdateWorkoutTemplateUseCase(templateRepo, StampTemplateExerciseSnapshotsUseCase(exercises)),
         CountingIds("te"),
+        preferences,
     )
 
     @Test
@@ -149,5 +153,37 @@ class ExercisePageViewModelTest {
         exercises.failWrites = true
         vm.setRest(60)
         assertEquals(ExercisePageEvent.Failed, vm.events.first())
+    }
+
+    @Test
+    fun chartableLiftGetsProgressBlockAndShowOnProgress() = runTest {
+        // 3 sessions over 3 weeks: bench can be charted; it is the only lift, so it is on Progress.
+        sources.sessions.value = listOf(session("a", 0, 80f, 5), session("b", 7 * DAY, 82.5f, 5), session("c", 21 * DAY, 85f, 5))
+        val vm = vm("bench")
+        val s = vm.uiState.first { it.loaded }
+        assertEquals(listOf("a", "b", "c"), s.progress?.points?.map { it.sessionId })
+        assertTrue(s.onProgress)
+        assertFalse(s.canTurnOff) // nothing else to show instead
+    }
+
+    @Test
+    fun notChartableHasNoProgressBlock() = runTest {
+        sources.sessions.value = listOf(session("a", 0, 80f, 5), session("b", 1, 82.5f, 5), session("c", 2, 85f, 5))
+        val s = vm("bench").uiState.first { it.loaded }
+        assertNull(s.progress) // three sessions, but not over 2 weeks
+        assertFalse(s.onProgress)
+    }
+
+    @Test
+    fun showOnProgressStoresThisLift() = runTest {
+        sources.sessions.value = listOf(session("a", 0, 80f, 5), session("b", 7 * DAY, 82.5f, 5), session("c", 21 * DAY, 85f, 5))
+        val vm = vm("bench")
+        vm.uiState.first { it.loaded }
+        vm.setShowOnProgress(true)
+        assertEquals("bench", preferences.progressLiftId.first { it != null })
+    }
+
+    private companion object {
+        const val DAY = 86_400_000L
     }
 }

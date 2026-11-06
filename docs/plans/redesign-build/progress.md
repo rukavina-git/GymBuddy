@@ -11,7 +11,7 @@
 - [x] 06b Active workout: around the workout (steps/06-active-workout.md) — bd61611
 - [x] 06c Active workout: rest buzz + lock screen (steps/06-active-workout.md) — 2d9b952
 - [x] 07 Exercise page + create (steps/07-exercise-page.md) — 0245dcc
-- [ ] 08 Progress tab
+- [x] 08 Progress tab + All sessions (steps/08-progress.md) — HASH
 - [ ] 09 Session detail
 - [ ] 10 You + Settings
 - [ ] 11 Cross-flow states
@@ -318,7 +318,55 @@
   source is unknown; confirm or replace before release.
 - 07: Strings in `res/values/strings_exercises.xml` (quotes must be `\"`).
 
+- 08: One step, not split (owner). Figma read via the Console MCP.
+  Decisions 2–6 as recommended.
+- 08: Rows open the old `WorkoutSessionFormDialog` through
+  `SessionEditBridge` (WorkoutScreen.kt), state in MainScreen
+  (`editingSession`). WorkoutScreen's list, sort menu, FAB, delete dialog
+  and pull-to-refresh are gone; manual past-session logging and manual
+  sync from this screen go with them. `WorkoutSessionViewModel` not
+  trimmed (step file said it would be); 09 deletes it with the dialog.
+- 08: "Start a workout" (R7-3) goes to the Workouts tab, not the start
+  sheet: that sheet is internal to HomeScreen.
+- 08: "N weeks ago" is min 1 week, not 2 as decision 5 said (a thin window
+  can span 1 week); weeks = whole weeks between first and last point.
+- 08: Chart points are evenly spaced (Figma), not by date. Sparkline on
+  the card, full `LiftChart` (3 y ticks, 3 dates, drag readout) on the
+  exercise page only. At font scale ≥ 2 the card drops the line and
+  "Change lift" becomes a button; the page drops the chart.
+- 08: Exercise page: chartable lifts show the Progress block (sentence,
+  chart, Show on Progress, window rows newest first with Latest tag)
+  instead of History; others keep History (3 rows). Rows open the
+  session; "All N sessions" link opens All sessions filtered. Route
+  `exercise/{id}?atProgress=` scrolls to the block once.
+- 08: Show on Progress off = the most-logged other lift is stored; the
+  switch is disabled when this lift is the only one.
+- 08: All sessions exercise filter = a sheet of exercises you've logged
+  (most sessions first), not the exercise picker; ✕ is an icon button
+  beside the cobalt chip. Filter with no matches: "No sessions with X"
+  + Clear exercise filter.
+- 08: Progress uses `ZoneId.systemDefault()` for days; `Clock` is UTC.
+- 08: Chosen lift = DataStore `progress_lift_id` (device pref, like
+  units). `ui/SessionsScreen.kt` deleted. Strings in
+  `res/values/strings_progress.xml`.
+
 ## Gotchas
+- From 08 (reviewer, not fixed):
+  - No tests for the sentence variants (more/same/less), units in the
+    week line, `inlineSets` or the session subtitle (Compose text).
+  - Chart drag: if `pointerInput` restarts mid-drag (data change), `active`
+    isn't reset; reset it in try/finally.
+  - `SessionEditBridge` with a missing session leaves `editingSession` set.
+  - All sessions exercise filter isn't in SavedStateHandle (lost on
+    process death).
+  - Week line buckets by `doneAt`, months by `startedAt`.
+  - AppPreferencesRepository: progressLiftId KDoc sits between
+    `notificationsAsked`'s KDoc and its val.
+- 08: Home's `HomeViewModel` uses `clock.zone` (UTC) for the week strip,
+  so Home and Progress can disagree near midnight.
+- 08, for 09: delete `SessionEditBridge`, `WorkoutSessionFormDialog`,
+  `WorkoutSessionViewModel` and WorkoutScreen.kt; point `openSession` in
+  MainScreen at the new session route.
 - From 07 (reviewer, not fixed):
   - No Room/outbox tests for the new repository calls (restore over a
     pending DELETE, setExerciseRest, observeUserState(s), any-state read).

@@ -1,6 +1,22 @@
 package com.rukavina.gymbuddy.ui.exercises.page
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import com.rukavina.gymbuddy.domain.progress.LiftPoint
+import com.rukavina.gymbuddy.domain.progress.LiftProgress
+import com.rukavina.gymbuddy.ui.design.AppSwitch
+import com.rukavina.gymbuddy.ui.design.LiftChart
+import com.rukavina.gymbuddy.ui.progress.CHART_HIDDEN_FONT_SCALE
+import com.rukavina.gymbuddy.ui.progress.chartSummary
+import com.rukavina.gymbuddy.ui.progress.chartTicks
+import com.rukavina.gymbuddy.ui.progress.dayMonth
+import com.rukavina.gymbuddy.ui.progress.displayWeight
+import com.rukavina.gymbuddy.ui.progress.liftSentence
+import com.rukavina.gymbuddy.ui.progress.tickText
+import com.rukavina.gymbuddy.ui.theme.FullShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -66,7 +82,7 @@ import com.rukavina.gymbuddy.ui.workout.WorkoutSet as UiSet
 /** Raw size (DESIGN.md §4): the bundled photo's frame on R13-1 (384 × 216). */
 private const val PHOTO_RATIO = 16f / 9f
 
-/** History rows on the page; the full list is All sessions (7.8). */
+/** History rows on the page (not chartable lifts); the full list is All sessions. */
 private const val HISTORY_ROWS = 3
 
 private enum class PageSheet { Rest, Note, AddToTemplate }
@@ -81,6 +97,8 @@ fun ExercisePageScreen(
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
     onMessage: (String) -> Unit,
+    onOpenSession: (String) -> Unit = {},
+    onAllSessions: (String) -> Unit = {},
     viewModel: ExercisePageViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -113,6 +131,10 @@ fun ExercisePageScreen(
         onAddToTemplate = { sheet = PageSheet.AddToTemplate },
         onHide = viewModel::hide,
         onDelete = { confirmDelete = true },
+        onOpenSession = onOpenSession,
+        onAllSessions = onAllSessions,
+        onShowOnProgress = viewModel::setShowOnProgress,
+        atProgress = viewModel.atProgress,
     )
     val exercise = state.exercise ?: return
     when (sheet) {
@@ -158,9 +180,22 @@ internal fun ExercisePageContent(
     onAddToTemplate: () -> Unit,
     onHide: () -> Unit,
     onDelete: () -> Unit,
+    onOpenSession: (String) -> Unit = {},
+    onAllSessions: (String) -> Unit = {},
+    onShowOnProgress: (Boolean) -> Unit = {},
+    atProgress: Boolean = false,
 ) {
     val d = GymBuddyTheme.dimens
     val cs = MaterialTheme.colorScheme
+    val listState = rememberLazyListState()
+    // From the Progress card: jump to the block once (R7-5).
+    var jumped by rememberSaveable { mutableStateOf(!atProgress) }
+    LaunchedEffect(state.loaded, state.progress != null) {
+        if (!jumped && state.loaded) {
+            jumped = true
+            progressIndex(state)?.let { listState.scrollToItem(it) }
+        }
+    }
     var menuOpen by remember { mutableStateOf(false) }
     val exercise = state.exercise
     Surface(Modifier.fillMaxSize(), color = cs.background) {
@@ -185,6 +220,7 @@ internal fun ExercisePageContent(
             if (exercise == null) return@Column
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+                state = listState,
                 contentPadding = PaddingValues(start = d.insetScreen, end = d.insetScreen, bottom = d.section),
                 verticalArrangement = Arrangement.spacedBy(d.stack),
             ) {
@@ -199,10 +235,27 @@ internal fun ExercisePageContent(
                 }
                 item(key = "rest") { RestRow(state.restSeconds, onRest) }
                 item(key = "note") { NoteBlock(state.user.note, onNote) }
-                if (state.history.entries.isNotEmpty()) {
+                val progress = state.progress
+                if (progress != null) {
+                    item(key = "progress") {
+                        ProgressBlock(progress, exercise.trackingType, state.units, state.onProgress, state.canTurnOff, onShowOnProgress)
+                    }
+                    val rows = progress.points.reversed()
+                    items(rows, key = { "p-" + it.sessionId }) { point ->
+                        ProgressRow(point, latest = point === rows.first(), exercise.trackingType, state.units) { onOpenSession(point.sessionId) }
+                    }
+                } else if (state.history.entries.isNotEmpty()) {
                     item(key = "history") { SectionTitle(stringResource(R.string.exercise_history)) }
                     items(state.history.entries.take(HISTORY_ROWS), key = { it.sessionId }) { entry ->
-                        HistoryRow(entry, exercise.trackingType, state.units)
+                        HistoryRow(entry, exercise.trackingType, state.units) { onOpenSession(entry.sessionId) }
+                    }
+                }
+                if (state.history.sessionCount > 0) {
+                    item(key = "all") {
+                        AppLinkButton(
+                            stringResource(R.string.progress_all_n_sessions, state.history.sessionCount),
+                            { onAllSessions(exercise.id) },
+                        )
                     }
                 }
                 if (exercise.instructions.isNotEmpty() || state.own) {
@@ -325,12 +378,12 @@ private fun NoteBlock(note: String?, onClick: () -> Unit) {
     }
 }
 
-/** Date left, best set right. Not tappable until session detail (7.9). */
+/** Date left, best set right; opens the session. */
 @Composable
-private fun HistoryRow(entry: ExerciseHistoryEntry, type: ExerciseTrackingType, units: PreferredUnits) {
+private fun HistoryRow(entry: ExerciseHistoryEntry, type: ExerciseTrackingType, units: PreferredUnits, onClick: () -> Unit) {
     val d = GymBuddyTheme.dimens
     val zone = remember { ZoneId.systemDefault() }
-    Surface(shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
+    Surface(onClick = onClick, shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
         Row(
             Modifier.heightIn(min = d.control).padding(horizontal = d.insetCard).semantics(mergeDescendants = true) {},
             verticalAlignment = Alignment.CenterVertically,
@@ -338,6 +391,95 @@ private fun HistoryRow(entry: ExerciseHistoryEntry, type: ExerciseTrackingType, 
             Text(shortDate(entry.startedAt, zone), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
             Text(setText(type, entry.best, units), style = MaterialTheme.typography.titleSmall.copy(fontFeatureSettings = "tnum"))
         }
+    }
+}
+
+/** Index of the "progress" item, same order as the LazyColumn above. */
+private fun progressIndex(state: ExercisePageUiState): Int? {
+    val exercise = state.exercise ?: return null
+    if (state.progress == null) return null
+    var i = 0
+    if (exercise.thumbnailUrl != null && exercise.source == EntitySource.DEFAULT) i++
+    i++ // title
+    if (state.history.last != null && state.history.best != null) i++
+    i += 2 // rest, note
+    return i
+}
+
+/**
+ * Progress block (R7-5, drag R7-6): sentence, chart, "Show on Progress".
+ * Rows follow as their own items; they open the session.
+ */
+@Composable
+private fun ProgressBlock(p: LiftProgress, type: ExerciseTrackingType, units: PreferredUnits, onProgress: Boolean, canTurnOff: Boolean, onShow: (Boolean) -> Unit) {
+    val d = GymBuddyTheme.dimens
+    val cs = MaterialTheme.colorScheme
+    val zone = remember { ZoneId.systemDefault() }
+    val large = LocalDensity.current.fontScale >= CHART_HIDDEN_FONT_SCALE
+    Column(verticalArrangement = Arrangement.spacedBy(d.stackTight)) {
+        SectionTitle(stringResource(R.string.progress_section))
+        Text(liftSentence(p, units), style = MaterialTheme.typography.bodyLarge)
+        Surface(shape = MaterialTheme.shapes.large, color = cs.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(d.insetCard), verticalArrangement = Arrangement.spacedBy(d.stackTight)) {
+                Text(stringResource(R.string.progress_heaviest), style = MaterialTheme.typography.labelMedium, color = cs.onSurfaceVariant)
+                if (!large) {
+                    val values = p.points.map { displayWeight(it.weightKg, units) }
+                    val dates = p.points.map { shortDate(it.startedAt, zone) }
+                    val xLabels = p.points.map { dayMonth(it.startedAt, zone) }.let { all ->
+                        if (all.size < 3) listOf(all.first(), all.last()) else listOf(all.first(), all[all.size / 2], all.last())
+                    }
+                    val texts = p.points.map { setText(type, it.set, units) }
+                    LiftChart(
+                        values = values,
+                        yTicks = chartTicks(p, units),
+                        yLabel = ::tickText,
+                        xLabels = xLabels,
+                        readout = { i -> dates[i] to texts[i] },
+                        summary = chartSummary(p, units),
+                    )
+                }
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = d.target),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(stringResource(R.string.progress_show_on_progress), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                    AppSwitch(checked = onProgress, onCheckedChange = onShow, enabled = !onProgress || canTurnOff)
+                }
+            }
+        }
+        Text(stringResource(R.string.progress_tap_row), style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
+    }
+}
+
+/** "Mon 26 Oct  [Latest]  87.5 kg × 5  ›" (R7-5). */
+@Composable
+private fun ProgressRow(point: LiftPoint, latest: Boolean, type: ExerciseTrackingType, units: PreferredUnits, onClick: () -> Unit) {
+    val d = GymBuddyTheme.dimens
+    val cs = MaterialTheme.colorScheme
+    val zone = remember { ZoneId.systemDefault() }
+    Surface(onClick = onClick, shape = MaterialTheme.shapes.medium, color = cs.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.heightIn(min = d.control).padding(start = d.insetCard, end = d.stack).semantics(mergeDescendants = true) {},
+            horizontalArrangement = Arrangement.spacedBy(d.stackTight),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(shortDate(point.startedAt, zone), style = MaterialTheme.typography.bodyMedium)
+            if (latest) LatestTag()
+            Spacer(Modifier.weight(1f))
+            Text(setText(type, point.set, units), style = MaterialTheme.typography.titleSmall.copy(fontFeatureSettings = "tnum"))
+            Icon(painterResource(AppIcons.Ui.ChevronRight), null, Modifier.size(d.iconSmall), tint = cs.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun LatestTag() {
+    Surface(shape = FullShape, color = MaterialTheme.colorScheme.surfaceContainerHighest) {
+        Text(
+            stringResource(R.string.progress_latest),
+            style = GymBuddyTheme.type.tag,
+            modifier = Modifier.padding(horizontal = GymBuddyTheme.dimens.stackTight, vertical = 2.dp),
+        )
     }
 }
 
