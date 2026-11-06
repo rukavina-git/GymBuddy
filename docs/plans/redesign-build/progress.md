@@ -13,7 +13,7 @@
 - [x] 07 Exercise page + create (steps/07-exercise-page.md) — 0245dcc
 - [x] 08 Progress tab + All sessions (steps/08-progress.md) — c5dc7c7
 - [x] 09a Session detail (steps/09-session-detail.md) — 453d555
-- [x] 09b Edit workout (steps/09-session-detail.md) — HASH
+- [x] 09b Edit workout (steps/09-session-detail.md) — 5135a08
 - [ ] 10 You + Settings
 - [ ] 11 Cross-flow states
 - [ ] 12 Device pass, CI green, PR develop → main (me)
