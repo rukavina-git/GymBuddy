@@ -28,6 +28,7 @@ import com.rukavina.gymbuddy.ui.progress.ProgressScreen
 import com.rukavina.gymbuddy.ui.progress.session.SessionDeleteViewModel
 import com.rukavina.gymbuddy.ui.progress.session.SessionDetailScreen
 import com.rukavina.gymbuddy.ui.progress.session.SessionDetailViewModel
+import com.rukavina.gymbuddy.ui.progress.session.SessionEditScreen
 import com.rukavina.gymbuddy.ui.workouts.WorkoutsScreen
 import kotlinx.coroutines.launch
 import com.rukavina.gymbuddy.ui.theme.fadeThroughIn
@@ -406,7 +407,16 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                     onBack = { leave() },
                     onOpenExercise = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id)) },
                     onStartAgain = startTemplate,
+                    onEdit = { id -> bottomNavController.navigate(NavRoutes.sessionEdit(id)) },
                     onDelete = { id, title -> leave(); offerUndoSessionDelete(id, title) },
+                )
+            }
+            composable(
+                route = NavRoutes.SessionEdit,
+                arguments = listOf(navArgument(SessionDetailViewModel.ARG_SESSION_ID) { type = NavType.StringType }),
+            ) { entry ->
+                SessionEditScreen(
+                    onClose = { if (bottomNavController.currentBackStackEntry == entry) bottomNavController.popBackStack() },
                 )
             }
             composable(NavRoutes.You) {

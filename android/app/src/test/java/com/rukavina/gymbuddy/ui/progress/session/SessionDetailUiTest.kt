@@ -44,8 +44,9 @@ class SessionDetailUiTest {
         running: Boolean = false,
         onExercise: (String) -> Unit = {},
         onDelete: (String, String) -> Unit = { _, _ -> },
+        onEdit: (String) -> Unit = {},
     ) = rule.setContent {
-        GymBuddyTheme { SessionDetailContent(state, null, running, {}, onExercise, {}, onDelete) }
+        GymBuddyTheme { SessionDetailContent(state, null, running, {}, onExercise, {}, onEdit, onDelete) }
     }
 
     @Test
@@ -75,5 +76,14 @@ class SessionDetailUiTest {
         show(state(template("t1", title = "Push A")))
         rule.onNodeWithContentDescription("More options").performClick()
         rule.onNodeWithText("Start Push A again").assertExists()
+    }
+
+    @Test
+    fun menuOpensEditWorkout() {
+        val edited = mutableListOf<String>()
+        show(state(), onEdit = { edited += it })
+        rule.onNodeWithContentDescription("More options").performClick()
+        rule.onNodeWithText("Edit workout").performClick()
+        assertEquals(listOf("s1"), edited)
     }
 }

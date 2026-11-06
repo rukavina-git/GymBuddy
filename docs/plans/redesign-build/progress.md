@@ -13,12 +13,25 @@
 - [x] 07 Exercise page + create (steps/07-exercise-page.md) — 0245dcc
 - [x] 08 Progress tab + All sessions (steps/08-progress.md) — c5dc7c7
 - [x] 09a Session detail (steps/09-session-detail.md) — 453d555
-- [ ] 09b Edit workout (steps/09-session-detail.md)
+- [x] 09b Edit workout (steps/09-session-detail.md) — HASH
 - [ ] 10 You + Settings
 - [ ] 11 Cross-flow states
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 09b: Owner OK: an exercise whose sets are all swiped away is dropped on
+  save (exercises can't be removed otherwise).
+- 09b: Save goes through `UpdateWorkoutSessionUseCase` (validates via
+  `ValidateWorkoutSessionSetsUseCase`, then `updateWorkoutSession`).
+- 09b: Unchanged sets are saved as stored (no lb → kg drift); edited sets
+  keep their id, set type and rest taken.
+- 09b: Pickers are M3 `DatePickerDialog` and `TimePicker` in a
+  `BasicAlertDialog` (no design-system picker exists). An end time before
+  the start rolls to the next day. A changed date moves start and end
+  together.
+- 09b: `NameField` from the template editor made internal and reused.
+  Card line in Edit is computed from the edited sets and hidden while
+  the card is open (Figma R14-4).
 - 09: Split into 09a/09b (owner, decisions 1–5 as proposed). Figma read
   via the Console MCP. Roadmap 7.9 stays unticked until 09b lands.
 - 09a: ⋯ has no "Edit workout" until 09b; past sessions can't be edited
@@ -362,6 +375,16 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 09b (reviewer, not fixed):
+  - Every save sets durationSeconds = end − start, even for a rename
+    (WorkoutSession says duration isn't derived). Keep the stored one
+    unless times changed.
+  - Save re-stamps exercise snapshots from today's exercise (use case
+    behaviour): a renamed exercise renames history; a changed tracking
+    type makes old sets fail validation ("Couldn't save").
+  - No test for the save-failure path; no Compose UI test for Edit.
+  - Deleting every set saves an empty workout. No future-date limit.
+    Edits aren't in SavedStateHandle (lost on process death).
 - From 09a (reviewer, not fixed):
   - `IndexColumn = 20.dp` raw dp in SessionDetailScreen (not a token).
   - No UI test for the history highlight (open + scroll + 1.5 s outline).

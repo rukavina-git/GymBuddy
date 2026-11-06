@@ -88,6 +88,7 @@ fun SessionDetailScreen(
     onBack: () -> Unit,
     onOpenExercise: (String) -> Unit,
     onStartAgain: (WorkoutTemplate) -> Unit,
+    onEdit: (id: String) -> Unit,
     onDelete: (id: String, title: String) -> Unit,
     viewModel: SessionDetailViewModel = hiltViewModel(),
 ) {
@@ -103,6 +104,7 @@ fun SessionDetailScreen(
         onBack = onBack,
         onOpenExercise = onOpenExercise,
         onStartAgain = onStartAgain,
+        onEdit = onEdit,
         onDelete = onDelete,
     )
 }
@@ -115,6 +117,7 @@ internal fun SessionDetailContent(
     onBack: () -> Unit,
     onOpenExercise: (String) -> Unit,
     onStartAgain: (WorkoutTemplate) -> Unit,
+    onEdit: (id: String) -> Unit,
     onDelete: (id: String, title: String) -> Unit,
 ) {
     val cs = MaterialTheme.colorScheme
@@ -157,6 +160,11 @@ internal fun SessionDetailContent(
                                     AppIcons.Ui.Add,
                                 )
                             }
+                            AppMenuItem(
+                                stringResource(R.string.session_menu_edit),
+                                { menuOpen = false; onEdit(session.id) },
+                                AppIcons.Ui.Edit,
+                            )
                             AppMenuItem(
                                 stringResource(R.string.menu_delete),
                                 { menuOpen = false; onDelete(session.id, session.title) },

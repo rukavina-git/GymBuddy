@@ -320,7 +320,7 @@ internal fun TemplateEditorContent(
 
 /** Label, big name text, underline (Editor A). Error: red line + "Give it a name". */
 @Composable
-private fun NameField(value: String, error: Boolean, onChange: (String) -> Unit, modifier: Modifier = Modifier) {
+internal fun NameField(value: String, error: Boolean, onChange: (String) -> Unit, modifier: Modifier = Modifier) {
     val cs = MaterialTheme.colorScheme
     val c = GymBuddyTheme.colors
     val d = GymBuddyTheme.dimens

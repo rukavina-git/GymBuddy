@@ -24,6 +24,8 @@ object NavRoutes {
     const val AllSessions = "all_sessions?exerciseId={exerciseId}"
     /** Session detail (R14-1); exerciseId opens and outlines that exercise (R14-3). */
     const val SessionDetail = "session/{sessionId}?exerciseId={exerciseId}"
+    /** Edit workout (R14-4). */
+    const val SessionEdit = "session/{sessionId}/edit"
     const val You = "you"
     const val Profile = "profile"
     const val About = "about"
@@ -71,6 +73,8 @@ object NavRoutes {
 
     fun sessionDetail(sessionId: String, exerciseId: String? = null) =
         if (exerciseId == null) "session/$sessionId" else "session/$sessionId?exerciseId=$exerciseId"
+
+    fun sessionEdit(sessionId: String) = "session/$sessionId/edit"
 
     fun exerciseEdit(exerciseId: String? = null) =
         if (exerciseId == null) "exercise_edit" else "exercise_edit?exerciseId=$exerciseId"
