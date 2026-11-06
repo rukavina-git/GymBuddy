@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -67,6 +68,8 @@ data class EditorExercise(
     val weightKg: Float? = null,
     val restSeconds: Int? = null,
     val notes: String? = null,
+    /** The exercise was deleted (R13-12): the row offers Swap / Remove / Restore. */
+    val deleted: Boolean = false,
 ) {
     val fields: List<EditField> get() = chipFields(trackingType) + EditField.Rest
 }
@@ -131,6 +134,8 @@ class TemplateEditorViewModel @Inject constructor(
     private var saved: Snapshot = Snapshot("", emptyList())
     private var nextKey = 0L
     private var lastRemoved: Pair<Int, EditorExercise>? = null
+    /** Swap on a deleted row: the next picker result replaces this card. */
+    private var swapKey: Long? = null
 
     init {
         viewModelScope.launch { sources.units.collect { u -> _uiState.update { it.copy(units = u) } } }
@@ -155,7 +160,9 @@ class TemplateEditorViewModel @Inject constructor(
             return
         }
         existing = template
-        val items = template.templateExercises.sortedBy { it.orderIndex }.map { it.toEditor(nextKey++) }
+        val gone = deletedIds(template.templateExercises.map { it.exerciseId })
+        val items = template.templateExercises.sortedBy { it.orderIndex }
+            .map { it.toEditor(nextKey++).copy(deleted = it.exerciseId in gone) }
         saved = Snapshot(template.title, items)
         _uiState.update { it.copy(loaded = true, isNew = false, name = template.title, exercises = items) }
     }
@@ -164,12 +171,74 @@ class TemplateEditorViewModel @Inject constructor(
 
     fun setNote(key: Long, note: String) = editExercise(key) { it.copy(notes = note) }
 
-    /** Picker "Add N": appended in pick order, defaults 3 × 10, kg empty, rest 2:00. */
+    /** Ids among [ids] whose exercise is deleted (a lookup failure marks none). */
+    private suspend fun deletedIds(ids: List<String>): Set<String> = try {
+        exercises.getExercisesAnyState(ids).filter { it.deletedAt != null }.map { it.id }.toSet()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        emptySet()
+    }
+
+    /** Picker result: replaces the card a Swap started from, else appends ([add]). */
+    fun onPicked(exerciseIds: List<String>) {
+        val key = swapKey
+        swapKey = null
+        if (key == null) add(exerciseIds) else swap(key, exerciseIds.firstOrNull() ?: return)
+    }
+
+    /** Deleted row Swap (R13-12): the picker opens; its first pick takes this card's place. Null = a plain add. */
+    fun startSwap(key: Long?) {
+        swapKey = key
+    }
+
+    private fun swap(key: Long, exerciseId: String) {
+        viewModelScope.launch {
+            val e = exercises.getExerciseById(exerciseId) ?: return@launch
+            val rest = exercises.observeUserStates().first()[e.id]?.restSeconds
+            editExercise(key) { old ->
+                val sameType = old.trackingType == e.trackingType
+                EditorExercise(
+                    key = old.key,
+                    existingId = null,
+                    exerciseId = e.id,
+                    name = e.name,
+                    trackingType = e.trackingType,
+                    sets = old.sets,
+                    reps = if (sameType) old.reps else defaultReps(e.trackingType),
+                    durationSeconds = if (sameType) old.durationSeconds else null,
+                    distanceMeters = if (sameType) old.distanceMeters else null,
+                    weightKg = if (sameType) old.weightKg else null,
+                    restSeconds = old.restSeconds ?: rest ?: DEFAULT_REST_SECONDS,
+                    notes = old.notes,
+                )
+            }
+        }
+    }
+
+    /** Deleted row Restore: the exercise comes back for every template. */
+    fun restore(key: Long) {
+        val item = _uiState.value.exercises.firstOrNull { it.key == key } ?: return
+        viewModelScope.launch {
+            try {
+                exercises.restoreExercise(item.exerciseId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _events.send(TemplateEditorEvent.SaveFailed)
+                return@launch
+            }
+            edit { s -> s.copy(exercises = s.exercises.map { if (it.exerciseId == item.exerciseId) it.copy(deleted = false) else it }) }
+        }
+    }
+
+    /** Picker "Add N": appended in pick order, defaults 3 × 10, kg empty, your rest or 2:00. */
     fun add(exerciseIds: List<String>) {
         if (exerciseIds.isEmpty()) return
         viewModelScope.launch {
             val picked = exerciseIds.mapNotNull { id -> exercises.getExerciseById(id) }
             if (picked.isEmpty()) return@launch
+            val rests = exercises.observeUserStates().first()
             val added = picked.map { e ->
                 val reps = e.trackingType == ExerciseTrackingType.WEIGHT_REPS || e.trackingType == ExerciseTrackingType.REPS_ONLY
                 EditorExercise(
@@ -180,7 +249,7 @@ class TemplateEditorViewModel @Inject constructor(
                     trackingType = e.trackingType,
                     sets = DEFAULT_SETS,
                     reps = if (reps) DEFAULT_REPS else null,
-                    restSeconds = DEFAULT_REST_SECONDS,
+                    restSeconds = rests[e.id]?.restSeconds ?: DEFAULT_REST_SECONDS,
                 )
             }
             edit { it.copy(exercises = it.exercises + added) }
@@ -351,7 +420,7 @@ class TemplateEditorViewModel @Inject constructor(
         override fun hashCode(): Int = name.trim().hashCode()
 
         private fun norm(list: List<EditorExercise>) =
-            list.map { it.copy(key = 0, notes = it.notes?.trim()?.takeIf { n -> n.isNotEmpty() }) }
+            list.map { it.copy(key = 0, deleted = false, notes = it.notes?.trim()?.takeIf { n -> n.isNotEmpty() }) }
     }
 
     companion object {
@@ -360,6 +429,9 @@ class TemplateEditorViewModel @Inject constructor(
         const val DEFAULT_REPS = 10
         /** Rest for new exercises until 7.10 adds the Settings default (decision 7). */
         const val DEFAULT_REST_SECONDS = 120
+
+        fun defaultReps(type: ExerciseTrackingType): Int? =
+            if (type == ExerciseTrackingType.WEIGHT_REPS || type == ExerciseTrackingType.REPS_ONLY) DEFAULT_REPS else null
     }
 }
 

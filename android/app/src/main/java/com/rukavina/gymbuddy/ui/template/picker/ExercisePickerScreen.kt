@@ -32,6 +32,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import com.rukavina.gymbuddy.ui.design.AppChip
+import com.rukavina.gymbuddy.ui.design.AppSnackbar
+import com.rukavina.gymbuddy.ui.exercises.CreateNamed
+import com.rukavina.gymbuddy.ui.exercises.ListMuscleChips
+import com.rukavina.gymbuddy.ui.exercises.create.QuickCreateSheet
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import com.rukavina.gymbuddy.ui.design.BackTopBar
 import com.rukavina.gymbuddy.ui.design.PrimaryButton
 import com.rukavina.gymbuddy.ui.design.SearchField
@@ -44,11 +56,6 @@ import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 /** Raw size (DESIGN.md §4): the pick mark on Picker A. */
 private val PickMark = 28.dp
 
-/** Muscle chips on Picker A, in Figma order ("Other" has no chip). */
-private val MuscleChips = listOf(
-    MuscleGroup.CHEST, MuscleGroup.BACK, MuscleGroup.LEGS, MuscleGroup.SHOULDERS, MuscleGroup.ARMS, MuscleGroup.CORE,
-)
-
 /**
  * Exercise picker (Figma Picker A 93:13183, search 93:14148). × drops
  * the picks; lime "Add N" hands them back in pick order.
@@ -60,6 +67,15 @@ fun ExercisePickerScreen(
     viewModel: ExercisePickerViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val creating by viewModel.creating.collectAsStateWithLifecycle()
+    var quickName by rememberSaveable { mutableStateOf<String?>(null) }
+    val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    LaunchedEffect(viewModel) {
+        viewModel.created.collect { ok ->
+            if (ok) quickName = null else snackbar.showSnackbar(context.getString(R.string.exercises_create_failed))
+        }
+    }
     ExercisePickerContent(
         state = state,
         onBack = onBack,
@@ -67,7 +83,12 @@ fun ExercisePickerScreen(
         onMuscle = viewModel::setMuscle,
         onToggle = viewModel::toggle,
         onAdd = { onAdd(viewModel.picked) },
+        onCreateNamed = { quickName = it },
+        snackbar = snackbar,
     )
+    quickName?.let { name ->
+        QuickCreateSheet(initialName = name, busy = creating, onCreate = viewModel::quickCreate, onDismiss = { quickName = null })
+    }
 }
 
 @Composable
@@ -78,6 +99,8 @@ internal fun ExercisePickerContent(
     onMuscle: (MuscleGroup?) -> Unit,
     onToggle: (String) -> Unit,
     onAdd: () -> Unit,
+    onCreateNamed: (String) -> Unit = {},
+    snackbar: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val cs = MaterialTheme.colorScheme
     val d = GymBuddyTheme.dimens
@@ -95,7 +118,7 @@ internal fun ExercisePickerContent(
                 horizontalArrangement = Arrangement.spacedBy(d.stackTight),
             ) {
                 item { AppChip(stringResource(R.string.picker_all), state.muscle == null, { onMuscle(null) }) }
-                items(MuscleChips) { m ->
+                items(ListMuscleChips) { m ->
                     AppChip(stringResource(muscleLabel(m)), state.muscle == m, { onMuscle(if (state.muscle == m) null else m) })
                 }
             }
@@ -106,16 +129,21 @@ internal fun ExercisePickerContent(
             ) {
                 if (state.loaded && state.rows.isEmpty()) {
                     item(key = "none") {
-                        Text(
-                            stringResource(R.string.picker_none, state.query),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = cs.onSurfaceVariant,
-                            modifier = Modifier.padding(d.insetScreen),
-                        )
+                        if (state.query.isNotBlank()) {
+                            CreateNamed(state.query.trim(), onCreateNamed)
+                        } else {
+                            Text(
+                                stringResource(R.string.picker_none, state.query),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = cs.onSurfaceVariant,
+                                modifier = Modifier.padding(d.insetScreen),
+                            )
+                        }
                     }
                 }
                 items(state.rows, key = { it.exercise.id }) { row -> PickerRowItem(row, onToggle) }
             }
+            SnackbarHost(snackbar) { AppSnackbar(it) }
             PrimaryButton(
                 text = if (state.pickCount > 0) stringResource(R.string.picker_add, state.pickCount)
                 else stringResource(R.string.picker_add_none),

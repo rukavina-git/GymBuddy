@@ -15,6 +15,7 @@ import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.repository.ActiveWorkoutDraftRepository
+import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
@@ -28,6 +29,7 @@ import com.rukavina.gymbuddy.ui.workout.service.counterSeconds
 import com.rukavina.gymbuddy.ui.workout.service.toNotice
 import com.rukavina.gymbuddy.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -37,6 +39,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.map
@@ -73,7 +76,9 @@ data class ActiveExercise(
     val sets: List<WorkoutSet>,
     val plannedSets: Int,
     val plannedReps: Int?,
-    val restSeconds: Int?
+    val restSeconds: Int?,
+    /** The template's note for this exercise; the line shows it first (R13-13). */
+    val templateNote: String? = null,
 ) {
     /** The set the card shows: first not done, null when all are. */
     val currentSet: WorkoutSet? get() = sets.firstOrNull { !it.isCompleted }
@@ -144,6 +149,8 @@ data class ActiveWorkoutUiState(
     val note: String = "",
     /** Buzz when rest ends (06c), a device preference. */
     val restBuzz: Boolean = false,
+    /** Your notes by exercise id (one-note line, R13-13/14). */
+    val userNotes: Map<String, String> = emptyMap(),
 ) {
     /**
      * A workout runs: started (an empty workout has no exercises yet) and
@@ -186,6 +193,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     private val clock: Clock,
     private val workoutService: WorkoutServiceStarter,
     private val restBuzz: RestBuzzScheduler,
+    private val exerciseRepository: ExerciseRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ActiveWorkoutUiState())
@@ -219,6 +227,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         restoreDraft()
         followService()
         followRestBuzz()
+        followUserNotes()
     }
 
     /**
@@ -385,9 +394,11 @@ class ActiveWorkoutViewModel @Inject constructor(
             val activeExercises = template.templateExercises
                 .sortedBy { it.orderIndex }
                 .mapIndexed { exerciseIndex, templateExercise ->
-                    val exerciseName = exerciseMap[templateExercise.exerciseId]?.name ?: "Unknown Exercise"
+                    // A deleted exercise still starts with its template (R13-12): use the snapshot.
+                    val exerciseName = exerciseMap[templateExercise.exerciseId]?.name
+                        ?: templateExercise.exerciseName.ifBlank { "Unknown Exercise" }
                     val exerciseTrackingType = exerciseMap[templateExercise.exerciseId]?.trackingType
-                        ?: ExerciseTrackingType.WEIGHT_REPS
+                        ?: templateExercise.exerciseTrackingType
                     val fields = SetFields.of(exerciseTrackingType)
                     val sets = (1..templateExercise.plannedSets).mapIndexed { setIndex, setNumber ->
                         WorkoutSet(
@@ -414,7 +425,8 @@ class ActiveWorkoutViewModel @Inject constructor(
                         sets = sets,
                         plannedSets = templateExercise.plannedSets,
                         plannedReps = templateExercise.plannedReps,
-                        restSeconds = templateExercise.restSeconds
+                        restSeconds = templateExercise.restSeconds,
+                        templateNote = templateExercise.notes?.trim()?.ifEmpty { null },
                     )
                 }
 
@@ -650,6 +662,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         viewModelScope.launch {
             if (availableExercises.isEmpty()) setExercises(getAllExercisesIncludingHiddenUseCase().first())
             val byId = availableExercises.associateBy { it.id }
+            val rests = userStates()
             val added = exerciseIds.mapNotNull { byId[it] }.map { exercise ->
                 val reps = SetField.Reps in SetFields.of(exercise.trackingType)
                 ActiveExercise(
@@ -666,7 +679,8 @@ class ActiveWorkoutViewModel @Inject constructor(
                     },
                     plannedSets = TemplateEditorViewModel.DEFAULT_SETS,
                     plannedReps = if (reps) TemplateEditorViewModel.DEFAULT_REPS else null,
-                    restSeconds = null,
+                    // Your rest for this exercise (exercise page), else the default.
+                    restSeconds = rests[exercise.id]?.restSeconds,
                 )
             }
             if (added.isEmpty()) return@launch
@@ -705,6 +719,37 @@ class ActiveWorkoutViewModel @Inject constructor(
             it.copy(exercises = list, currentExerciseIndex = list.indexOfFirst { e -> e.id == shown }.coerceAtLeast(0))
         }
         persistDraft()
+    }
+
+    private suspend fun userStates() = try {
+        exerciseRepository.observeUserStates().first()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        emptyMap()
+    }
+
+    private fun followUserNotes() {
+        viewModelScope.launch {
+            exerciseRepository.observeUserStates()
+                .map { all -> all.values.mapNotNull { s -> s.note?.takeIf { it.isNotBlank() }?.let { s.exerciseId to it } }.toMap() }
+                .distinctUntilChanged()
+                .catch { emit(emptyMap()) }
+                .collect { notes -> _uiState.update { it.copy(userNotes = notes) } }
+        }
+    }
+
+    /** Your note sheet in the workout (R13-14): the note for this exercise everywhere. */
+    fun saveUserNote(exerciseId: String, note: String) {
+        viewModelScope.launch {
+            try {
+                exerciseRepository.updateExerciseNote(exerciseId, note.trim().ifEmpty { null })
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _events.send(WorkoutEvent.SaveFailed(NOTE_FAILED))
+            }
+        }
     }
 
     /** ⋯ → Workout note. */
@@ -953,6 +998,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         /** Rest when the template has none; 7.10's setting replaces it. */
         const val DEFAULT_REST_SECONDS = TemplateEditorViewModel.DEFAULT_REST_SECONDS
         const val NOTHING_LOGGED = "No exercises logged. Workout not saved."
+        const val NOTE_FAILED = "Couldn't save your note. Try again."
 
         /** kg (or lb) shown for a stored kg value, "." separator. */
         fun displayWeight(kg: Float, units: PreferredUnits): String =
@@ -996,6 +1042,7 @@ private fun ActiveWorkoutUiState.toDraft(now: Long) = ActiveWorkoutDraft(
             plannedSets = exercise.plannedSets,
             plannedReps = exercise.plannedReps,
             restSeconds = exercise.restSeconds,
+            templateNote = exercise.templateNote,
             sets = exercise.sets.map { set ->
                 ActiveWorkoutDraft.Set(
                     id = set.id,
@@ -1031,5 +1078,6 @@ private fun ActiveWorkoutDraft.Exercise.toActiveExercise() = ActiveExercise(
     },
     plannedSets = plannedSets,
     plannedReps = plannedReps,
-    restSeconds = restSeconds
+    restSeconds = restSeconds,
+    templateNote = templateNote,
 )

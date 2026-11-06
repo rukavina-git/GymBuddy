@@ -30,8 +30,12 @@ class ValidateWorkoutSessionSetsUseCase @Inject constructor(
      * completed set is invalid, or if a referenced exercise cannot be found.
      */
     suspend operator fun invoke(workoutSession: WorkoutSession): WorkoutSession {
+        // Deleted exercises count: a template keeps them and still starts with them (Plan 7 step 07).
+        val known = exerciseRepository
+            .getExercisesAnyState(workoutSession.performedExercises.map { it.exerciseId })
+            .associateBy { it.id }
         val performedExercises = workoutSession.performedExercises.map { performedExercise ->
-            val exercise = exerciseRepository.getExerciseById(performedExercise.exerciseId)
+            val exercise = known[performedExercise.exerciseId]
                 ?: throw IllegalArgumentException("Exercise ${performedExercise.exerciseId} not found")
 
             performedExercise.sets.forEach { set ->

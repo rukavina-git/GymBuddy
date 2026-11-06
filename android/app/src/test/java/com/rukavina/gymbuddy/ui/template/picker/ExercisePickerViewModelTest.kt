@@ -4,11 +4,14 @@ import androidx.lifecycle.SavedStateHandle
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import com.rukavina.gymbuddy.testutil.ExerciseFixtures.exercise
 import com.rukavina.gymbuddy.testutil.FakeExerciseRepository
+import com.rukavina.gymbuddy.testutil.exerciseCreator
 import com.rukavina.gymbuddy.testutil.MainDispatcherRule
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -27,7 +30,7 @@ class ExercisePickerViewModelTest {
     )
 
     private fun vm() = ExercisePickerViewModel(
-        SavedStateHandle(mapOf(ExercisePickerViewModel.ARG_IN_TEMPLATE to "bench,row")), repo,
+        SavedStateHandle(mapOf(ExercisePickerViewModel.ARG_IN_TEMPLATE to "bench,row")), repo, exerciseCreator(repo),
     )
 
     @Test
@@ -70,5 +73,19 @@ class ExercisePickerViewModelTest {
         assertEquals(listOf("bench", "row"), vm.uiState.value.rows.map { it.exercise.id })
         vm.setQuery("cros")
         assertEquals(listOf("fly"), vm.uiState.value.rows.map { it.exercise.id })
+    }
+
+    @Test
+    fun quickCreateFromEmptySearchPicksTheNewExercise() = runTest {
+        val vm = vm()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} }
+        vm.toggle("fly")
+        vm.setQuery("zercher squat")
+        assertTrue(vm.uiState.value.rows.isEmpty())
+        vm.quickCreate(com.rukavina.gymbuddy.ui.exercises.create.ExerciseForm(name = "Zercher Squat"))
+        assertEquals(true, vm.created.first())
+        val id = repo.all.values.single { it.name == "Zercher Squat" }.id
+        assertEquals(listOf("fly", id), vm.picked)
+        assertEquals(2, vm.uiState.value.rows.single().pickNumber)
     }
 }

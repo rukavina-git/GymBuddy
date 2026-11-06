@@ -8,6 +8,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import com.rukavina.gymbuddy.ui.exercises.page.ExerciseNoteSheet
+import com.rukavina.gymbuddy.ui.design.AppIconButton
+import com.rukavina.gymbuddy.ui.theme.FullShape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -150,8 +155,11 @@ fun ActiveWorkoutScreen(
                     scope.launch {
                         snackbar.showSnackbar(
                             context.getString(
-                                if (event.message == ActiveWorkoutViewModel.NOTHING_LOGGED) R.string.workout_nothing_logged
-                                else R.string.workout_save_failed,
+                                when (event.message) {
+                                    ActiveWorkoutViewModel.NOTHING_LOGGED -> R.string.workout_nothing_logged
+                                    ActiveWorkoutViewModel.NOTE_FAILED -> R.string.exercise_action_failed
+                                    else -> R.string.workout_save_failed
+                                },
                             ),
                         )
                     }
@@ -190,6 +198,7 @@ fun ActiveWorkoutScreen(
             onMove = viewModel::moveExercise,
             onNote = viewModel::updateNote,
             onRest = viewModel::setRest,
+            onUserNote = viewModel::saveUserNote,
             onRestBuzz = viewModel::setRestBuzz,
         ),
         snackbar = snackbar,
@@ -236,6 +245,7 @@ internal data class WorkoutActions(
     val onNote: (String) -> Unit = {},
     val onRest: (Int) -> Unit = {},
     val onRestBuzz: (Boolean) -> Unit = {},
+    val onUserNote: (exerciseId: String, note: String) -> Unit = { _, _ -> },
 )
 
 @Composable
@@ -305,7 +315,7 @@ internal fun ActiveWorkoutContent(
             modifier = Modifier.padding(padding),
         ) { index ->
             val shown = state.exercises.getOrNull(index)
-            if (shown != null) ExerciseSets(shown, state, actions) else NoExercises(actions.onAddExercises)
+            if (shown != null) ExerciseSets(shown, state, actions) { sheet = WorkoutSheet.YourNote } else NoExercises(actions.onAddExercises)
         }
     }
 
@@ -333,6 +343,15 @@ internal fun ActiveWorkoutContent(
                 buzz = state.restBuzz,
                 onBuzzChange = actions.onRestBuzz,
                 onSave = { sheet = null; actions.onRest(it) },
+                onDismiss = { sheet = null },
+            )
+        }
+        WorkoutSheet.YourNote -> exercise?.let { ex ->
+            ExerciseNoteSheet(
+                exerciseName = ex.exerciseName,
+                note = state.userNotes[ex.exerciseId],
+                editing = false,
+                onSave = { sheet = null; actions.onUserNote(ex.exerciseId, it) },
                 onDismiss = { sheet = null },
             )
         }
@@ -433,7 +452,7 @@ private fun ExerciseTabs(exercises: List<ActiveExercise>, selected: Int, onSelec
 }
 
 @Composable
-private fun ExerciseSets(exercise: ActiveExercise, state: ActiveWorkoutUiState, actions: WorkoutActions) {
+private fun ExerciseSets(exercise: ActiveExercise, state: ActiveWorkoutUiState, actions: WorkoutActions, onYourNote: () -> Unit) {
     val d = GymBuddyTheme.dimens
     val current = exercise.currentSet
     LazyColumn(
@@ -441,7 +460,9 @@ private fun ExerciseSets(exercise: ActiveExercise, state: ActiveWorkoutUiState, 
         contentPadding = PaddingValues(horizontal = d.insetScreen, vertical = d.group),
         verticalArrangement = Arrangement.spacedBy(d.stackTight),
     ) {
-        item(key = "header") { ExerciseHeader(exercise, state.equipment[exercise.exerciseId]) }
+        item(key = "header") {
+            ExerciseHeader(exercise, state.equipment[exercise.exerciseId], noteLine(exercise.templateNote, state.userNotes[exercise.exerciseId]), onYourNote)
+        }
         items(exercise.sets, key = { it.id }) { set ->
             Column(Modifier.animateItem(), verticalArrangement = Arrangement.spacedBy(d.stackTight)) {
                 SetItem(exercise, set, set.id == current?.id, state, actions)
@@ -460,7 +481,7 @@ private fun ExerciseSets(exercise: ActiveExercise, state: ActiveWorkoutUiState, 
 }
 
 @Composable
-private fun ExerciseHeader(exercise: ActiveExercise, equipment: Equipment?) {
+private fun ExerciseHeader(exercise: ActiveExercise, equipment: Equipment?, note: NoteLine?, onYourNote: () -> Unit) {
     val d = GymBuddyTheme.dimens
     val cs = MaterialTheme.colorScheme
     Column(Modifier.padding(bottom = d.stackTight), verticalArrangement = Arrangement.spacedBy(d.hairline)) {
@@ -472,6 +493,46 @@ private fun ExerciseHeader(exercise: ActiveExercise, equipment: Equipment?) {
             stringResource(R.string.workout_rest_target, clock(exercise.restSeconds ?: ActiveWorkoutViewModel.DEFAULT_REST_SECONDS)),
         )
         Text(line, style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
+        if (note != null) NoteLineRow(note, onYourNote)
+    }
+}
+
+/**
+ * The one note line (R13-13): note glyph + text; with a plan note your
+ * note sits behind the icon on the right, a cobalt dot when you have one.
+ * Only your note: the line itself opens it.
+ */
+@Composable
+private fun NoteLineRow(note: NoteLine, onYourNote: () -> Unit) {
+    val d = GymBuddyTheme.dimens
+    val cs = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (note.icon) Modifier else Modifier.clickable(role = Role.Button, onClick = onYourNote)),
+        horizontalArrangement = Arrangement.spacedBy(d.stackTight),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(painterResource(AppIcons.Ui.Note), null, Modifier.size(d.iconSmall), tint = cs.onSurfaceVariant)
+        Text(note.text, style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant, modifier = Modifier.weight(1f))
+        if (note.icon) {
+            Box {
+                AppIconButton(
+                    AppIcons.Ui.Note,
+                    stringResource(if (note.dot) R.string.cd_your_note_set else R.string.cd_your_note),
+                    onYourNote,
+                )
+                if (note.dot) {
+                    Box(
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(d.stackTight)
+                            .size(d.stackTight)
+                            .background(GymBuddyTheme.colors.cobalt, FullShape),
+                    )
+                }
+            }
+        }
     }
 }
 

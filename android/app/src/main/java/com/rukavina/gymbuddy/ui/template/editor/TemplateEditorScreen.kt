@@ -83,6 +83,7 @@ import com.rukavina.gymbuddy.ui.design.KeypadInput
 import com.rukavina.gymbuddy.ui.design.KeypadValue
 import com.rukavina.gymbuddy.ui.design.OutlineButton
 import com.rukavina.gymbuddy.ui.design.PrimaryButton
+import com.rukavina.gymbuddy.ui.design.SecondaryButton
 import com.rukavina.gymbuddy.ui.design.keypadSeparator
 import com.rukavina.gymbuddy.ui.template.clock
 import com.rukavina.gymbuddy.ui.theme.AppIcons
@@ -114,7 +115,7 @@ fun TemplateEditorScreen(
 
     LaunchedEffect(picked) {
         if (picked != null) {
-            viewModel.add(picked)
+            viewModel.onPicked(picked)
             onPickedHandled()
         }
     }
@@ -155,7 +156,15 @@ fun TemplateEditorScreen(
             onRemove = viewModel::remove,
             onMove = viewModel::move,
             onMoveBy = viewModel::moveBy,
-            onAddExercises = { onAddExercises(state.exercises.map { it.exerciseId }) },
+            onAddExercises = {
+                viewModel.startSwap(null)
+                onAddExercises(state.exercises.map { it.exerciseId })
+            },
+            onSwap = { key ->
+                viewModel.startSwap(key)
+                onAddExercises(state.exercises.map { it.exerciseId })
+            },
+            onRestore = viewModel::restore,
         ),
         snackbar = snackbar,
     )
@@ -192,6 +201,8 @@ internal data class EditorActions(
     val onMove: (Long, Int) -> Unit = { _, _ -> },
     val onMoveBy: (Long, Int) -> Unit = { _, _ -> },
     val onAddExercises: () -> Unit = {},
+    val onSwap: (Long) -> Unit = {},
+    val onRestore: (Long) -> Unit = {},
 )
 
 @Composable
@@ -267,6 +278,10 @@ internal fun TemplateEditorContent(
                     items(state.exercises, key = { it.key }) { exercise ->
                         val index = state.exercises.indexOf(exercise)
                         val dragging = dragKey == exercise.key
+                        if (exercise.deleted) {
+                            DeletedCard(exercise, actions, Modifier.animateItem())
+                            return@items
+                        }
                         ExerciseCard(
                             exercise = exercise,
                             units = state.units,
@@ -446,6 +461,27 @@ private fun ExerciseCard(
                     }
                 }
                 NoteLine(exercise, editingNote, onEditNote, actions.onNote)
+            }
+        }
+    }
+}
+
+/**
+ * A deleted exercise (Figma R13-12): muted name, "Deleted exercise ·
+ * still starts with this template", Swap / Remove / Restore.
+ */
+@Composable
+private fun DeletedCard(exercise: EditorExercise, actions: EditorActions, modifier: Modifier = Modifier) {
+    val cs = MaterialTheme.colorScheme
+    val d = GymBuddyTheme.dimens
+    Surface(shape = MaterialTheme.shapes.medium, color = cs.surfaceContainer, modifier = modifier.fillMaxWidth()) {
+        Column(Modifier.padding(d.insetCard), verticalArrangement = Arrangement.spacedBy(d.hairline)) {
+            Text(exercise.name, style = MaterialTheme.typography.titleSmall, color = cs.onSurfaceVariant)
+            Text(stringResource(R.string.editor_deleted), style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
+            Row(Modifier.padding(top = d.stackTight), horizontalArrangement = Arrangement.spacedBy(d.stackTight)) {
+                SecondaryButton(stringResource(R.string.editor_swap), { actions.onSwap(exercise.key) }, size = ButtonSize.Small)
+                SecondaryButton(stringResource(R.string.editor_remove), { actions.onRemove(exercise.key) }, size = ButtonSize.Small)
+                SecondaryButton(stringResource(R.string.editor_restore), { actions.onRestore(exercise.key) }, size = ButtonSize.Small)
             }
         }
     }

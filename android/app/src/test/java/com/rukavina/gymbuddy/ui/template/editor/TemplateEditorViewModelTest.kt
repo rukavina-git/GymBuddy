@@ -257,11 +257,74 @@ class TemplateEditorViewModelTest {
     @Test
     fun saveFailureKeepsEditing() = runTest {
         val vm = vm("push")
-        exercises.deleteExercise("e0") // stamping can't find it: the use case fails
+        exercises.purge("e0") // stamping can't find it: the use case fails
         vm.setName("Push B")
         vm.save()
         assertEquals(TemplateEditorEvent.SaveFailed, vm.events.first())
         assertFalse(vm.s.saving)
         assertTrue(vm.s.dirty)
+    }
+
+    // 7.7: deleted exercise row (R13-12) and your rest on add
+
+    @Test
+    fun deletedExerciseIsMarkedAndSaveStillWorks() = runTest {
+        exercises.deleteExercise("e0")
+        val vm = vm("push")
+        vm.uiState.first { it.loaded }
+        assertEquals(listOf(true, false), vm.s.exercises.map { it.deleted })
+        vm.setName("Push B")
+        vm.save()
+        assertEquals(TemplateEditorEvent.Close, vm.events.first())
+        assertEquals(listOf("e0", "e1"), templates.updated.last().templateExercises.map { it.exerciseId })
+    }
+
+    @Test
+    fun restoreBringsTheExerciseBackAndClearsTheRow() = runTest {
+        exercises.deleteExercise("e0")
+        val vm = vm("push")
+        vm.uiState.first { it.loaded }
+        vm.restore(vm.s.exercises.first().key)
+        vm.uiState.first { s -> s.exercises.none { it.deleted } }
+        assertNull(exercises.all.getValue("e0").deletedAt)
+        assertFalse(vm.s.dirty)
+    }
+
+    @Test
+    fun swapReplacesTheDeletedCardInPlace() = runTest {
+        exercises.deleteExercise("e0")
+        val vm = vm("push")
+        vm.uiState.first { it.loaded }
+        val key = vm.s.exercises.first().key
+        vm.startSwap(key)
+        vm.onPicked(listOf("fly", "dip"))
+        vm.uiState.first { it.exercises.first().exerciseId == "fly" }
+        val card = vm.s.exercises.first()
+        assertEquals(key, card.key)
+        assertEquals("Cable Fly", card.name)
+        assertFalse(card.deleted)
+        assertEquals(80f, card.weightKg) // same tracking type keeps the targets
+        assertEquals(listOf("fly", "e1"), vm.s.exercises.map { it.exerciseId })
+    }
+
+    @Test
+    fun plainAddAfterSwapIsNotASwap() = runTest {
+        val vm = vm("push")
+        vm.uiState.first { it.loaded }
+        vm.startSwap(vm.s.exercises.first().key)
+        vm.startSwap(null)
+        vm.onPicked(listOf("fly"))
+        vm.uiState.first { it.exercises.size == 3 }
+        assertEquals(listOf("e0", "e1", "fly"), vm.s.exercises.map { it.exerciseId })
+    }
+
+    @Test
+    fun addUsesYourRestForTheExercise() = runTest {
+        exercises.setExerciseRest("fly", 75)
+        val vm = vm()
+        vm.uiState.first { it.loaded }
+        vm.add(listOf("fly", "dip"))
+        vm.uiState.first { it.exercises.size == 2 }
+        assertEquals(listOf(75, TemplateEditorViewModel.DEFAULT_REST_SECONDS), vm.s.exercises.map { it.restSeconds })
     }
 }

@@ -2,10 +2,13 @@ package com.rukavina.gymbuddy.ui.exercise
 
 import androidx.annotation.StringRes
 import com.rukavina.gymbuddy.R
+import com.rukavina.gymbuddy.domain.model.DifficultyLevel
 import com.rukavina.gymbuddy.domain.model.Equipment
+import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
+import com.rukavina.gymbuddy.domain.model.ExerciseType
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
 
-/** Display names for exercise enums (picker rows and chips; 7.7 reuses them). */
+/** Display names for exercise enums (picker, exercise page, create). */
 
 @StringRes
 fun muscleLabel(muscle: MuscleGroup): Int = when (muscle) {
@@ -34,4 +37,27 @@ fun equipmentLabel(equipment: Equipment): Int = when (equipment) {
     Equipment.MEDICINE_BALL -> R.string.equipment_medicine_ball
     Equipment.SUSPENSION_TRAINER -> R.string.equipment_suspension_trainer
     Equipment.SMITH_MACHINE -> R.string.equipment_smith_machine
+}
+
+@StringRes
+fun trackingLabel(type: ExerciseTrackingType): Int = when (type) {
+    ExerciseTrackingType.WEIGHT_REPS -> R.string.tracking_weight_reps
+    ExerciseTrackingType.REPS_ONLY -> R.string.tracking_reps_only
+    ExerciseTrackingType.DURATION -> R.string.tracking_duration
+    ExerciseTrackingType.WEIGHT_DURATION -> R.string.tracking_weight_duration
+    ExerciseTrackingType.DISTANCE_DURATION -> R.string.tracking_distance_duration
+    ExerciseTrackingType.WEIGHT_DISTANCE -> R.string.tracking_weight_distance
+}
+
+@StringRes
+fun difficultyLabel(level: DifficultyLevel): Int = when (level) {
+    DifficultyLevel.BEGINNER -> R.string.difficulty_beginner
+    DifficultyLevel.INTERMEDIATE -> R.string.difficulty_intermediate
+    DifficultyLevel.ADVANCED -> R.string.difficulty_advanced
+}
+
+@StringRes
+fun kindLabel(type: ExerciseType): Int = when (type) {
+    ExerciseType.COMPOUND -> R.string.kind_compound
+    ExerciseType.ISOLATION -> R.string.kind_isolation
 }

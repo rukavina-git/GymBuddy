@@ -243,5 +243,7 @@ Never NC, ND, SA or GPL/AGPL. Record every third-party asset here.
 | Google sign-in button + G logo | Google | Google's brand rules | Use Google's own dark button; never recolour or tokenise |
 | Mark, wordmark, app icon, gym glyphs, tab icons, notification ring | Own drawing | Ours | Wordmark is Figtree Bold outlined (OFL) |
 
-Not yet recorded: the licence of the stock reference exercise photos
-(PRODUCT.md "Evidence on Hand").
+| Built-in exercise photos (exercise page, 7.7) | github.com/yuhonas/free-exercise-db (`thumbnailUrl` in the seed data), loaded at runtime with Coil, not bundled | Unlicense (repo), checked 2026-11-06 | Risk: the repo restructured github.com/wrkout/exercises.json (also Unlicense), whose photos' original source isn't stated. Confirm the photos' origin or replace them before release; the page shows no photo when one is missing, so removing them is safe |
+
+Still open: the licence of the stock reference exercise photos in
+PRODUCT.md "Evidence on Hand" (the design references, not the app's photos).

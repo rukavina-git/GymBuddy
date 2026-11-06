@@ -22,7 +22,7 @@ import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
-import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
+import com.rukavina.gymbuddy.ui.exercises.ExercisesViewModel
 import com.rukavina.gymbuddy.utils.UnitConverter
 import com.rukavina.gymbuddy.utils.validation.InputValidation
 import com.rukavina.gymbuddy.utils.validation.ValidationConstants
@@ -37,7 +37,7 @@ import java.util.*
 @Composable
 fun WorkoutScreen(
     viewModel: WorkoutSessionViewModel = hiltViewModel(),
-    exerciseViewModel: ExerciseViewModel = hiltViewModel()
+    exerciseViewModel: ExercisesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val exerciseUiState by exerciseViewModel.uiState.collectAsState()
@@ -203,7 +203,7 @@ fun WorkoutScreen(
         if (showDialog) {
             WorkoutSessionFormDialog(
                 workoutSession = editingWorkoutSession,
-                availableExercises = exerciseUiState.exercises,
+                availableExercises = exerciseUiState.rows,
                 preferredUnits = uiState.preferredUnits,
                 onDismiss = { showDialog = false },
                 onSave = { draft ->

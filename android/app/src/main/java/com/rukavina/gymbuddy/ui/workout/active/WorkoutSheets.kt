@@ -55,7 +55,7 @@ import com.rukavina.gymbuddy.ui.workout.ActiveExercise
 private val Mark = 28.dp
 
 /** Which workout sheet is open (state lives in the screen, saveable). */
-internal enum class WorkoutSheet { Exercises, Reorder, Note, Rest }
+internal enum class WorkoutSheet { Exercises, Reorder, Note, Rest, YourNote }
 
 /**
  * All exercises (Figma 53:3272): title, "15 exercises · 2 done", one row

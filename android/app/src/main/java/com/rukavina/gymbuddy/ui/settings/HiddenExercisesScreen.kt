@@ -39,13 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.rukavina.gymbuddy.domain.model.Exercise
-import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HiddenExercisesScreen(
     navController: NavHostController,
-    viewModel: ExerciseViewModel = hiltViewModel()
+    viewModel: HiddenExercisesViewModel = hiltViewModel()
 ) {
     val hiddenExercises by viewModel.hiddenExercises.collectAsState(initial = emptyList())
     var showRestoreAllDialog by remember { mutableStateOf(false) }

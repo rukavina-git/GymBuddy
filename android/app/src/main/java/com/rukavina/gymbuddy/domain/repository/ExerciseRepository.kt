@@ -1,6 +1,7 @@
 package com.rukavina.gymbuddy.domain.repository
 
 import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.ExerciseUserState
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -80,4 +81,22 @@ interface ExerciseRepository {
      * regardless of hidden status.
      */
     fun getAllExercisesIncludingHidden(): Flow<List<Exercise>>
+
+    /** One exercise as it changes; emits null once it is deleted or gone. */
+    fun observeExercise(id: String): Flow<Exercise?>
+
+    /** These ids, deleted ones included (the template editor marks them). */
+    suspend fun getExercisesAnyState(ids: List<String>): List<Exercise>
+
+    /** Bring back a deleted exercise of your own (editor Restore). */
+    suspend fun restoreExercise(id: String)
+
+    /** Your state for one exercise (defaults when you never set anything). */
+    fun observeUserState(exerciseId: String): Flow<ExerciseUserState>
+
+    /** Your state for every exercise that has some, by exercise id. */
+    fun observeUserStates(): Flow<Map<String, ExerciseUserState>>
+
+    /** Your rest between sets for this exercise; null goes back to the default. */
+    suspend fun setExerciseRest(exerciseId: String, seconds: Int?)
 }

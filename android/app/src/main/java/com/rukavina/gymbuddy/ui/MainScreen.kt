@@ -65,9 +65,11 @@ import com.rukavina.gymbuddy.ui.frame.route
 import com.rukavina.gymbuddy.ui.frame.selectedTab
 import com.rukavina.gymbuddy.ui.frame.toLiveBarState
 import com.rukavina.gymbuddy.navigation.NavRoutes
-import com.rukavina.gymbuddy.ui.exercise.ExerciseScreen
-import com.rukavina.gymbuddy.ui.exercise.ExerciseDetailsScreen
-import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
+import com.rukavina.gymbuddy.ui.exercises.ExercisesScreen
+import com.rukavina.gymbuddy.ui.exercises.create.ExerciseEditScreen
+import com.rukavina.gymbuddy.ui.exercises.create.ExerciseEditViewModel
+import com.rukavina.gymbuddy.ui.exercises.page.ExercisePageScreen
+import com.rukavina.gymbuddy.ui.exercises.page.ExercisePageViewModel
 import com.rukavina.gymbuddy.ui.profile.ProfileScreen
 import com.rukavina.gymbuddy.ui.profile.ProfileViewModel
 import com.rukavina.gymbuddy.ui.profile.edit.EditActivityLevelScreen
@@ -304,32 +306,45 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                 )
             }
             composable(NavRoutes.Exercises) {
-                ExerciseScreen(navController = bottomNavController)
+                ExercisesScreen(
+                    onOpen = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id)) },
+                    onNew = { bottomNavController.navigate(NavRoutes.exerciseEdit()) },
+                    onHidden = { bottomNavController.navigate(NavRoutes.HiddenExercises) },
+                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                )
             }
             composable(
-                route = NavRoutes.ExerciseDetails,
-                arguments = listOf(navArgument("exerciseId") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
-                val exerciseViewModel: ExerciseViewModel = hiltViewModel()
-                val uiState = exerciseViewModel.uiState.collectAsState().value
-                val exercise = uiState.exercises.find { it.id == exerciseId }
-                val note = exerciseViewModel.selectedExerciseNote.collectAsState().value
-
-                LaunchedEffect(exerciseId) {
-                    exerciseViewModel.loadExerciseNote(exerciseId)
-                }
-
-                if (exercise != null) {
-                    ExerciseDetailsScreen(
-                        exercise = exercise,
-                        note = note,
-                        onNavigateBack = { bottomNavController.navigateUp() },
-                        onUpdateNote = { newNote ->
-                            exerciseViewModel.updateExerciseNote(exerciseId, newNote)
+                route = NavRoutes.ExercisePage,
+                arguments = listOf(navArgument(ExercisePageViewModel.ARG_EXERCISE_ID) { type = NavType.StringType }),
+            ) { entry ->
+                ExercisePageScreen(
+                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    onEdit = { id -> bottomNavController.navigate(NavRoutes.exerciseEdit(id)) },
+                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                )
+            }
+            composable(
+                route = NavRoutes.ExerciseEdit,
+                arguments = listOf(
+                    navArgument(ExerciseEditViewModel.ARG_EXERCISE_ID) {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                ExerciseEditScreen(
+                    onClose = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    // A new exercise opens its page in the editor's place; an edit goes back to the page.
+                    onSaved = { id, isNew ->
+                        if (isNew) {
+                            bottomNavController.navigate(NavRoutes.exercisePage(id)) {
+                                popUpTo(entry.destination.id) { inclusive = true }
+                            }
+                        } else {
+                            bottomNavController.popBackStack(entry.destination.id, inclusive = true)
                         }
-                    )
-                }
+                    },
+                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                )
             }
             // Old session list until the Progress tab lands (7.8).
             composable(NavRoutes.Progress) {

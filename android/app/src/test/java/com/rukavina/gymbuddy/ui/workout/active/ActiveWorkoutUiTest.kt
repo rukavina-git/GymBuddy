@@ -72,6 +72,7 @@ class ActiveWorkoutUiTest {
             MutableClock(),
             FakeWorkoutServiceStarter(),
             FakeRestBuzzScheduler(),
+            exercises,
         )
         vm.startWorkoutFromTemplate(
             WorkoutTemplate(

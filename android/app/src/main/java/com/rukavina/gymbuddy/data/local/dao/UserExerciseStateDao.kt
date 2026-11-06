@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.rukavina.gymbuddy.data.local.entity.UserExerciseStateEntity
 import com.rukavina.gymbuddy.domain.model.SyncState
+import kotlinx.coroutines.flow.Flow
 
 /**
  * DAO for per-user Exercise overlay state (user_exercise_state).
@@ -20,6 +21,20 @@ interface UserExerciseStateDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(state: UserExerciseStateEntity)
+
+    /** Every overlay row (notes and rests for the workout and the editor). */
+    @Query("SELECT * FROM user_exercise_state")
+    fun observeAll(): Flow<List<UserExerciseStateEntity>>
+
+    @Query("SELECT * FROM user_exercise_state WHERE exerciseId = :exerciseId")
+    fun observeState(exerciseId: String): Flow<UserExerciseStateEntity?>
+
+    /** Your rest for this exercise (null = the default), creating the row if needed. */
+    @Transaction
+    suspend fun setDefaultRest(exerciseId: String, seconds: Int?, updatedAt: Long) {
+        val current = getState(exerciseId) ?: UserExerciseStateEntity(exerciseId = exerciseId)
+        upsert(current.copy(defaultRestSeconds = seconds, updatedAt = updatedAt, syncState = SyncState.PENDING))
+    }
 
     /**
      * Set the hidden flag for an exercise, creating the sparse overlay row

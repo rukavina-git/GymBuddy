@@ -20,7 +20,7 @@ class TabNavigationTest {
         assertEquals(NavTab.Home, selectedTab(listOf(null, NavRoutes.Home)))
         assertEquals(
             NavTab.Exercises,
-            selectedTab(listOf(null, NavRoutes.Home, NavRoutes.Exercises, NavRoutes.ExerciseDetails)),
+            selectedTab(listOf(null, NavRoutes.Home, NavRoutes.Exercises, NavRoutes.ExercisePage)),
         )
         assertEquals(NavTab.You, selectedTab(listOf(NavRoutes.Home, NavRoutes.You, NavRoutes.Profile, NavRoutes.EditName)))
     }

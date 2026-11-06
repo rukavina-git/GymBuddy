@@ -155,6 +155,7 @@ class ActiveWorkoutViewModelTest {
             clock = clock,
             workoutService = service,
             restBuzz = buzz,
+            exerciseRepository = exerciseRepo,
         )
         created += viewModel
         return Triple(viewModel, sessionRepo, idGenerator)
@@ -300,6 +301,7 @@ class ActiveWorkoutViewModelTest {
             clock = MutableClock(),
             workoutService = FakeWorkoutServiceStarter(),
             restBuzz = FakeRestBuzzScheduler(),
+            exerciseRepository = FakeExerciseRepository(listOf(benchPress)),
         )
         created += viewModel
 
@@ -533,6 +535,7 @@ class ActiveWorkoutViewModelTest {
             clock = MutableClock(),
             workoutService = FakeWorkoutServiceStarter(),
             restBuzz = FakeRestBuzzScheduler(),
+            exerciseRepository = FakeExerciseRepository(listOf(benchPress)),
         )
         created += vmWithImperialPrefs
 
@@ -1210,5 +1213,80 @@ class ActiveWorkoutViewModelTest {
         viewModel.step(SetField.Duration, plus = true)
         viewModel.done() // last set: nothing to rest for
         assertNull(buzz.pending)
+    }
+
+    // --- 7.7: notes, your rest, deleted exercises ---
+
+    @Test
+    fun `template notes ride along and your notes follow the repository`() = kotlinx.coroutines.runBlocking {
+        val repo = FakeExerciseRepository(listOf(benchPress, plank, sprint))
+        val (viewModel, _, _) = buildViewModel(exerciseRepo = repo)
+        viewModel.startWorkoutFromTemplate(
+            WorkoutTemplate(
+                id = "t", title = "Push",
+                templateExercises = listOf(templateExercise("ex-bench", 0).copy(notes = "  Pause 1 s  "), templateExercise("ex-plank", 1)),
+            ),
+        )
+        assertEquals(listOf("Pause 1 s", null), viewModel.uiState.value.exercises.map { it.templateNote })
+
+        repo.updateExerciseNote("ex-bench", "Notch 3")
+        assertEquals(mapOf("ex-bench" to "Notch 3"), viewModel.uiState.value.userNotes)
+        viewModel.saveUserNote("ex-bench", "   ")
+        assertEquals(emptyMap<String, String>(), viewModel.uiState.value.userNotes)
+        assertNull(repo.getExerciseNote("ex-bench"))
+    }
+
+    @Test
+    fun `a deleted exercise still starts with its template snapshot`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(
+            WorkoutTemplate(
+                id = "t", title = "Core",
+                templateExercises = listOf(
+                    templateExercise("gone", 0).copy(exerciseName = "Cable Crunch", exerciseTrackingType = ExerciseTrackingType.REPS_ONLY),
+                ),
+            ),
+        )
+        val ex = viewModel.uiState.value.exercises.single()
+        assertEquals("Cable Crunch", ex.exerciseName)
+        assertEquals(ExerciseTrackingType.REPS_ONLY, ex.exerciseTrackingType)
+    }
+
+    @Test
+    fun `added exercises use your rest for them`() = kotlinx.coroutines.runBlocking {
+        val repo = FakeExerciseRepository(listOf(benchPress, plank, sprint))
+        repo.setExerciseRest("ex-plank", 45)
+        val (viewModel, _, _) = buildViewModel(exerciseRepo = repo)
+        viewModel.startEmptyWorkout("Workout")
+        viewModel.addExercises(listOf("ex-plank", "ex-bench"))
+        assertEquals(listOf(45, null), viewModel.uiState.value.exercises.map { it.restSeconds })
+    }
+
+    @Test
+    fun `template note survives the draft`() {
+        val drafts = FakeActiveWorkoutDraftRepository()
+        val (viewModel, _, _) = buildViewModel(draftRepo = drafts)
+        viewModel.startWorkoutFromTemplate(
+            WorkoutTemplate(id = "t", title = "Push", templateExercises = listOf(templateExercise("ex-bench", 0).copy(notes = "Pins 4"))),
+        )
+        assertEquals("Pins 4", drafts.draft!!.exercises.single().templateNote)
+    }
+
+    @Test
+    fun `a workout with a deleted exercise still saves`() = kotlinx.coroutines.runBlocking {
+        val repo = FakeExerciseRepository(listOf(benchPress, plank, sprint))
+        repo.deleteExercise("ex-bench")
+        val (viewModel, sessionRepo, _) = buildViewModel(exerciseRepo = repo)
+        viewModel.startWorkoutFromTemplate(
+            WorkoutTemplate(
+                id = "t", title = "Push",
+                templateExercises = listOf(templateExercise("ex-bench", 0, plannedSets = 1).copy(exerciseName = "Bench Press", plannedWeightKg = 80f)),
+            ),
+        )
+        viewModel.done()
+        viewModel.saveWorkout()
+        val saved = sessionRepo.created.single().performedExercises.single()
+        assertEquals("ex-bench", saved.exerciseId)
+        assertEquals(1, saved.sets.size)
     }
 }

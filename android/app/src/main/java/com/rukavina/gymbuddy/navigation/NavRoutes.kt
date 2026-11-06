@@ -14,7 +14,10 @@ object NavRoutes {
     const val Home = "home"
     const val Templates = "templates"
     const val Exercises = "exercises"
-    const val ExerciseDetails = "exercise_details/{exerciseId}"
+    /** Exercise page (R13-1). */
+    const val ExercisePage = "exercise/{exerciseId}"
+    /** Create A / Edit (R13-4); no exerciseId = new exercise. */
+    const val ExerciseEdit = "exercise_edit?exerciseId={exerciseId}"
     const val Workouts = "workouts"
     const val Progress = "progress"
     const val You = "you"
@@ -57,7 +60,8 @@ object NavRoutes {
 
     fun exercisePicker(inTemplate: List<String>) = "exercise_picker?inTemplate=${inTemplate.distinct().joinToString(",")}"
 
-    fun exerciseDetailsRoute(exerciseId: String): String {
-        return "exercise_details/$exerciseId"
-    }
+    fun exercisePage(exerciseId: String) = "exercise/$exerciseId"
+
+    fun exerciseEdit(exerciseId: String? = null) =
+        if (exerciseId == null) "exercise_edit" else "exercise_edit?exerciseId=$exerciseId"
 }

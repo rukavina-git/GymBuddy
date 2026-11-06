@@ -10,7 +10,7 @@
 - [x] 06a Active workout: logging (steps/06-active-workout.md) — 0d33cb5
 - [x] 06b Active workout: around the workout (steps/06-active-workout.md) — bd61611
 - [x] 06c Active workout: rest buzz + lock screen (steps/06-active-workout.md) — 2d9b952
-- [ ] 07 Exercise page + create
+- [x] 07 Exercise page + create (steps/07-exercise-page.md) — HASH
 - [ ] 08 Progress tab
 - [ ] 09 Session detail
 - [ ] 10 You + Settings
@@ -278,7 +278,70 @@
 - 06c: Rest timer sheet has the switch on top; state follows the
   DataStore flow (no optimistic update, avoids a flip back on first read).
 
+- 07: One step, not split (owner). Figma read via the Console MCP.
+  Decisions 2–6 as recommended.
+- 07: Templates keep a deleted exercise. `StampTemplateExerciseSnapshots`
+  and `ValidateWorkoutSessionSets` now look exercises up including deleted
+  ones (`getExercisesAnyState`), or templates/workouts with one couldn't
+  save (reviewer BLOCKER, fixed). The workout starts a deleted exercise from
+  the template snapshot (name, tracking type).
+- 07: Restore = `ExerciseDao.restoreExercise` (deletedAt null) + a plain
+  UPSERT outbox push; the server's update clears deleted_at. No spec change.
+- 07: New queries only (no Room schema change): `observeExercise`,
+  `getExercisesAnyState`, `restoreExercise`, user state `observeAll`,
+  `observeState`, `setDefaultRest`. Domain `ExerciseUserState`.
+- 07: "Progress shows after 3 sessions." left out with the chart (7.8).
+  History rows and "All N sessions" not tappable/shown until 7.8/7.9.
+- 07: Tracking chips are Weight + reps, Reps only, Time, then "More" on
+  both create screens (android/CLAUDE.md: not six equal choices); Figma
+  Create A shows all six. Equipment: 7 chips + More.
+- 07: Hidden fields: Difficulty and Kind (compound/isolation) editable under
+  More details; Category isn't shown (Distance + time → Cardio, else
+  Strength; an edit keeps its category). No main muscle → Other.
+- 07: Create A has no discard dialog (× just leaves). New exercise Save
+  opens its page in the editor's place; Edit pops back to the page.
+- 07: Your rest per exercise is used when it's added (editor add/swap,
+  workout add, ⋯ Add to template); template rest still wins on start.
+- 07: Add to template = sheet of your own templates (no starters), appended
+  with editor defaults.
+- 07: Hide from lists pops the page with a snackbar (no Undo; Settings ›
+  Hidden exercises brings it back). Hidden screen got its own small
+  `HiddenExercisesViewModel`; old WorkoutScreen now uses `ExercisesViewModel`.
+- 07: Workout one-note line: plan note first, your note behind the note
+  icon (cobalt dot when set), only yours → the line opens it. Template note
+  is in ActiveExercise + draft JSON (`templateNote`, default null). "How to"
+  in the workout still hidden.
+- 07: Swap on a deleted row opens the picker; the first pick replaces the
+  card (same tracking type keeps the targets).
+- 07: Photos load from free-exercise-db URLs with Coil, nothing shown on
+  failure. DESIGN.md licence row: Unlicense, but the photos' original
+  source is unknown; confirm or replace before release.
+- 07: Strings in `res/values/strings_exercises.xml` (quotes must be `\"`).
+
 ## Gotchas
+- From 07 (reviewer, not fixed):
+  - No Room/outbox tests for the new repository calls (restore over a
+    pending DELETE, setExerciseRest, observeUserState(s), any-state read).
+  - Workout note line isn't limited to one line (no maxLines/ellipsis).
+  - Note dot is cobalt; cobalt is meant only for "you are here". Check
+    against R13-13 or switch it.
+  - With neither a plan note nor your note, a workout can't add your note.
+  - `ExerciseHistory.SetOrder` ranks time before distance: for Distance +
+    time, Best is the longest, not the farthest set.
+  - Swap with several picks keeps the first only; `swapKey` is lost on
+    process death (the pick is appended instead).
+  - Editing an exercise's tracking type leaves old template snapshots on the
+    old type until each template is saved again.
+  - DESIGN.md §10: the new photo row sits after a blank line, so it renders
+    outside the table. Photos are a runtime call to GitHub.
+- 07, for 7.8: put the Progress block (chart + "Show on Progress") into
+  `ExercisePageContent` after the note; history entries are
+  `ExerciseHistory.of(id, sessions)`. "All N sessions" → All sessions
+  filtered by exercise. For 7.9: make `HistoryRow` open the session.
+- 07: in Robolectric, click buttons inside a ModalBottomSheet through
+  `performSemanticsAction(SemanticsActions.OnClick)`; performClick can miss.
+- 07: workout VM tests must not use `runTest` (it drives the endless clock
+  loop and hangs); use plain tests or runBlocking.
 - From 06c (reviewer, not fixed):
   - The workout clock ticks with `delay(1000)` and stops while the phone
     sleeps, so the notification chronometer base (`now - elapsed`) jumps

@@ -43,7 +43,9 @@ data class ActiveWorkoutDraft(
         val plannedSets: Int,
         val plannedReps: Int?,
         val restSeconds: Int?,
-        val sets: List<Set>
+        val sets: List<Set>,
+        /** The template's note for this exercise (7.7 one-note line); older drafts have none. */
+        val templateNote: String? = null,
     )
 
     data class Set(

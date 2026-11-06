@@ -118,3 +118,21 @@ internal fun keypadDisplay(field: SetField, text: String): String =
 
 /** "9,120" in the user's locale, whole numbers. */
 internal fun wholeNumber(value: Float): String = NumberFormat.getIntegerInstance().format(Math.round(value))
+
+/** The one note line under the exercise header (R13-13). [icon]: your note sits behind the note icon. */
+internal data class NoteLine(val text: String, val icon: Boolean, val dot: Boolean)
+
+/**
+ * Owner rule (2026-11-02): one line only. The plan note wins and your
+ * note waits behind the icon (dot = you have one). Only your note? It is
+ * the line. Neither? No line, no icon.
+ */
+internal fun noteLine(templateNote: String?, userNote: String?): NoteLine? {
+    val plan = templateNote?.trim()?.ifEmpty { null }
+    val mine = userNote?.trim()?.ifEmpty { null }
+    return when {
+        plan != null -> NoteLine(plan, icon = true, dot = mine != null)
+        mine != null -> NoteLine(mine, icon = false, dot = false)
+        else -> null
+    }
+}

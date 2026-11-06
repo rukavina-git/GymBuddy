@@ -105,7 +105,7 @@ class AppFrameTest {
                 ) {
                     NavHost(nav, startDestination = NavRoutes.Home) {
                         NavTab.entries.forEach { tab -> composable(tab.route) { Text("root ${tab.route}") } }
-                        composable(NavRoutes.ExerciseDetails) { Text("details") }
+                        composable(NavRoutes.ExercisePage) { Text("details") }
                     }
                 }
             }
@@ -132,7 +132,7 @@ class AppFrameTest {
         val nav = tabs()
 
         rule.onNodeWithText("Exercises").performClick()
-        rule.runOnIdle { nav().navigate("exercise_details/x") }
+        rule.runOnIdle { nav().navigate(NavRoutes.exercisePage("x")) }
         rule.onNodeWithText("details").assertExists()
         rule.onNodeWithText("Exercises").assertIsSelected()
 
