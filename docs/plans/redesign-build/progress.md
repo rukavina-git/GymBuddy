@@ -10,7 +10,7 @@
 - [x] 06a Active workout: logging (steps/06-active-workout.md) — 0d33cb5
 - [x] 06b Active workout: around the workout (steps/06-active-workout.md) — bd61611
 - [x] 06c Active workout: rest buzz + lock screen (steps/06-active-workout.md) — 2d9b952
-- [x] 07 Exercise page + create (steps/07-exercise-page.md) — HASH
+- [x] 07 Exercise page + create (steps/07-exercise-page.md) — 0245dcc
 - [ ] 08 Progress tab
 - [ ] 09 Session detail
 - [ ] 10 You + Settings
