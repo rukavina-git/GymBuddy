@@ -6,6 +6,20 @@
     <string name="home_start_workout">Start workout</string>
     <string name="home_your_templates">Your templates</string>
     <string name="home_all_templates">All templates</string>
+    <plurals name="home_not_backed_up">
+        <item quantity="one">Not backed up for %d day</item>
+        <item quantity="other">Not backed up for %d days</item>
+    </plurals>
+    <string name="home_retry">Retry</string>
+    <string name="home_backing_up">Backing up…</string>
+    <string name="home_backup_offline">Needs internet. Safe on this phone.</string>
+    <string name="home_resync_running">Getting your workouts…</string>
+    <string name="home_resync_running_body">From your account. Takes a few seconds. You can start a workout meanwhile.</string>
+    <string name="home_resync_failed">Couldn\'t get your workouts</string>
+    <string name="home_resync_failed_body">They\'re safe in your account. Check your connection, then try again.</string>
+    <string name="home_resync_rows_running">Coming back from your account.</string>
+    <string name="home_resync_rows_failed">Not back yet.</string>
+    <string name="start_sheet_resync">On their way from your account.</string>
     <plurals name="week_workouts">
         <item quantity="one">%d workout</item>
         <item quantity="other">%d workouts</item>

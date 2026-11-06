@@ -81,6 +81,8 @@ import com.rukavina.gymbuddy.ui.workout.WorkoutSet as UiSet
 
 /** Raw size (DESIGN.md §4): the bundled photo's frame on R13-1 (384 × 216). */
 private const val PHOTO_RATIO = 16f / 9f
+/** Raw size (DESIGN.md §4): stand-in glyph, as EmptyState's (Figma R17-E4). */
+private val StandInGlyph = 40.dp
 
 /** History rows on the page (not chartable lifts); the full list is All sessions. */
 private const val HISTORY_ROWS = 3
@@ -230,7 +232,9 @@ internal fun ExercisePageContent(
                 item(key = "title") { Title(exercise, state.own) }
                 val last = state.history.last
                 val best = state.history.best
-                if (last != null && best != null) {
+                if (state.firstTime && last != null) {
+                    item(key = "numbers") { FirstTime(exercise.trackingType, last, state.units) }
+                } else if (last != null && best != null) {
                     item(key = "numbers") { Numbers(exercise.trackingType, last, best, state.units) }
                 }
                 item(key = "rest") { RestRow(state.restSeconds, onRest) }
@@ -250,7 +254,7 @@ internal fun ExercisePageContent(
                         HistoryRow(entry, exercise.trackingType, state.units) { onOpenSession(entry.sessionId) }
                     }
                 }
-                if (state.history.sessionCount > 0) {
+                if (state.history.sessionCount > 1) {
                     item(key = "all") {
                         AppLinkButton(
                             stringResource(R.string.progress_all_n_sessions, state.history.sessionCount),
@@ -285,11 +289,14 @@ internal fun ExercisePageContent(
     }
 }
 
-/** Bundled photo; nothing shows while it can't load (offline: name on top, like R13-7). */
+/** Photo from the web (cached). Can't load (offline) → a quiet stand-in at the same size (R17-E4). */
 @Composable
 private fun Photo(url: String, name: String) {
     var failed by rememberSaveable(url) { mutableStateOf(false) }
-    if (failed) return
+    if (failed) {
+        PhotoStandIn()
+        return
+    }
     AsyncImage(
         model = url,
         contentDescription = stringResource(R.string.exercise_photo_cd, name),
@@ -310,6 +317,37 @@ private fun Title(exercise: Exercise, own: Boolean) {
         val line = joinDot(exerciseSubtitle(exercise), if (own) stringResource(R.string.exercise_yours) else null)
         if (line.isNotEmpty()) {
             Text(line, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun PhotoStandIn() {
+    val cs = MaterialTheme.colorScheme
+    val d = GymBuddyTheme.dimens
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = cs.surfaceContainer,
+        modifier = Modifier.fillMaxWidth().aspectRatio(PHOTO_RATIO),
+    ) {
+        Column(
+            Modifier.fillMaxSize().semantics(mergeDescendants = true) {},
+            verticalArrangement = Arrangement.spacedBy(d.stackTight, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(painterResource(AppIcons.Glyph.Dumbbell), null, Modifier.size(StandInGlyph), tint = cs.onSurfaceVariant)
+            Text(stringResource(R.string.exercise_photo_offline), style = MaterialTheme.typography.bodyMedium, color = cs.onSurfaceVariant)
+        }
+    }
+}
+
+/** Done once (R17-D3): "First time · 80 kg × 8" in the Last / Best card's place. */
+@Composable
+private fun FirstTime(type: ExerciseTrackingType, set: WorkoutSet, units: PreferredUnits) {
+    val d = GymBuddyTheme.dimens
+    Surface(shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(horizontal = d.insetCard, vertical = d.stack)) {
+            NumberCell(stringResource(R.string.exercise_first_time), setText(type, set, units), Modifier.weight(1f))
         }
     }
 }

@@ -1,6 +1,17 @@
 package com.rukavina.gymbuddy.ui.home
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import com.rukavina.gymbuddy.data.sync.Resync
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -91,7 +102,11 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HomeContent(state, workoutRunning, onStartTemplate, onOpenTemplate, onAllTemplates, onOpenWeek, workout, onOpenWorkout, onEmptyWorkout, unfinished)
+    HomeContent(
+        state, workoutRunning, onStartTemplate, onOpenTemplate, onAllTemplates, onOpenWeek, workout, onOpenWorkout, onEmptyWorkout, unfinished,
+        onRetryBackup = viewModel::retryBackup,
+        onRetryResync = viewModel::retryResync,
+    )
 }
 
 /** Unfinished workout card (R17-E2). Discard confirms first. */
@@ -137,8 +152,11 @@ internal fun HomeContent(
     onOpenWorkout: () -> Unit = {},
     onEmptyWorkout: () -> Unit = {},
     unfinished: UnfinishedActions = UnfinishedActions(),
+    onRetryBackup: () -> Unit = {},
+    onRetryResync: () -> Unit = {},
 ) {
     val d = GymBuddyTheme.dimens
+    val resyncing = state.resync != Resync.Idle
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
@@ -159,7 +177,10 @@ internal fun HomeContent(
             if (workoutRunning && workout != null && workout.unfinishedSince == null) {
                 InProgressCard(workout, state.zone, onOpenWorkout)
             }
-            state.week?.let { week ->
+            if (resyncing) {
+                ResyncCard(failed = state.resync == Resync.Failed, onRetry = onRetryResync)
+            }
+            state.week?.takeIf { !resyncing }?.let { week ->
                 WeekStrip(
                     days = weekDays(week),
                     summary = joinDot(
@@ -168,6 +189,9 @@ internal fun HomeContent(
                     ),
                     onClick = onOpenWeek,
                     modifier = Modifier.fillMaxWidth(),
+                    footer = if (state.backup == HomeBackup.Hidden) null else {
+                        { BackupFooter(state.backup, onRetryBackup) }
+                    },
                 )
             }
             val since = workout?.unfinishedSince
@@ -180,7 +204,20 @@ internal fun HomeContent(
                     onClick = { sheetOpen = true },
                     modifier = Modifier.fillMaxWidth().padding(top = d.hairline),
                 )
-                if (state.rows.isNotEmpty()) {
+                if (resyncing) {
+                    Text(
+                        stringResource(R.string.home_your_templates),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = d.hairline, top = d.stackTight).semantics { heading() },
+                    )
+                    Text(
+                        stringResource(if (state.resync == Resync.Failed) R.string.home_resync_rows_failed else R.string.home_resync_rows_running),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = d.hairline),
+                    )
+                } else if (state.rows.isNotEmpty()) {
                     Text(
                         stringResource(R.string.home_your_templates),
                         style = MaterialTheme.typography.labelMedium,
@@ -199,8 +236,10 @@ internal fun HomeContent(
                     }
                 }
             }
-            Box(Modifier.fillMaxWidth().padding(bottom = d.group), contentAlignment = Alignment.Center) {
-                AppLinkButton(stringResource(R.string.home_all_templates), onAllTemplates)
+            if (!resyncing) {
+                Box(Modifier.fillMaxWidth().padding(bottom = d.group), contentAlignment = Alignment.Center) {
+                    AppLinkButton(stringResource(R.string.home_all_templates), onAllTemplates)
+                }
             }
         }
     }
@@ -213,6 +252,91 @@ internal fun HomeContent(
         )
     }
 }
+
+/**
+ * The week card's backup line (R17-C1b, R1, E3): one 48dp row, muted.
+ * TalkBack reads "Not backed up for 3 days, Retry, button" (notes).
+ */
+@Composable
+private fun BackupFooter(backup: HomeBackup, onRetry: () -> Unit) {
+    val cs = MaterialTheme.colorScheme
+    val d = GymBuddyTheme.dimens
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = d.target).padding(horizontal = d.group),
+        horizontalArrangement = Arrangement.spacedBy(d.stackTight),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (backup == HomeBackup.BackingUp) {
+            Spinner(Modifier.size(d.iconSmall))
+        } else {
+            Icon(painterResource(AppIcons.Ui.CloudOff), null, Modifier.size(d.iconSmall), tint = cs.onSurfaceVariant)
+        }
+        val text = when (backup) {
+            is HomeBackup.Stuck -> pluralStringResource(R.plurals.home_not_backed_up, backup.days, backup.days)
+            HomeBackup.BackingUp -> stringResource(R.string.home_backing_up)
+            HomeBackup.Offline -> stringResource(R.string.home_backup_offline)
+            HomeBackup.Hidden -> ""
+        }
+        Text(
+            text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = cs.onSurfaceVariant,
+            modifier = Modifier.weight(1f).semantics { liveRegion = LiveRegionMode.Polite },
+        )
+        if (backup is HomeBackup.Stuck) AppLinkButton(stringResource(R.string.home_retry), onRetry)
+    }
+}
+
+/** R17-C2a / R2: in place of the week card while a re-download runs or after it failed. */
+@Composable
+private fun ResyncCard(failed: Boolean, onRetry: () -> Unit) {
+    val cs = MaterialTheme.colorScheme
+    val d = GymBuddyTheme.dimens
+    Surface(shape = MaterialTheme.shapes.large, color = cs.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
+        Column(
+            Modifier.padding(d.insetCard).semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+            verticalArrangement = Arrangement.spacedBy(d.hairline),
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(d.stackTight), verticalAlignment = Alignment.CenterVertically) {
+                if (failed) {
+                    Icon(painterResource(AppIcons.Ui.CloudOff), null, Modifier.size(d.icon), tint = cs.onSurfaceVariant)
+                } else {
+                    Spinner(Modifier.size(d.icon))
+                }
+                Text(
+                    stringResource(if (failed) R.string.home_resync_failed else R.string.home_resync_running),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f).semantics { heading() },
+                )
+                if (failed) AppLinkButton(stringResource(R.string.home_retry), onRetry)
+            }
+            Text(
+                stringResource(if (failed) R.string.home_resync_failed_body else R.string.home_resync_running_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = cs.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** The spinner glyph, turning (stays still with animations off, like the system). */
+@Composable
+private fun Spinner(modifier: Modifier) {
+    val turn by rememberInfiniteTransition(label = "spinner").animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(SPIN_MS, easing = LinearEasing)),
+        label = "turn",
+    )
+    Icon(
+        painterResource(AppIcons.Ui.Spinner),
+        null,
+        modifier.graphicsLayer { rotationZ = turn },
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+private const val SPIN_MS = 1_000
 
 /** "Workout in progress · Push A · Started 18:24 · 2 of 15 exercises done"; tap opens it. */
 @Composable
@@ -308,7 +432,16 @@ private fun StartSheet(state: HomeUiState, onDismiss: () -> Unit, onStart: (Work
     AppBottomSheet(onDismiss = onDismiss, title = stringResource(R.string.start_sheet_title)) {
         Column(Modifier.verticalScroll(rememberScrollState())) {
             SheetRow(title = stringResource(R.string.start_sheet_empty), subtitle = null, trailing = null, onClick = onEmpty)
-            if (state.sheetYours.isNotEmpty()) {
+            if (state.resync != Resync.Idle) {
+                // R3: yours are still on their way; starters and Empty work.
+                SheetHeader(stringResource(R.string.home_your_templates))
+                Text(
+                    stringResource(R.string.start_sheet_resync),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = GymBuddyTheme.dimens.stackTight),
+                )
+            } else if (state.sheetYours.isNotEmpty()) {
                 SheetHeader(stringResource(R.string.home_your_templates))
                 state.sheetYours.forEach { line ->
                     SheetRow(

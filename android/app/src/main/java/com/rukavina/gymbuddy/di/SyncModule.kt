@@ -79,7 +79,8 @@ object SyncModule {
             // Only the signed-in account's own file syncs, never another owner's outbox (ADR 0014).
             isSignedIn = { auth.currentUid.let { it != null && it == holder.owner } },
             // Shared with the holder, so a database switch never runs mid-cycle.
-            mutex = holder.lock
+            mutex = holder.lock,
+            owner = holder.ownerFlow
         )
 
     @Provides

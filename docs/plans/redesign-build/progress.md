@@ -17,10 +17,27 @@
 - [x] 10a You page (steps/10-you-settings.md) — 86974f2
 - [x] 10b Profile, picture, body weight (steps/10-you-settings.md) — dab5844
 - [x] 11a Cross-flow: workout safety (steps/11-cross-flow-states.md) — 5e145e6
-- [ ] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md)
+- [x] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md) — HASH
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11b: Not split (owner). Figma read via the Console MCP (C1b, R1, E3, C2a,
+  R2, R3, D3, E4, E5, E6, notes).
+- 11b: Resync card replaces the week card (Figma C2a/R2 show no week
+  strip; the step said "templates card"). Rows become one muted line,
+  "All templates" hides while it runs or failed.
+- 11b: Home's 3-day rule is its own `stuckDays` (HomeSync.kt) on the
+  oldest outbox `enqueuedAt`, not 10a's `backupLine` (that one is 24 h and
+  shows counts). Guests never see the line.
+- 11b: `SyncEngine.resync` is scoped to the database owner (`holder.ownerFlow`):
+  sign out, guest or another account reads Idle (reviewer blocker).
+  Failed clears on the next successful pull, else on process death.
+- 11b: E5 body says "A chart appears after 2 entries" (10b chart needs 2;
+  Figma says 3). Hidden templates empty copy mirrors E6 (no frame).
+- 11b: Start sheet keeps Empty workout on top (R11-3), R3 has it last.
+- 11b: D3 also hides "All N sessions" for a lift done once. Progress
+  rule unchanged (ProgressStats: 3 sessions, 14 days).
+- 11b: `ui/components/**` deleted; coverage globs for it left in place.
 - 11a: Split 11a/11b (owner). Figma read via the Console MCP (R17-B1, E2).
 - 11a: E2 "Unfinished workout" is a Home card under the week strip
   (Figma), not a dialog. Discard confirms with an AppDialog; buttons
@@ -428,6 +445,14 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 11b (reviewer, not fixed):
+  - `catch (e: Throwable)` in `SyncEngine.pullLocked` also marks a
+    cancelled re-download Failed.
+  - The day count only refreshes when the outbox or Retry emits; Home
+    left open never ticks over to 3 days.
+  - BackupFooter isn't merged for TalkBack (text and Retry are two stops;
+    notes want one).
+  - No Compose test for the resync card, rows or Start sheet states.
 - From 11a (reviewer, not fixed):
   - Finish on Home fails silently: with 0 sets, or if the save fails,
     `rejectSave` sends `SaveFailed` on the workout events Channel, which

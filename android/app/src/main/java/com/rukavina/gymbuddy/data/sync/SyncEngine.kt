@@ -10,6 +10,11 @@ import com.rukavina.gymbuddy.data.remote.generated.models.MutationResult
 import com.rukavina.gymbuddy.data.remote.generated.models.PushRequest
 import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.domain.model.SyncState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import retrofit2.Response
@@ -52,6 +57,13 @@ data class ReferenceSummary(val exercisesReplaced: Boolean, val templatesReplace
 
 data class SyncSummary(val push: PushSummary, val pull: PullSummary, val reference: ReferenceSummary?)
 
+/**
+ * A 410 re-download (R17-C2a/R2): Running from the wipe until the full
+ * pull lands, Failed if that pull failed. Failed stays until a later pull
+ * succeeds (the cursor is gone, so that pull is the full one). In memory.
+ */
+enum class Resync { Idle, Running, Failed }
+
 /** Test seam: runs inside each pull page's transaction, after the page is applied and before the cursor is saved. */
 fun interface PullPageObserver {
     suspend fun beforeCursorCommit(pageIndex: Int, nextCursor: String)
@@ -79,14 +91,32 @@ class SyncEngine(
     /** True only while the signed-in account owns the open database. Checked under the lock. */
     private val isSignedIn: () -> Boolean = { true },
     /** Shared with DatabaseHolder in the app, so a database switch waits for a running cycle. */
-    private val mutex: Mutex = Mutex()
+    private val mutex: Mutex = Mutex(),
+    /** The open database's owner (ADR 0014): a re-download belongs to the owner it ran for. */
+    private val owner: StateFlow<String?> = MutableStateFlow(null)
 ) {
+
+    private val _resync = MutableStateFlow(Resync.Idle)
+    /** Unfiltered, for tests. */
+    internal val rawResync: StateFlow<Resync> = _resync.asStateFlow()
+    @Volatile private var resyncOwner: String? = null
+
+    /**
+     * Where a 410 re-download stands for the open database's owner. After
+     * sign out, guest or another account it reads Idle (no sync runs to clear it).
+     */
+    val resync: Flow<Resync> = combine(_resync, owner) { state, now ->
+        if (state != Resync.Idle && resyncOwner != now) Resync.Idle else state
+    }
 
     /** A full cycle: push, pull, reference data. Does nothing if signed out by the time it gets the lock. */
     suspend fun sync(): SyncSummary = mutex.withLock {
         // A cycle queued behind logout must not run once the wipe and
         // sign-out are done: it would push and pull with no user.
-        if (!isSignedIn()) return@withLock SyncSummary(PushSummary(), PullSummary(), null)
+        if (!isSignedIn()) {
+            _resync.value = Resync.Idle // another account's re-download isn't this one's
+            return@withLock SyncSummary(PushSummary(), PullSummary(), null)
+        }
         val conflicted = mutableSetOf<Pair<SyncEntityType, String>>()
         val push = pushLocked(conflicted)
         var pull = pullLocked(fromScratch = false)
@@ -201,7 +231,23 @@ class SyncEngine(
 
     // ---- pull ----
 
+    /** A pull during a re-download (or retrying a failed one) moves [resync] along. */
     private suspend fun pullLocked(fromScratch: Boolean): PullSummary {
+        if (_resync.value == Resync.Idle) return pullPagesLocked(fromScratch)
+        if (resyncOwner != owner.value) {
+            _resync.value = Resync.Idle // another owner's; this database never lost anything
+            return pullPagesLocked(fromScratch)
+        }
+        _resync.value = Resync.Running
+        return try {
+            pullPagesLocked(fromScratch).also { _resync.value = Resync.Idle }
+        } catch (e: Throwable) {
+            _resync.value = Resync.Failed
+            throw e
+        }
+    }
+
+    private suspend fun pullPagesLocked(fromScratch: Boolean): PullSummary {
         var cursor = if (fromScratch) null else store.cursor()
         var pages = 0
         val applied = mutableMapOf<SyncEntityType, Int>()
@@ -248,6 +294,8 @@ class SyncEngine(
             throw SyncException("Cursor expired but $remaining local changes could not be pushed; not wiping.")
         }
         store.wipeForResync()
+        resyncOwner = owner.value
+        _resync.value = Resync.Running
         return pullLocked(fromScratch = true).copy(cursorExpired = true)
     }
 

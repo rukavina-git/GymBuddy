@@ -1,5 +1,7 @@
 package com.rukavina.gymbuddy.di
 
+import com.rukavina.gymbuddy.ui.home.HomeSyncSignals
+import com.rukavina.gymbuddy.ui.home.RoomHomeSyncSignals
 import com.rukavina.gymbuddy.ui.template.RoomTemplateSources
 import com.rukavina.gymbuddy.ui.template.TemplateSources
 import dagger.Binds
@@ -13,4 +15,7 @@ import dagger.hilt.components.SingletonComponent
 abstract class TemplateModule {
     @Binds
     abstract fun bindTemplateSources(impl: RoomTemplateSources): TemplateSources
+
+    @Binds
+    abstract fun bindHomeSyncSignals(impl: RoomHomeSyncSignals): HomeSyncSignals
 }

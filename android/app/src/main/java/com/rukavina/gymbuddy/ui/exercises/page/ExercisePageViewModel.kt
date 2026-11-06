@@ -56,6 +56,8 @@ data class ExercisePageUiState(
     /** Your own exercise: no photo, Edit and Delete in ⋯ (R13-7, R13-9). */
     val own: Boolean get() = exercise?.source == EntitySource.CUSTOM
     val restSeconds: Int get() = user.restSeconds ?: TemplateEditorViewModel.DEFAULT_REST_SECONDS
+    /** Done once (R17-D3): one "First time" box instead of Last / Best, no All sessions link. */
+    val firstTime: Boolean get() = history.sessionCount == 1
 }
 
 sealed interface ExercisePageEvent {

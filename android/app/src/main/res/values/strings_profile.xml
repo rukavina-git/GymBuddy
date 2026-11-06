@@ -78,8 +78,8 @@
     <string name="body_weight_range_all">All</string>
     <string name="body_weight_chart_few">Log one more weight to see a line.</string>
     <string name="body_weight_chart_summary">Body weight from %1$s, %2$s, to %3$s, %4$s.</string>
-    <string name="body_weight_empty">No weights yet</string>
-    <string name="body_weight_empty_body">Log your weight now and then to see how it changes.</string>
+    <string name="body_weight_empty">No weigh-ins yet</string>
+    <string name="body_weight_empty_body">Log your weight now and then. A chart appears after 2 entries.</string>
     <string name="body_weight_log">Log weight</string>
     <string name="body_weight_hint">± 0.1 %1$s, hold to repeat. Tap the number to type.</string>
     <string name="body_weight_date">Date</string>

@@ -195,13 +195,17 @@ fun WeekDay(day: WeekDayUi, modifier: Modifier = Modifier) {
     }
 }
 
-/** Home week card: seven [WeekDay]s and a summary line (opens Progress when [onClick] is set). */
+/**
+ * Home week card: seven [WeekDay]s and a summary line (opens Progress when
+ * [onClick] is set). [footer] adds a line under the summary (backup, R17-C1b).
+ */
 @Composable
 fun WeekStrip(
     days: List<WeekDayUi>,
     summary: String,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    footer: (@Composable () -> Unit)? = null,
 ) {
     require(days.size == 7) { "A week has 7 days, got ${days.size}" }
     val d = GymBuddyTheme.dimens
@@ -230,6 +234,7 @@ fun WeekStrip(
                     )
                 }
             }
+            footer?.invoke()
         }
     }
     if (onClick != null) {
