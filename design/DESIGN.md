@@ -239,7 +239,7 @@ Never NC, ND, SA or GPL/AGPL. Record every third-party asset here.
 |---|---|---|---|
 | UI icons | Material Symbols Rounded, weight 400, `@material-symbols/svg-400` 0.27.0 | Apache 2.0 | List in the app's open-source licences screen. Android drawables converted 2026-11-03 with `svg2vectordrawable` 2.9.1 (MIT, run once via npx, not a build dependency) |
 | Font | Figtree | OFL 1.1 | Bundled 2026-11-03: Regular, Medium, SemiBold, Bold static TTFs from github.com/erikdkennedy/figtree (upstream, commit 032dfa7) in android/app/src/main/res/font; licence text in assets/licenses/figtree-OFL.txt |
-| Profile animals (20) | Fluent Emoji | MIT | Pictures, not icons; stored as an id |
+| Profile animals (20) | Microsoft Fluent Emoji, 3D style, github.com/microsoft/fluentui-emoji (commit 1ffb34c) | MIT | Bundled 2026-11-07: 256 px PNGs scaled to 144 px with `sips`, in android/app/src/main/res/drawable-nodpi/avatar_<id>.png; licence text in assets/licenses/fluent-emoji-MIT.txt. Stored in the profile as an id (e.g. `fox`) |
 | Google sign-in button + G logo | Google | Google's brand rules | Use Google's own dark button; never recolour or tokenise |
 | Mark, wordmark, app icon, gym glyphs, tab icons, notification ring | Own drawing | Ours | Wordmark is Figtree Bold outlined (OFL) |
 

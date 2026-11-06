@@ -74,18 +74,6 @@ import com.rukavina.gymbuddy.ui.exercises.create.ExerciseEditScreen
 import com.rukavina.gymbuddy.ui.exercises.create.ExerciseEditViewModel
 import com.rukavina.gymbuddy.ui.exercises.page.ExercisePageScreen
 import com.rukavina.gymbuddy.ui.exercises.page.ExercisePageViewModel
-import com.rukavina.gymbuddy.ui.profile.ProfileScreen
-import com.rukavina.gymbuddy.ui.profile.ProfileViewModel
-import com.rukavina.gymbuddy.ui.profile.edit.EditActivityLevelScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditBirthdateScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditBioScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditFitnessGoalScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditGenderScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditHeightScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditNameScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditTargetWeightScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditUnitsScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditWeightScreen
 import com.rukavina.gymbuddy.ui.guest.GuestMergeDialogs
 import com.rukavina.gymbuddy.navigation.openWelcome
 import com.rukavina.gymbuddy.ui.design.AppSnackbar
@@ -98,6 +86,8 @@ import com.rukavina.gymbuddy.ui.you.HiddenExercisesScreen
 import com.rukavina.gymbuddy.ui.you.HiddenTemplatesScreen
 import com.rukavina.gymbuddy.ui.you.YouNav
 import com.rukavina.gymbuddy.ui.you.YouScreen
+import com.rukavina.gymbuddy.ui.you.body.BodyWeightScreen
+import com.rukavina.gymbuddy.ui.you.profile.ProfileScreen
 import com.rukavina.gymbuddy.ui.settings.debug.SyncDebugScreen
 import com.rukavina.gymbuddy.ui.workout.active.ActiveWorkoutScreen
 import com.rukavina.gymbuddy.ui.workout.active.WorkoutSummaryScreen
@@ -170,7 +160,6 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
 
     // Create ViewModels at MainScreen level so they survive navigation
     val activeWorkoutViewModel: ActiveWorkoutViewModel = hiltViewModel()
-    val profileViewModel: ProfileViewModel = hiltViewModel()
     val workoutState by activeWorkoutViewModel.uiState.collectAsState()
 
     val openWorkout = { bottomNavController.navigate(NavRoutes.ActiveWorkout) { launchSingleTop = true } }
@@ -441,103 +430,13 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
             }
             composable(NavRoutes.Profile) {
                 ProfileScreen(
-                    rootNavController = rootNavController,
-                    bottomNavController = bottomNavController,
-                    viewModel = profileViewModel
+                    onBack = { bottomNavController.popBackStack() },
+                    onBodyWeight = { bottomNavController.navigate(NavRoutes.BodyWeight) },
                 )
             }
 
-            composable(NavRoutes.EditName) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditNameScreen(
-                    navController = bottomNavController,
-                    currentName = uiState.name,
-                    onSave = { profileViewModel.onNameSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditBio) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditBioScreen(
-                    navController = bottomNavController,
-                    currentBio = uiState.bio,
-                    onSave = { profileViewModel.onBioSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditBirthdate) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditBirthdateScreen(
-                    navController = bottomNavController,
-                    currentBirthDate = uiState.birthDate,
-                    onSave = { profileViewModel.onBirthDateSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditWeight) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditWeightScreen(
-                    navController = bottomNavController,
-                    currentWeight = uiState.weight ?: 70f,
-                    preferredUnits = uiState.preferredUnits,
-                    onSave = { profileViewModel.onWeightSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditHeight) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditHeightScreen(
-                    navController = bottomNavController,
-                    currentHeight = uiState.height ?: 170f,
-                    preferredUnits = uiState.preferredUnits,
-                    onSave = { profileViewModel.onHeightSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditTargetWeight) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditTargetWeightScreen(
-                    navController = bottomNavController,
-                    currentTargetWeight = uiState.targetWeight ?: 70f,
-                    preferredUnits = uiState.preferredUnits,
-                    onSave = { profileViewModel.onTargetWeightSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditGender) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditGenderScreen(
-                    navController = bottomNavController,
-                    currentGender = uiState.gender,
-                    onSave = { profileViewModel.onGenderSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditFitnessGoal) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditFitnessGoalScreen(
-                    navController = bottomNavController,
-                    currentGoal = uiState.fitnessGoal,
-                    onSave = { profileViewModel.onFitnessGoalSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditActivityLevel) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditActivityLevelScreen(
-                    navController = bottomNavController,
-                    currentLevel = uiState.activityLevel,
-                    onSave = { profileViewModel.onActivityLevelSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditUnits) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditUnitsScreen(
-                    navController = bottomNavController,
-                    currentUnits = uiState.preferredUnits,
-                    onSave = { profileViewModel.onPreferredUnitsSaved(it) }
-                )
+            composable(NavRoutes.BodyWeight) {
+                BodyWeightScreen(onBack = { bottomNavController.popBackStack() })
             }
 
             composable(NavRoutes.HiddenExercises) {

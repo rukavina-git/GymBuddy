@@ -228,9 +228,9 @@ internal fun YouContent(state: YouUiState, actions: YouActions, clock: Clock) {
                             stringResource(if (state.units == PreferredUnits.IMPERIAL) R.string.you_units_imperial else R.string.you_units_metric),
                             actions.onUnits,
                         )
-                        Divider()
+                        RowDivider()
                         SwitchRow(stringResource(R.string.you_rest_buzz), state.restBuzz, actions.onRestBuzz)
-                        Divider()
+                        RowDivider()
                         ValueRow(
                             stringResource(R.string.you_notification),
                             null,
@@ -242,7 +242,7 @@ internal fun YouContent(state: YouUiState, actions: YouActions, clock: Clock) {
                 item(key = "lists") {
                     Group(stringResource(R.string.you_group_lists)) {
                         ValueRow(stringResource(R.string.you_hidden_exercises), state.hiddenExercises.toString(), actions.nav.onHiddenExercises)
-                        Divider()
+                        RowDivider()
                         ValueRow(stringResource(R.string.you_hidden_templates), state.hiddenTemplates.toString(), actions.nav.onHiddenTemplates)
                     }
                 }
@@ -250,7 +250,7 @@ internal fun YouContent(state: YouUiState, actions: YouActions, clock: Clock) {
                     Group(stringResource(R.string.you_group_data)) {
                         ValueRow(stringResource(R.string.you_export), null, actions.onExport, subtitle = stringResource(R.string.you_export_sub))
                         if (state.isGuest) {
-                            Divider()
+                            RowDivider()
                             ValueRow(stringResource(R.string.you_erase), null, actions.onErase, danger = true)
                         }
                     }
@@ -267,9 +267,9 @@ internal fun YouContent(state: YouUiState, actions: YouActions, clock: Clock) {
                             null,
                             actions.onPassword,
                         )
-                        Divider()
+                        RowDivider()
                         ValueRow(stringResource(R.string.you_sign_out), null, actions.onSignOut)
-                        Divider()
+                        RowDivider()
                         ValueRow(stringResource(R.string.you_delete_account), null, actions.onDelete, danger = true)
                     }
                 }
@@ -317,28 +317,16 @@ private fun AccountCard(state: YouUiState, clock: Clock, actions: YouActions) {
                 horizontalArrangement = Arrangement.spacedBy(d.stack),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                LetterAvatar(state.userName.ifBlank { state.userEmail })
+                Avatar(state.avatarId, state.userName.ifBlank { state.userEmail }, CardAvatar)
                 Column(Modifier.weight(1f)) {
                     if (state.userName.isNotBlank()) Text(state.userName, style = MaterialTheme.typography.titleSmall)
                     Text(state.userEmail, style = MaterialTheme.typography.bodyMedium, color = cs.onSurfaceVariant)
                 }
             }
             BackupRow(state.backup, clock, actions.onRetryBackup)
-            Divider()
+            RowDivider()
             ValueRow(stringResource(R.string.you_profile), null, actions.nav.onProfile)
         }
-    }
-}
-
-/** Plain circle with the first letter (the 10b picker adds the animals). */
-@Composable
-private fun LetterAvatar(name: String) {
-    val cs = MaterialTheme.colorScheme
-    Box(
-        Modifier.size(CardAvatar).background(cs.surfaceContainerHighest, FullShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(name.trim().take(1).uppercase(), style = MaterialTheme.typography.titleMedium)
     }
 }
 
@@ -379,66 +367,6 @@ private fun agoText(at: Long, now: Long): String {
         minutes < 1 -> stringResource(R.string.you_just_now)
         minutes < 60 -> stringResource(R.string.you_min_ago, minutes)
         else -> stringResource(R.string.you_hours_ago, minutes / 60)
-    }
-}
-
-/** Muted group label, then one card holding its rows (R15-2). */
-@Composable
-private fun Group(title: String, content: @Composable ColumnScope.() -> Unit) {
-    val d = GymBuddyTheme.dimens
-    Column(Modifier.padding(top = d.stack), verticalArrangement = Arrangement.spacedBy(d.stackTight)) {
-        Text(
-            title,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = d.hairline).semantics { heading() },
-        )
-        Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
-            Column(content = content)
-        }
-    }
-}
-
-@Composable
-private fun Divider() {
-    HorizontalDivider(
-        Modifier.padding(horizontal = GymBuddyTheme.dimens.insetCard),
-        thickness = GymBuddyTheme.dimens.strokeDivider,
-        color = MaterialTheme.colorScheme.outlineVariant,
-    )
-}
-
-/** Title, optional subtitle, optional value, chevron. [danger] = red title, no chevron. */
-@Composable
-private fun ValueRow(
-    title: String,
-    value: String?,
-    onClick: () -> Unit,
-    subtitle: String? = null,
-    danger: Boolean = false,
-) {
-    val d = GymBuddyTheme.dimens
-    val cs = MaterialTheme.colorScheme
-    val interaction = remember { MutableInteractionSource() }
-    Surface(
-        onClick = onClick,
-        color = cs.surfaceContainer,
-        shape = RectangleShape,
-        interactionSource = interaction,
-        modifier = Modifier.fillMaxWidth().focusRing(interaction, RectangleShape),
-    ) {
-        Row(
-            Modifier.heightIn(min = d.control).padding(horizontal = d.insetCard, vertical = d.stackTight),
-            horizontalArrangement = Arrangement.spacedBy(d.stackTight),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.bodyLarge, color = if (danger) cs.error else cs.onSurface)
-                if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
-            }
-            if (value != null) Text(value, style = MaterialTheme.typography.bodyMedium, color = cs.onSurfaceVariant)
-            if (!danger) Icon(painterResource(AppIcons.Ui.ChevronRight), null, Modifier.size(d.iconSmall), tint = cs.onSurfaceVariant)
-        }
     }
 }
 

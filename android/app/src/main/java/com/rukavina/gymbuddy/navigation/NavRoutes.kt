@@ -37,17 +37,8 @@ object NavRoutes {
     /** Exercise picker; inTemplate = comma-joined exercise ids already in the template. */
     const val ExercisePicker = "exercise_picker?inTemplate={inTemplate}"
 
-    // Profile edit screens
-    const val EditName = "edit_name"
-    const val EditBio = "edit_bio"
-    const val EditBirthdate = "edit_birthdate"
-    const val EditWeight = "edit_weight"
-    const val EditHeight = "edit_height"
-    const val EditTargetWeight = "edit_target_weight"
-    const val EditGender = "edit_gender"
-    const val EditFitnessGoal = "edit_fitness_goal"
-    const val EditActivityLevel = "edit_activity_level"
-    const val EditUnits = "edit_units"
+    /** Body weight (R15-5). */
+    const val BodyWeight = "body_weight"
     const val HiddenExercises = "hidden_exercises"
     const val HiddenTemplates = "hidden_templates"
     const val SyncDebug = "sync_debug"

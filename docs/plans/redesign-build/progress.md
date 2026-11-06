@@ -15,11 +15,32 @@
 - [x] 09a Session detail (steps/09-session-detail.md) — 453d555
 - [x] 09b Edit workout (steps/09-session-detail.md) — 5135a08
 - [x] 10a You page (steps/10-you-settings.md) — 86974f2
-- [ ] 10b Profile, picture, body weight (steps/10-you-settings.md)
+- [x] 10b Profile, picture, body weight (steps/10-you-settings.md) — HASH
 - [ ] 11 Cross-flow states
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 10b: Not split (owner). Figma read via the Console MCP (R15-3..6, notes).
+- 10b: Avatars are Fluent Emoji 3D PNGs (Flat exists only as SVG; Figma
+  shows 3D), scaled to 144 px with sips (no webp tool), 448 KB in
+  `res/drawable-nodpi/avatar_<id>.png`. Ids: fox cat dog panda bear koala
+  tiger lion frog monkey pig rabbit hamster owl penguin unicorn dragon
+  wolf sloth otter. Licence row + assets/licenses/fluent-emoji-MIT.txt.
+- 10b: Body weight page lists the entries in the chosen range (no "All
+  entries" link/screen). Chart needs 2 points; fewer shows a line of text.
+  Change line only once an entry is 30+ days older than the latest.
+- 10b: Experience uses New / Some / Experienced (onboarding words), not
+  Figma's "Intermediate". Footer says "Used later for BMI…" (no "(v2)").
+- 10b: Height and target weight edit in a Keypad sheet (Save, Clear);
+  birth date in an M3 DatePickerDialog (Clear, Cancel, OK), stored as UTC
+  midnight. Gender/activity/goal sheets have "Not set". Bio and the old
+  Units/Weight edit screens are gone (units live on the You page).
+- 10b: Log date other than today saves at noon that day; future days off.
+  Undo on delete re-saves the same entry (upsert clears the tombstone).
+- 10b: `Group`, `RowDivider`, `ValueRow`, `ChoiceSheet` moved to
+  `ui/you/YouRows.kt`; `Avatar` in `ui/you/Avatars.kt` (also on the You
+  card). `SignInInfo` (open, Firebase) gives the email line. Both new VMs
+  use `SharingStarted.Eagerly` (actions read `uiState.value`).
 - 10a: Decisions 1–6 as recommended (owner). Figma read via the Console MCP.
   Rows left out: Distance (one Units row), Default rest, Weight step, Keep
   screen on, Week starts on, Starter plans, Show tips again.
@@ -395,6 +416,17 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 10b (reviewer, not fixed):
+  - In lbs, holding + reaches unrounded kgToLbs(700) ≈ 1543.24, which
+    converts back over 700 kg: the repo `require` fails and Save shows
+    "Couldn't save". Round the lbs bounds.
+  - No Compose test for body weight swipe-delete + Undo; no test for the
+    SaveFailed path.
+  - Raw dp 96 (page avatar), 32 (badge), 56 (picker cell), 80 (letter
+    size switch) aren't in DESIGN.md §4.
+  - Events use tryEmit with buffer 1: quick repeat deletes during a
+    snackbar can drop an Undo. A failed delete leaves the row swiped away.
+  - Birth date picker allows future dates.
 - From 10a (reviewer, not fixed):
   - `busy` in DeleteAccountFlow/PasswordDialog is rememberSaveable: rotate
     mid re-auth → dialog stuck disabled. Use remember or move to the VM.
