@@ -144,15 +144,18 @@ object ProgressStats {
      * Sessions with a PR (note 1): a weighted lift's heaviest set beats
      * every earlier session of that lift. A lift's first session is no PR.
      */
-    fun prSessions(sessions: List<WorkoutSession>): Set<String> {
+    fun prSessions(sessions: List<WorkoutSession>): Set<String> = prLifts(sessions).keys
+
+    /** Session id → the lifts (exercise ids) that set a PR in it, same rule as [prSessions]. */
+    fun prLifts(sessions: List<WorkoutSession>): Map<String, Set<String>> {
         val best = HashMap<String, WorkoutSet>()
-        val prs = HashSet<String>()
+        val prs = HashMap<String, MutableSet<String>>()
         for (s in live(sessions).sortedBy { it.startedAt }) {
             val tops = s.performedExercises.filter(::weighted).groupBy { it.exerciseId }
                 .mapNotNull { (id, pes) -> heaviest(pes.flatMap { it.sets })?.let { id to it } }
             for ((id, top) in tops) {
                 val before = best[id]
-                if (before != null && ExerciseHistory.SetOrder.compare(top, before) > 0) prs += s.id
+                if (before != null && ExerciseHistory.SetOrder.compare(top, before) > 0) prs.getOrPut(s.id) { HashSet() } += id
                 if (before == null || ExerciseHistory.SetOrder.compare(top, before) > 0) best[id] = top
             }
         }

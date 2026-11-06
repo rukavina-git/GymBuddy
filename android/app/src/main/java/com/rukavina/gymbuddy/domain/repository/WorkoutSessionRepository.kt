@@ -45,4 +45,7 @@ interface WorkoutSessionRepository {
      * Also deletes all associated performed exercises (cascade).
      */
     suspend fun deleteWorkoutSession(id: String)
+
+    /** Undo [deleteWorkoutSession]: clears the tombstone and pushes the session again. */
+    suspend fun restoreWorkoutSession(id: String)
 }

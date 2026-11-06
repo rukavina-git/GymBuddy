@@ -97,6 +97,12 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun restoreWorkoutSession(id: String) {
+        outbox.record(SyncEntityType.WORKOUT_SESSION, id) { db ->
+            db.workoutSessionDao().restoreWorkoutSession(id, clock.millis())
+        }
+    }
+
     /**
      * Guards against ever persisting a PerformedExercise whose exercise
      * snapshot was never stamped. Construction sites are allowed to build a

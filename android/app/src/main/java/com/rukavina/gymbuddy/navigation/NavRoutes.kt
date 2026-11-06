@@ -22,6 +22,8 @@ object NavRoutes {
     const val Progress = "progress"
     /** All sessions (R7-7); exerciseId filters it (R7-8). */
     const val AllSessions = "all_sessions?exerciseId={exerciseId}"
+    /** Session detail (R14-1); exerciseId opens and outlines that exercise (R14-3). */
+    const val SessionDetail = "session/{sessionId}?exerciseId={exerciseId}"
     const val You = "you"
     const val Profile = "profile"
     const val About = "about"
@@ -66,6 +68,9 @@ object NavRoutes {
 
     fun allSessions(exerciseId: String? = null) =
         if (exerciseId == null) "all_sessions" else "all_sessions?exerciseId=$exerciseId"
+
+    fun sessionDetail(sessionId: String, exerciseId: String? = null) =
+        if (exerciseId == null) "session/$sessionId" else "session/$sessionId?exerciseId=$exerciseId"
 
     fun exerciseEdit(exerciseId: String? = null) =
         if (exerciseId == null) "exercise_edit" else "exercise_edit?exerciseId=$exerciseId"

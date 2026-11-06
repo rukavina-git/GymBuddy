@@ -601,6 +601,7 @@ class ActiveWorkoutViewModelTest {
         }
         override suspend fun updateWorkoutSession(workoutSession: WorkoutSession) = Unit
         override suspend fun deleteWorkoutSession(id: String) = Unit
+        override suspend fun restoreWorkoutSession(id: String) = Unit
     }
 
     @Test

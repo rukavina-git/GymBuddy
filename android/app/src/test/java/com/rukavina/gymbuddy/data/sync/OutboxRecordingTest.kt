@@ -110,6 +110,19 @@ class OutboxRecordingTest {
     }
 
     @Test
+    fun `restoring a deleted session queues an UPSERT and clears the tombstone`() = runBlocking {
+        val session = SyncFixtures.session()
+        sessions.createWorkoutSession(session)
+        sessions.deleteWorkoutSession(session.id)
+        sessions.restoreWorkoutSession(session.id)
+
+        assertEquals(OutboxOperation.UPSERT, outbox().single().operation)
+        val restored = sessions.getWorkoutSessionById(session.id)!!
+        assertNull(restored.deletedAt)
+        assertEquals(session.performedExercises.size, restored.performedExercises.size)
+    }
+
+    @Test
     fun `DEFAULT exercises are never queued`() = runBlocking {
         exercises.createExercise(SyncFixtures.exercise().copy(source = EntitySource.DEFAULT))
         assertEquals(emptyList<Any>(), outbox())

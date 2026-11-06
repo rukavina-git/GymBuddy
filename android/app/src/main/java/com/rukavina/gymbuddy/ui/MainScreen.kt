@@ -6,9 +6,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,10 +22,12 @@ import com.rukavina.gymbuddy.ui.template.picker.ExercisePickerScreen
 import com.rukavina.gymbuddy.ui.template.picker.ExercisePickerViewModel
 import com.rukavina.gymbuddy.ui.template.page.TemplatePageScreen
 import com.rukavina.gymbuddy.ui.template.page.TemplatePageViewModel
-import com.rukavina.gymbuddy.ui.workout.SessionEditBridge
 import com.rukavina.gymbuddy.ui.progress.AllSessionsScreen
 import com.rukavina.gymbuddy.ui.progress.AllSessionsViewModel
 import com.rukavina.gymbuddy.ui.progress.ProgressScreen
+import com.rukavina.gymbuddy.ui.progress.session.SessionDeleteViewModel
+import com.rukavina.gymbuddy.ui.progress.session.SessionDetailScreen
+import com.rukavina.gymbuddy.ui.progress.session.SessionDetailViewModel
 import com.rukavina.gymbuddy.ui.workouts.WorkoutsScreen
 import kotlinx.coroutines.launch
 import com.rukavina.gymbuddy.ui.theme.fadeThroughIn
@@ -180,10 +180,7 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
         openWorkout()
     }
     val openTemplate: (String) -> Unit = { id -> bottomNavController.navigate(NavRoutes.templatePage(id)) }
-    // Past sessions open the old edit dialog until session detail (step 09).
-    var editingSession by rememberSaveable { mutableStateOf<String?>(null) }
-    val openSession: (String) -> Unit = { id -> editingSession = id }
-    editingSession?.let { id -> SessionEditBridge(sessionId = id, onClose = { editingSession = null }) }
+    val openSession: (String) -> Unit = { id -> bottomNavController.navigate(NavRoutes.sessionDetail(id)) }
 
     // Delete (Undo): the tombstone is written only when the snackbar goes without Undo.
     val scope = rememberCoroutineScope()
@@ -204,6 +201,19 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                 // Main left mid-snackbar (sign-out, owner switch): keep the template.
                 if (!settled) templateDeletes.undo(id)
             }
+        }
+    }
+    // Session Delete (Undo, R14-5): tombstoned at once, Undo restores it (step 09 decision 2).
+    val sessionDeletes: SessionDeleteViewModel = hiltViewModel()
+    val offerUndoSessionDelete: (String, String) -> Unit = { id, title ->
+        sessionDeletes.delete(id)
+        scope.launch {
+            val result = snackbar.showSnackbar(
+                message = context.getString(R.string.session_deleted, title),
+                actionLabel = context.getString(R.string.undo),
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) sessionDeletes.restore(id)
         }
     }
     // Pop the workout (or its summary) first so no tab saves it into its back stack.
@@ -327,8 +337,9 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                     navArgument(ExercisePageViewModel.ARG_AT_PROGRESS) { type = NavType.BoolType; defaultValue = false },
                 ),
             ) { entry ->
+                val pageExerciseId = entry.arguments?.getString(ExercisePageViewModel.ARG_EXERCISE_ID)
                 ExercisePageScreen(
-                    onOpenSession = openSession,
+                    onOpenSession = { id -> bottomNavController.navigate(NavRoutes.sessionDetail(id, pageExerciseId)) },
                     onAllSessions = { id -> bottomNavController.navigate(NavRoutes.allSessions(id)) },
                     onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
                     onEdit = { id -> bottomNavController.navigate(NavRoutes.exerciseEdit(id)) },
@@ -377,6 +388,25 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                 AllSessionsScreen(
                     onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
                     onOpenSession = openSession,
+                )
+            }
+            composable(
+                route = NavRoutes.SessionDetail,
+                arguments = listOf(
+                    navArgument(SessionDetailViewModel.ARG_SESSION_ID) { type = NavType.StringType },
+                    navArgument(SessionDetailViewModel.ARG_EXERCISE_ID) {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                // Pop only this entry, and only while it is on top (a gone session and Delete both leave).
+                val leave = { if (bottomNavController.currentBackStackEntry == entry) bottomNavController.popBackStack() }
+                SessionDetailScreen(
+                    workoutRunning = workoutRunning,
+                    onBack = { leave() },
+                    onOpenExercise = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id)) },
+                    onStartAgain = startTemplate,
+                    onDelete = { id, title -> leave(); offerUndoSessionDelete(id, title) },
                 )
             }
             composable(NavRoutes.You) {

@@ -12,12 +12,23 @@
 - [x] 06c Active workout: rest buzz + lock screen (steps/06-active-workout.md) — 2d9b952
 - [x] 07 Exercise page + create (steps/07-exercise-page.md) — 0245dcc
 - [x] 08 Progress tab + All sessions (steps/08-progress.md) — c5dc7c7
-- [ ] 09 Session detail
+- [x] 09a Session detail (steps/09-session-detail.md) — HASH
+- [ ] 09b Edit workout (steps/09-session-detail.md)
 - [ ] 10 You + Settings
 - [ ] 11 Cross-flow states
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 09: Split into 09a/09b (owner, decisions 1–5 as proposed). Figma read
+  via the Console MCP. Roadmap 7.9 stays unticked until 09b lands.
+- 09a: ⋯ has no "Edit workout" until 09b; past sessions can't be edited
+  for one step. Delete pops the screen, then tombstones at once; Undo =
+  new `restoreWorkoutSession` (DAO UPDATE, outbox UPSERT; no schema or
+  spec change). A Mutex keeps Undo behind its delete.
+- 09a: Also deleted `SetTrackingFields.kt` (only WorkoutScreen used it)
+  and `WorkoutSessionViewModelTest`.
+- 09a: Distance tile in km/mi (one decimal), pace per km/mi; set rows in
+  the open card use bodyMedium, not a tabular style (none exists).
 - 01: Figtree TTFs from the upstream repo (erikdkennedy/figtree, commit
   032dfa7), not google/fonts (which ships only the variable font).
   OFL text in assets/licenses/figtree-OFL.txt.
@@ -351,6 +362,13 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 09a (reviewer, not fixed):
+  - `IndexColumn = 20.dp` raw dp in SessionDetailScreen (not a token).
+  - No UI test for the history highlight (open + scroll + 1.5 s outline).
+- 09a, for 09b: add "Edit workout" back to the ⋯ menu in
+  `SessionDetailContent`; route `session/{id}/edit`. Update/validate
+  through `ValidateWorkoutSessionSetsUseCase` + `updateWorkoutSession`.
+  Detail cards are keyed by PerformedExercise id; reuse `exerciseLine`.
 - From 08 (reviewer, not fixed):
   - No tests for the sentence variants (more/same/less), units in the
     week line, `inlineSets` or the session subtitle (Compose text).

@@ -17,6 +17,9 @@ class FakeWorkoutSessionRepository(
     private val sessions = initialSessions.associateBy { it.id }.toMutableMap()
     val created = mutableListOf<WorkoutSession>()
     val updated = mutableListOf<WorkoutSession>()
+    private val tombstoned = mutableMapOf<String, WorkoutSession>()
+    val deleted = mutableListOf<String>()
+    val restored = mutableListOf<String>()
 
     override fun getAllWorkoutSessions(): Flow<List<WorkoutSession>> =
         MutableStateFlow(sessions.values.toList())
@@ -37,6 +40,12 @@ class FakeWorkoutSessionRepository(
     }
 
     override suspend fun deleteWorkoutSession(id: String) {
-        sessions.remove(id)
+        sessions.remove(id)?.let { tombstoned[id] = it }
+        deleted.add(id)
+    }
+
+    override suspend fun restoreWorkoutSession(id: String) {
+        tombstoned.remove(id)?.let { sessions[id] = it }
+        restored.add(id)
     }
 }

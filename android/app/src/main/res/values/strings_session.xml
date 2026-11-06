@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Session detail (Plan 7 step 09a, Figma 107:15763) -->
+    <string name="session_time_range">%1$s–%2$s</string>
+    <string name="session_distance">distance</string>
+    <string name="session_per_km">per km</string>
+    <string name="session_per_mi">per mi</string>
+    <string name="session_km">%s km</string>
+    <string name="session_mi">%s mi</string>
+    <string name="session_start_again">Start %s again</string>
+    <string name="session_exercise_page">%s page</string>
+    <string name="session_deleted">%s deleted</string>
+    <string name="session_set_number">Set %d</string>
+    <string name="state_expanded">Expanded</string>
+    <string name="state_collapsed">Collapsed</string>
+</resources>
