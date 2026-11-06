@@ -17,7 +17,7 @@
 - [x] 10a You page (steps/10-you-settings.md) — 86974f2
 - [x] 10b Profile, picture, body weight (steps/10-you-settings.md) — dab5844
 - [x] 11a Cross-flow: workout safety (steps/11-cross-flow-states.md) — 5e145e6
-- [x] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md) — HASH
+- [x] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md) — 5c4299b
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
