@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.ui.settings
+package com.rukavina.gymbuddy.ui.you
 
 import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.room.Room
@@ -8,6 +8,10 @@ import com.rukavina.gymbuddy.data.local.db.AppDatabase
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
+import com.rukavina.gymbuddy.data.repository.WorkoutTemplateRepositoryImpl
+import com.rukavina.gymbuddy.data.sync.SyncScheduler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import com.rukavina.gymbuddy.data.sync.GuestMerge
 import com.rukavina.gymbuddy.data.export.DataExporter
 import android.net.Uri
@@ -38,14 +42,14 @@ import java.time.Instant
 import java.time.ZoneOffset
 
 /**
- * Logout states in Settings. Like ProfileViewModelTest, this needs
- * Robolectric and a FirebaseApp because SettingsViewModel reads
+ * Sign out, delete and export on the You tab. Like ProfileViewModelTest, this needs
+ * Robolectric and a FirebaseApp because YouViewModel reads
  * FirebaseAuth.getInstance() in its constructor. The coordinator is real,
  * with a fake flush and auth, over an in-memory database.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
-class SettingsViewModelTest {
+class YouViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -79,20 +83,34 @@ class SettingsViewModelTest {
     @After
     fun tearDown() = db.close()
 
+    private var online = true
+
     private fun buildViewModel(
         coordinator: LogoutCoordinator = LogoutCoordinator(store, { true }, auth, direct),
         deletion: AccountDeletionCoordinator = deletionCoordinator { 204 }
-    ) = SettingsViewModel(
-        repository = UserProfileRepository(DatabaseHolder.fixed(db), OutboxRecorder(DatabaseHolder.fixed(db), clock), clock),
-        logoutCoordinator = coordinator,
-        accountDeletionCoordinator = deletion,
-        appContext = org.robolectric.RuntimeEnvironment.getApplication(),
-        guestMerge = GuestMerge(DatabaseHolder.fixed(db)),
-        preferences = AppPreferencesRepository(
-            PreferenceDataStoreFactory.create(produceFile = { java.io.File.createTempFile("prefs", ".preferences_pb").also { it.delete() } })
-        ),
-        dataExporter = DataExporter(DatabaseHolder.fixed(db), "test", clock)
-    )
+    ): YouViewModel {
+        val holder = DatabaseHolder.fixed(db)
+        val recorder = OutboxRecorder(holder, clock)
+        return YouViewModel(
+            repository = UserProfileRepository(holder, recorder, clock),
+            logoutCoordinator = coordinator,
+            accountDeletionCoordinator = deletion,
+            appContext = org.robolectric.RuntimeEnvironment.getApplication(),
+            guestMerge = GuestMerge(holder),
+            preferences = AppPreferencesRepository(
+                PreferenceDataStoreFactory.create(produceFile = { java.io.File.createTempFile("prefs", ".preferences_pb").also { it.delete() } })
+            ),
+            dataExporter = DataExporter(holder, "test", clock),
+            exercises = ExerciseRepositoryImpl(holder, recorder, clock),
+            templates = WorkoutTemplateRepositoryImpl(holder, recorder, clock),
+            store = store,
+            scheduler = SyncScheduler({}, { 0 }, { false }, CoroutineScope(Dispatchers.Unconfined)),
+            onlineCheck = object : OnlineCheck(org.robolectric.RuntimeEnvironment.getApplication()) {
+                override fun isOnline() = online
+            },
+            clock = clock,
+        )
+    }
 
     private fun deletionCoordinator(deleteOnServer: suspend () -> Int) =
         AccountDeletionCoordinator(store, deleteOnServer, {}, auth, direct)
@@ -103,7 +121,7 @@ class SettingsViewModelTest {
     }
 
     /** Room runs queries off the main dispatcher, so wait for the state to settle. */
-    private suspend fun SettingsViewModel.awaitSettled(): LogoutUiState =
+    private suspend fun YouViewModel.awaitSettled(): LogoutUiState =
         withTimeout(5_000) { logoutState.first { it != LogoutUiState.Flushing } }
 
     @Test
@@ -127,6 +145,67 @@ class SettingsViewModelTest {
 
         assertEquals(LogoutUiState.UnsyncedWarning(listOf("1 custom exercise")), vm.awaitSettled())
         assertEquals(0, auth.signOuts)
+    }
+
+    @Test
+    fun `sign out with nothing waiting signs out at once`() = runBlocking {
+        val vm = buildViewModel()
+        val event = async(start = CoroutineStart.UNDISPATCHED) { vm.logoutEvent.first() }
+
+        vm.signOut()
+
+        withTimeout(5_000) { event.await() }
+        assertEquals(1, auth.signOuts)
+    }
+
+    @Test
+    fun `sign out with changes waiting asks first, and says when offline`() = runBlocking {
+        addPendingExercise()
+        val vm = buildViewModel()
+
+        vm.signOut()
+        assertEquals(
+            LogoutUiState.Confirm(listOf("1 custom exercise"), offline = false),
+            withTimeout(5_000) { vm.logoutState.first { it != LogoutUiState.Idle } },
+        )
+        assertEquals(0, auth.signOuts)
+
+        vm.cancelLogout()
+        online = false
+        vm.signOut()
+        assertEquals(
+            LogoutUiState.Confirm(listOf("1 custom exercise"), offline = true),
+            withTimeout(5_000) { vm.logoutState.first { it != LogoutUiState.Idle } },
+        )
+    }
+
+    @Test
+    fun `sign out anyway from the question discards and signs out`() = runBlocking {
+        addPendingExercise()
+        val vm = buildViewModel(LogoutCoordinator(store, { false }, auth, direct))
+        vm.signOut()
+        withTimeout(5_000) { vm.logoutState.first { it is LogoutUiState.Confirm } }
+        val event = async(start = CoroutineStart.UNDISPATCHED) { vm.logoutEvent.first() }
+
+        vm.confirmLogoutAndDelete()
+
+        withTimeout(5_000) { event.await() }
+        assertEquals(1, auth.signOuts)
+        assertEquals(0, db.syncDao().outboxCount())
+    }
+
+    @Test
+    fun `ui state shows the waiting change and hidden counts`() = runBlocking {
+        val exercises = ExerciseRepositoryImpl(DatabaseHolder.fixed(db), OutboxRecorder(DatabaseHolder.fixed(db), clock), clock)
+        val exercise = SyncFixtures.exercise()
+        exercises.createExercise(exercise)
+        exercises.hideExercise(exercise.id)
+        val vm = buildViewModel()
+
+        val state = withTimeout(5_000) { vm.uiState.first { !it.isLoading && it.hiddenExercises == 1 } }
+
+        assertTrue(state.backup is BackupLine.Waiting)
+        assertEquals(0, state.hiddenTemplates)
     }
 
     @Test
@@ -169,7 +248,7 @@ class SettingsViewModelTest {
 
     // ---- account deletion ----
 
-    private suspend fun SettingsViewModel.awaitDeletionSettled(): AccountDeletionUiState =
+    private suspend fun YouViewModel.awaitDeletionSettled(): AccountDeletionUiState =
         withTimeout(5_000) { accountDeletionState.first { it != AccountDeletionUiState.InProgress } }
 
     @Test
@@ -186,7 +265,7 @@ class SettingsViewModelTest {
         assertEquals(1, db.syncDao().outboxCount())
 
         status = 204
-        val event = async(start = CoroutineStart.UNDISPATCHED) { vm.accountDeletedEvent.first() }
+        val event = async(start = CoroutineStart.UNDISPATCHED) { vm.logoutEvent.first() }
         vm.retryAccountDeletion()
 
         withTimeout(5_000) { event.await() }
@@ -207,9 +286,9 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `success emits accountDeletedEvent`() = runBlocking {
+    fun `success emits logoutEvent`() = runBlocking {
         val vm = buildViewModel()
-        val event = async(start = CoroutineStart.UNDISPATCHED) { vm.accountDeletedEvent.first() }
+        val event = async(start = CoroutineStart.UNDISPATCHED) { vm.logoutEvent.first() }
 
         vm.deleteAccount()
 

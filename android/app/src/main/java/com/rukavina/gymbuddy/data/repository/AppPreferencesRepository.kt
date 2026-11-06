@@ -23,7 +23,6 @@ class AppPreferencesRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) {
     private object PreferencesKeys {
-        val SHOW_QUOTE_OF_THE_DAY = booleanPreferencesKey("show_quote_of_the_day")
         val PREFERRED_UNITS = stringPreferencesKey("preferred_units")
         val IS_GUEST = booleanPreferencesKey("is_guest")
         val LAST_SIGN_IN_EMAIL = stringPreferencesKey("last_sign_in_email")
@@ -87,17 +86,6 @@ class AppPreferencesRepository @Inject constructor(
 
     suspend fun setGuest(guest: Boolean) {
         dataStore.edit { it[PreferencesKeys.IS_GUEST] = guest }
-    }
-
-    val showQuoteOfTheDay: Flow<Boolean> = dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.SHOW_QUOTE_OF_THE_DAY] ?: true // Default: enabled
-        }
-
-    suspend fun setShowQuoteOfTheDay(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SHOW_QUOTE_OF_THE_DAY] = enabled
-        }
     }
 
     /**

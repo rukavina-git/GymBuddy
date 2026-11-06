@@ -40,6 +40,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Card
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -47,7 +50,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.rukavina.gymbuddy.navigation.NavRoutes
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
-import com.rukavina.gymbuddy.ui.settings.SettingsSection
 import com.rukavina.gymbuddy.utils.UnitConverter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -313,5 +315,20 @@ private fun ProfileInfoItem(
                 color = MaterialTheme.colorScheme.outlineVariant
             )
         }
+    }
+}
+
+/** Old grouped card; goes with this screen in 7.10b. */
+@Composable
+private fun SettingsSection(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) { content() }
     }
 }

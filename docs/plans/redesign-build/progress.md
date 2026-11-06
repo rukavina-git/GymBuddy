@@ -14,11 +14,31 @@
 - [x] 08 Progress tab + All sessions (steps/08-progress.md) — c5dc7c7
 - [x] 09a Session detail (steps/09-session-detail.md) — 453d555
 - [x] 09b Edit workout (steps/09-session-detail.md) — 5135a08
-- [ ] 10 You + Settings
+- [x] 10a You page (steps/10-you-settings.md) — HASH
+- [ ] 10b Profile, picture, body weight (steps/10-you-settings.md)
 - [ ] 11 Cross-flow states
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 10a: Decisions 1–6 as recommended (owner). Figma read via the Console MCP.
+  Rows left out: Distance (one Units row), Default rest, Weight step, Keep
+  screen on, Week starts on, Starter plans, Show tips again.
+- 10a: Delete account has no keep/erase radio; body says the phone is wiped
+  too. Re-auth: Google-only → Google at once; else a password dialog.
+- 10a: Sign out asks (R15-8) only when changes are waiting; nothing waiting
+  signs out at once. Offline (R15-13) disables "Back up and sign out". A
+  failed backup re-asks with "Couldn't back up just now".
+- 10a: Backup line from the outbox (count + oldest `enqueuedAt` > 24 h =
+  failed) and `SyncScheduler.status.lastSyncAt` (in memory, so "Backed up"
+  without a time after a restart). No new DAO query.
+- 10a: Card shows a letter avatar; animals come in 10b. Export sub reads
+  "A file you keep (JSON)" (CSV dropped). About = version, feedback mail,
+  Sync debug (debug builds); no licences link yet.
+- 10a: Quote-of-the-day pref deleted (nothing showed it). `AppChoiceDialog`
+  got a content slot and `DialogAction.enabled`. `OnlineCheck` added.
+- 10a: Hidden lists: new page, "Unhide all" only for exercises (no repo call
+  for templates). VMs moved to ui/you. `SettingsSection` moved into the old
+  ProfileScreen until 10b.
 - 09b: Owner OK: an exercise whose sets are all swiped away is dropped on
   save (exercises can't be removed otherwise).
 - 09b: Save goes through `UpdateWorkoutSessionUseCase` (validates via
@@ -375,6 +395,16 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 10a (reviewer, not fixed):
+  - `busy` in DeleteAccountFlow/PasswordDialog is rememberSaveable: rotate
+    mid re-auth → dialog stuck disabled. Use remember or move to the VM.
+  - No Compose test for DeleteAccountFlow (password vs Google, error).
+  - No licences link in About (CLAUDE.md licence rule): add or track.
+  - Guest erase failure is only logged; Export first closes the erase
+    dialog for good; loadCounts/loadDeletionWarning have no try/catch.
+- 10a, for 10b: Profile row still opens the old ProfileScreen (+ EditUnits
+  route). YouUiState has `avatarId`; swap `LetterAvatar` in YouScreen for
+  the picker's avatar. Delete ui/profile/** and the Edit* routes.
 - From 09b (reviewer, not fixed):
   - Every save sets durationSeconds = end − start, even for a rename
     (WorkoutSession says duration isn't derived). Keep the stored one

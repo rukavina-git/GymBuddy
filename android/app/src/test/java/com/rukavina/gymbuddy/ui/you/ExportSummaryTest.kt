@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.ui.settings
+package com.rukavina.gymbuddy.ui.you
 
 import com.rukavina.gymbuddy.data.sync.LocalDataCounts
 import org.junit.Assert.assertEquals

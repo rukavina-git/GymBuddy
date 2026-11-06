@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.ui.settings
+package com.rukavina.gymbuddy.ui.you
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Settings › Hidden templates (old screen until 7.10). What's left of the
+ * You › Hidden templates. What's left of the
  * v1 WorkoutTemplateViewModel after the 05b editor replaced its dialogs.
  */
 @HiltViewModel

@@ -82,7 +82,12 @@ fun AppDialog(
 
 enum class DialogActionTone { Lime, Plain, Danger }
 
-data class DialogAction(val label: String, val onClick: () -> Unit, val tone: DialogActionTone = DialogActionTone.Plain)
+data class DialogAction(
+    val label: String,
+    val onClick: () -> Unit,
+    val tone: DialogActionTone = DialogActionTone.Plain,
+    val enabled: Boolean = true,
+)
 
 /**
  * Account questions (Figma 114:20520): title, body and two or three
@@ -98,6 +103,7 @@ fun AppChoiceDialog(
     actions: List<DialogAction>,
     onDismiss: (() -> Unit)? = null,
     stacked: Boolean = false,
+    content: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     val d = GymBuddyTheme.dimens
     BasicAlertDialog(onDismissRequest = { onDismiss?.invoke() }) {
@@ -112,12 +118,13 @@ fun AppChoiceDialog(
             ) {
                 Text(title, style = MaterialTheme.typography.headlineSmall)
                 Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                content?.invoke(this)
                 val buttons = @Composable {
                     actions.forEach { action ->
                         when (action.tone) {
-                            DialogActionTone.Lime -> AppLinkButton(action.label, action.onClick)
-                            DialogActionTone.Plain -> AppTextButton(action.label, action.onClick)
-                            DialogActionTone.Danger -> DangerButton(action.label, action.onClick)
+                            DialogActionTone.Lime -> AppLinkButton(action.label, action.onClick, enabled = action.enabled)
+                            DialogActionTone.Plain -> AppTextButton(action.label, action.onClick, enabled = action.enabled)
+                            DialogActionTone.Danger -> DangerButton(action.label, action.onClick, enabled = action.enabled)
                         }
                     }
                 }

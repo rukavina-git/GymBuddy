@@ -93,11 +93,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import com.rukavina.gymbuddy.ui.guest.GuestMergeViewModel
-import com.rukavina.gymbuddy.ui.settings.AboutScreen
-import com.rukavina.gymbuddy.ui.settings.AppPreferencesScreen
-import com.rukavina.gymbuddy.ui.settings.HiddenExercisesScreen
-import com.rukavina.gymbuddy.ui.settings.HiddenTemplatesScreen
-import com.rukavina.gymbuddy.ui.settings.SettingsScreen
+import com.rukavina.gymbuddy.ui.you.AboutScreen
+import com.rukavina.gymbuddy.ui.you.HiddenExercisesScreen
+import com.rukavina.gymbuddy.ui.you.HiddenTemplatesScreen
+import com.rukavina.gymbuddy.ui.you.YouNav
+import com.rukavina.gymbuddy.ui.you.YouScreen
 import com.rukavina.gymbuddy.ui.settings.debug.SyncDebugScreen
 import com.rukavina.gymbuddy.ui.workout.active.ActiveWorkoutScreen
 import com.rukavina.gymbuddy.ui.workout.active.WorkoutSummaryScreen
@@ -420,14 +420,24 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                 )
             }
             composable(NavRoutes.You) {
-                SettingsScreen(
-                    bottomNavController = bottomNavController,
-                    rootNavController = rootNavController
+                YouScreen(
+                    YouNav(
+                        onProfile = { bottomNavController.navigate(NavRoutes.Profile) },
+                        onCreateAccount = { rootNavController.navigate(NavRoutes.createAccount(CreateFrom.SETTINGS)) },
+                        onSignIn = { rootNavController.navigate(NavRoutes.signIn()) },
+                        onHiddenExercises = { bottomNavController.navigate(NavRoutes.HiddenExercises) },
+                        onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
+                        onAbout = { bottomNavController.navigate(NavRoutes.About) },
+                        onLeft = { rootNavController.openWelcome() },
+                    ),
                 )
             }
 
             composable(NavRoutes.About) {
-                AboutScreen(navController = bottomNavController)
+                AboutScreen(
+                    onBack = { bottomNavController.popBackStack() },
+                    onSyncDebug = { bottomNavController.navigate(NavRoutes.SyncDebug) },
+                )
             }
             composable(NavRoutes.Profile) {
                 ProfileScreen(
@@ -531,15 +541,11 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
             }
 
             composable(NavRoutes.HiddenExercises) {
-                HiddenExercisesScreen(navController = bottomNavController)
+                HiddenExercisesScreen(onBack = { bottomNavController.popBackStack() })
             }
 
             composable(NavRoutes.HiddenTemplates) {
-                HiddenTemplatesScreen(navController = bottomNavController)
-            }
-
-            composable(NavRoutes.AppPreferences) {
-                AppPreferencesScreen(navController = bottomNavController)
+                HiddenTemplatesScreen(onBack = { bottomNavController.popBackStack() })
             }
             if (BuildConfig.DEBUG) {
                 composable(NavRoutes.SyncDebug) {

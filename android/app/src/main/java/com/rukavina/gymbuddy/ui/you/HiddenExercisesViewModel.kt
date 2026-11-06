@@ -1,4 +1,4 @@
-package com.rukavina.gymbuddy.ui.settings
+package com.rukavina.gymbuddy.ui.you
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/** Hidden exercises screen (restyled in 7.10): list and unhide, nothing else. */
+/** You › Hidden exercises: list and unhide, nothing else. */
 @HiltViewModel
 class HiddenExercisesViewModel @Inject constructor(
     private val exercises: ExerciseRepository,

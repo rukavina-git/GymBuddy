@@ -50,7 +50,6 @@ object NavRoutes {
     const val EditUnits = "edit_units"
     const val HiddenExercises = "hidden_exercises"
     const val HiddenTemplates = "hidden_templates"
-    const val AppPreferences = "app_preferences"
     const val SyncDebug = "sync_debug"
 
     fun signIn() = SignIn

@@ -9,7 +9,7 @@ import com.rukavina.gymbuddy.data.repository.ExerciseRepositoryImpl
 import com.rukavina.gymbuddy.data.repository.WorkoutSessionRepositoryImpl
 import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.domain.model.SyncState
-import com.rukavina.gymbuddy.ui.settings.unsyncedChangeLines
+import com.rukavina.gymbuddy.ui.you.unsyncedChangeLines
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers

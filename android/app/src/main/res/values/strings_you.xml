@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- You tab (Plan 7.10a, Figma R15-1/2) -->
+    <string name="you_guest_title">Your workouts are saved on this phone only.</string>
+    <string name="you_guest_body">If you lose or change phones, they\'re gone. An account backs them up and keeps everything you have.</string>
+    <string name="you_create_account">Create account</string>
+    <string name="you_sign_in">Sign in</string>
+    <string name="you_profile">Profile</string>
+    <string name="you_backed_up">Backed up</string>
+    <string name="you_backed_up_at">Backed up · %1$s</string>
+    <string name="you_just_now">just now</string>
+    <string name="you_min_ago">%1$d min ago</string>
+    <string name="you_hours_ago">%1$d h ago</string>
+    <plurals name="you_changes_waiting">
+        <item quantity="one">%1$d change waiting</item>
+        <item quantity="other">%1$d changes waiting</item>
+    </plurals>
+    <string name="you_backup_failed">Couldn\'t back up</string>
+    <string name="you_retry">Retry</string>
+
+    <string name="you_group_workout">Workout</string>
+    <string name="you_units">Units</string>
+    <string name="you_units_metric">kg · km</string>
+    <string name="you_units_imperial">lb · mi</string>
+    <string name="you_units_metric_long">Metric (kg, km)</string>
+    <string name="you_units_imperial_long">Imperial (lb, mi)</string>
+    <string name="you_rest_buzz">Rest buzz</string>
+    <string name="you_notification">Workout notification</string>
+    <string name="you_notification_sub">Lock screen controls, in Android settings</string>
+    <string name="you_group_lists">Lists</string>
+    <string name="you_hidden_exercises">Hidden exercises</string>
+    <string name="you_hidden_templates">Hidden templates</string>
+    <string name="you_group_data">Your data</string>
+    <string name="you_export">Export data</string>
+    <string name="you_export_sub">A file you keep (JSON)</string>
+    <string name="you_erase">Erase data on this phone</string>
+    <string name="you_group_help">Help</string>
+    <string name="you_about">About</string>
+    <string name="you_group_account">Account</string>
+    <string name="you_change_password">Change password</string>
+    <string name="you_set_password">Set a password</string>
+    <string name="you_sign_out">Sign out</string>
+    <string name="you_delete_account">Delete account</string>
+    <string name="you_follow_phone">Text size and animations follow your phone\'s settings.</string>
+
+    <!-- Dialogs -->
+    <string name="you_cancel">Cancel</string>
+    <string name="you_close">Close</string>
+    <string name="you_sign_out_title">Sign out?</string>
+    <string name="you_sign_out_body">Signing out clears this phone. %1$s are only here.</string>
+    <string name="you_sign_out_offline">Connect to the internet to back up first.</string>
+    <string name="you_sign_out_failed_backup">Couldn\'t back up just now. Try again, or sign out anyway.</string>
+    <string name="you_back_up_and_sign_out">Back up and sign out</string>
+    <string name="you_sign_out_anyway">Sign out anyway</string>
+    <string name="you_signing_out">Backing up…</string>
+    <string name="you_delete_title">Delete your account?</string>
+    <string name="you_delete_body">This deletes your account, its backup and everything on this phone: %1$s. You can\'t undo this.</string>
+    <string name="you_delete_body_empty">This deletes your account, its backup and everything on this phone. You can\'t undo this.</string>
+    <string name="you_delete_unsynced">Not backed up yet: %1$s.</string>
+    <string name="you_delete_confirm_google">You\'ll confirm with Google next.</string>
+    <string name="you_delete_confirm_password">You\'ll confirm with your password next.</string>
+    <string name="you_delete_password_title">Confirm it\'s you</string>
+    <string name="you_delete_password_body">Enter your password to delete your account.</string>
+    <string name="you_password">Password</string>
+    <string name="you_deleting">Deleting your account…</string>
+    <string name="you_erase_title">Erase this phone\'s data?</string>
+    <string name="you_erase_body">This deletes %1$s. There\'s no other copy.</string>
+    <string name="you_erase_body_empty">This deletes everything on this phone. There\'s no other copy.</string>
+    <string name="you_export_first">Export first</string>
+    <string name="you_erase_all">Erase all</string>
+    <string name="you_password_current">Current password</string>
+    <string name="you_password_new">New password</string>
+    <string name="you_password_repeat">Repeat new password</string>
+    <string name="you_password_rule">At least 8 characters, with upper and lower case and a number.</string>
+    <string name="you_password_fill">Fill in every field.</string>
+    <string name="you_password_mismatch">The new passwords don\'t match.</string>
+    <string name="you_password_weak">The new password is too weak.</string>
+    <string name="you_password_changed">Password changed</string>
+    <string name="you_password_set">Password set</string>
+    <string name="you_save">Save</string>
+
+    <!-- Export sheet (R15-11, JSON only) -->
+    <string name="you_export_file">Backup file (JSON)</string>
+    <string name="you_export_file_sub">Can be imported back into GymBuddy, now and in future versions.</string>
+    <string name="you_export_save">Save file</string>
+    <string name="you_export_done">Export saved</string>
+    <string name="you_export_failed">Couldn\'t save the export. Try again.</string>
+
+    <!-- Hidden lists, About -->
+    <string name="you_unhide">Unhide</string>
+    <string name="you_unhide_all">Unhide all</string>
+    <string name="you_hidden_exercises_empty">No hidden exercises</string>
+    <string name="you_hidden_exercises_empty_body">Exercises you hide from lists show up here.</string>
+    <string name="you_hidden_templates_empty">No hidden templates</string>
+    <string name="you_hidden_templates_empty_body">Templates you hide show up here.</string>
+    <string name="you_version">Version %1$s</string>
+    <string name="you_feedback">Send feedback</string>
+    <string name="you_feedback_sub">Questions or ideas? Email the developer.</string>
+    <string name="you_sync_debug">Sync debug</string>
+</resources>
