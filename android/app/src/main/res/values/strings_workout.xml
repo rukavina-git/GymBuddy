@@ -91,4 +91,19 @@
     <string name="workout_notice_paused">%s · paused</string>
     <string name="workout_notice_no_exercises">No exercises yet</string>
     <string name="workout_notice_open">Open</string>
+    <!-- 11a cross-flow states (Figma R17-B1, R17-E2) -->
+    <string name="workout_unsaved_title">Set %1$d isn\'t saved yet</string>
+    <string name="workout_unsaved_title_any">Your last change isn\'t saved yet</string>
+    <string name="workout_unsaved_body">Phone storage is full. Free up some space, then try again. Your numbers stay here.</string>
+    <string name="workout_storage_settings">Storage settings</string>
+    <string name="workout_try_again_set">Try again · set %1$d</string>
+    <string name="workout_try_again">Try again</string>
+    <string name="home_unfinished">Unfinished workout</string>
+    <plurals name="home_unfinished_line">
+        <item quantity="one">%1$s · %2$d set</item>
+        <item quantity="other">%1$s · %2$d sets</item>
+    </plurals>
+    <string name="home_unfinished_last">Last set %1$s at %2$s</string>
+    <string name="home_unfinished_resume">Resume</string>
+    <string name="home_unfinished_finish">Finish</string>
 </resources>

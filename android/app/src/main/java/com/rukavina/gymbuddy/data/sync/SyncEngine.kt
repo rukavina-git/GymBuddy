@@ -237,8 +237,8 @@ class SyncEngine(
     /**
      * 410 CURSOR_EXPIRED: the server has pruned history this device never
      * saw, so a delta can no longer be trusted. Flush local changes first
-     * so nothing unpushed is lost, then wipe local user data and pull
-     * everything from scratch.
+     * so nothing unpushed is lost, then wipe local user data (keeping the
+     * workout draft) and pull everything from scratch.
      */
     private suspend fun handleCursorExpired(): PullSummary {
         Log.w(TAG, "pull cursor expired; flushing outbox, wiping local user data, resyncing")
@@ -247,7 +247,7 @@ class SyncEngine(
         if (remaining > 0) {
             throw SyncException("Cursor expired but $remaining local changes could not be pushed; not wiping.")
         }
-        store.wipeUserData()
+        store.wipeForResync()
         return pullLocked(fromScratch = true).copy(cursorExpired = true)
     }
 

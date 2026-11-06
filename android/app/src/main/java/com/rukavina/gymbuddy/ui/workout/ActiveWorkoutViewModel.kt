@@ -151,6 +151,13 @@ data class ActiveWorkoutUiState(
     val restBuzz: Boolean = false,
     /** Your notes by exercise id (one-note line, R13-13/14). */
     val userNotes: Map<String, String> = emptyMap(),
+    /** The last draft write failed (R17-B1); cleared by the next good write. */
+    val unsaved: UnsavedSet? = null,
+    /**
+     * Restored from a draft last written 3 h+ ago (R17-E2): paused, Home
+     * asks Discard / Resume / Finish. The draft's savedAt, null otherwise.
+     */
+    val unfinishedSince: Long? = null,
 ) {
     /**
      * A workout runs: started (an empty workout has no exercises yet) and
@@ -164,10 +171,15 @@ data class ActiveWorkoutUiState(
     val lastSetLeft: Boolean get() = setsLeft == 1 && currentExercise?.currentSet != null
 }
 
+/** A draft write that failed; [setNumber] is the last set marked done, if any. */
+data class UnsavedSet(val setNumber: Int?)
+
 /** One-off things the screen does: haptics, snackbars. */
 sealed interface WorkoutEvent {
     data object SetDone : WorkoutEvent
     data object Rejected : WorkoutEvent
+    /** A draft write failed (R17-B1): haptic only; the banner is state. */
+    data object DraftSaveFailed : WorkoutEvent
     data class SetDeleted(val setId: String) : WorkoutEvent
     data class SaveFailed(val message: String) : WorkoutEvent
 }
@@ -214,6 +226,9 @@ class ActiveWorkoutViewModel @Inject constructor(
         data class Save(val draft: ActiveWorkoutDraft) : DraftWrite
         data object Clear : DraftWrite
     }
+
+    /** Set number of the last Done, for "Set N isn't saved yet". */
+    private var lastDoneSetNumber: Int? = null
 
     private val draftWrites = MutableSharedFlow<DraftWrite>(
         extraBufferCapacity = 1,
@@ -289,9 +304,20 @@ class ActiveWorkoutViewModel @Inject constructor(
     private fun startDraftWriter() {
         viewModelScope.launch {
             draftWrites.collect { write ->
-                when (write) {
-                    is DraftWrite.Save -> draftRepository.save(write.draft)
-                    DraftWrite.Clear -> draftRepository.clear()
+                try {
+                    when (write) {
+                        is DraftWrite.Save -> draftRepository.save(write.draft)
+                        DraftWrite.Clear -> draftRepository.clear()
+                    }
+                    if (_uiState.value.unsaved != null) _uiState.update { it.copy(unsaved = null) }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    // Disk full or broken: keep the numbers on screen, say so (R17-B1).
+                    if (write is DraftWrite.Save) {
+                        _uiState.update { it.copy(unsaved = UnsavedSet(lastDoneSetNumber)) }
+                        _events.trySend(WorkoutEvent.DraftSaveFailed)
+                    }
                 }
             }
         }
@@ -308,8 +334,10 @@ class ActiveWorkoutViewModel @Inject constructor(
             if (current.running || current.workoutSaved || current.workoutDiscarded) {
                 return@launch
             }
+            // Left 3 h+ ago: paused, no away time; Home asks what to do (R17-E2).
+            val stale = clock.millis() - draft.savedAt >= UNFINISHED_AFTER_MS
             // A running timer kept counting while the app was gone.
-            val awaySeconds = if (draft.isTimerRunning) {
+            val awaySeconds = if (draft.isTimerRunning && !stale) {
                 ((clock.millis() - draft.savedAt) / 1000).coerceAtLeast(0)
             } else {
                 0L
@@ -320,16 +348,17 @@ class ActiveWorkoutViewModel @Inject constructor(
                     workoutTitle = draft.title,
                     workoutStartTime = draft.startedAt,
                     elapsedSeconds = draft.elapsedSeconds + awaySeconds,
-                    isTimerRunning = draft.isTimerRunning,
+                    isTimerRunning = draft.isTimerRunning && !stale,
                     exercises = exercises,
                     templateId = draft.templateId,
                     templateTitle = draft.templateTitle,
                     currentExerciseIndex = draft.currentExerciseIndex.coerceIn(0, (exercises.size - 1).coerceAtLeast(0)),
-                    rest = draft.rest?.let { RestState(it.afterSetId, it.startedAtElapsed, it.seconds) },
+                    rest = if (stale) null else draft.rest?.let { RestState(it.afterSetId, it.startedAtElapsed, it.seconds) },
                     note = draft.note,
+                    unfinishedSince = if (stale) draft.savedAt else null,
                 )
             }
-            if (draft.isTimerRunning) startTimer()
+            if (draft.isTimerRunning && !stale) startTimer()
         }
     }
 
@@ -337,6 +366,23 @@ class ActiveWorkoutViewModel @Inject constructor(
         val state = _uiState.value
         if (!state.running) return
         draftWrites.tryEmit(DraftWrite.Save(state.toDraft(clock.millis())))
+    }
+
+    /** "Try again · set N" (R17-B1): write the draft again. */
+    fun retrySave() = persistDraft()
+
+    /** Unfinished workout → Resume (R17-E2): the timer picks up where it stopped. */
+    fun resumeUnfinished() {
+        if (_uiState.value.unfinishedSince == null) return
+        _uiState.update { it.copy(unfinishedSince = null, isTimerRunning = true) }
+        startTimer()
+        persistDraft()
+    }
+
+    /** Unfinished workout → Finish (R17-E2): saves it ending at the last write. */
+    fun finishUnfinished() {
+        val since = _uiState.value.unfinishedSince ?: return
+        saveWorkout(endedAt = since)
     }
 
     private fun clearDraft() {
@@ -443,6 +489,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     private fun begin(title: String, exercises: List<ActiveExercise>, templateId: String?) {
         val old = _uiState.value
         deleted = null
+        lastDoneSetNumber = null
         _uiState.value = ActiveWorkoutUiState(
             workoutTitle = title,
             workoutStartTime = clock.millis(),
@@ -613,6 +660,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
         val last = state.lastSetLeft
         val doneIndex = exercise.sets.indexOf(set)
+        lastDoneSetNumber = doneIndex + 1
         val sets = exercise.sets.mapIndexed { i, s ->
             when {
                 i == doneIndex -> s.copy(isCompleted = true)
@@ -838,7 +886,7 @@ class ActiveWorkoutViewModel @Inject constructor(
      * Save the workout's done sets and stop the timer. Undone sets are
      * dropped (decision 6). On success the summary is ready.
      */
-    fun saveWorkout() {
+    fun saveWorkout(endedAt: Long? = null) {
         // A second tap while the first save runs would store the workout twice.
         if (_uiState.value.isLoading) return
         _uiState.update { it.copy(isLoading = true, dialog = null) }
@@ -893,11 +941,11 @@ class ActiveWorkoutViewModel @Inject constructor(
                 return@launch
             }
 
-            val endedAt = clock.millis()
+            val end = endedAt ?: clock.millis()
             val workoutSession = WorkoutSession(
                 id = idGenerator.newId(),
                 startedAt = state.workoutStartTime,
-                endedAt = endedAt,
+                endedAt = end,
                 durationSeconds = state.elapsedSeconds.toInt(),
                 title = state.workoutTitle.ifBlank { "Workout" },
                 templateId = state.templateId,
@@ -913,7 +961,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                     val summary = WorkoutSummary(
                         title = workoutSession.title,
                         startedAt = state.workoutStartTime,
-                        endedAt = endedAt,
+                        endedAt = end,
                         durationSeconds = state.elapsedSeconds,
                         sets = kept.sumOf { it.second.size },
                         lifted = lifted(state.exercises),
@@ -945,7 +993,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     // Leave exercises intact; neither saved nor discarded is set, so the
     // user stays on the workout and can retry.
     private fun rejectSave(message: String) {
-        startTimer()
+        if (_uiState.value.isTimerRunning) startTimer()
         _uiState.update { it.copy(isLoading = false, errorMessage = message) }
         _events.trySend(WorkoutEvent.SaveFailed(message))
     }
@@ -993,6 +1041,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     companion object {
+        /** A draft last written this long ago restores as unfinished (R17-E2). */
+        const val UNFINISHED_AFTER_MS = 3 * 60 * 60 * 1000L
         /** The hint shows until this many workouts are saved. */
         const val HINT_WORKOUTS = 3
         /** Rest when the template has none; 7.10's setting replaces it. */

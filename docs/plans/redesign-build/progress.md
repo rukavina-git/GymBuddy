@@ -16,10 +16,22 @@
 - [x] 09b Edit workout (steps/09-session-detail.md) — 5135a08
 - [x] 10a You page (steps/10-you-settings.md) — 86974f2
 - [x] 10b Profile, picture, body weight (steps/10-you-settings.md) — dab5844
-- [ ] 11 Cross-flow states
+- [x] 11a Cross-flow: workout safety (steps/11-cross-flow-states.md) — HASH
+- [ ] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md)
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11a: Split 11a/11b (owner). Figma read via the Console MCP (R17-B1, E2).
+- 11a: E2 "Unfinished workout" is a Home card under the week strip
+  (Figma), not a dialog. Discard confirms with an AppDialog; buttons
+  40dp (`ButtonSize.Small`).
+- 11a: `Haptic.SaveFailed` already existed (01 gotcha was done); no split.
+- 11a: "Last set" = draft `savedAt` (decision 3), so any edit counts.
+- 11a: Unfinished also hides the live bar and the workout notification
+  until Resume. Resume always starts the timer.
+- 11a: Banner title falls back to "Your last change isn't saved yet"
+  when no set was marked done.
+- 11a: roadmap 7.11 stays unticked until 11b.
 - 10b: Not split (owner). Figma read via the Console MCP (R15-3..6, notes).
 - 10b: Avatars are Fluent Emoji 3D PNGs (Flat exists only as SVG; Figma
   shows 3D), scaled to 144 px with sips (no webp tool), 448 KB in
@@ -416,6 +428,23 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 11a (reviewer, not fixed):
+  - Finish on Home fails silently: with 0 sets, or if the save fails,
+    `rejectSave` sends `SaveFailed` on the workout events Channel, which
+    only the workout screen reads. The event fires later (on Resume) and
+    `finishingFromHome` stays true (the next finish navigates twice,
+    harmless with launchSingleTop). Fix: hide Finish at 0 sets, reset
+    the flag, and show the error on Home.
+  - No SyncEngine-level test that 410 keeps the draft (DAO-level only);
+    no test for the finishUnfinished failure path.
+  - A failed `DraftWrite.Clear` is now swallowed (it used to crash the
+    app); a stale draft could come back after a save. Add a log line or
+    a retry.
+  - The banner's set number is read when a write fails, not when it
+    was made (quick taps can name a later set).
+- Use (11b): `SyncDao.wipeForResync()` / `SyncLocalStore.wipeForResync()`
+  is the 410 wipe (keeps the draft); `wipeLocalUserData()` = it + draft.
+  `ActiveWorkoutUiState.unfinishedSince` marks a stale restore.
 - From 10b (reviewer, not fixed):
   - In lbs, holding + reaches unrounded kgToLbs(700) ≈ 1543.24, which
     converts back over 700 kg: the repo `require` fails and Save shows

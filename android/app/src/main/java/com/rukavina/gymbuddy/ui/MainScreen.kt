@@ -8,12 +8,14 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.ui.design.LargeTitleTopBar
 import com.rukavina.gymbuddy.ui.home.HomeScreen
+import com.rukavina.gymbuddy.ui.home.UnfinishedActions
 import com.rukavina.gymbuddy.ui.home.toRunningWorkout
 import com.rukavina.gymbuddy.ui.template.TemplateDeleteViewModel
 import com.rukavina.gymbuddy.ui.template.editor.TemplateEditorScreen
@@ -213,6 +215,20 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
         bottomNavController.navigateToTab(NavTab.Workouts)
     }
 
+    // Unfinished → Finish on Home (R17-E2): show the summary once the save lands.
+    var finishingFromHome by remember { mutableStateOf(false) }
+    LaunchedEffect(finishingFromHome, workoutState.summary != null) {
+        if (finishingFromHome && workoutState.summary != null) {
+            finishingFromHome = false
+            bottomNavController.navigate(NavRoutes.WorkoutSummary) { launchSingleTop = true }
+        }
+    }
+    val unfinished = UnfinishedActions(
+        onDiscard = activeWorkoutViewModel::discardWorkout,
+        onResume = { activeWorkoutViewModel.resumeUnfinished(); openWorkout() },
+        onFinish = { finishingFromHome = true; activeWorkoutViewModel.finishUnfinished() },
+    )
+
     AppFrame(
         selectedTab = tab,
         onSelectTab = bottomNavController::navigateToTab,
@@ -245,6 +261,7 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                         }
                         openWorkout()
                     },
+                    unfinished = unfinished,
                 )
             }
             composable(NavRoutes.Workouts) {

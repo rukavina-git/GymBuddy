@@ -1,6 +1,11 @@
 package com.rukavina.gymbuddy.ui.workout.active
 
 import android.app.Application
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
@@ -57,7 +62,7 @@ class ActiveWorkoutUiTest {
 
     private lateinit var vm: ActiveWorkoutViewModel
 
-    private fun show(width: Int? = null, second: Boolean = false) {
+    private fun show(width: Int? = null, second: Boolean = false, drafts: FakeActiveWorkoutDraftRepository = FakeActiveWorkoutDraftRepository()) {
         val exercises = FakeExerciseRepository(listOf(exercise("bench", "Bench Press"), exercise("row", "Barbell Row")))
         val sessions = FakeWorkoutSessionRepository()
         val ids = FixedIdGenerator((0..20).map { "id-$it" })
@@ -66,7 +71,7 @@ class ActiveWorkoutUiTest {
             GetAllExercisesIncludingHiddenUseCase(exercises),
             AppPreferencesRepository(testPreferencesDataStore()),
             ids,
-            FakeActiveWorkoutDraftRepository(),
+            drafts,
             sessions,
             InMemoryDataOwnerStore(),
             MutableClock(),
@@ -107,6 +112,24 @@ class ActiveWorkoutUiTest {
     }
 
     private fun sets() = vm.uiState.value.exercises[0].sets
+
+    @Test
+    fun unsavedSetShowsAnAlertBannerWithBothActions() {
+        val drafts = FakeActiveWorkoutDraftRepository()
+        show(drafts = drafts)
+        drafts.failSaves = true
+        rule.onNodeWithText("Done · set 1").performClick()
+        rule.waitUntil(3_000) { vm.uiState.value.unsaved != null }
+        rule.onNodeWithTag(UNSAVED_BANNER_TAG)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Assertive))
+        rule.onNodeWithText("Set 1 isn't saved yet").assertExists()
+        rule.onNodeWithText("Storage settings").assertExists()
+
+        drafts.failSaves = false
+        rule.onNodeWithText("Try again · set 1").performClick()
+        rule.waitUntil(3_000) { vm.uiState.value.unsaved == null }
+        rule.onNodeWithText("Done · set 2").assertExists()
+    }
 
     @Test
     fun doneLandsTheSetAndStartsRest() {

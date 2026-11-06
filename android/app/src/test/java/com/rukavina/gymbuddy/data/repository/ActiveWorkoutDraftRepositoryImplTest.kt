@@ -114,4 +114,11 @@ class ActiveWorkoutDraftRepositoryImplTest {
         db.syncDao().wipeLocalUserData()
         assertNull(repository.load())
     }
+
+    @Test
+    fun `a 410 re-download wipe keeps the draft`() = runTest {
+        repository.save(draft)
+        db.syncDao().wipeForResync()
+        assertEquals(draft, repository.load())
+    }
 }

@@ -56,6 +56,10 @@ import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutUiState
 import java.time.Instant
 import java.time.ZoneId
+import com.rukavina.gymbuddy.ui.design.AppDialog
+import com.rukavina.gymbuddy.ui.design.ButtonSize
+import com.rukavina.gymbuddy.ui.design.OutlineButton
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
@@ -83,14 +87,30 @@ fun HomeScreen(
     workout: RunningWorkout? = null,
     onOpenWorkout: () -> Unit = {},
     onEmptyWorkout: () -> Unit = {},
+    unfinished: UnfinishedActions = UnfinishedActions(),
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HomeContent(state, workoutRunning, onStartTemplate, onOpenTemplate, onAllTemplates, onOpenWeek, workout, onOpenWorkout, onEmptyWorkout)
+    HomeContent(state, workoutRunning, onStartTemplate, onOpenTemplate, onAllTemplates, onOpenWeek, workout, onOpenWorkout, onEmptyWorkout, unfinished)
 }
 
+/** Unfinished workout card (R17-E2). Discard confirms first. */
+data class UnfinishedActions(
+    val onDiscard: () -> Unit = {},
+    val onResume: () -> Unit = {},
+    val onFinish: () -> Unit = {},
+)
+
 /** The running workout for Home's "Workout in progress" card (Figma 53:3414). */
-data class RunningWorkout(val title: String, val startedAt: Long, val exercisesDone: Int, val exerciseCount: Int)
+data class RunningWorkout(
+    val title: String,
+    val startedAt: Long,
+    val exercisesDone: Int,
+    val exerciseCount: Int,
+    val setsDone: Int = 0,
+    /** Last write of a workout left 3 h+ ago (R17-E2); null while live. */
+    val unfinishedSince: Long? = null,
+)
 
 /** Null when no workout runs. An exercise counts as done once all its sets are. */
 fun ActiveWorkoutUiState.toRunningWorkout(): RunningWorkout? =
@@ -100,6 +120,8 @@ fun ActiveWorkoutUiState.toRunningWorkout(): RunningWorkout? =
         startedAt = workoutStartTime,
         exercisesDone = exercises.count { it.allDone && it.sets.isNotEmpty() },
         exerciseCount = exercises.size,
+        setsDone = doneSets,
+        unfinishedSince = unfinishedSince,
     )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,6 +136,7 @@ internal fun HomeContent(
     workout: RunningWorkout? = null,
     onOpenWorkout: () -> Unit = {},
     onEmptyWorkout: () -> Unit = {},
+    unfinished: UnfinishedActions = UnfinishedActions(),
 ) {
     val d = GymBuddyTheme.dimens
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
@@ -133,7 +156,7 @@ internal fun HomeContent(
                     modifier = Modifier.height(WordmarkHome).semantics { heading() },
                 )
             }
-            if (workoutRunning && workout != null) {
+            if (workoutRunning && workout != null && workout.unfinishedSince == null) {
                 InProgressCard(workout, state.zone, onOpenWorkout)
             }
             state.week?.let { week ->
@@ -146,6 +169,10 @@ internal fun HomeContent(
                     onClick = onOpenWeek,
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+            val since = workout?.unfinishedSince
+            if (workoutRunning && workout != null && since != null) {
+                UnfinishedCard(workout, since, state.today, state.zone, unfinished)
             }
             if (!workoutRunning) {
                 PrimaryButton(
@@ -210,6 +237,59 @@ private fun InProgressCard(workout: RunningWorkout, zone: ZoneId, onClick: () ->
                 color = cs.onSurfaceVariant,
             )
         }
+    }
+}
+
+/**
+ * R17-E2: a workout left 3 h+ ago. "Push A · 12 sets", "Last set
+ * yesterday at 19:02"; Discard (confirms) · Resume · Finish (lime).
+ */
+@Composable
+private fun UnfinishedCard(workout: RunningWorkout, since: Long, today: LocalDate, zone: ZoneId, actions: UnfinishedActions) {
+    val cs = MaterialTheme.colorScheme
+    val d = GymBuddyTheme.dimens
+    val locale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
+    val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
+        .format(Instant.ofEpochMilli(since).atZone(zone))
+    var confirm by rememberSaveable { mutableStateOf(false) }
+    Surface(shape = MaterialTheme.shapes.large, color = cs.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(d.insetCard), verticalArrangement = Arrangement.spacedBy(d.hairline)) {
+            Text(
+                stringResource(R.string.home_unfinished),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
+            )
+            Text(
+                pluralStringResource(R.plurals.home_unfinished_line, workout.setsDone, workout.title, workout.setsDone),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                stringResource(R.string.home_unfinished_last, relativeDay(since, today, zone), time),
+                style = MaterialTheme.typography.bodySmall,
+                color = cs.onSurfaceVariant,
+            )
+            Row(
+                Modifier.fillMaxWidth().padding(top = d.stack),
+                horizontalArrangement = Arrangement.spacedBy(d.stackTight),
+            ) {
+                OutlineButton(stringResource(R.string.workout_discard), { confirm = true }, Modifier.weight(1f), size = ButtonSize.Small)
+                OutlineButton(stringResource(R.string.home_unfinished_resume), actions.onResume, Modifier.weight(1f), size = ButtonSize.Small)
+                PrimaryButton(stringResource(R.string.home_unfinished_finish), actions.onFinish, Modifier.weight(1f), size = ButtonSize.Small)
+            }
+        }
+    }
+    if (confirm) {
+        AppDialog(
+            title = stringResource(R.string.workout_discard_title),
+            body = stringResource(R.string.workout_discard_body),
+            confirmLabel = stringResource(R.string.workout_discard),
+            onConfirm = { confirm = false; actions.onDiscard() },
+            dismissLabel = stringResource(R.string.cancel),
+            onDismiss = { confirm = false },
+            destructive = true,
+        )
     }
 }
 

@@ -45,7 +45,8 @@ interface RestBuzzScheduler {
 
 /** Null when no workout runs. [WorkoutNotice.counterBase] is left for the caller. */
 fun ActiveWorkoutUiState.toNotice(): WorkoutNotice? {
-    if (!running) return null
+    // Unfinished (R17-E2) is paused until Resume: no notification.
+    if (!running || unfinishedSince != null) return null
     val exercise = liveExercise()
     return WorkoutNotice(
         workoutTitle = workoutTitle,

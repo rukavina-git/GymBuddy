@@ -35,7 +35,8 @@ data class LiveBarRest(val setNumber: Int, val setCount: Int, val leftSeconds: L
  * one with a set left; when all are done, the last one.
  */
 fun ActiveWorkoutUiState.toLiveBarState(): LiveBarState? {
-    if (!running) return null
+    // Unfinished (R17-E2): Home's card asks first; no live bar until Resume.
+    if (!running || unfinishedSince != null) return null
     if (exercises.isEmpty()) {
         return LiveBarState(workoutTitle, setNumber = null, setCount = 0, allDone = false, elapsedSeconds = elapsedSeconds, progress = 0f)
     }

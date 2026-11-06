@@ -1,5 +1,13 @@
 package com.rukavina.gymbuddy.ui.workout.active
 
+import com.rukavina.gymbuddy.ui.workout.UnsavedSet
+import com.rukavina.gymbuddy.ui.design.BannerTone
+import com.rukavina.gymbuddy.ui.design.Banner
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.platform.testTag
+import android.provider.Settings
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
@@ -149,6 +157,7 @@ fun ActiveWorkoutScreen(
             when (event) {
                 WorkoutEvent.SetDone -> haptics(Haptic.Confirm)
                 WorkoutEvent.Rejected -> haptics(Haptic.Reject)
+                WorkoutEvent.DraftSaveFailed -> haptics(Haptic.SaveFailed)
                 is WorkoutEvent.SaveFailed -> {
                     haptics(Haptic.SaveFailed)
                     viewModel.clearError()
@@ -200,6 +209,10 @@ fun ActiveWorkoutScreen(
             onRest = viewModel::setRest,
             onUserNote = viewModel::saveUserNote,
             onRestBuzz = viewModel::setRestBuzz,
+            onRetrySave = viewModel::retrySave,
+            onStorageSettings = {
+                runCatching { context.startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS)) }
+            },
         ),
         snackbar = snackbar,
     )
@@ -246,6 +259,8 @@ internal data class WorkoutActions(
     val onRest: (Int) -> Unit = {},
     val onRestBuzz: (Boolean) -> Unit = {},
     val onUserNote: (exerciseId: String, note: String) -> Unit = { _, _ -> },
+    val onRetrySave: () -> Unit = {},
+    val onStorageSettings: () -> Unit = {},
 )
 
 @Composable
@@ -294,15 +309,27 @@ internal fun ActiveWorkoutContent(
                     .padding(horizontal = d.insetScreen, vertical = d.group),
                 verticalArrangement = Arrangement.spacedBy(d.stack),
             ) {
-                UpNextRow(state, actions.onUpNext)
-                PrimaryButton(
-                    text = doneLabel(state),
-                    onClick = actions.onDone,
-                    icon = AppIcons.Ui.Check,
-                    loading = state.isLoading,
-                    enabled = exercise != null && !state.isLoading,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                val unsaved = state.unsaved
+                if (unsaved != null) {
+                    UnsavedBanner(unsaved, actions.onStorageSettings)
+                    PrimaryButton(
+                        text = unsaved.setNumber?.let { stringResource(R.string.workout_try_again_set, it) }
+                            ?: stringResource(R.string.workout_try_again),
+                        onClick = actions.onRetrySave,
+                        icon = AppIcons.Ui.Refresh,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    UpNextRow(state, actions.onUpNext)
+                    PrimaryButton(
+                        text = doneLabel(state),
+                        onClick = actions.onDone,
+                        icon = AppIcons.Ui.Check,
+                        loading = state.isLoading,
+                        enabled = exercise != null && !state.isLoading,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
         },
         snackbarHost = { SnackbarHost(snackbar) { AppSnackbar(it) } },
@@ -757,3 +784,21 @@ private fun AskNotificationsOnce(running: Boolean, viewModel: ActiveWorkoutViewM
         }
     }
 }
+
+/** R17-B1: a danger card above the button; an alert, so TalkBack reads it at once. */
+@Composable
+private fun UnsavedBanner(unsaved: UnsavedSet, onStorageSettings: () -> Unit) {
+    Banner(
+        tone = BannerTone.Danger,
+        title = unsaved.setNumber?.let { stringResource(R.string.workout_unsaved_title, it) }
+            ?: stringResource(R.string.workout_unsaved_title_any),
+        body = stringResource(R.string.workout_unsaved_body),
+        actionLabel = stringResource(R.string.workout_storage_settings),
+        onAction = onStorageSettings,
+        modifier = Modifier
+            .testTag(UNSAVED_BANNER_TAG)
+            .semantics { liveRegion = LiveRegionMode.Assertive },
+    )
+}
+
+internal const val UNSAVED_BANNER_TAG = "workout-unsaved"

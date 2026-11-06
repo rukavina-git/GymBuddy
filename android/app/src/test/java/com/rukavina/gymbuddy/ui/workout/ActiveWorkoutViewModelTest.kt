@@ -1,5 +1,7 @@
 package com.rukavina.gymbuddy.ui.workout
 
+import com.rukavina.gymbuddy.ui.workout.service.toNotice
+import com.rukavina.gymbuddy.ui.frame.toLiveBarState
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.data.sync.InMemoryDataOwnerStore
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
@@ -703,6 +705,87 @@ class ActiveWorkoutViewModelTest {
         second.saveWorkout()
         assertEquals("Push Day", sessionRepo.created.single().title)
         assertNull("a saved workout must not come back", draftRepo.draft)
+    }
+
+    // --- 11a: couldn't save (R17-B1), unfinished workout (R17-E2) ---
+
+    @Test
+    fun `a failed draft write shows the unsaved set, and Try again clears it`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (viewModel, _, _) = buildViewModel(draftRepo = draftRepo)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        draftRepo.failSaves = true
+
+        viewModel.fillFirstSet("10", "60") // ends with Done
+
+        assertEquals(UnsavedSet(1), viewModel.uiState.value.unsaved)
+        assertTrue("the numbers stay on screen", viewModel.uiState.value.exercises.single().sets.single().isCompleted)
+
+        draftRepo.failSaves = false
+        viewModel.retrySave()
+
+        assertNull(viewModel.uiState.value.unsaved)
+        assertTrue(draftRepo.draft!!.exercises.single().sets.single().isCompleted)
+    }
+
+    @Test
+    fun `a draft left under 3 h restores live, not unfinished`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+
+        clock.advanceSeconds(3 * 60 * 60 - 1)
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        assertNull(second.uiState.value.unfinishedSince)
+        assertTrue(second.uiState.value.isTimerRunning)
+    }
+
+    @Test
+    fun `a draft left 3 h+ restores paused as unfinished, and Finish ends at the last write`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+        val lastWrite = draftRepo.draft!!.savedAt
+        val elapsed = draftRepo.draft!!.elapsedSeconds
+
+        clock.advanceSeconds(20 * 60 * 60)
+        val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        val restored = second.uiState.value
+        assertEquals(lastWrite, restored.unfinishedSince)
+        assertFalse(restored.isTimerRunning)
+        assertEquals("no away time", elapsed, restored.elapsedSeconds)
+        assertNull("no live bar until Resume", restored.toLiveBarState())
+        assertNull("no notification until Resume", restored.toNotice())
+
+        second.finishUnfinished()
+
+        val saved = sessionRepo.created.single()
+        assertEquals(lastWrite, saved.endedAt)
+        assertEquals(elapsed.toInt(), saved.durationSeconds)
+        assertNull(draftRepo.draft)
+    }
+
+    @Test
+    fun `Resume on an unfinished workout restarts the timer`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+
+        clock.advanceSeconds(4 * 60 * 60)
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        second.resumeUnfinished()
+
+        assertNull(second.uiState.value.unfinishedSince)
+        assertTrue(second.uiState.value.isTimerRunning)
+        assertEquals(clock.millis, draftRepo.draft!!.savedAt)
     }
 
     @Test
