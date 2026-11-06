@@ -9,7 +9,7 @@
 - [x] 05b Template editor + exercise picker (steps/05-home-templates.md) — 803691f
 - [x] 06a Active workout: logging (steps/06-active-workout.md) — 0d33cb5
 - [x] 06b Active workout: around the workout (steps/06-active-workout.md) — bd61611
-- [x] 06c Active workout: rest buzz + lock screen (steps/06-active-workout.md) — HASH
+- [x] 06c Active workout: rest buzz + lock screen (steps/06-active-workout.md) — 2d9b952
 - [ ] 07 Exercise page + create
 - [ ] 08 Progress tab
 - [ ] 09 Session detail
