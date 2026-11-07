@@ -101,7 +101,7 @@ fun BodyWeightScreen(onBack: () -> Unit, viewModel: BodyWeightViewModel = hiltVi
                     val result = snackbar.showSnackbar(
                         message = context.getString(R.string.body_weight_deleted),
                         actionLabel = context.getString(R.string.undo),
-                        duration = SnackbarDuration.Short,
+                        duration = SnackbarDuration.Indefinite,
                     )
                     if (result == SnackbarResult.ActionPerformed) viewModel.undoDelete(event.entry)
                 }

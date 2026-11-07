@@ -138,7 +138,8 @@ fun StatTile(value: String, label: String, modifier: Modifier = Modifier) {
             Modifier.heightIn(min = d.row).padding(horizontal = StatTilePadding, vertical = d.stackTight),
             verticalArrangement = Arrangement.spacedBy(StatTileGap, Alignment.CenterVertically),
         ) {
-            Text(value, style = GymBuddyTheme.type.statValue)
+            // F23: the number never wraps; units live in the label.
+            Text(value, style = GymBuddyTheme.type.statValue, maxLines = 1, softWrap = false)
             Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

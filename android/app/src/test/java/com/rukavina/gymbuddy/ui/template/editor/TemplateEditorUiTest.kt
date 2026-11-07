@@ -68,10 +68,18 @@ class TemplateEditorUiTest {
     @Test
     fun swipeRemovesAndUndoBringsItBack() {
         show()
+        // The Undo snackbar times itself (F21d): idling would run its 8 s out,
+        // so the clock moves by hand until the snackbar is up.
+        rule.mainClock.autoAdvance = false
         rule.onNodeWithText("Exercise 0").performTouchInput { swipeLeft() }
+        var frames = 0
+        while (rule.onAllNodesWithText("Exercise 0 removed").fetchSemanticsNodes().isEmpty() && frames++ < 200) {
+            rule.mainClock.advanceTimeByFrame()
+        }
         rule.waitUntil(3_000) { names() == listOf("Exercise 1") }
         rule.onNodeWithText("Exercise 0 removed").assertExists()
         rule.onNodeWithText("Undo").performClick()
+        rule.mainClock.autoAdvance = true
         rule.waitUntil(3_000) { names() == listOf("Exercise 0", "Exercise 1") }
         rule.waitForIdle()
         rule.onAllNodesWithText("Exercise 0").assertCountEquals(1)

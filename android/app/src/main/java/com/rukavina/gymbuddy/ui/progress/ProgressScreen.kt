@@ -47,6 +47,7 @@ import com.rukavina.gymbuddy.ui.design.AppBottomSheet
 import com.rukavina.gymbuddy.ui.design.AppChip
 import com.rukavina.gymbuddy.ui.design.EmptyState
 import com.rukavina.gymbuddy.ui.design.LargeTitleTopBar
+import com.rukavina.gymbuddy.ui.design.AppLinkButton
 import com.rukavina.gymbuddy.ui.design.SecondaryButton
 import com.rukavina.gymbuddy.ui.design.SessionCard
 import com.rukavina.gymbuddy.ui.design.Sparkline
@@ -121,22 +122,22 @@ internal fun ProgressContent(
                 state.chart?.let { chart ->
                     item(key = "chart") { LiftCard(chart, state.units, { onOpenLift(chart.lift.exerciseId) }, onChangeLift) }
                 }
+                // F15: 3 recent, "See all" beside the heading so it's never below the fold.
                 item(key = "recent") {
-                    Text(
-                        stringResource(R.string.progress_recent),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(top = d.stack).semantics { heading() },
-                    )
+                    Row(
+                        Modifier.fillMaxWidth().padding(top = d.stack),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            stringResource(R.string.progress_recent),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(1f).semantics { heading() },
+                        )
+                        AppLinkButton(stringResource(R.string.progress_see_all), onAllSessions)
+                    }
                 }
                 items(state.recent, key = { it.session.id }) { row ->
                     SessionRowCard(row, state.units, state.zone, onOpenSession)
-                }
-                item(key = "all") {
-                    SecondaryButton(
-                        stringResource(R.string.progress_all_sessions),
-                        onAllSessions,
-                        Modifier.fillMaxWidth().padding(top = d.stackTight),
-                    )
                 }
             }
         }

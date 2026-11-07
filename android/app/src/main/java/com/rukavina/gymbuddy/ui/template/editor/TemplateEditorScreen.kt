@@ -135,7 +135,7 @@ fun TemplateEditorScreen(
                     val result = snackbar.showSnackbar(
                         message = context.getString(R.string.editor_removed, event.name),
                         actionLabel = context.getString(R.string.undo),
-                        duration = SnackbarDuration.Short,
+                        duration = SnackbarDuration.Indefinite,
                     )
                     if (result == SnackbarResult.ActionPerformed) viewModel.undoRemove(event.key)
                 }

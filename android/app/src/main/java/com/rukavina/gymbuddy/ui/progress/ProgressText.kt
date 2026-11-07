@@ -32,12 +32,16 @@ fun displayWeight(kg: Float, units: PreferredUnits): Float =
 fun weightText(kg: Float, units: PreferredUnits): String =
     stringResource(R.string.weight_value, UnitConverter.weightToDisplayUnit(kg, units), UnitConverter.getWeightUnitLabel(units))
 
+/** "12,400": the number only, for stat tiles (F23). */
+fun volumeNumber(kg: Float, units: PreferredUnits): String =
+    NumberFormat.getIntegerInstance().format(displayWeight(kg, units).roundToInt())
+
 /** Totals: "9,850 kg", whole numbers grouped in the user's locale. */
 @Composable
 fun volumeText(kg: Float, units: PreferredUnits): String =
     stringResource(
         R.string.weight_value,
-        NumberFormat.getIntegerInstance().format(displayWeight(kg, units).roundToInt()),
+        volumeNumber(kg, units),
         UnitConverter.getWeightUnitLabel(units),
     )
 

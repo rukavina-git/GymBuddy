@@ -1,5 +1,21 @@
 package com.rukavina.gymbuddy.ui.design
 
+import androidx.compose.ui.platform.LocalAccessibilityManager
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.background
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.BorderStroke
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
@@ -115,35 +131,79 @@ fun EmptyState(
 
 /**
  * For `SnackbarHost { AppSnackbar(it) }`: high surface, lime action, min 56 (D12).
- * F9: an outline and a shadow lift it off dark pages; full redesign is F21d.
+ * F9: an outline and a shadow lift it off dark pages.
+ * F21d: a snackbar with an action shown as [SnackbarDuration.Indefinite]
+ * times itself: [UNDO_MS] (or the longer accessibility timeout), a 2 dp
+ * lime line shrinking right to left, paused while a finger is on it.
  */
 @Composable
 fun AppSnackbar(data: SnackbarData, modifier: Modifier = Modifier) {
     val d = GymBuddyTheme.dimens
     val cs = MaterialTheme.colorScheme
+    val timed = data.visuals.actionLabel != null && data.visuals.duration == SnackbarDuration.Indefinite
+    val left = remember(data) { Animatable(1f) }
+    var touched by remember(data) { mutableStateOf(false) }
+    val a11y = LocalAccessibilityManager.current
+    val total = remember(a11y) {
+        a11y?.calculateRecommendedTimeoutMillis(UNDO_MS, containsIcons = true, containsText = true, containsControls = true)
+            ?.coerceAtLeast(UNDO_MS) // "if longer": never shorter than 8 s
+            ?: UNDO_MS
+    }
+    if (timed) {
+        LaunchedEffect(data, touched) {
+            if (touched) return@LaunchedEffect // cancelling the animation pauses it where it is
+            left.animateTo(0f, tween((left.value * total).toInt(), easing = LinearEasing))
+            data.dismiss()
+        }
+    }
     Surface(
         shape = MaterialTheme.shapes.small,
         color = cs.surfaceContainerHighest,
         contentColor = cs.onSurface,
         border = BorderStroke(d.strokeDivider, cs.outline),
         shadowElevation = SnackbarShadow,
-        modifier = modifier.padding(horizontal = d.insetScreen).fillMaxWidth(),
+        modifier = modifier
+            .padding(horizontal = d.insetScreen)
+            .fillMaxWidth()
+            .pointerInput(data) {
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    touched = true
+                    waitForUpOrCancellation(PointerEventPass.Initial)
+                    touched = false
+                }
+            },
     ) {
-        Row(
-            modifier = Modifier
-                .heightIn(min = SnackbarHeight)
-                .padding(start = d.group, end = d.stackTight),
-            horizontalArrangement = Arrangement.spacedBy(d.stack),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(data.visuals.message, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-            data.visuals.actionLabel?.let { LinkAction(it, data::performAction, MaterialTheme.typography.labelLarge, d.stackTight) }
-            if (data.visuals.withDismissAction) {
-                AppIconButton(AppIcons.Ui.Close, stringResource(R.string.cd_dismiss), data::dismiss)
+        Box {
+            Row(
+                modifier = Modifier
+                    .heightIn(min = SnackbarHeight)
+                    .padding(start = d.group, end = d.stackTight),
+                horizontalArrangement = Arrangement.spacedBy(d.stack),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(data.visuals.message, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                data.visuals.actionLabel?.let { LinkAction(it, data::performAction, MaterialTheme.typography.labelLarge, d.stackTight) }
+                if (data.visuals.withDismissAction) {
+                    AppIconButton(AppIcons.Ui.Close, stringResource(R.string.cd_dismiss), data::dismiss)
+                }
+            }
+            if (timed) {
+                Box(
+                    Modifier
+                        .align(Alignment.BottomStart)
+                        .fillMaxWidth(left.value)
+                        .height(SnackbarTimerLine)
+                        .background(cs.primary),
+                )
             }
         }
     }
 }
+
+/** Undo window (F21d): 8 s; the accessibility timeout wins if longer. */
+const val UNDO_MS = 8_000L
+private val SnackbarTimerLine = 2.dp
 
 @Composable
 private fun LinkAction(

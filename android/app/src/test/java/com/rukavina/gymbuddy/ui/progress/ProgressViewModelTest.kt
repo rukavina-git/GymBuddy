@@ -46,13 +46,13 @@ class ProgressViewModelTest {
     }
 
     @Test
-    fun fullTabShowsMostLoggedLiftAndFiveRecent() = runTest {
+    fun fullTabShowsMostLoggedLiftAndThreeRecent() = runTest {
         sources.sessions.value = history
         val s = vm().uiState.first { it.loaded }
         assertFalse(s.empty)
         assertEquals("bench", s.chart?.lift?.exerciseId) // 4 sessions beats squat's 3
         assertEquals(listOf("bench", "squat"), s.lifts.map { it.exerciseId })
-        assertEquals(listOf("f", "e", "d", "c", "b"), s.recent.map { it.session.id })
+        assertEquals(listOf("f", "e", "d"), s.recent.map { it.session.id })
         assertTrue(s.recent.first { it.session.id == "d" }.isPr)
         assertNull(s.recent.first { it.session.id == "e" }.top)
     }

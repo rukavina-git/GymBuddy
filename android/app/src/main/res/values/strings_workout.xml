@@ -54,6 +54,9 @@
     <string name="summary_time">time</string>
     <string name="summary_sets">sets</string>
     <string name="summary_lifted">lifted</string>
+    <!-- F23: stat tiles keep the number on one line; the unit goes in the label. -->
+    <string name="summary_minutes_label">min</string>
+    <string name="summary_lifted_unit">%s lifted</string>
     <string name="summary_what_you_did">What you did</string>
     <string name="summary_top">top %s</string>
     <string name="summary_best">best %s</string>
@@ -81,7 +84,7 @@
     <string name="workout_note_save">Save note</string>
     <string name="workout_rest_keypad_label">%s · rest</string>
     <string name="workout_empty_title">Workout</string>
-    <string name="start_sheet_empty">+ Empty workout</string>
+    <string name="start_sheet_empty">Didn\'t find one? Start an empty workout</string>
     <string name="home_in_progress">Workout in progress</string>
     <string name="home_in_progress_line">Started %1$s · %2$d of %3$d exercises done</string>
     <!-- Rest buzz + workout notification (Plan 7 06c, Figma 53:3470). -->

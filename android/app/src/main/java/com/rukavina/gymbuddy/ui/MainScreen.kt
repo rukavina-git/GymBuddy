@@ -185,7 +185,7 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                 val result = snackbar.showSnackbar(
                     message = context.getString(R.string.template_deleted, title),
                     actionLabel = context.getString(R.string.undo),
-                    duration = SnackbarDuration.Short,
+                    duration = SnackbarDuration.Indefinite,
                 )
                 settled = true
                 if (result == SnackbarResult.ActionPerformed) templateDeletes.undo(id) else templateDeletes.commit(id)
@@ -203,7 +203,7 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
             val result = snackbar.showSnackbar(
                 message = context.getString(R.string.session_deleted, title),
                 actionLabel = context.getString(R.string.undo),
-                duration = SnackbarDuration.Short,
+                duration = SnackbarDuration.Indefinite,
             )
             if (result == SnackbarResult.ActionPerformed) sessionDeletes.restore(id)
         }

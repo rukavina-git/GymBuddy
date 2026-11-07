@@ -1,5 +1,8 @@
 package com.rukavina.gymbuddy.ui.workout.active
 
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -123,13 +126,14 @@ internal fun WorkoutSummaryContent(
                 }
             }
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(d.stackTight)) {
-                    StatTile(stringResource(R.string.workout_minutes, summary.durationSeconds / 60), stringResource(R.string.summary_time), Modifier.weight(1f))
-                    StatTile(summary.sets.toString(), stringResource(R.string.summary_sets), Modifier.weight(1f))
+                Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(d.stackTight)) {
+                    val tile = Modifier.weight(1f).fillMaxHeight()
+                    StatTile((summary.durationSeconds / 60).toString(), stringResource(R.string.summary_minutes_label), tile)
+                    StatTile(summary.sets.toString(), stringResource(R.string.summary_sets), tile)
                     StatTile(
-                        "${wholeNumber(summary.lifted)} ${unitText(SetField.Weight, summary.units)}",
-                        stringResource(R.string.summary_lifted),
-                        Modifier.weight(1f),
+                        wholeNumber(summary.lifted),
+                        stringResource(R.string.summary_lifted_unit, unitText(SetField.Weight, summary.units)),
+                        tile,
                     )
                 }
             }

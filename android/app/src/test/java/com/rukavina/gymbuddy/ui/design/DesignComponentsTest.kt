@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.ui.design
 
 import android.app.Application
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.getValue
@@ -152,14 +153,45 @@ class DesignComponentsTest {
         var result: SnackbarResult? = null
         set { SnackbarHost(host) { AppSnackbar(it) } }
 
+        rule.mainClock.autoAdvance = false
         rule.runOnIdle {
             kotlinx.coroutines.MainScope().launch {
                 result = host.showSnackbar("Set deleted", actionLabel = "Undo", withDismissAction = true)
             }
         }
+        rule.waitForIdle() // clock paused: runs the launch, not the timer
+        repeat(SHOW_FRAMES) { rule.mainClock.advanceTimeByFrame() }
         rule.onNodeWithText("Undo").assertIsDisplayed()
         rule.onNodeWithContentDescription("Dismiss").performClick()
+        rule.mainClock.autoAdvance = true
+        rule.waitForIdle()
+        assertEquals(SnackbarResult.Dismissed, result)
+    }
+
+    @Test
+    fun undoSnackbarClosesItselfAfterEightSeconds() {
+        val host = SnackbarHostState()
+        var result: SnackbarResult? = null
+        set { SnackbarHost(host) { AppSnackbar(it) } }
+
+        rule.mainClock.autoAdvance = false
+        rule.runOnIdle {
+            kotlinx.coroutines.MainScope().launch {
+                result = host.showSnackbar("Set deleted", actionLabel = "Undo", duration = SnackbarDuration.Indefinite)
+            }
+        }
+        rule.waitForIdle() // clock paused: runs the launch, not the timer
+        repeat(SHOW_FRAMES) { rule.mainClock.advanceTimeByFrame() }
+        repeat(FRAMES_7S) { rule.mainClock.advanceTimeByFrame() } // ~7 s
+        rule.onNodeWithText("Undo").assertExists()
+        repeat(FRAMES_7S / 4) { rule.mainClock.advanceTimeByFrame() }
+        rule.mainClock.autoAdvance = true
         rule.waitForIdle()
         assertEquals(SnackbarResult.Dismissed, result)
     }
 }
+
+private const val FRAMES_7S = 7_000 / 16
+
+/** Frames for the host to pick up the snackbar and lay it out. */
+private const val SHOW_FRAMES = 20

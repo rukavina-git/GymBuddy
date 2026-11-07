@@ -3,6 +3,8 @@ package com.rukavina.gymbuddy.ui.design
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -177,6 +179,7 @@ fun StepperKey(
         holdChange(true)
         haptics(Haptic.StepperTick)
         var interval = HOLD_FIRST_MS
+        var steps = 0
         while (true) {
             if (!canRepeat) {
                 haptics(Haptic.Reject)
@@ -184,6 +187,8 @@ fun StepperKey(
             }
             repeated = true
             click()
+            steps++
+            if (steps % HOLD_TICK_EVERY == 0) haptics(Haptic.StepperTick)
             delay(interval)
             interval = (interval * HOLD_SPEEDUP).toLong().coerceAtLeast(HOLD_FASTEST_MS)
         }
@@ -219,8 +224,11 @@ fun StepperKey(
 /** Hold to repeat: raw ms (motion.md #3b has no token). */
 private const val HOLD_START_MS = 400L
 private const val HOLD_FIRST_MS = 150L
-private const val HOLD_FASTEST_MS = 50L
-private const val HOLD_SPEEDUP = 0.85
+// F20: 50 ms ran 0 -> 167.5 kg in 4.5 s; 110 ms keeps a long hold readable.
+private const val HOLD_FASTEST_MS = 110L
+private const val HOLD_SPEEDUP = 0.9
+/** One haptic tick every this many repeated steps. */
+private const val HOLD_TICK_EVERY = 5
 
 /**
  * Weight or reps on the set card. Tapping the number opens the keypad
@@ -280,13 +288,16 @@ fun ValuePanel(
                         AnimatedContent(
                             targetState = number,
                             transitionSpec = {
+                                // F20: no size animation and no clip, or the leading digit
+                                // gets cut while the width changes ("87.5" read "37.5").
+                                val noResize = SizeTransform(clip = false) { _, _ -> snap() }
                                 if (held) {
-                                    EnterTransition.None togetherWith ExitTransition.None
+                                    (EnterTransition.None togetherWith ExitTransition.None) using noResize
                                 } else {
                                     val up = (initialState.toFloatOrNull() ?: 0f) <= (targetState.toFloatOrNull() ?: 0f)
                                     val tween = motionTween<IntOffset>(Durations.SHORT4)
-                                    (slideInVertically(tween) { if (up) it else -it } + fadeIn(motionTween(Durations.SHORT4))) togetherWith
-                                        (slideOutVertically(tween) { if (up) -it else it } + fadeOut(motionTween(Durations.SHORT4)))
+                                    ((slideInVertically(tween) { if (up) it else -it } + fadeIn(motionTween(Durations.SHORT4))) togetherWith
+                                        (slideOutVertically(tween) { if (up) -it else it } + fadeOut(motionTween(Durations.SHORT4)))) using noResize
                                 }
                             },
                             contentAlignment = Alignment.CenterEnd,
@@ -362,8 +373,8 @@ private fun numberSlot(style: TextStyle): Dp {
     }
 }
 
-/** Covers 0–99.5 kg and any reps; wider numbers push the unit right. */
-private const val NUMBER_SLOT = "00.0"
+/** Covers 0–999.5 kg and any reps, so the box never resizes mid-hold (F20). */
+private const val NUMBER_SLOT = "000.0"
 
 
 /** Two panels of two 48dp keys each need this much; narrower cards stack them. */

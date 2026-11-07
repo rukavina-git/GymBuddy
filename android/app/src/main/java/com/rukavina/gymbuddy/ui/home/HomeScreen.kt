@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import com.rukavina.gymbuddy.ui.design.AppTextButton
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -424,14 +425,14 @@ private fun rowSubtitle(line: TemplateLine, state: HomeUiState): String =
 /**
  * Start sheet (Figma R11-3): your templates by recency (last done right),
  * then starter templates with a one-liner (plan, day, about N min) and
- * "N ex". "+ Empty workout" on top starts one with no exercises.
+ * "N ex". A quiet "Start an empty workout" is pinned under the list
+ * (F24a): templates first, and the list scrolls, so last-in-list would bury it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StartSheet(state: HomeUiState, onDismiss: () -> Unit, onStart: (WorkoutTemplate) -> Unit, onEmpty: () -> Unit) {
     AppBottomSheet(onDismiss = onDismiss, title = stringResource(R.string.start_sheet_title)) {
-        Column(Modifier.verticalScroll(rememberScrollState())) {
-            SheetRow(title = stringResource(R.string.start_sheet_empty), subtitle = null, trailing = null, onClick = onEmpty)
+        Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
             if (state.resync != Resync.Idle) {
                 // R3: yours are still on their way; starters and Empty work.
                 SheetHeader(stringResource(R.string.home_your_templates))
@@ -464,6 +465,7 @@ private fun StartSheet(state: HomeUiState, onDismiss: () -> Unit, onStart: (Work
                 }
             }
         }
+        AppTextButton(stringResource(R.string.start_sheet_empty), onEmpty, Modifier.fillMaxWidth())
     }
 }
 

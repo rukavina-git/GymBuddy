@@ -136,7 +136,7 @@ fun SessionEditScreen(
                     val result = snackbar.showSnackbar(
                         message = context.getString(R.string.workout_set_deleted),
                         actionLabel = context.getString(R.string.undo),
-                        duration = SnackbarDuration.Short,
+                        duration = SnackbarDuration.Indefinite,
                     )
                     if (result == SnackbarResult.ActionPerformed) viewModel.undoDelete(event.setId)
                 }

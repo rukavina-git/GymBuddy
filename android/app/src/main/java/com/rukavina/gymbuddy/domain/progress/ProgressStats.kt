@@ -56,7 +56,7 @@ object ProgressStats {
     const val WINDOW_DAYS = 56L
 
     /** Recent list on Progress (R7-1). */
-    const val RECENT = 5
+    const val RECENT = 3 // F15: 5 cards felt heavy
 
     private const val DAY_MS = 86_400_000L
 

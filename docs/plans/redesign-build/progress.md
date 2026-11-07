@@ -21,10 +21,9 @@
 - [x] 11c Device feedback A1: profile + sheets + settings bugs (F1, F3a, F7, F10, F12) — d3b7634
 - [x] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c) — 3694d71
 - [x] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16) — dfeaf5d
-- [ ] 11f Feedback: F20 hold +/- digits and speed, F23 stat tiles
+- [x] 11f Feedback: F20, F23, F15, F24a, F21a, F21d (grown: owner asked for bigger feedback steps) — HASH
 - [ ] 11g Feedback: F1 + F12 profile sync conflict (avatar revert, backup "not possible")
-- [ ] 11h Feedback: F21a short swipe shows Delete, F21d snackbar timer line
-- [ ] 11i Feedback: F15 3 recent + See all, F24a empty workout last, F24b save as template
+- [ ] 11i Feedback: F24b save as template after an empty workout
 - [ ] 11j Feedback: F6 height and body weight wheels
 - [ ] 11k Feedback: F13 delete account screen
 - [ ] 11l Feedback: F3b typing off sheets (notes, quick create, name/units inline)
@@ -34,6 +33,19 @@
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11f: Spec is device-feedback.md "Round C consult"; device feel over Figma, no Figma read.
+  Scope grew from F20+F23 to also F15, F24a, F21a, F21d (owner: bigger steps for feedback);
+  11h folded in, 11i keeps only F24b.
+- 11f: F21d "lighter surface" not done: no lighter surface token exists (surfaceBright ==
+  surfaceContainerHighest). Snackbar keeps SurfaceHigh + outline. Needs a token decision.
+- 11f: F21d timer runs inside AppSnackbar for any snackbar with an action and
+  SnackbarDuration.Indefinite (M3's default when actionLabel is set). The 6 Undo callers
+  moved from Short to Indefinite. Timeout = max(8 s, a11y recommended).
+- 11f: F21a replaces SwipeToDismissBox with AnchoredDraggable (Settled / Revealed 88 dp /
+  Deleted / Done). The swipe background paints only the exposed strip (set rows are
+  see-through). F23 distance tile shows "5.2" over "km".
+- 11f: F20 phone check: 4.5 s hold now reaches 82.5 kg (was 167.5), no clipped digits.
+  Verified on the phone via adb: F15, F23, F24a, F20, F21a reveal + Delete + Undo, F21d line.
 - 11e: Spec is device-feedback.md Round B; device feel over Figma, so no
   Figma read. Figma still shows the letter row, licence line, BMI footer,
   phone tip and raised collapsed bar; update it after.
@@ -490,6 +502,19 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 11f (reviewer, not fixed):
+  - Unused strings now: summary_time, summary_lifted, session_km, session_mi,
+    session_distance. Delete in the next step.
+  - No tests for snackbar pause-on-touch, line only with action, or F21a reveal/tap/long swipe.
+  - DeleteRevealWidth = 88.dp is a raw dp in ActiveWorkoutScreen; move to a token/ui/design.
+  - Tapping the Delete strip plays SwipeThreshold haptic twice.
+  - Positional threshold is 50% of the distance to the next anchor: Done needs ~half the row
+    width (was 56 dp) unless flung. Check feel.
+  - A revealed row only closes by swiping back, not by tapping it or opening another row.
+  - Compose UI tests with an Undo snackbar must pause mainClock (autoAdvance = false) before
+    the action, or idling runs the 8 s timer out (see ActiveWorkoutUiTest swipe test).
+  - android/CLAUDE.md "Verification" still says no adb driving; owner now wants Claude to
+    check on the phone. Owner to update the file.
 - From 11e (reviewer, not fixed):
   - F11 eye has no Compose test.
   - Bars.kt fade uses `colorScheme.surface`; tab pages paint

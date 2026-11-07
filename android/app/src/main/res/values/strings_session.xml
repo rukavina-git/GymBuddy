@@ -7,6 +7,8 @@
     <string name="session_per_mi">per mi</string>
     <string name="session_km">%s km</string>
     <string name="session_mi">%s mi</string>
+    <string name="session_km_label">km</string>
+    <string name="session_mi_label">mi</string>
     <string name="session_start_again">Start %s again</string>
     <string name="session_exercise_page">%s page</string>
     <string name="session_deleted">%s deleted</string>

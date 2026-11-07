@@ -1,5 +1,10 @@
 package com.rukavina.gymbuddy.ui.progress.session
 
+import com.rukavina.gymbuddy.ui.progress.volumeNumber
+import com.rukavina.gymbuddy.utils.UnitConverter
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -60,7 +65,6 @@ import com.rukavina.gymbuddy.ui.design.BackTopBar
 import com.rukavina.gymbuddy.ui.design.PrTag
 import com.rukavina.gymbuddy.ui.design.StatTile
 import com.rukavina.gymbuddy.ui.exercises.page.setText
-import com.rukavina.gymbuddy.ui.progress.volumeText
 import com.rukavina.gymbuddy.ui.template.clock
 import com.rukavina.gymbuddy.ui.template.joinDot
 import com.rukavina.gymbuddy.ui.theme.AppIcons
@@ -217,16 +221,21 @@ internal fun SessionDetailContent(
 @Composable
 private fun Tiles(tiles: SessionTiles, units: PreferredUnits) {
     val d = GymBuddyTheme.dimens
-    Row(horizontalArrangement = Arrangement.spacedBy(d.stackTight)) {
-        val tile = Modifier.weight(1f)
-        StatTile(stringResource(R.string.workout_minutes, tiles.seconds / 60), stringResource(R.string.summary_time), tile)
+    Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(d.stackTight)) {
+        val tile = Modifier.weight(1f).fillMaxHeight()
+        StatTile((tiles.seconds / 60).toString(), stringResource(R.string.summary_minutes_label), tile)
         when (tiles) {
             is SessionTiles.Lifted -> {
                 StatTile(tiles.sets.toString(), stringResource(R.string.summary_sets), tile)
-                StatTile(volumeText(tiles.liftedKg, units), stringResource(R.string.summary_lifted), tile)
+                StatTile(
+                    volumeNumber(tiles.liftedKg, units),
+                    stringResource(R.string.summary_lifted_unit, UnitConverter.getWeightUnitLabel(units)),
+                    tile,
+                )
             }
             is SessionTiles.Distance -> {
-                StatTile(distanceText(tiles.meters, units), stringResource(R.string.session_distance), tile)
+                val km = if (units == PreferredUnits.IMPERIAL) R.string.session_mi_label else R.string.session_km_label
+                StatTile(distanceNumber(tiles.meters, units), stringResource(km), tile)
                 tiles.secondsPerKm?.let { perKm ->
                     val perUnit = if (units == PreferredUnits.IMPERIAL) perKm * KM_PER_MILE else perKm
                     val label = if (units == PreferredUnits.IMPERIAL) R.string.session_per_mi else R.string.session_per_km
@@ -242,13 +251,12 @@ private const val KM_PER_MILE = 1.609344f
 
 /** "5.2 km" / "3.2 mi": one decimal, trimmed. */
 @Composable
-private fun distanceText(meters: Float, units: PreferredUnits): String {
+private fun distanceNumber(meters: Float, units: PreferredUnits): String {
     val imperial = units == PreferredUnits.IMPERIAL
     val value = if (imperial) meters / 1000f / KM_PER_MILE else meters / 1000f
     val rounded = (value * 10).roundToInt() / 10f
-    val text = if (rounded == rounded.roundToInt().toFloat()) rounded.roundToInt().toString()
+    return if (rounded == rounded.roundToInt().toFloat()) rounded.roundToInt().toString()
     else String.format(Locale.getDefault(), "%.1f", rounded)
-    return stringResource(if (imperial) R.string.session_mi else R.string.session_km, text)
 }
 
 /** "Mon 26 Oct · 18:24–19:16" (R14-1). */

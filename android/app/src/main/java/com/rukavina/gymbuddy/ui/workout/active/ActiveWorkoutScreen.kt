@@ -1,5 +1,20 @@
 package com.rukavina.gymbuddy.ui.workout.active
 
+import androidx.compose.foundation.layout.wrapContentWidth
+import kotlin.math.roundToInt
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import com.rukavina.gymbuddy.ui.workout.UnsavedSet
 import com.rukavina.gymbuddy.ui.design.BannerTone
 import com.rukavina.gymbuddy.ui.design.Banner
@@ -43,14 +58,10 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.SwipeToDismissBoxDefaults
-import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import android.Manifest
 import android.content.pm.PackageManager
@@ -186,7 +197,7 @@ fun ActiveWorkoutScreen(
                     val result = snackbar.showSnackbar(
                         message = context.getString(R.string.workout_set_deleted),
                         actionLabel = context.getString(R.string.undo),
-                        duration = SnackbarDuration.Short,
+                        duration = SnackbarDuration.Indefinite,
                     )
                     if (result == SnackbarResult.ActionPerformed) viewModel.undoDelete(event.setId)
                 }
@@ -625,54 +636,109 @@ private fun SetItem(
     }
 }
 
+private enum class SwipeAnchor { Settled, Revealed, Deleted, Done }
+
+/**
+ * Swipe left a little: the row stops on a tappable Delete (F21a). Swipe
+ * left far: deletes straight away. Undo works either way. On the card,
+ * swipe right is Done.
+ */
 @Composable
 private fun SwipeableSet(onDelete: () -> Unit, onDone: (() -> Unit)?, content: @Composable () -> Unit) {
     val cs = MaterialTheme.colorScheme
     val d = GymBuddyTheme.dimens
     val haptics = rememberHaptics()
+    val density = LocalDensity.current
+    val revealPx = with(density) { DeleteRevealWidth.toPx() }
+    val scope = rememberCoroutineScope()
     // Not saveable (F21c): the list saves item state by set id, so Undo
     // brought the set back still dismissed and it deleted itself again.
-    val density = LocalDensity.current
-    val threshold = SwipeToDismissBoxDefaults.positionalThreshold
-    val swipe = remember { SwipeToDismissBoxState(SwipeToDismissBoxValue.Settled, density, positionalThreshold = threshold) }
-    LaunchedEffect(swipe.currentValue) {
-        when (swipe.currentValue) {
-            SwipeToDismissBoxValue.EndToStart -> { haptics(Haptic.SwipeThreshold); onDelete() }
-            SwipeToDismissBoxValue.StartToEnd -> { onDone?.invoke(); swipe.reset() }
-            SwipeToDismissBoxValue.Settled -> Unit
+    val swipe = remember { AnchoredDraggableState(SwipeAnchor.Settled) }
+    var widthPx by remember { mutableFloatStateOf(0f) }
+    val canDone = onDone != null
+    LaunchedEffect(widthPx, canDone) {
+        if (widthPx <= 0f) return@LaunchedEffect
+        swipe.updateAnchors(
+            DraggableAnchors {
+                SwipeAnchor.Settled at 0f
+                SwipeAnchor.Revealed at -revealPx
+                SwipeAnchor.Deleted at -widthPx
+                if (canDone) SwipeAnchor.Done at widthPx
+            },
+        )
+    }
+    LaunchedEffect(swipe.settledValue) {
+        when (swipe.settledValue) {
+            SwipeAnchor.Deleted -> { haptics(Haptic.SwipeThreshold); onDelete() }
+            SwipeAnchor.Done -> { onDone?.invoke(); swipe.animateTo(SwipeAnchor.Settled) }
+            SwipeAnchor.Settled, SwipeAnchor.Revealed -> Unit
         }
     }
     val deleteLabel = stringResource(R.string.workout_delete_set)
     val doneLabel = stringResource(R.string.workout_done_set_action)
-    SwipeToDismissBox(
-        state = swipe,
-        enableDismissFromStartToEnd = onDone != null,
-        modifier = Modifier
+    val offset = if (swipe.offset.isNaN()) 0f else swipe.offset
+    val toDone = offset > 0f
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .onSizeChanged { widthPx = it.width.toFloat() }
             .semantics {
                 customActions = buildList {
                     if (onDone != null) add(CustomAccessibilityAction(doneLabel) { onDone(); true })
                     add(CustomAccessibilityAction(deleteLabel) { onDelete(); true })
                 }
             },
-        backgroundContent = {
-            val toDone = swipe.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+    ) {
+        if (offset != 0f) {
+            // Only the strip the row has uncovered: set rows are see-through (F21a).
+            val exposed = with(density) { kotlin.math.abs(offset).toDp() }
             Box(
                 Modifier
-                    .fillMaxSize()
-                    .background(if (toDone) GymBuddyTheme.colors.limeTint else GymBuddyTheme.colors.dangerSwipe, MaterialTheme.shapes.medium)
-                    .padding(horizontal = d.section),
+                    .matchParentSize()
+                    .wrapContentWidth(if (toDone) Alignment.Start else Alignment.End)
+                    .width(exposed)
+                    .background(if (toDone) GymBuddyTheme.colors.limeTint else GymBuddyTheme.colors.dangerSwipe, MaterialTheme.shapes.medium),
                 contentAlignment = if (toDone) Alignment.CenterStart else Alignment.CenterEnd,
             ) {
-                Icon(
-                    painterResource(if (toDone) AppIcons.Ui.Check else AppIcons.Ui.Delete),
-                    null,
-                    Modifier.size(d.icon),
-                    tint = if (toDone) cs.primary else cs.onSurface,
-                )
+                if (toDone) {
+                    Icon(
+                        painterResource(AppIcons.Ui.Check), null,
+                        Modifier.padding(horizontal = d.section).size(d.icon), tint = cs.primary,
+                    )
+                } else {
+                    // The revealed strip is the Delete button (F21a: the icon used to be paint only).
+                    Box(
+                        Modifier
+                            .fillMaxHeight()
+                            .width(DeleteRevealWidth)
+                            .clickable(onClickLabel = deleteLabel) {
+                                haptics(Haptic.SwipeThreshold)
+                                scope.launch { swipe.animateTo(SwipeAnchor.Deleted) }
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(painterResource(AppIcons.Ui.Delete), deleteLabel, Modifier.size(d.icon), tint = cs.onSurface)
+                    }
+                }
             }
-        },
-    ) { content() }
+        }
+        Box(
+            Modifier
+                .offset { IntOffset(offset.roundToInt(), 0) }
+                .anchoredDraggable(
+                    state = swipe,
+                    orientation = Orientation.Horizontal,
+                    flingBehavior = AnchoredDraggableDefaults.flingBehavior(
+                        swipe,
+                        positionalThreshold = { distance -> distance * 0.5f },
+                    ),
+                ),
+        ) { content() }
+    }
 }
+
+/** Width of the Delete strip a short swipe leaves open (F21a). */
+private val DeleteRevealWidth = 88.dp
 
 @Composable
 private fun CurrentSetCard(

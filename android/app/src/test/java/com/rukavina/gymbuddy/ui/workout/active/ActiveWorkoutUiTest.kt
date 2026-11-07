@@ -153,10 +153,18 @@ class ActiveWorkoutUiTest {
     fun swipeLeftDeletesAndUndoBringsItBack() {
         show()
         val ids = sets().map { it.id }
+        // The Undo snackbar times itself (F21d): idling would run its 8 s out,
+        // so the clock moves by hand until the snackbar is up.
+        rule.mainClock.autoAdvance = false
         rule.onNodeWithText("Set 2").performTouchInput { swipeLeft() }
+        var frames = 0
+        while (rule.onAllNodesWithText("Set deleted").fetchSemanticsNodes().isEmpty() && frames++ < 200) {
+            rule.mainClock.advanceTimeByFrame()
+        }
         rule.waitUntil(3_000) { sets().size == 2 }
         rule.onNodeWithText("Set deleted").assertExists()
         rule.onNodeWithText("Undo").performClick()
+        rule.mainClock.autoAdvance = true
         rule.waitUntil(3_000) { sets().map { it.id } == ids }
     }
 

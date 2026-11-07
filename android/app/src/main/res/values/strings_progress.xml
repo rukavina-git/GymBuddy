@@ -24,6 +24,7 @@
     <string name="progress_chart_cd">%1$s. %2$s chart, %3$s.</string>
     <string name="progress_recent">Recent</string>
     <string name="progress_all_sessions">All sessions</string>
+    <string name="progress_see_all">See all</string>
     <string name="progress_empty_title">No workouts yet</string>
     <string name="progress_empty_body">Finish a workout and it shows up here, with your weekly totals.</string>
     <string name="progress_start">Start a workout</string>
