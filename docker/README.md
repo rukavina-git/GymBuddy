@@ -25,6 +25,16 @@ Neon free Postgres (EU). Blueprint: `render.yaml` at the repo root. The
 image is the same one compose builds; nothing in the app knows about
 Render or Neon.
 
+### Deploys are manual
+
+`render.yaml` has `autoDeploy: false`, and the service tracks the
+`develop` branch. A merge never reaches the server by itself: after a
+backend change lands, Render dashboard → gymbuddy-backend → Manual
+Deploy → Deploy latest commit, then wait for Live. Until Plan 5 splits
+staging and prod, this one service is effectively the test server.
+(2026-11-07: it still ran a pre-Plan-6 build, so the server dropped
+the profile's `avatarId` on every push: device feedback F1/F12.)
+
 ### Neon: direct vs pooled host
 
 Neon gives two hosts per branch: `ep-xxx.<region>.aws.neon.tech`

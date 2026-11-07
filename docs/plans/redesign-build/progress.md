@@ -22,7 +22,7 @@
 - [x] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c) — 3694d71
 - [x] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16) — dfeaf5d
 - [x] 11f Feedback: F20, F23, F15, F24a, F21a, F21d (grown: owner asked for bigger feedback steps) — aa75b70
-- [ ] 11g Feedback: F1 + F12 profile sync conflict (avatar revert, backup "not possible")
+- [x] 11g Feedback: F1 + F12 avatar revert, backup "not possible" (stale Render build; steps/11g-profile-sync.md)
 - [ ] 11i Feedback: F24b save as template after an empty workout
 - [ ] 11j Feedback: F6 height and body weight wheels
 - [ ] 11k Feedback: F13 delete account screen
@@ -33,6 +33,12 @@
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11g: No code change. Cause was a stale Render build (pre-Plan 6; Render tracks develop with
+  autoDeploy off), not a sync conflict as the 11c leads guessed. Owner redeployed develop.
+  Phone check via adb: avatar survives sync and restart (fox, rev 13, SYNCED), offline change
+  uploads once online, sync_log empty, reference `plans` error gone. "Back up and sign out"
+  not tapped (would sign the owner out); it runs the same flushOutbox push that now succeeds.
+  Roadmap has no 11g line; nothing to tick there.
 - 11f: Spec is device-feedback.md "Round C consult"; device feel over Figma, no Figma read.
   Scope grew from F20+F23 to also F15, F24a, F21a, F21d (owner: bigger steps for feedback);
   11h folded in, 11i keeps only F24b.
@@ -502,6 +508,11 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 11g: Render never deploys by itself. After any backend change on develop, ask the owner
+  to Manual Deploy before a phone check. Quick stale-server sign: logcat SyncEngine
+  "reference data check failed ... missing". Step 12: redeploy before the device pass.
+- From 11g: a scratch adb tap-by-text helper (uiautomator dump + bounds) works well for phone
+  checks; the debug DB copies out with `run-as ... cat databases/<file>` (+ -wal, -shm).
 - From 11f (reviewer, not fixed):
   - Unused strings now: summary_time, summary_lifted, session_km, session_mi,
     session_distance. Delete in the next step.
