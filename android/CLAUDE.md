@@ -22,5 +22,9 @@ Project status (phases, open items) lives in docs/status.md, not here.
   override.
 
 ## Verification
-- Do not drive the device with adb tap/screenshot loops. Verify with
-  the compiler and unit tests; leave manual UI verification to me.
+- After each UI or bug step, install on the connected phone
+  (./gradlew installDebug) and check the fix with adb: screenshots,
+  taps, logcat. Compose UI tests are fine too.
+- Keep device checks cheap: only the changed screens, a few
+  screenshots (crop them), no long tap loops.
+- The owner tests by hand only at big checkpoints.
