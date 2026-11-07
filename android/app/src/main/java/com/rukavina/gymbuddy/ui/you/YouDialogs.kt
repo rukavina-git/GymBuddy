@@ -22,6 +22,7 @@ import com.rukavina.gymbuddy.data.sync.LocalDataCounts
 import com.rukavina.gymbuddy.ui.design.AppBottomSheet
 import com.rukavina.gymbuddy.ui.design.AppChoiceDialog
 import com.rukavina.gymbuddy.ui.design.AppTextField
+import com.rukavina.gymbuddy.ui.design.AppTextFieldDefaults
 import com.rukavina.gymbuddy.ui.design.DialogAction
 import com.rukavina.gymbuddy.ui.design.DialogActionTone
 import com.rukavina.gymbuddy.ui.design.PrimaryButton
@@ -194,6 +195,7 @@ internal fun DeleteAccountFlow(
                 helper = error,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                container = AppTextFieldDefaults.onDialog,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -295,6 +297,7 @@ internal fun PasswordDialog(isSetup: Boolean, viewModel: YouViewModel, onDone: (
                 label = stringResource(label),
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                container = AppTextFieldDefaults.onDialog,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -57,6 +58,8 @@ fun AppTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailing: (@Composable () -> Unit)? = null,
+    /** Field fill; one step above whatever it sits on. Dialogs pass [AppTextFieldDefaults.onDialog] (F10). */
+    container: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
 ) {
     val cs = MaterialTheme.colorScheme
     val c = GymBuddyTheme.colors
@@ -92,7 +95,7 @@ fun AppTextField(
                 Row(
                     modifier = Modifier
                         .heightIn(min = d.control)
-                        .background(cs.surfaceContainerHigh, MaterialTheme.shapes.small)
+                        .background(container, MaterialTheme.shapes.small)
                         .then(
                             if (line != null) Modifier.border(d.strokeEmphasis, line, MaterialTheme.shapes.small)
                             else Modifier,
@@ -164,4 +167,11 @@ fun SearchField(
             }
         },
     )
+}
+
+/** Fills for [AppTextField] on raised surfaces. */
+object AppTextFieldDefaults {
+    /** Dialogs are surfaceContainerHigh, the page field's own fill, so fields there go one step up. */
+    val onDialog: Color
+        @Composable get() = MaterialTheme.colorScheme.surfaceContainerHighest
 }

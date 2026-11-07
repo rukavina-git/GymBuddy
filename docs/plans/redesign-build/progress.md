@@ -18,13 +18,18 @@
 - [x] 10b Profile, picture, body weight (steps/10-you-settings.md) — dab5844
 - [x] 11a Cross-flow: workout safety (steps/11-cross-flow-states.md) — 5e145e6
 - [x] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md) — 5c4299b
-- [ ] 11c Device feedback A1: profile + sheets + settings bugs (F1, F3a, F7, F10, F12)
+- [x] 11c Device feedback A1: profile + sheets + settings bugs (F1, F3a, F7, F10, F12) — cfa11a5
 - [ ] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c)
 - [ ] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16)
 - [ ] 11f+ Device feedback C/D: after design talk, deferred
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11c: Spec is device-feedback.md (no step file); bug fixes only, so no
+  Figma read (device feel over Figma). F1 and F12 diagnosed, not fixed:
+  sync changes are outside the plan invariants. Both stay open.
+- 11c: F3a pads the sheet surface (not just content) for the nav bar, so
+  the sheet floats above a strip of scrim. Unverified on device.
 - 11b: Not split (owner). Figma read via the Console MCP (C1b, R1, E3, C2a,
   R2, R3, D3, E4, E5, E6, notes).
 - 11b: Resync card replaces the week card (Figma C2a/R2 show no week
@@ -449,6 +454,23 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 11c, F1/F12 (avatar reverts, backup "not possible"): server and
+  client both store avatarId fine. Leads: the profile push comes back
+  CONFLICT (local revision behind server, e.g. after guest merge or a
+  locally created row) and SyncEngine.sync's full pull then overwrites
+  the row, or INVALID (blank name/email, ProfileSyncService.validate).
+  Owner: read the reason in the debug Sync screen or Render logs
+  (SyncAudit, entityType=USER_PROFILE). Render sleep is ruled out
+  (UptimeRobot 5-min ping); /v1/health doesn't touch Neon, which can
+  still suspend. Hosting move stays after v1 (roadmap Plan 5).
+- From 11c (reviewer, not fixed):
+  - Overlays.kt comment on insets is wrong: M3's own imePadding eats the
+    keyboard inset; the nav padding drops to 0 while the keyboard is up.
+  - Sheets now open full height: long ones (avatar picker, add-to-template
+    ExerciseSheets.kt:165, start sheet HomeScreen.kt:432) need their own
+    scroll if taller than the screen.
+  - F10 changes the fill only (SurfaceRaised on SurfaceHigh); unfocused
+    fields still have no border. Check contrast on device.
 - From 11b (reviewer, not fixed):
   - `catch (e: Throwable)` in `SyncEngine.pullLocked` also marks a
     cancelled re-download Failed.

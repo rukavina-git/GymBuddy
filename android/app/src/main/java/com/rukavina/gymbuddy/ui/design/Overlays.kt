@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -153,7 +156,8 @@ fun AppBottomSheet(
     title: String?,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
-    sheetState: SheetState = rememberModalBottomSheetState(),
+    // Opens fully: tall sheets (keypad) hid their Save half off screen (F7).
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val cs = MaterialTheme.colorScheme
@@ -161,7 +165,10 @@ fun AppBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        modifier = modifier,
+        // The sheet stops above the navigation bar instead of running
+        // under its buttons (F3a). Consumed here, so the content's default
+        // insets only add the keyboard on top.
+        modifier = modifier.windowInsetsPadding(WindowInsets.navigationBars),
         shape = SheetShape,
         containerColor = cs.surfaceContainer,
         contentColor = cs.onSurface,
