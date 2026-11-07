@@ -54,7 +54,7 @@ before code.
 - [ ] F5 design · iOS-style swipe from the left edge to go back, on
       most screens. Same rules as Back: if leaving would lose data, ask
       first. Big change.
-- [ ] F6 design · Height and weight input: a 4-digit keypad limit for
+- [x] F6 design · (391a60f) Height and weight input: a 4-digit keypad limit for
       height makes no sense (cap it at 3 digits). Keypad or a
       scroll wheel (most apps use wheels)? Same question for weight.
 - [ ] F13 design · Delete account: 2 taps is too easy for a delete you
@@ -128,7 +128,7 @@ before code.
       template's target weight; if there is none, from the last
       session's numbers. Probably always prefer the last session.
       Touches the domain, not just the UI.
-- [ ] F24b idea · After an empty workout: offer "Save as template".
+- [x] F24b idea · (391a60f) After an empty workout: offer "Save as template".
 
 ## Notes
 - Owner rule for this list: device feel wins over Figma; Figma gets

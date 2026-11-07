@@ -23,7 +23,7 @@
 - [x] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16) — dfeaf5d
 - [x] 11f Feedback: F20, F23, F15, F24a, F21a, F21d (grown: owner asked for bigger feedback steps) — aa75b70
 - [x] 11g Feedback: F1 + F12 avatar revert, backup "not possible" (stale Render build; steps/11g-profile-sync.md) — 2576fc9
-- [x] 11i Feedback: F24b save as template + F6 height/weight wheels (11j folded in; steps/11i-template-and-wheels.md) — HASH
+- [x] 11i Feedback: F24b save as template + F6 height/weight wheels (11j folded in; steps/11i-template-and-wheels.md) — 391a60f
 - [ ] 11k Feedback: F13 delete account screen
 - [ ] 11l Feedback: F3b typing off sheets (notes, quick create, name/units inline)
 - [ ] 11m Feedback: F25 stale workouts (2 h rule, auto-finish, estimates)
