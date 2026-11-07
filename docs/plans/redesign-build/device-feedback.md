@@ -57,7 +57,7 @@ before code.
 - [x] F6 design · (391a60f) Height and weight input: a 4-digit keypad limit for
       height makes no sense (cap it at 3 digits). Keypad or a
       scroll wheel (most apps use wheels)? Same question for weight.
-- [ ] F13 design · Delete account: 2 taps is too easy for a delete you
+- [x] F13 design · (192e59b) Delete account: 2 taps is too easy for a delete you
       can't undo. An extra screen ("all data is lost for good") and
       typing a word like "delete" to confirm?
 - [ ] F15 design · Progress: 5 recent cards feel heavy, and "Show
