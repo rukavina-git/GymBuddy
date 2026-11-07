@@ -21,17 +21,17 @@ before code.
 - [ ] F12 bug? · Back up (You): 2 changes waiting, "Back up" says
       it's not possible right now. Find out whether the backend was
       down or it's a real bug.
-- [ ] F17 bug · Workout: a set can be logged with 0 kg.
-- [ ] F22 bug · Workout: Done on 0 kg × 0 reps does nothing, with
+- [x] F17 bug (HASH) · Workout: a set can be logged with 0 kg.
+- [x] F22 bug (HASH) · Workout: Done on 0 kg × 0 reps does nothing, with
       no message saying why.
-- [ ] F19 bug · Workout: opening set 3 after set 2 doesn't scroll to
+- [x] F19 bug (HASH) · Workout: opening set 3 after set 2 doesn't scroll to
       it; the keypad and steppers are half hidden (with 5 sets, fully).
-- [ ] F21a bug · Workout: tapping the trash icon on a future set
+- [ ] F21a bug (diagnosed, see progress.md) · Workout: tapping the trash icon on a future set
       does nothing.
-- [ ] F21b bug · Workout: a long press anywhere on a set deletes it,
+- [x] F21b bug (HASH) · Workout: a long press anywhere on a set deletes it,
       with no warning. Long press must not delete; swipe left and
       the trash icon are fine.
-- [ ] F21c bug · Workout: Undo on the delete snackbar does nothing.
+- [x] F21c bug (HASH) · Workout: Undo on the delete snackbar does nothing.
 
 ## Round B — quick cuts and small fixes (step 11e)
 - [ ] F2 feel · Avatar picker: remove the licence line under the

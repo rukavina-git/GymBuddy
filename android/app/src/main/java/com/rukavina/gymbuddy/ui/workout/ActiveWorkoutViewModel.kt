@@ -178,6 +178,9 @@ data class UnsavedSet(val setNumber: Int?)
 sealed interface WorkoutEvent {
     data object SetDone : WorkoutEvent
     data object Rejected : WorkoutEvent
+
+    /** Done on a set that breaks [rule] (F22: say why, not just buzz). */
+    data class DoneRejected(val rule: SetRule) : WorkoutEvent
     /** A draft write failed (R17-B1): haptic only; the banner is state. */
     data object DraftSaveFailed : WorkoutEvent
     data class SetDeleted(val setId: String) : WorkoutEvent
@@ -654,8 +657,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             nextExercise()
             return
         }
-        if (SetFields.rule(exercise.exerciseTrackingType, set) != null) {
-            _events.trySend(WorkoutEvent.Rejected)
+        SetFields.rule(exercise.exerciseTrackingType, set)?.let { rule ->
+            _events.trySend(WorkoutEvent.DoneRejected(rule))
             return
         }
         val last = state.lastSetLeft
@@ -899,7 +902,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             // orderIndex, so the kept exercises stay contiguously ordered.
             val kept = state.exercises.mapNotNull { activeExercise ->
                 val done = activeExercise.sets.filter {
-                    it.isCompleted && SetFields.rule(activeExercise.exerciseTrackingType, it) == null
+                    it.isCompleted && SetFields.savable(activeExercise.exerciseTrackingType, it)
                 }
                 if (done.isEmpty()) null else activeExercise to done
             }

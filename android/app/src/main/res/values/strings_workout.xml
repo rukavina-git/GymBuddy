@@ -22,6 +22,7 @@
     <string name="workout_unit_metres">m</string>
     <string name="workout_keypad_label">Set %1$d · %2$s</string>
     <string name="workout_keypad_save">Save</string>
+    <string name="workout_rule_weight">Weight must be more than 0. To skip this set, delete it.</string>
     <string name="workout_rule_rep">At least 1 rep. To skip this set, delete it.</string>
     <string name="workout_rule_second">At least 1 second. To skip this set, delete it.</string>
     <string name="workout_rule_distance">More than 0 m. To skip this set, delete it.</string>

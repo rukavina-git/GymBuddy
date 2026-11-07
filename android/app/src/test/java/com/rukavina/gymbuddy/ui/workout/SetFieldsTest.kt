@@ -47,12 +47,21 @@ class SetFieldsTest {
     }
 
     @Test
-    fun rulesBlockEmptyOrZeroButNotWeight() {
+    fun savableIgnoresWeightSoOldSetsAreKept() {
+        assertTrue(SetFields.savable(ExerciseTrackingType.WEIGHT_REPS, set.copy(weight = "")))
+        assertFalse(SetFields.savable(ExerciseTrackingType.WEIGHT_REPS, set.copy(weight = "60", reps = "0")))
+    }
+
+    @Test
+    fun rulesBlockEmptyOrZero() {
         assertEquals(SetRule.AtLeastOneRep, SetFields.rule(SetField.Reps, "0"))
         assertEquals(SetRule.AtLeastOneRep, SetFields.rule(SetField.Reps, ""))
         assertEquals(SetRule.AtLeastOneSecond, SetFields.rule(SetField.Duration, ""))
         assertEquals(SetRule.OverZeroDistance, SetFields.rule(SetField.Distance, "0"))
-        assertNull(SetFields.rule(SetField.Weight, ""))
+        assertEquals(SetRule.OverZeroWeight, SetFields.rule(SetField.Weight, ""))
+        assertEquals(SetRule.OverZeroWeight, SetFields.rule(SetField.Weight, "0"))
+        assertNull(SetFields.rule(SetField.Weight, "0.5"))
+        assertEquals(SetRule.OverZeroWeight, SetFields.rule(ExerciseTrackingType.WEIGHT_REPS, set.copy(weight = "0", reps = "0")))
         assertNull(SetFields.rule(ExerciseTrackingType.WEIGHT_REPS, set))
         assertEquals(SetRule.AtLeastOneRep, SetFields.rule(ExerciseTrackingType.REPS_ONLY, set.copy(reps = "")))
     }

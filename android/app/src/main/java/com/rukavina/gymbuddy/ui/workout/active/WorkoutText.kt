@@ -104,13 +104,14 @@ internal fun restText(rest: RestState, elapsedSeconds: Long): String {
 }
 
 @Composable
-internal fun ruleText(rule: SetRule): String = stringResource(
-    when (rule) {
-        SetRule.AtLeastOneRep -> R.string.workout_rule_rep
-        SetRule.AtLeastOneSecond -> R.string.workout_rule_second
-        SetRule.OverZeroDistance -> R.string.workout_rule_distance
-    },
-)
+internal fun ruleText(rule: SetRule): String = stringResource(ruleRes(rule))
+
+internal fun ruleRes(rule: SetRule): Int = when (rule) {
+    SetRule.OverZeroWeight -> R.string.workout_rule_weight
+    SetRule.AtLeastOneRep -> R.string.workout_rule_rep
+    SetRule.AtLeastOneSecond -> R.string.workout_rule_second
+    SetRule.OverZeroDistance -> R.string.workout_rule_distance
+}
 
 /** The keypad's value while typing: clock digits as m:ss. */
 internal fun keypadDisplay(field: SetField, text: String): String =

@@ -14,7 +14,7 @@ enum class SetField(val kind: KeypadValue.Kind) {
 }
 
 /** Why a value can't be logged (Figma 53:2873 "Keypad rules"). */
-enum class SetRule { AtLeastOneRep, AtLeastOneSecond, OverZeroDistance }
+enum class SetRule { OverZeroWeight, AtLeastOneRep, AtLeastOneSecond, OverZeroDistance }
 
 /**
  * The set card's values per tracking type: which fields, − / + steps and
@@ -90,11 +90,15 @@ object SetFields {
         return if (plus) current < ceiling(field) else current > floor(field)
     }
 
-    /** The rule [text] breaks for [field], or null. Weight may be empty (bodyweight). */
-    fun rule(field: SetField, text: String): SetRule? {
+    /**
+     * The rule [text] breaks for [field], or null. Weight must be over 0
+     * (F17: bodyweight lifts use Reps only) unless [weightRequired] is
+     * false: editing past sessions, logged when weight was optional.
+     */
+    fun rule(field: SetField, text: String, weightRequired: Boolean = true): SetRule? {
         val v = KeypadValue.parse(text)
         return when (field) {
-            SetField.Weight -> null
+            SetField.Weight -> if (weightRequired && (v == null || v <= 0f)) SetRule.OverZeroWeight else null
             SetField.Reps -> if (v == null || v < 1f) SetRule.AtLeastOneRep else null
             SetField.Duration -> if (v == null || v < 1f) SetRule.AtLeastOneSecond else null
             SetField.Distance -> if (v == null || v <= 0f) SetRule.OverZeroDistance else null
@@ -102,8 +106,15 @@ object SetFields {
     }
 
     /** First rule the set breaks, or null when Done may log it. */
-    fun rule(type: ExerciseTrackingType, set: WorkoutSet): SetRule? =
-        of(type).firstNotNullOfOrNull { rule(it, text(set, it)) }
+    fun rule(type: ExerciseTrackingType, set: WorkoutSet, weightRequired: Boolean = true): SetRule? =
+        of(type).firstNotNullOfOrNull { rule(it, text(set, it), weightRequired) }
+
+    /**
+     * Whether a done set is saved. Skips the weight rule: sets logged
+     * before F17 (empty or 0 kg, e.g. in a restored draft) must not be lost.
+     */
+    fun savable(type: ExerciseTrackingType, set: WorkoutSet): Boolean =
+        rule(type, set, weightRequired = false) == null
 
     /** 82.5 → "82.5", 80.0 → "80", 1.25 → "1.25". Always "." (the stored form). */
     fun format(value: Float): String =

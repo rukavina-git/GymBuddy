@@ -54,7 +54,8 @@ data class EditKeypad(
     val text: String,
     val fresh: Boolean = true,
 ) {
-    val rule: SetRule? get() = if (fresh) null else SetFields.rule(this.field, text)
+    // Weight stays optional here: past sessions were logged before F17.
+    val rule: SetRule? get() = if (fresh) null else SetFields.rule(this.field, text, weightRequired = false)
 }
 
 data class SessionEditUiState(
@@ -280,8 +281,8 @@ class SessionEditViewModel @Inject constructor(
         // A set missing a value (an empty added set): open the keypad on it instead of failing.
         s.exercises.firstNotNullOfOrNull { e ->
             val type = e.performed.exerciseTrackingType
-            e.sets.firstOrNull { SetFields.rule(type, it) != null }?.let { set ->
-                Triple(e.id, set.id, SetFields.of(type).first { SetFields.rule(it, SetFields.text(set, it)) != null })
+            e.sets.firstOrNull { !SetFields.savable(type, it) }?.let { set ->
+                Triple(e.id, set.id, SetFields.of(type).first { SetFields.rule(it, SetFields.text(set, it), weightRequired = false) != null })
             }
         }?.let { (exerciseId, setId, field) ->
             openKeypad(exerciseId, setId, field)

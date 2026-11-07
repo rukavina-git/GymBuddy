@@ -19,12 +19,22 @@
 - [x] 11a Cross-flow: workout safety (steps/11-cross-flow-states.md) — 5e145e6
 - [x] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md) — 5c4299b
 - [x] 11c Device feedback A1: profile + sheets + settings bugs (F1, F3a, F7, F10, F12) — d3b7634
-- [ ] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c)
+- [x] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c) — HASH
 - [ ] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16)
 - [ ] 11f+ Device feedback C/D: after design talk, deferred
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11d: Spec is device-feedback.md; bug fixes, no Figma read. F21a
+  diagnosed, not fixed: set rows have no trash button; the only trash is
+  the swipe background icon, which can't be tapped. Owner to confirm.
+- 11d: F17 changes the 06a rule "weight may be empty (bodyweight)": Done
+  and the keypad now need weight > 0 on weight types (bodyweight lifts
+  use Reps only). Saving skips the weight rule (`SetFields.savable`), and
+  Edit workout keeps weight optional (`weightRequired = false`), so sets
+  logged before F17 are never dropped or blocked.
+- 11d: Edit workout change was the reviewer's SHOULD (a regression), fixed
+  under the "app stays usable" invariant.
 - 11c: Spec is device-feedback.md (no step file); bug fixes only, so no
   Figma read (device feel over Figma). F1 and F12 diagnosed, not fixed:
   sync changes are outside the plan invariants. Both stay open.
@@ -454,6 +464,14 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 11d (reviewer, not fixed):
+  - The rule snackbar (F22) dismisses a showing Undo snackbar: delete a
+    set, then Done on an invalid set, and Undo is gone.
+  - Weight − still floors at 0 kg, a value Done rejects (same as distance).
+  - F19 scroll and F21c Undo have no Compose tests; check on device.
+- From 11d: the F21c cause was LazyColumn restoring saveable item state by
+  key. Any `remember*Saveable` state inside a keyed lazy item comes back
+  when that key returns.
 - From 11c, F1/F12 (avatar reverts, backup "not possible"): server and
   client both store avatarId fine. Leads: the profile push comes back
   CONFLICT (local revision behind server, e.g. after guest merge or a

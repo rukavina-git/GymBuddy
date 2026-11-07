@@ -14,14 +14,12 @@ import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import com.rukavina.gymbuddy.ui.exercises.page.ExerciseNoteSheet
 import com.rukavina.gymbuddy.ui.design.AppIconButton
 import com.rukavina.gymbuddy.ui.theme.FullShape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -50,7 +49,8 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxDefaults
+import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import android.Manifest
 import android.content.pm.PackageManager
@@ -68,6 +68,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -157,6 +158,13 @@ fun ActiveWorkoutScreen(
             when (event) {
                 WorkoutEvent.SetDone -> haptics(Haptic.Confirm)
                 WorkoutEvent.Rejected -> haptics(Haptic.Reject)
+                is WorkoutEvent.DoneRejected -> {
+                    haptics(Haptic.Reject)
+                    scope.launch {
+                        snackbar.currentSnackbarData?.dismiss()
+                        snackbar.showSnackbar(context.getString(ruleRes(event.rule)))
+                    }
+                }
                 WorkoutEvent.DraftSaveFailed -> haptics(Haptic.SaveFailed)
                 is WorkoutEvent.SaveFailed -> {
                     haptics(Haptic.SaveFailed)
@@ -482,7 +490,19 @@ private fun ExerciseTabs(exercises: List<ActiveExercise>, selected: Int, onSelec
 private fun ExerciseSets(exercise: ActiveExercise, state: ActiveWorkoutUiState, actions: WorkoutActions, onYourNote: () -> Unit) {
     val d = GymBuddyTheme.dimens
     val current = exercise.currentSet
+    val list = rememberLazyListState()
+    // F19: bring the next card up when Done moves on (+1: the header item).
+    // Not on first show: a fresh exercise opens at the top.
+    var shownSet by remember(exercise.id) { mutableStateOf(current?.id) }
+    LaunchedEffect(current?.id) {
+        if (current != null && current.id != shownSet) {
+            val index = exercise.sets.indexOfFirst { it.id == current.id }
+            if (index >= 0) list.animateScrollToItem(index + 1)
+        }
+        shownSet = current?.id
+    }
     LazyColumn(
+        state = list,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = d.insetScreen, vertical = d.group),
         verticalArrangement = Arrangement.spacedBy(d.stackTight),
@@ -566,8 +586,8 @@ private fun NoteLineRow(note: NoteLine, onYourNote: () -> Unit) {
 /**
  * One set: the current one is the card, the others rows. The item swaps
  * content in place when Done lands it (motion.md #2: one node, no
- * animateBounds). Swipe left deletes (rows: long-press too); on the card,
- * swipe right is Done.
+ * animateBounds). Swipe left deletes; on the card, swipe right is Done.
+ * No long-press delete (F21b): it fired on any hold, with no warning.
  */
 @Composable
 private fun SetItem(
@@ -605,13 +625,16 @@ private fun SetItem(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SwipeableSet(onDelete: () -> Unit, onDone: (() -> Unit)?, content: @Composable () -> Unit) {
     val cs = MaterialTheme.colorScheme
     val d = GymBuddyTheme.dimens
     val haptics = rememberHaptics()
-    val swipe = rememberSwipeToDismissBoxState()
+    // Not saveable (F21c): the list saves item state by set id, so Undo
+    // brought the set back still dismissed and it deleted itself again.
+    val density = LocalDensity.current
+    val threshold = SwipeToDismissBoxDefaults.positionalThreshold
+    val swipe = remember { SwipeToDismissBoxState(SwipeToDismissBoxValue.Settled, density, positionalThreshold = threshold) }
     LaunchedEffect(swipe.currentValue) {
         when (swipe.currentValue) {
             SwipeToDismissBoxValue.EndToStart -> { haptics(Haptic.SwipeThreshold); onDelete() }
@@ -624,13 +647,7 @@ private fun SwipeableSet(onDelete: () -> Unit, onDone: (() -> Unit)?, content: @
     SwipeToDismissBox(
         state = swipe,
         enableDismissFromStartToEnd = onDone != null,
-        // Long-press → Delete on rows only: on the card it would fire under a held − / +.
         modifier = Modifier
-            .then(
-                if (onDone == null) {
-                    Modifier.combinedClickable(onClick = {}, onLongClick = { haptics(Haptic.DragStart); onDelete() }, onLongClickLabel = deleteLabel)
-                } else Modifier,
-            )
             .semantics {
                 customActions = buildList {
                     if (onDone != null) add(CustomAccessibilityAction(doneLabel) { onDone(); true })

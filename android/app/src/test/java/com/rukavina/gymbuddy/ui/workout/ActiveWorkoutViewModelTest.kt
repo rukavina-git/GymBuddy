@@ -317,7 +317,7 @@ class ActiveWorkoutViewModelTest {
         viewModel.updateSetReps(exercise.id, exercise.sets[0].id, "10")
         viewModel.updateSetWeight(exercise.id, exercise.sets[0].id, "60")
 
-        viewModel.done()
+        viewModel.logDone()
         viewModel.saveWorkout()
 
         val state = viewModel.uiState.value
@@ -346,7 +346,7 @@ class ActiveWorkoutViewModelTest {
         viewModel.updateSetReps(exercise.id, exercise.sets[0].id, "10")
         viewModel.updateSetWeight(exercise.id, exercise.sets[0].id, "60")
 
-        viewModel.done()
+        viewModel.logDone()
         viewModel.saveWorkout()
 
         val state = viewModel.uiState.value
@@ -380,7 +380,7 @@ class ActiveWorkoutViewModelTest {
         viewModel.updateSetReps(benchExercise.id, benchExercise.sets[0].id, "10")
         // Plank's only set is left untouched - not filled in, so it's dropped.
 
-        viewModel.done()
+        viewModel.logDone()
         viewModel.saveWorkout()
 
         val saved = sessionRepo.created.single()
@@ -479,12 +479,12 @@ class ActiveWorkoutViewModelTest {
         viewModel.updateSetDuration(plankExercise.id, plankExercise.sets[0].id, "60")
 
         val sprintExercise = viewModel.uiState.value.exercises.single { it.exerciseId == "ex-sprint" }
-        viewModel.updateSetWeight(sprintExercise.id, sprintExercise.sets[0].id, "0")
+        viewModel.updateSetWeight(sprintExercise.id, sprintExercise.sets[0].id, "20")
         viewModel.updateSetDistance(sprintExercise.id, sprintExercise.sets[0].id, "400")
 
-        viewModel.done()
-        viewModel.done()
-        viewModel.done()
+        viewModel.logDone()
+        viewModel.logDone()
+        viewModel.logDone()
         viewModel.saveWorkout()
 
         val saved = sessionRepo.created.single()
@@ -502,7 +502,7 @@ class ActiveWorkoutViewModelTest {
 
         val sprintSet = saved.performedExercises.single { it.exerciseId == "ex-sprint" }.sets.single()
         assertNull(sprintSet.reps)
-        assertEquals(0f, sprintSet.weightKg)
+        assertEquals(20f, sprintSet.weightKg)
         assertNull(sprintSet.durationSeconds)
         assertEquals(400f, sprintSet.distanceMeters)
     }
@@ -578,11 +578,23 @@ class ActiveWorkoutViewModelTest {
         templateExercises = listOf(templateExercise("ex-bench", orderIndex = 0, plannedSets = 1))
     )
 
+    /** Done, with a weight first when the set has none (F17: Done needs weight > 0). */
+    private fun ActiveWorkoutViewModel.logDone() {
+        val exercise = uiState.value.currentExercise
+        val set = exercise?.currentSet
+        if (exercise != null && set != null && SetField.Weight in SetFields.of(exercise.exerciseTrackingType) &&
+            (SetFields.value(set, SetField.Weight) ?: 0f) <= 0f
+        ) {
+            updateSetWeight(exercise.id, set.id, "20")
+        }
+        done()
+    }
+
     private fun ActiveWorkoutViewModel.fillFirstSet(reps: String, weight: String) {
         val exercise = uiState.value.exercises[0]
         updateSetReps(exercise.id, exercise.sets[0].id, reps)
         updateSetWeight(exercise.id, exercise.sets[0].id, weight)
-        done()
+        logDone()
     }
 
     /** Fails every create until [failing] is false; can also hold a create open on [gate]. */
@@ -856,7 +868,7 @@ class ActiveWorkoutViewModelTest {
         viewModel.step(SetField.Weight, plus = true) // 0 → 2.5
         viewModel.step(SetField.Reps, plus = true) // 8 → 9
 
-        viewModel.done()
+        viewModel.logDone()
 
         val state = viewModel.uiState.value
         val bench = state.exercises[0]
@@ -872,22 +884,36 @@ class ActiveWorkoutViewModelTest {
     fun `finishing an exercise moves to the next one with sets left, and the last set opens Finish`() {
         val (viewModel, _, _) = buildViewModel()
         viewModel.startWorkoutFromTemplate(twoExercises)
-        viewModel.done()
-        viewModel.done()
+        viewModel.logDone()
+        viewModel.logDone()
         assertEquals(1, viewModel.uiState.value.currentExerciseIndex)
         assertTrue(viewModel.uiState.value.lastSetLeft)
 
         // Plank has no target: Done is rejected until it has a time.
-        viewModel.done()
+        viewModel.logDone()
         assertFalse(viewModel.uiState.value.exercises[1].sets[0].isCompleted)
         viewModel.step(SetField.Duration, plus = true)
-        viewModel.done()
+        viewModel.logDone()
 
         val state = viewModel.uiState.value
         assertTrue(state.exercises.all { it.allDone })
         assertEquals(WorkoutDialog.Finish, state.dialog)
         // Plank has no rest of its own: the default.
         assertEquals(ActiveWorkoutViewModel.DEFAULT_REST_SECONDS, state.rest!!.seconds)
+    }
+
+    @Test
+    fun `Done on 0 kg is rejected with the rule, and the set stays open`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        val exercise = viewModel.uiState.value.exercises[0]
+        viewModel.updateSetWeight(exercise.id, exercise.sets[0].id, "0")
+        viewModel.drainEvents()
+
+        viewModel.done()
+
+        assertEquals(listOf(WorkoutEvent.DoneRejected(SetRule.OverZeroWeight)), viewModel.drainEvents())
+        assertFalse(viewModel.uiState.value.exercises[0].sets[0].isCompleted)
     }
 
     @Test
@@ -957,7 +983,7 @@ class ActiveWorkoutViewModelTest {
     fun `deleting a set and undoing puts it back in place with its rest`() {
         val (viewModel, _, _) = buildViewModel()
         viewModel.startWorkoutFromTemplate(twoExercises)
-        viewModel.done()
+        viewModel.logDone()
         val before = viewModel.uiState.value
         val bench = before.exercises[0]
         viewModel.drainEvents()
@@ -981,9 +1007,9 @@ class ActiveWorkoutViewModelTest {
         viewModel.startWorkoutFromTemplate(twoExercises)
         val bench = viewModel.uiState.value.exercises[0]
         viewModel.updateSetWeight(bench.id, bench.sets[0].id, "80")
-        viewModel.done() // 80 × 8; set 2 now 80 × 8 too
+        viewModel.logDone() // 80 × 8; set 2 now 80 × 8 too
         viewModel.step(SetField.Weight, plus = true)
-        viewModel.done() // 82.5 × 8; plank left undone
+        viewModel.logDone() // 82.5 × 8; plank left undone
 
         val preview = viewModel.finishPreview()
         assertEquals(2, preview.sets)
@@ -1012,7 +1038,7 @@ class ActiveWorkoutViewModelTest {
     fun `an account gets no backup card`() {
         val (viewModel, _, _) = buildViewModel(owners = InMemoryDataOwnerStore("uid-1"))
         viewModel.startWorkoutFromTemplate(oneSetBench)
-        viewModel.done()
+        viewModel.logDone()
         viewModel.saveWorkout()
         assertFalse(viewModel.uiState.value.summary!!.offerBackup)
     }
@@ -1022,7 +1048,7 @@ class ActiveWorkoutViewModelTest {
         val repo = ControllableSessionRepository().apply { failing = true }
         val (viewModel, _, _) = buildViewModel(sessionRepository = repo)
         viewModel.startWorkoutFromTemplate(oneSetBench)
-        viewModel.done()
+        viewModel.logDone()
         viewModel.drainEvents()
         viewModel.saveWorkout()
         assertEquals(listOf(WorkoutEvent.SaveFailed("disk full")), viewModel.drainEvents())
@@ -1100,7 +1126,7 @@ class ActiveWorkoutViewModelTest {
         viewModel.startEmptyWorkout("Workout")
         viewModel.addExercises(listOf("ex-bench"))
 
-        viewModel.done()
+        viewModel.logDone()
         viewModel.saveWorkout()
 
         val saved = sessionRepo.created.single()
@@ -1154,7 +1180,7 @@ class ActiveWorkoutViewModelTest {
 
         val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo)
         assertEquals("  shoulder was tight  ", second.uiState.value.note)
-        second.done()
+        second.logDone()
         second.saveWorkout()
         assertEquals("shoulder was tight", sessionRepo.created.single().notes)
     }
@@ -1173,7 +1199,7 @@ class ActiveWorkoutViewModelTest {
     fun `rest timer changes this exercise's rest and the rest running after it`() {
         val (viewModel, _, _) = buildViewModel()
         viewModel.startWorkoutFromTemplate(twoExercises)
-        viewModel.done()
+        viewModel.logDone()
 
         viewModel.setRest(150)
         viewModel.setRest(0) // ignored
@@ -1212,7 +1238,7 @@ class ActiveWorkoutViewModelTest {
         assertFalse(notice.resting)
         assertEquals(clock.millis, notice.counterBase)
 
-        viewModel.done()
+        viewModel.logDone()
         notice = service.last!!
         assertTrue(notice.resting)
         assertEquals(2, notice.set!!.setNumber)
@@ -1230,7 +1256,7 @@ class ActiveWorkoutViewModelTest {
         val service = FakeWorkoutServiceStarter()
         val (viewModel, _, _) = buildViewModel(service = service)
         viewModel.startWorkoutFromTemplate(twoExercises)
-        viewModel.done()
+        viewModel.logDone()
         viewModel.saveWorkout()
         assertTrue(viewModel.uiState.value.workoutSaved)
         assertNull(service.last)
@@ -1241,7 +1267,7 @@ class ActiveWorkoutViewModelTest {
         val buzz = FakeRestBuzzScheduler()
         val (viewModel, _, _) = buildViewModel(buzz = buzz)
         viewModel.startWorkoutFromTemplate(twoExercises)
-        viewModel.done()
+        viewModel.logDone()
         viewModel.setRest(60)
         assertTrue(buzz.calls.none { it.startsWith("schedule") })
         assertNull(buzz.pending)
@@ -1256,7 +1282,7 @@ class ActiveWorkoutViewModelTest {
         viewModel.startWorkoutFromTemplate(twoExercises)
         assertNull("no rest yet", buzz.pending)
 
-        viewModel.done()
+        viewModel.logDone()
         assertEquals(90L, buzz.pending)
 
         viewModel.setRest(60)
@@ -1284,7 +1310,7 @@ class ActiveWorkoutViewModelTest {
         viewModel.setRestBuzz(true)
         viewModel.awaitBuzz(true)
         viewModel.startWorkoutFromTemplate(twoExercises)
-        viewModel.done()
+        viewModel.logDone()
         assertEquals(90L, buzz.pending)
         viewModel.setRestBuzz(false)
         viewModel.awaitBuzz(false)
@@ -1292,10 +1318,10 @@ class ActiveWorkoutViewModelTest {
 
         viewModel.setRestBuzz(true)
         viewModel.awaitBuzz(true)
-        viewModel.done() // bench done, rest before the plank
+        viewModel.logDone() // bench done, rest before the plank
         assertEquals(90L, buzz.pending)
         viewModel.step(SetField.Duration, plus = true)
-        viewModel.done() // last set: nothing to rest for
+        viewModel.logDone() // last set: nothing to rest for
         assertNull(buzz.pending)
     }
 
@@ -1367,7 +1393,7 @@ class ActiveWorkoutViewModelTest {
                 templateExercises = listOf(templateExercise("ex-bench", 0, plannedSets = 1).copy(exerciseName = "Bench Press", plannedWeightKg = 80f)),
             ),
         )
-        viewModel.done()
+        viewModel.logDone()
         viewModel.saveWorkout()
         val saved = sessionRepo.created.single().performedExercises.single()
         assertEquals("ex-bench", saved.exerciseId)
