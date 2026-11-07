@@ -21,7 +21,7 @@
 - [x] 11c Device feedback A1: profile + sheets + settings bugs (F1, F3a, F7, F10, F12) — d3b7634
 - [x] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c) — 3694d71
 - [x] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16) — dfeaf5d
-- [x] 11f Feedback: F20, F23, F15, F24a, F21a, F21d (grown: owner asked for bigger feedback steps) — HASH
+- [x] 11f Feedback: F20, F23, F15, F24a, F21a, F21d (grown: owner asked for bigger feedback steps) — aa75b70
 - [ ] 11g Feedback: F1 + F12 profile sync conflict (avatar revert, backup "not possible")
 - [ ] 11i Feedback: F24b save as template after an empty workout
 - [ ] 11j Feedback: F6 height and body weight wheels
