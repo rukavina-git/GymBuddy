@@ -65,6 +65,10 @@
     <string name="summary_backup_body">Your workouts live only on this phone. An account backs them up and syncs your devices.</string>
     <string name="summary_create_account">Create account</string>
     <string name="summary_not_now">Not now</string>
+    <string name="summary_save_template">Save as template</string>
+    <string name="summary_template_saved">Saved to Workouts</string>
+    <string name="summary_template_edit">Edit</string>
+    <string name="summary_template_failed">Couldn\'t save the template. Try again.</string>
     <string name="summary_done">Done</string>
     <!-- 06b: around the workout -->
     <string name="workout_menu_add_exercise">Add exercise</string>

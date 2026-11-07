@@ -43,6 +43,9 @@ import org.junit.Assert.assertTrue
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import com.rukavina.gymbuddy.testutil.FakeWorkoutTemplateRepository
+import com.rukavina.gymbuddy.domain.usecase.template.CreateWorkoutTemplateUseCase
+import com.rukavina.gymbuddy.domain.usecase.template.StampTemplateExerciseSnapshotsUseCase
 
 /**
  * ActiveWorkoutViewModel holds the active-workout state machine - starting
@@ -139,6 +142,7 @@ class ActiveWorkoutViewModelTest {
         owners: InMemoryDataOwnerStore = InMemoryDataOwnerStore(),
         service: FakeWorkoutServiceStarter = FakeWorkoutServiceStarter(),
         buzz: FakeRestBuzzScheduler = FakeRestBuzzScheduler(),
+        templateRepo: FakeWorkoutTemplateRepository = FakeWorkoutTemplateRepository(),
     ): Triple<ActiveWorkoutViewModel, FakeWorkoutSessionRepository, FixedIdGenerator> {
         val appPreferencesRepository = AppPreferencesRepository(testPreferencesDataStore())
         val viewModel = ActiveWorkoutViewModel(
@@ -158,6 +162,7 @@ class ActiveWorkoutViewModelTest {
             workoutService = service,
             restBuzz = buzz,
             exerciseRepository = exerciseRepo,
+            createTemplate = CreateWorkoutTemplateUseCase(templateRepo, idGenerator, StampTemplateExerciseSnapshotsUseCase(exerciseRepo)),
         )
         created += viewModel
         return Triple(viewModel, sessionRepo, idGenerator)
@@ -304,6 +309,11 @@ class ActiveWorkoutViewModelTest {
             workoutService = FakeWorkoutServiceStarter(),
             restBuzz = FakeRestBuzzScheduler(),
             exerciseRepository = FakeExerciseRepository(listOf(benchPress)),
+            createTemplate = CreateWorkoutTemplateUseCase(
+                FakeWorkoutTemplateRepository(),
+                FixedIdGenerator((0..20).map { "t-$it" }),
+                StampTemplateExerciseSnapshotsUseCase(FakeExerciseRepository(listOf(benchPress))),
+            ),
         )
         created += viewModel
 
@@ -538,6 +548,11 @@ class ActiveWorkoutViewModelTest {
             workoutService = FakeWorkoutServiceStarter(),
             restBuzz = FakeRestBuzzScheduler(),
             exerciseRepository = FakeExerciseRepository(listOf(benchPress)),
+            createTemplate = CreateWorkoutTemplateUseCase(
+                FakeWorkoutTemplateRepository(),
+                FixedIdGenerator((0..20).map { "t-$it" }),
+                StampTemplateExerciseSnapshotsUseCase(FakeExerciseRepository(listOf(benchPress))),
+            ),
         )
         created += vmWithImperialPrefs
 
@@ -1133,6 +1148,44 @@ class ActiveWorkoutViewModelTest {
         assertEquals("Workout", saved.title)
         assertNull(saved.templateId)
         assertEquals(1, saved.performedExercises.single().sets.size)
+    }
+
+    @Test
+    fun `an empty workout can be saved as a template once`() {
+        val templates = FakeWorkoutTemplateRepository()
+        val (viewModel, _, _) = buildViewModel(templateRepo = templates)
+        viewModel.startEmptyWorkout("Legs")
+        viewModel.addExercises(listOf("ex-bench", "ex-plank"))
+        val bench = viewModel.uiState.value.exercises[0]
+        viewModel.updateSetReps(bench.id, bench.sets[0].id, "8")
+        viewModel.logDone()
+        viewModel.logDone()
+        viewModel.saveWorkout()
+
+        val summary = viewModel.uiState.value.summary!!
+        val draft = summary.template!!
+        assertEquals("Legs", draft.title)
+        viewModel.saveSummaryAsTemplate()
+        viewModel.saveSummaryAsTemplate()
+
+        val saved = templates.created.single()
+        assertEquals(draft.id, viewModel.uiState.value.summary!!.savedTemplateId)
+        assertEquals(summary.exercises.size, saved.templateExercises.size)
+        val first = saved.templateExercises.first()
+        assertEquals("ex-bench", first.exerciseId)
+        assertEquals(0, first.orderIndex)
+        assertEquals(summary.exercises.first().setCount, first.plannedSets)
+        assertEquals(summary.exercises.first().top.reps.toIntOrNull(), first.plannedReps)
+        assertNull("no weight in a template", first.plannedWeightKg)
+    }
+
+    @Test
+    fun `a template workout offers no save as template`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.logDone()
+        viewModel.saveWorkout()
+        assertNull(viewModel.uiState.value.summary!!.template)
     }
 
     @Test

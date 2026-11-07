@@ -4,7 +4,6 @@ import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.domain.model.BodyWeightEntry
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.repository.BodyWeightRepository
-import com.rukavina.gymbuddy.ui.design.KeypadInput
 import com.rukavina.gymbuddy.testutil.FixedIdGenerator
 import com.rukavina.gymbuddy.testutil.MainDispatcherRule
 import com.rukavina.gymbuddy.testutil.testPreferencesDataStore
@@ -74,37 +73,15 @@ class BodyWeightViewModelTest {
     }
 
     @Test
-    fun `steps are a tenth and stop at the floor`() {
+    fun `a wheel value is rounded to a tenth and held inside the range`() {
         val v = vm()
         v.openLog()
-        v.step(up = true); v.step(up = true)
-        assertEquals(70.2f, v.log.value!!.value)
-        v.step(up = false)
-        assertEquals(70.1f, v.log.value!!.value)
-        repeat(600) { v.step(up = false) }
+        v.setValue(81.46f)
+        assertEquals(81.5f, v.log.value!!.value)
+        v.setValue(5f)
         assertEquals(BodyWeightViewModel.MIN_KG, v.log.value!!.value)
-        assertFalse(v.canStep(up = false))
-        assertTrue(v.canStep(up = true))
-    }
-
-    @Test
-    fun `keypad commits a typed number, rejects one out of range, cancel keeps the old`() {
-        val v = vm()
-        v.openLog()
-        v.openKeypad()
-        listOf(KeypadInput.Digit(8), KeypadInput.Digit(1), KeypadInput.Decimal, KeypadInput.Digit(5)).forEach(v::keypadInput)
-        assertEquals("81.5", v.log.value!!.keypad)
-        v.keypadInput(KeypadInput.Next)
-        assertEquals(81.5f, v.log.value!!.value)
-        assertNull(v.log.value!!.keypad)
-
-        v.openKeypad()
-        listOf(KeypadInput.Digit(9), KeypadInput.Digit(9), KeypadInput.Digit(9), KeypadInput.Digit(9)).forEach(v::keypadInput)
-        v.keypadInput(KeypadInput.Next)
-        assertTrue(v.log.value!!.keypadError)
-        v.keypadInput(KeypadInput.Cancel)
-        assertEquals(81.5f, v.log.value!!.value)
-        assertNull(v.log.value!!.keypad)
+        v.setValue(9999f)
+        assertEquals(BodyWeightViewModel.MAX_KG, v.log.value!!.value)
     }
 
     @Test

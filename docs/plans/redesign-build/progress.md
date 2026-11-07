@@ -23,8 +23,7 @@
 - [x] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16) — dfeaf5d
 - [x] 11f Feedback: F20, F23, F15, F24a, F21a, F21d (grown: owner asked for bigger feedback steps) — aa75b70
 - [x] 11g Feedback: F1 + F12 avatar revert, backup "not possible" (stale Render build; steps/11g-profile-sync.md) — 2576fc9
-- [ ] 11i Feedback: F24b save as template after an empty workout
-- [ ] 11j Feedback: F6 height and body weight wheels
+- [x] 11i Feedback: F24b save as template + F6 height/weight wheels (11j folded in; steps/11i-template-and-wheels.md) — HASH
 - [ ] 11k Feedback: F13 delete account screen
 - [ ] 11l Feedback: F3b typing off sheets (notes, quick create, name/units inline)
 - [ ] 11m Feedback: F25 stale workouts (2 h rule, auto-finish, estimates)
@@ -33,6 +32,12 @@
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11i: 11j (F6) folded in on owner request; Figma waived by owner. Target weight also moved to
+  wheels (it shared the deleted NumberSheet). Feet wheel is 2–8, not 1–8 (1 ft < 50 cm floor).
+  Profile height row now shows "5 ft 9 in" in imperial. Body weight hint and ± stepper strings
+  deleted. F24b checked by a Robolectric UI test, not on the phone (would add a real workout and
+  template to the owner's synced account). Wheels checked on the phone via adb: height scroll,
+  tap-a-row, Save (restored to 125 cm); log sheet opened, not saved. Roadmap has no 11i line.
 - 11g: No code change. Cause was a stale Render build (pre-Plan 6; Render tracks develop with
   autoDeploy off), not a sync conflict as the 11c leads guessed. Owner redeployed develop.
   Phone check via adb: avatar survives sync and restart (fox, rev 13, SYNCED), offline change
@@ -508,6 +513,11 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- 11i: `WheelPicker` (ui/design) only reads [selected] when still; two-wheel values (whole +
+  tenth) can show e.g. 700.5 while 700.0 is stored at range edges (reviewer NIT, display only).
+- 11i reviewer, not fixed: no test for a failed template save / retry; the saved-id assert passes
+  by construction; raw 88/56/48 dp and 0.6 alpha in the wheels (no token); target weight saves
+  an unrounded start value if the wheel isn't moved; @OptIn sits above heightText's KDoc.
 - From 11g: Render never deploys by itself. After any backend change on develop, ask the owner
   to Manual Deploy before a phone check. Quick stale-server sign: logcat SyncEngine
   "reference data check failed ... missing". Step 12: redeploy before the device pass.

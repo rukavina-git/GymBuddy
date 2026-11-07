@@ -67,6 +67,7 @@ fun WorkoutSummaryScreen(
     viewModel: ActiveWorkoutViewModel,
     onDone: () -> Unit,
     onCreateAccount: () -> Unit,
+    onEditTemplate: (String) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val summary = state.summary
@@ -78,6 +79,8 @@ fun WorkoutSummaryScreen(
         onDone = close,
         onCreateAccount = onCreateAccount,
         onNotNow = viewModel::dismissBackup,
+        onSaveTemplate = viewModel::saveSummaryAsTemplate,
+        onEditTemplate = { id -> viewModel.closeSummary(); onEditTemplate(id) },
     )
 }
 
@@ -87,6 +90,8 @@ internal fun WorkoutSummaryContent(
     onDone: () -> Unit,
     onCreateAccount: () -> Unit,
     onNotNow: () -> Unit,
+    onSaveTemplate: () -> Unit = {},
+    onEditTemplate: (String) -> Unit = {},
     zone: ZoneId = ZoneId.systemDefault(),
 ) {
     val d = GymBuddyTheme.dimens
@@ -151,6 +156,9 @@ internal fun WorkoutSummaryContent(
                     AppTextButton(stringResource(R.string.summary_more, more), { showAll = true })
                 }
             }
+            if (summary.template != null) {
+                item { TemplateOffer(summary, onSaveTemplate, onEditTemplate) }
+            }
             if (summary.offerBackup) {
                 item { BackupCard(onCreateAccount, onNotNow, Modifier.padding(top = d.group)) }
             }
@@ -178,6 +186,31 @@ private fun exerciseLine(ex: SummaryExercise, summary: WorkoutSummary): String {
         stringResource(R.string.summary_best, value)
     }
     return joinDot(pluralStringResource(R.plurals.workout_sets, ex.setCount, ex.setCount), best)
+}
+
+/** F24b, after an empty workout: a quiet Save as template, then "Saved" + Edit. */
+@Composable
+private fun TemplateOffer(summary: WorkoutSummary, onSave: () -> Unit, onEdit: (String) -> Unit) {
+    val cs = MaterialTheme.colorScheme
+    val saved = summary.savedTemplateId
+    Column(Modifier.fillMaxWidth().padding(top = GymBuddyTheme.dimens.group)) {
+        if (saved == null) {
+            AppTextButton(stringResource(R.string.summary_save_template), onSave)
+            if (summary.templateFailed) {
+                Text(stringResource(R.string.summary_template_failed), style = MaterialTheme.typography.bodySmall, color = cs.error)
+            }
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.summary_template_saved),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = cs.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                AppLinkButton(stringResource(R.string.summary_template_edit), { onEdit(saved) })
+            }
+        }
+    }
 }
 
 @Composable

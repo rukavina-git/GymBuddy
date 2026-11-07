@@ -49,6 +49,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import com.rukavina.gymbuddy.testutil.FakeWorkoutTemplateRepository
+import com.rukavina.gymbuddy.domain.usecase.template.CreateWorkoutTemplateUseCase
+import com.rukavina.gymbuddy.domain.usecase.template.StampTemplateExerciseSnapshotsUseCase
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -78,6 +81,7 @@ class ActiveWorkoutUiTest {
             FakeWorkoutServiceStarter(),
             FakeRestBuzzScheduler(),
             exercises,
+            CreateWorkoutTemplateUseCase(FakeWorkoutTemplateRepository(), ids, StampTemplateExerciseSnapshotsUseCase(exercises)),
         )
         vm.startWorkoutFromTemplate(
             WorkoutTemplate(

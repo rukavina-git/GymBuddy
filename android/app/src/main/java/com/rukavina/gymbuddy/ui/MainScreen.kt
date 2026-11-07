@@ -497,6 +497,10 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                     viewModel = activeWorkoutViewModel,
                     onDone = leaveWorkout,
                     onCreateAccount = { rootNavController.navigate(NavRoutes.createAccount(CreateFrom.SETTINGS)) },
+                    onEditTemplate = { id ->
+                        leaveWorkout()
+                        bottomNavController.navigate(NavRoutes.templateEditor(id))
+                    },
                 )
             }
         }

@@ -16,7 +16,6 @@
     <string name="profile_target_weight">Target weight</string>
     <string name="profile_not_set">Not set</string>
     <string name="profile_clear">Clear</string>
-    <string name="profile_out_of_range">That number looks off. Check it and try again.</string>
     <string name="profile_gender_male">Male</string>
     <string name="profile_gender_female">Female</string>
     <string name="profile_gender_other">Other</string>
@@ -76,13 +75,16 @@
     <string name="body_weight_empty">No weigh-ins yet</string>
     <string name="body_weight_empty_body">Log your weight now and then. A chart appears after 2 entries.</string>
     <string name="body_weight_log">Log weight</string>
-    <string name="body_weight_hint">± 0.1 %1$s, hold to repeat. Tap the number to type.</string>
     <string name="body_weight_date">Date</string>
     <string name="body_weight_today">Today, %1$s</string>
-    <string name="body_weight_keypad_done">Done</string>
-    <string name="body_weight_out_of_range">Between 20 and 700 kg (44 and 1543 lbs).</string>
-    <string name="body_weight_decrease">Decrease weight</string>
-    <string name="body_weight_increase">Increase weight</string>
     <string name="body_weight_deleted">Weight deleted</string>
     <string name="body_weight_save_failed">Couldn\'t save the weight. Try again.</string>
+    <!-- F6 wheels -->
+    <string name="unit_cm">cm</string>
+    <string name="unit_ft">ft</string>
+    <string name="unit_in">in</string>
+    <string name="wheel_feet">Feet</string>
+    <string name="wheel_inches">Inches</string>
+    <string name="wheel_tenths">Tenths</string>
+    <string name="profile_height_ft_in">%1$d ft %2$d in</string>
 </resources>

@@ -7,8 +7,6 @@ import com.rukavina.gymbuddy.domain.id.IdGenerator
 import com.rukavina.gymbuddy.domain.model.BodyWeightEntry
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.repository.BodyWeightRepository
-import com.rukavina.gymbuddy.ui.design.KeypadInput
-import com.rukavina.gymbuddy.ui.design.KeypadValue
 import com.rukavina.gymbuddy.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,15 +40,12 @@ data class BodyWeightUiState(
 }
 
 /**
- * Log weight sheet (R15-6). [value] is in the display unit, one decimal.
- * [keypad] is the typed text while the keypad is open, else null.
+ * Log weight sheet (R15-6, F6 wheels). [value] is in the display unit,
+ * one decimal.
  */
 data class LogState(
     val value: Float,
     val date: LocalDate,
-    val keypad: String? = null,
-    /** The typed number is out of range (keypad stays open). */
-    val keypadError: Boolean = false,
 )
 
 sealed interface BodyWeightEvent {
@@ -90,7 +85,8 @@ class BodyWeightViewModel @Inject constructor(
     private val units get() = uiState.value.units
     private fun today(): LocalDate = Instant.ofEpochMilli(clock.millis()).atZone(zone).toLocalDate()
 
-    private fun bounds(): ClosedFloatingPointRange<Float> =
+    /** The log range in the display unit. */
+    fun bounds(): ClosedFloatingPointRange<Float> =
         if (units == PreferredUnits.IMPERIAL) UnitConverter.kgToLbs(MIN_KG)..UnitConverter.kgToLbs(MAX_KG) else MIN_KG..MAX_KG
 
     /** Starts at the latest weight, else 70 kg (154.3 lbs). */
@@ -101,32 +97,9 @@ class BodyWeightViewModel @Inject constructor(
 
     fun closeLog() { _log.value = null }
 
-    /** ± 0.1 in the display unit, held inside the range. */
-    fun step(up: Boolean) = _log.update { s ->
-        s?.copy(value = round1(s.value + if (up) STEP else -STEP).coerceIn(bounds().start, bounds().endInclusive))
-    }
-
-    fun canStep(up: Boolean): Boolean {
-        val s = _log.value ?: return false
-        return if (up) s.value + STEP <= bounds().endInclusive + EPS else s.value - STEP >= bounds().start - EPS
-    }
-
-    fun openKeypad() = _log.update { it?.copy(keypad = "", keypadError = false) }
-
-    fun keypadInput(input: KeypadInput) = _log.update { s ->
-        val text = s?.keypad ?: return@update s
-        when (input) {
-            KeypadInput.Cancel -> s.copy(keypad = null, keypadError = false)
-            KeypadInput.Next -> {
-                val typed = KeypadValue.parse(text)
-                when {
-                    typed == null -> s.copy(keypad = null, keypadError = false)
-                    typed !in bounds() -> s.copy(keypadError = true)
-                    else -> s.copy(value = round1(typed), keypad = null, keypadError = false)
-                }
-            }
-            else -> s.copy(keypad = KeypadValue.apply(text, input, KeypadValue.Kind.Decimal), keypadError = false)
-        }
+    /** A wheel moved: rounded to 0.1 and held inside the range. */
+    fun setValue(v: Float) = _log.update { s ->
+        s?.copy(value = round1(v).coerceIn(bounds().start, bounds().endInclusive))
     }
 
     /** Future days are ignored. */
@@ -160,11 +133,9 @@ class BodyWeightViewModel @Inject constructor(
     private fun toDisplay(kg: Float) = if (units == PreferredUnits.IMPERIAL) UnitConverter.kgToLbs(kg) else kg
 
     companion object {
-        const val STEP = 0.1f
         const val MIN_KG = 20f
         const val MAX_KG = 700f
         const val DEFAULT_KG = 70f
-        private const val EPS = 0.0001f
 
         fun round1(v: Float): Float = (v * 10f).roundToInt() / 10f
     }

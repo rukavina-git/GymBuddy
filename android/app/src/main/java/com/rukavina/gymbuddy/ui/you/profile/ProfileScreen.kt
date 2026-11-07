@@ -56,15 +56,19 @@ import com.rukavina.gymbuddy.ui.design.AppBottomSheet
 import com.rukavina.gymbuddy.ui.design.AppLinkButton
 import com.rukavina.gymbuddy.ui.design.AppTextField
 import com.rukavina.gymbuddy.ui.design.BackTopBar
-import com.rukavina.gymbuddy.ui.design.Keypad
-import com.rukavina.gymbuddy.ui.design.KeypadInput
-import com.rukavina.gymbuddy.ui.design.KeypadValue
 import com.rukavina.gymbuddy.ui.design.PrimaryButton
-import com.rukavina.gymbuddy.ui.design.keypadSeparator
 import com.rukavina.gymbuddy.ui.progress.weightText
 import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.FullShape
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
+import com.rukavina.gymbuddy.ui.you.BodyWheel
+import com.rukavina.gymbuddy.ui.you.CmWheel
+import com.rukavina.gymbuddy.ui.you.FeetInchesWheels
+import com.rukavina.gymbuddy.ui.you.WeightWheels
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import kotlin.math.roundToInt
 import com.rukavina.gymbuddy.ui.you.Avatar
 import com.rukavina.gymbuddy.ui.you.Avatars
 import com.rukavina.gymbuddy.ui.you.Choice
@@ -122,17 +126,11 @@ fun ProfileScreen(onBack: () -> Unit, onBodyWeight: () -> Unit, viewModel: Profi
             { viewModel.setGoal(it); close() },
             close,
         )
-        ProfileSheet.Height -> NumberSheet(
-            title = stringResource(R.string.profile_height),
-            current = state.heightCm?.let { UnitConverter.heightToDisplayUnit(it, state.units) },
-            unit = UnitConverter.getHeightUnitLabel(state.units),
-            onSave = viewModel::setHeight,
-            onDone = close,
-        )
-        ProfileSheet.TargetWeight -> NumberSheet(
-            title = stringResource(R.string.profile_target_weight),
-            current = state.targetWeightKg?.let { UnitConverter.weightToDisplayUnit(it, state.units) },
-            unit = UnitConverter.getWeightUnitLabel(state.units),
+        ProfileSheet.Height -> HeightSheet(state.heightCm, state.units, viewModel::setHeight, close)
+        ProfileSheet.TargetWeight -> TargetWeightSheet(
+            current = state.targetWeightKg,
+            start = state.targetWeightKg ?: state.bodyWeightKg ?: DEFAULT_TARGET_KG,
+            units = state.units,
             onSave = viewModel::setTargetWeight,
             onDone = close,
         )
@@ -203,9 +201,7 @@ internal fun ProfileContent(state: ProfileUiState, onBack: () -> Unit, onBodyWei
                     Group(stringResource(R.string.profile_group_about)) {
                         ValueRow(
                             stringResource(R.string.profile_height),
-                            state.heightCm?.let {
-                                stringResource(R.string.weight_value, UnitConverter.heightToDisplayUnit(it, state.units), UnitConverter.getHeightUnitLabel(state.units))
-                            } ?: dash,
+                            state.heightCm?.let { heightText(it, state.units) } ?: dash,
                             { onOpen(ProfileSheet.Height) },
                         )
                         RowDivider()
@@ -312,32 +308,73 @@ private fun NameSheet(current: String, onSave: (String) -> Unit, onDismiss: () -
     }
 }
 
-/** Keypad for height / target weight. Done saves; Clear empties the field. */
+@OptIn(ExperimentalMaterial3Api::class)
+/** "175 cm", or "5 ft 9 in" in imperial. */
+@Composable
+private fun heightText(cm: Float, units: PreferredUnits): String =
+    if (units == PreferredUnits.IMPERIAL) {
+        val (ft, inch) = BodyWheel.feetInches(UnitConverter.cmToInches(cm))
+        stringResource(R.string.profile_height_ft_in, ft, inch)
+    } else {
+        stringResource(R.string.weight_value, cm.roundToInt().toString(), stringResource(R.string.unit_cm))
+    }
+
+/** F6: height on a wheel (cm, or ft + in). [onSave] takes cm or total inches as text. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NumberSheet(title: String, current: String?, unit: String, onSave: (String) -> Boolean, onDone: () -> Unit) {
-    var text by rememberSaveable { mutableStateOf(current.orEmpty()) }
-    var error by remember { mutableStateOf(false) }
-    AppBottomSheet(onDismiss = onDone, title = null) {
-        Keypad(
-            label = title,
-            value = text.replace('.', keypadSeparator()),
-            unit = unit,
-            onInput = { input ->
-                when (input) {
-                    KeypadInput.Cancel -> onDone()
-                    KeypadInput.Next -> if (onSave(text)) onDone() else error = true
-                    else -> { text = KeypadValue.apply(text, input, KeypadValue.Kind.Decimal); error = false }
-                }
-            },
-            nextLabel = stringResource(R.string.you_save),
-            message = if (error) stringResource(R.string.profile_out_of_range) else null,
+private fun HeightSheet(current: Float?, units: PreferredUnits, onSave: (String) -> Boolean, onDone: () -> Unit) {
+    val d = GymBuddyTheme.dimens
+    val imperial = units == PreferredUnits.IMPERIAL
+    val startCm = current ?: DEFAULT_HEIGHT_CM
+    var value by rememberSaveable {
+        mutableIntStateOf(if (imperial) UnitConverter.cmToInches(startCm).roundToInt() else startCm.roundToInt())
+    }
+    AppBottomSheet(onDismiss = onDone, title = stringResource(R.string.profile_height)) {
+        if (imperial) {
+            FeetInchesWheels(value, { value = it })
+        } else {
+            val range = ProfileViewModel.HEIGHT_CM.start.toInt()..ProfileViewModel.HEIGHT_CM.endInclusive.toInt()
+            CmWheel(value.coerceIn(range), range, { value = it })
+        }
+        PrimaryButton(
+            stringResource(R.string.you_save),
+            { if (onSave(value.toString())) onDone() },
+            Modifier.fillMaxWidth().padding(top = d.stackTight),
         )
         if (current != null) {
             AppLinkButton(stringResource(R.string.profile_clear), { onSave(""); onDone() })
         }
     }
 }
+
+/** F6: target weight on whole + tenth wheels, in the display unit. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TargetWeightSheet(current: Float?, start: Float, units: PreferredUnits, onSave: (String) -> Boolean, onDone: () -> Unit) {
+    val d = GymBuddyTheme.dimens
+    val range = ProfileViewModel.WEIGHT_KG.let {
+        kgToDisplay(it.start, units)..kgToDisplay(it.endInclusive, units)
+    }
+    var value by rememberSaveable { mutableFloatStateOf(kgToDisplay(start, units).coerceIn(range.start, range.endInclusive)) }
+    val unit = UnitConverter.getWeightUnitLabel(units)
+    AppBottomSheet(onDismiss = onDone, title = stringResource(R.string.profile_target_weight)) {
+        WeightWheels(value, range, unit, stringResource(R.string.profile_target_weight), { value = it })
+        PrimaryButton(
+            stringResource(R.string.you_save),
+            { if (onSave(value.toString())) onDone() },
+            Modifier.fillMaxWidth().padding(top = d.stackTight),
+        )
+        if (current != null) {
+            AppLinkButton(stringResource(R.string.profile_clear), { onSave(""); onDone() })
+        }
+    }
+}
+
+private fun kgToDisplay(kg: Float, units: PreferredUnits) =
+    if (units == PreferredUnits.IMPERIAL) UnitConverter.kgToLbs(kg) else kg
+
+private const val DEFAULT_HEIGHT_CM = 175f
+private const val DEFAULT_TARGET_KG = 70f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -14,6 +14,8 @@ import com.rukavina.gymbuddy.domain.model.PerformedExercise
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
+import com.rukavina.gymbuddy.domain.model.TemplateExercise
+import com.rukavina.gymbuddy.domain.usecase.template.CreateWorkoutTemplateUseCase
 import com.rukavina.gymbuddy.domain.repository.ActiveWorkoutDraftRepository
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
@@ -116,6 +118,12 @@ data class WorkoutSummary(
     val units: PreferredUnits,
     val exercises: List<SummaryExercise>,
     val offerBackup: Boolean,
+    /** F24b: what "Save as template" stores; null after a template workout. */
+    val template: WorkoutTemplate? = null,
+    /** Set once the template is saved; the summary then offers Edit. */
+    val savedTemplateId: String? = null,
+    /** The last Save as template failed; the button stays to retry. */
+    val templateFailed: Boolean = false,
 )
 
 enum class WorkoutDialog { Finish, Discard }
@@ -209,6 +217,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     private val workoutService: WorkoutServiceStarter,
     private val restBuzz: RestBuzzScheduler,
     private val exerciseRepository: ExerciseRepository,
+    private val createTemplate: CreateWorkoutTemplateUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ActiveWorkoutUiState())
@@ -973,6 +982,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                             SummaryExercise(ex.exerciseName, done.size, ex.exerciseTrackingType, topSet(done))
                         },
                         offerBackup = owners.owner == null,
+                        template = if (state.templateId == null) templateFrom(workoutSession.title, kept) else null,
                     )
                     _uiState.update {
                         it.copy(
@@ -1003,6 +1013,46 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Summary "Not now": hides the backup card for this summary only (decision 7). */
     fun dismissBackup() = _uiState.update { s -> s.copy(summary = s.summary?.copy(offerBackup = false)) }
+
+    /** F24b: saves the summary's template once; then the summary offers Edit. */
+    fun saveSummaryAsTemplate() {
+        val summary = _uiState.value.summary ?: return
+        val template = summary.template ?: return
+        if (summary.savedTemplateId != null || savingTemplate) return
+        savingTemplate = true
+        viewModelScope.launch {
+            createTemplate(template)
+                .onSuccess {
+                    _uiState.update { s -> s.copy(summary = s.summary?.copy(savedTemplateId = template.id, templateFailed = false)) }
+                }
+                .onFailure { _uiState.update { s -> s.copy(summary = s.summary?.copy(templateFailed = true)) } }
+            savingTemplate = false
+        }
+    }
+
+    private var savingTemplate = false
+
+    /** One planned exercise per kept one: done set count, top set targets, rest; no weight. */
+    private fun templateFrom(title: String, kept: List<Pair<ActiveExercise, List<WorkoutSet>>>) = WorkoutTemplate(
+        id = idGenerator.newId(),
+        title = title,
+        templateExercises = kept.mapIndexed { index, (ex, done) ->
+            val top = topSet(done)
+            val fields = SetFields.of(ex.exerciseTrackingType)
+            TemplateExercise(
+                id = idGenerator.newId(),
+                exerciseId = ex.exerciseId,
+                exerciseName = ex.exerciseName,
+                exerciseTrackingType = ex.exerciseTrackingType,
+                plannedSets = done.size,
+                plannedReps = if (SetField.Reps in fields) top.reps.toIntOrNull()?.takeIf { it > 0 } else null,
+                orderIndex = index,
+                restSeconds = ex.restSeconds?.takeIf { it > 0 },
+                plannedDurationSeconds = if (SetField.Duration in fields) top.duration.toIntOrNull()?.takeIf { it > 0 } else null,
+                plannedDistanceMeters = if (SetField.Distance in fields) top.distance.toFloatOrNull()?.takeIf { it > 0f } else null,
+            )
+        },
+    )
 
     /** Summary Done. */
     fun closeSummary() = _uiState.update { it.copy(summary = null) }

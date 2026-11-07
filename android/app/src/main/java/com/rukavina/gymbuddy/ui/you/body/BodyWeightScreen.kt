@@ -61,11 +61,8 @@ import com.rukavina.gymbuddy.ui.design.AppLinkButton
 import com.rukavina.gymbuddy.ui.design.AppSnackbar
 import com.rukavina.gymbuddy.ui.design.BackTopBar
 import com.rukavina.gymbuddy.ui.design.EmptyState
-import com.rukavina.gymbuddy.ui.design.Keypad
 import com.rukavina.gymbuddy.ui.design.LiftChart
 import com.rukavina.gymbuddy.ui.design.PrimaryButton
-import com.rukavina.gymbuddy.ui.design.ValuePanel
-import com.rukavina.gymbuddy.ui.design.keypadSeparator
 import com.rukavina.gymbuddy.ui.theme.Haptic
 import com.rukavina.gymbuddy.ui.theme.rememberHaptics
 import com.rukavina.gymbuddy.ui.progress.dayMonth
@@ -75,6 +72,7 @@ import com.rukavina.gymbuddy.ui.progress.weightText
 import com.rukavina.gymbuddy.ui.template.shortDate
 import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
+import com.rukavina.gymbuddy.ui.you.WeightWheels
 import com.rukavina.gymbuddy.utils.UnitConverter
 import java.time.Clock
 import java.time.Instant
@@ -305,7 +303,7 @@ private fun EntryRow(entry: BodyWeightEntry, units: PreferredUnits, zone: ZoneId
     }
 }
 
-/** Log weight (R15-6): − / + 0.1, tap the number for the keypad, date row, Save. */
+/** Log weight (R15-6, F6): whole + tenth wheels from the last value, date row, Save. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LogWeightSheet(log: LogState, units: PreferredUnits, viewModel: BodyWeightViewModel) {
@@ -314,32 +312,13 @@ private fun LogWeightSheet(log: LogState, units: PreferredUnits, viewModel: Body
     val unit = UnitConverter.getWeightUnitLabel(units)
     var picking by rememberSaveable { mutableStateOf(false) }
     AppBottomSheet(onDismiss = viewModel::closeLog, title = stringResource(R.string.body_weight_log)) {
-        val typed = log.keypad
-        if (typed != null) {
-            Keypad(
-                label = stringResource(R.string.body_weight_title),
-                value = typed.replace('.', keypadSeparator()),
-                unit = unit,
-                onInput = viewModel::keypadInput,
-                nextLabel = stringResource(R.string.body_weight_keypad_done),
-                message = if (log.keypadError) stringResource(R.string.body_weight_out_of_range) else null,
-            )
-            return@AppBottomSheet
-        }
-        ValuePanel(
-            number = number1(log.value),
+        WeightWheels(
+            value = log.value,
+            range = viewModel.bounds(),
             unit = unit,
-            editing = false,
-            onClick = viewModel::openKeypad,
-            onMinus = { viewModel.step(up = false) },
-            onPlus = { viewModel.step(up = true) },
-            modifier = Modifier.fillMaxWidth(),
-            minusEnabled = viewModel.canStep(up = false),
-            plusEnabled = viewModel.canStep(up = true),
-            minusDescription = stringResource(R.string.body_weight_decrease),
-            plusDescription = stringResource(R.string.body_weight_increase),
+            contentDescription = stringResource(R.string.body_weight_title),
+            onChange = viewModel::setValue,
         )
-        Text(stringResource(R.string.body_weight_hint, unit), style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
         Surface(
             onClick = { picking = true },
             shape = MaterialTheme.shapes.medium,
