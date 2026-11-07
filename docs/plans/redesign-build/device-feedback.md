@@ -1,14 +1,14 @@
 # Device feedback (owner, round 1, 2026-11-07)
 
 Owner's phone pass after 7.11. Fixed in rounds before step 12.
-Steps: 11c = Rounds A + B, 11d = Round C design talk, 11e = C + D build. Tick an item when its fix
+Steps (small, one per /step): 11c = A1, 11d = A2, 11e = B, 11f+ = C/D. Tick an item when its fix
 lands, with the commit hash.
 
 Tags: **bug** broken · **feel** works but bad · **idea** new/changed
 behaviour · **design** needs an Impeccable consult (and a Figma frame)
 before code.
 
-## Round A — bugs (step 11c)
+## Round A — bugs (11c = A1: F1–F12, 11d = A2: F17–F21c)
 - [ ] F1 bug · Profile picture: the picked avatar shows for a second,
       then goes back to empty.
 - [ ] F3a bug · All bottom sheets: the sheet draws over the Android
@@ -33,7 +33,7 @@ before code.
       the trash icon are fine.
 - [ ] F21c bug · Workout: Undo on the delete snackbar does nothing.
 
-## Round B — quick cuts and small fixes (step 11c)
+## Round B — quick cuts and small fixes (step 11e)
 - [ ] F2 feel · Avatar picker: remove the licence line under the
       pictures (credits move to the licences page, Plan 9).
 - [ ] F4 feel · Profile: remove "Use your letter". New profiles get a
@@ -48,7 +48,7 @@ before code.
 - [ ] F16 feel · Progress: the collapsed "Progress" title shows a
       hard square box when scrolling; make it smooth.
 
-## Round C — design consults (talk in 11d, build in 11e)
+## Round C — design consults (11f+: Impeccable, then Figma, then code)
 - [ ] F3b design · Bottom sheets in general: keep them, or use
       something else?
 - [ ] F5 design · iOS-style swipe from the left edge to go back, on
@@ -73,7 +73,7 @@ before code.
       should be steered to templates. Move it last: "Didn't find one?
       Start an empty workout".
 
-## Round D — features (step 11e)
+## Round D — features (11f+, own step files)
 - [ ] F18 idea · Workout: every set starts at 0 kg, even for a lift
       done last week (holding + up to 120 kg). Start from the
       template's target weight; if there is none, from the last

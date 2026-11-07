@@ -18,9 +18,10 @@
 - [x] 10b Profile, picture, body weight (steps/10-you-settings.md) — dab5844
 - [x] 11a Cross-flow: workout safety (steps/11-cross-flow-states.md) — 5e145e6
 - [x] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md) — 5c4299b
-- [ ] 11c Device feedback A + B: bugs and quick cuts (device-feedback.md)
-- [ ] 11d Device feedback C: design talk (Impeccable + Figma, owner), deferred
-- [ ] 11e Device feedback C + D: build (device-feedback.md), deferred
+- [ ] 11c Device feedback A1: profile + sheets + settings bugs (F1, F3a, F7, F10, F12)
+- [ ] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c)
+- [ ] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16)
+- [ ] 11f+ Device feedback C/D: after design talk, deferred
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
