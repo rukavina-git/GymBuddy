@@ -18,6 +18,9 @@
 - [x] 10b Profile, picture, body weight (steps/10-you-settings.md) — dab5844
 - [x] 11a Cross-flow: workout safety (steps/11-cross-flow-states.md) — 5e145e6
 - [x] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md) — 5c4299b
+- [ ] 11c Device feedback A: bugs (device-feedback.md, Round A)
+- [ ] 11d Device feedback B: quick cuts (device-feedback.md, Round B)
+- [ ] 11e+ Device feedback C/D: after design talk (device-feedback.md), deferred
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
