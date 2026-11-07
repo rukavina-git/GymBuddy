@@ -14,7 +14,6 @@
     <string name="profile_activity">Activity level</string>
     <string name="profile_goal">Goal</string>
     <string name="profile_target_weight">Target weight</string>
-    <string name="profile_about_foot">Used later for BMI and a calorie target. Clear them any time.</string>
     <string name="profile_not_set">Not set</string>
     <string name="profile_clear">Clear</string>
     <string name="profile_out_of_range">That number looks off. Check it and try again.</string>
@@ -42,10 +41,6 @@
     <!-- Change picture (R15-4) -->
     <string name="profile_change_picture">Change picture</string>
     <string name="profile_choose_picture">Choose a picture</string>
-    <string name="profile_use_letter">Use your letter</string>
-    <string name="profile_use_letter_sub">Your first letter on a plain circle</string>
-    <string name="profile_pick_one">Or pick one</string>
-    <string name="profile_picture_foot">Animal pictures: Microsoft Fluent Emoji (MIT licence).</string>
     <string name="avatar_fox">Fox</string>
     <string name="avatar_cat">Cat</string>
     <string name="avatar_dog">Dog</string>

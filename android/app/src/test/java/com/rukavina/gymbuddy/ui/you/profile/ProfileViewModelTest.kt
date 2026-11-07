@@ -106,6 +106,26 @@ class ProfileViewModelTest {
     }
 
     @Test
+    fun `a new profile gets a random animal, an existing one keeps no picture`() = runBlocking {
+        profiles.random = kotlin.random.Random(7)
+        val expected = com.rukavina.gymbuddy.domain.model.AvatarIds.random(kotlin.random.Random(7))
+        profiles.updateProfile(UID, { UserProfile(uid = UID, name = "", email = "", joinedDate = 1) }) { it }
+        assertEquals(expected, stored().avatarId)
+
+        profiles.updateProfile(UID, { error("row exists") }) { it.copy(avatarId = null) }
+        profiles.updateProfile(UID, { error("row exists") }) { it.copy(name = "Karlo") }
+        assertEquals(null, stored().avatarId)
+    }
+
+    @Test
+    fun `avatar ids and pictures list the same animals`() {
+        assertEquals(
+            com.rukavina.gymbuddy.domain.model.AvatarIds.all,
+            com.rukavina.gymbuddy.ui.you.Avatars.all.map { it.id },
+        )
+    }
+
+    @Test
     fun `about you edits save, clear, and keep other fields`() {
         seed()
         val v = vm()

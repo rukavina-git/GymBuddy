@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -109,7 +110,8 @@ fun YouScreen(nav: YouNav, viewModel: YouViewModel = hiltViewModel()) {
         sheet = null
         viewModel.clearExportState()
         // Not in this effect: clearing the state restarts it.
-        scope.launch { snackbar.showSnackbar(message) }
+        // F9: long enough to read, with a close button.
+        scope.launch { snackbar.showSnackbar(message, withDismissAction = true, duration = SnackbarDuration.Long) }
     }
 
     val open = { s: YouSheet ->
@@ -272,14 +274,6 @@ internal fun YouContent(state: YouUiState, actions: YouActions, clock: Clock) {
                         RowDivider()
                         ValueRow(stringResource(R.string.you_delete_account), null, actions.onDelete, danger = true)
                     }
-                }
-                item(key = "foot") {
-                    Text(
-                        stringResource(R.string.you_follow_phone),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = cs.onSurfaceVariant,
-                        modifier = Modifier.padding(top = d.stackTight),
-                    )
                 }
             }
         }

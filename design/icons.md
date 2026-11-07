@@ -63,7 +63,8 @@ a 2.75 stroke (a dumbbell has nothing to fill).
 | list | list | Lists |
 | info / alert / warning | info / error / warning | Help, field errors, warnings |
 | edit | edit | Edit note, name |
-| hide | visibility_off | Hidden exercises |
+| hide | visibility_off | Hidden exercises, hide password |
+| show | visibility | Show password (F11; github.com/google/material-design-icons, symbols/web, rounded 24px) |
 | delete | delete | Delete (red only when destructive) |
 | undo | undo | Undo snackbar |
 | backspace | backspace | Keypad |

@@ -31,13 +31,12 @@ class ProfileUiTest {
     @Test
     fun `picker marks the chosen animal selected and picks another`() {
         var picked: String? = "unset"
-        rule.setContent { GymBuddyTheme { PictureSheet("fox", "Karlo", { picked = it }, {}) } }
+        rule.setContent { GymBuddyTheme { PictureSheet("fox", { picked = it }, {}) } }
         rule.onNodeWithContentDescription("Fox").assertIsSelected()
         rule.onNodeWithContentDescription("Owl").assertIsNotSelected()
         rule.onNodeWithContentDescription("Owl").performSemanticsAction(SemanticsActions.OnClick)
         assertEquals("owl", picked)
-        rule.onNodeWithText("Use your letter").performSemanticsAction(SemanticsActions.OnClick)
-        assertEquals(null, picked)
+        rule.onNodeWithText("Use your letter").assertDoesNotExist()
     }
 
     @Test

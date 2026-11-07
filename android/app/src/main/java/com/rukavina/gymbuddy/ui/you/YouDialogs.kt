@@ -17,9 +17,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.data.sync.LocalDataCounts
 import com.rukavina.gymbuddy.ui.design.AppBottomSheet
+import com.rukavina.gymbuddy.ui.design.AppIconButton
 import com.rukavina.gymbuddy.ui.design.AppChoiceDialog
 import com.rukavina.gymbuddy.ui.design.AppTextField
 import com.rukavina.gymbuddy.ui.design.AppTextFieldDefaults
@@ -27,6 +29,7 @@ import com.rukavina.gymbuddy.ui.design.DialogAction
 import com.rukavina.gymbuddy.ui.design.DialogActionTone
 import com.rukavina.gymbuddy.ui.design.PrimaryButton
 import com.rukavina.gymbuddy.ui.guest.countsText
+import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 
 /** Export (R15-11), JSON only (ADR 0015 amendment): one file, no checkboxes. */
@@ -261,6 +264,7 @@ internal fun PasswordDialog(isSetup: Boolean, viewModel: YouViewModel, onDone: (
     var repeat by rememberSaveable { mutableStateOf("") }
     var busy by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var show by rememberSaveable { mutableStateOf(false) }
     val fill = stringResource(R.string.you_password_fill)
     val mismatch = stringResource(R.string.you_password_mismatch)
     val weak = stringResource(R.string.you_password_weak)
@@ -295,8 +299,16 @@ internal fun PasswordDialog(isSetup: Boolean, viewModel: YouViewModel, onDone: (
                 value = value,
                 onValueChange = { onChange(it); error = null },
                 label = stringResource(label),
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (show) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                // F11: one eye shows or hides all fields.
+                trailing = {
+                    AppIconButton(
+                        if (show) AppIcons.Ui.Hide else AppIcons.Ui.Show,
+                        stringResource(if (show) R.string.cd_hide_password else R.string.cd_show_password),
+                        { show = !show },
+                    )
+                },
                 container = AppTextFieldDefaults.onDialog,
                 modifier = Modifier.fillMaxWidth(),
             )

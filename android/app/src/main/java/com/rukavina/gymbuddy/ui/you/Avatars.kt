@@ -27,7 +27,7 @@ object Avatars {
     data class Animal(val id: String, @DrawableRes val image: Int, @StringRes val name: Int)
 
     /** Picker order (R15-4). Ids match `^[a-z0-9-]{1,32}$` (server). */
-    val all: List<Animal> = listOf(
+    val all: List<Animal> = listOf( // same ids and order as domain AvatarIds
         Animal("fox", R.drawable.avatar_fox, R.string.avatar_fox),
         Animal("cat", R.drawable.avatar_cat, R.string.avatar_cat),
         Animal("dog", R.drawable.avatar_dog, R.string.avatar_dog),

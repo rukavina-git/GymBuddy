@@ -92,7 +92,7 @@ fun ProfileScreen(onBack: () -> Unit, onBodyWeight: () -> Unit, viewModel: Profi
     ProfileContent(state, onBack, onBodyWeight, onOpen = { sheet = it })
     val close = { sheet = null }
     when (sheet) {
-        ProfileSheet.Picture -> PictureSheet(state.avatarId, state.name.ifBlank { state.email }, { viewModel.setAvatar(it); close() }, close)
+        ProfileSheet.Picture -> PictureSheet(state.avatarId, { viewModel.setAvatar(it); close() }, close)
         ProfileSheet.Name -> NameSheet(state.name, { viewModel.setName(it); close() }, close)
         ProfileSheet.Experience -> ChoiceSheet(
             stringResource(R.string.profile_experience),
@@ -224,14 +224,6 @@ internal fun ProfileContent(state: ProfileUiState, onBack: () -> Unit, onBodyWei
                         )
                     }
                 }
-                item(key = "foot") {
-                    Text(
-                        stringResource(R.string.profile_about_foot),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = cs.onSurfaceVariant,
-                        modifier = Modifier.padding(start = d.hairline),
-                    )
-                }
             }
         }
     }
@@ -269,36 +261,13 @@ private fun AvatarHeader(state: ProfileUiState, onClick: () -> Unit) {
     }
 }
 
-/** Choose a picture (R15-4): the letter, or one of 20 animals. TalkBack: "Fox, selected". */
+/** Choose a picture (R15-4): one of 20 animals (F4: no letter option). TalkBack: "Fox, selected". */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun PictureSheet(current: String?, name: String, onPick: (String?) -> Unit, onDismiss: () -> Unit) {
+internal fun PictureSheet(current: String?, onPick: (String) -> Unit, onDismiss: () -> Unit) {
     val d = GymBuddyTheme.dimens
-    val cs = MaterialTheme.colorScheme
     val c = GymBuddyTheme.colors
     AppBottomSheet(onDismiss = onDismiss, title = stringResource(R.string.profile_choose_picture)) {
-        val letterSelected = Avatars.of(current) == null
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .heightIn(min = d.control)
-                .selectable(selected = letterSelected, role = Role.RadioButton, onClick = { onPick(null) }),
-            horizontalArrangement = Arrangement.spacedBy(d.stack),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Avatar(null, name, d.target)
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.profile_use_letter), style = MaterialTheme.typography.bodyLarge)
-                Text(stringResource(R.string.profile_use_letter_sub), style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
-            }
-            if (letterSelected) Icon(painterResource(AppIcons.Ui.Check), null, Modifier.size(d.icon), tint = c.cobalt)
-        }
-        Text(
-            stringResource(R.string.profile_pick_one),
-            style = MaterialTheme.typography.labelMedium,
-            color = cs.onSurfaceVariant,
-            modifier = Modifier.padding(top = d.stackTight),
-        )
         Avatars.all.chunked(GRID_COLUMNS).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(d.stackTight)) {
                 row.forEach { animal ->
@@ -319,7 +288,6 @@ internal fun PictureSheet(current: String?, name: String, onPick: (String?) -> U
                 }
             }
         }
-        Text(stringResource(R.string.profile_picture_foot), style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
     }
 }
 

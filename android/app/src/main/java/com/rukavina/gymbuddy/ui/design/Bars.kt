@@ -1,5 +1,8 @@
 package com.rukavina.gymbuddy.ui.design
 
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -128,8 +131,9 @@ fun rememberLargeTitleState(): LargeTitleState = remember { LargeTitleState() }
 /**
  * Tab roots: actions row, large title, optional muted subtitle. With a
  * [state], the big title shrinks away as content scrolls and a small
- * title fades into the actions row on a raised background (Figma
- * 85:10257). TalkBack sees one heading: the big title.
+ * title fades into the actions row (Figma 85:10257). F16: no raised
+ * box; the bar stays page coloured and a soft fade under it hides the
+ * content scrolling past. TalkBack sees one heading: the big title.
  */
 @Composable
 fun LargeTitleTopBar(
@@ -140,13 +144,25 @@ fun LargeTitleTopBar(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     val d = GymBuddyTheme.dimens
-    val raised = MaterialTheme.colorScheme.surfaceContainerHigh
+    val page = MaterialTheme.colorScheme.surface
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .zIndex(1f)
             .drawBehind {
                 val f = state?.collapsedFraction ?: 0f
-                if (f > 0f) drawRect(raised.copy(alpha = f))
+                if (f > 0f) {
+                    val fade = TitleFade.toPx()
+                    drawRect(
+                        Brush.verticalGradient(
+                            listOf(page.copy(alpha = f), page.copy(alpha = 0f)),
+                            startY = size.height,
+                            endY = size.height + fade,
+                        ),
+                        topLeft = Offset(0f, size.height),
+                        size = Size(size.width, fade),
+                    )
+                }
             }
             .statusBarsPadding(),
     ) {
@@ -342,3 +358,6 @@ fun AppNavBar(
         }
     }
 }
+
+/** Height of the soft fade under a collapsed [LargeTitleTopBar] (F16). */
+private val TitleFade = 16.dp

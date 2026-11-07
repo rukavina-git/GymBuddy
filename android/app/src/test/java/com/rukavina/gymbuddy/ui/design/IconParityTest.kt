@@ -34,7 +34,7 @@ class IconParityTest {
             .filter { it.startsWith("ic_ui_") || it.startsWith("ic_glyph_") || it.startsWith("ic_tab_") || it.startsWith("brand_") }
             .toSortedSet()
         assertEquals(expected, actual)
-        // design/icons.md: 35 UI, 12 glyphs, 10 tab states.
-        assertEquals(35 + 12 + 10 + 3, actual.size)
+        // design/icons.md: 36 UI, 12 glyphs, 10 tab states.
+        assertEquals(36 + 12 + 10 + 3, actual.size)
     }
 }

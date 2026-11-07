@@ -20,11 +20,28 @@
 - [x] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md) — 5c4299b
 - [x] 11c Device feedback A1: profile + sheets + settings bugs (F1, F3a, F7, F10, F12) — d3b7634
 - [x] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c) — 3694d71
-- [ ] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16)
+- [x] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16) — HASH
 - [ ] 11f+ Device feedback C/D: after design talk, deferred
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11e: Spec is device-feedback.md Round B; device feel over Figma, so no
+  Figma read. Figma still shows the letter row, licence line, BMI footer,
+  phone tip and raised collapsed bar; update it after.
+- 11e: F4 random animal is set in `UserProfileRepository.updateProfile`'s
+  create path only (new local rows). Existing or server-pulled profiles
+  without one keep the letter until the owner picks. Ids live in
+  `domain/model/AvatarIds` (test keeps them equal to `ui/you/Avatars`).
+  "Or pick one" label went with the letter row.
+- 11e: F9 keeps the dark snackbar (an inverse one breaks the lime action
+  and close icon): adds a 1 dp outline + 6 dp shadow on every snackbar;
+  export message is Long with a close button. Full redesign stays F21d.
+- 11e: F11 adds icon `ui/show` (Material Symbols Rounded `visibility`,
+  Apache 2.0, design/icons.md); one eye toggles all three fields. The
+  delete-account password field has no eye (not in F11).
+- 11e: F16 drops the raised box; the bar stays page coloured and draws a
+  16 dp fade below itself (zIndex over the list).
+- 11e: roadmap has no 11c–11e rows (7.11 already ticked); nothing ticked.
 - 11d: Spec is device-feedback.md; bug fixes, no Figma read. F21a
   diagnosed, not fixed: set rows have no trash button; the only trash is
   the swipe background icon, which can't be tapped. Owner to confirm.
@@ -464,6 +481,16 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- From 11e (reviewer, not fixed):
+  - F11 eye has no Compose test.
+  - Bars.kt fade uses `colorScheme.surface`; tab pages paint
+    `background`. Same token today (Ground).
+  - The fade draws outside the bar's bounds: needs an unclipped parent
+    with the list as a sibling (true at all 4 tab roots; not in a
+    Scaffold topBar).
+  - F2: the Fluent Emoji MIT credit is no longer shown in the app (the
+    text still ships in assets/licenses/). Plan 9's licences page must
+    list it.
 - From 11d (reviewer, not fixed):
   - The rule snackbar (F22) dismisses a showing Undo snackbar: delete a
     set, then Done on an invalid set, and Undo is gone.

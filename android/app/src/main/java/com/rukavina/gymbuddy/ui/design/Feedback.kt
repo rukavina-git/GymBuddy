@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.ui.design
 
+import androidx.compose.foundation.BorderStroke
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -41,6 +42,7 @@ private val BannerIcon = 22.dp
 private val EmptyGlyphTile = 80.dp
 private val EmptyGlyph = 40.dp
 private val SnackbarHeight = 56.dp
+private val SnackbarShadow = 6.dp
 
 /**
  * "Couldn't save", "Needs internet". Danger sits on the danger
@@ -111,13 +113,20 @@ fun EmptyState(
     }
 }
 
-/** For `SnackbarHost { AppSnackbar(it) }`: high surface, lime action, min 56 (D12). */
+/**
+ * For `SnackbarHost { AppSnackbar(it) }`: high surface, lime action, min 56 (D12).
+ * F9: an outline and a shadow lift it off dark pages; full redesign is F21d.
+ */
 @Composable
 fun AppSnackbar(data: SnackbarData, modifier: Modifier = Modifier) {
     val d = GymBuddyTheme.dimens
+    val cs = MaterialTheme.colorScheme
     Surface(
         shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        color = cs.surfaceContainerHighest,
+        contentColor = cs.onSurface,
+        border = BorderStroke(d.strokeDivider, cs.outline),
+        shadowElevation = SnackbarShadow,
         modifier = modifier.padding(horizontal = d.insetScreen).fillMaxWidth(),
     ) {
         Row(

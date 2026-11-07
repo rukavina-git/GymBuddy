@@ -41,7 +41,6 @@
     <string name="you_set_password">Set a password</string>
     <string name="you_sign_out">Sign out</string>
     <string name="you_delete_account">Delete account</string>
-    <string name="you_follow_phone">Text size and animations follow your phone\'s settings.</string>
 
     <!-- Dialogs -->
     <string name="you_cancel">Cancel</string>

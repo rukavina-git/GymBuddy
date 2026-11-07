@@ -37,6 +37,7 @@ object AppIcons {
         @DrawableRes val DragDots = R.drawable.ic_ui_drag_dots
         @DrawableRes val Edit = R.drawable.ic_ui_edit
         @DrawableRes val Hide = R.drawable.ic_ui_hide
+        @DrawableRes val Show = R.drawable.ic_ui_show
         @DrawableRes val Info = R.drawable.ic_ui_info
         @DrawableRes val List = R.drawable.ic_ui_list
         @DrawableRes val Logout = R.drawable.ic_ui_logout
