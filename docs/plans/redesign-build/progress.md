@@ -513,8 +513,8 @@
   - A revealed row only closes by swiping back, not by tapping it or opening another row.
   - Compose UI tests with an Undo snackbar must pause mainClock (autoAdvance = false) before
     the action, or idling runs the 8 s timer out (see ActiveWorkoutUiTest swipe test).
-  - android/CLAUDE.md "Verification" still says no adb driving; owner now wants Claude to
-    check on the phone. Owner to update the file.
+  - (done 990fcb7) android/CLAUDE.md Verification now allows phone checks; was:
+    "no adb driving".
 - From 11e (reviewer, not fixed):
   - F11 eye has no Compose test.
   - Bars.kt fade uses `colorScheme.surface`; tab pages paint
