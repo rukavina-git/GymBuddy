@@ -73,6 +73,55 @@ before code.
       should be steered to templates. Move it last: "Didn't find one?
       Start an empty workout".
 
+### Round C consult (2026-11-07, Impeccable + phone check)
+- F3b decided: keep sheets for short pickers and keypads (start, change
+  lift, rest, set keypad, avatar, add to template). Typing moves off
+  sheets: workout/exercise notes and quick create become screens; name
+  and units go inline on their page.
+- F5: owner's phone uses 3-button navigation (`navigation_mode=0`), so
+  there is no system edge swipe. Do it later; must not fight the system
+  gesture when gesture navigation is on.
+- F6 decided: wheel for height (cm, or ft + in) and body weight
+  (kg + .1, starts at last value). Sets keep keypad + steppers.
+- F13 decided: full screen listing what is lost, typing "delete"
+  (localised) enables the button, then password / Google re-auth.
+- F15 decided: 3 recent; "See all" link next to the Recent heading.
+- F20 confirmed on phone (recorded): while holding +, digits get cut off
+  on the left ("87.5" shows as "37.5", "132.5" as ".32.5") because
+  AnimatedContent's size animation clips while the width changes. Also
+  too fast: a 4.5 s hold went 0 → 167.5 kg. Fix: no clip/size animation,
+  slot fits "000.0", slower top speed, a tick every 5 steps.
+- F21a decided: short swipe left stops and shows a tappable Delete;
+  long swipe still deletes; Undo either way.
+- F21d decided: Undo 8 s (or the Android accessibility timeout if
+  longer), 2 dp lime line along the bottom shrinking right → left,
+  timer pauses while touched, line only on snackbars with an action,
+  lighter surface.
+- F23 is a bug, not design: tiles are ~104 dp wide, "12 400 kg" wraps,
+  the Row has no equal heights. Fix: number on one line, unit in the
+  label ("kg lifted"), equal heights. Same on Session detail.
+- F24a decided: "Didn't find one? Start an empty workout" as a quiet
+  button pinned to the sheet bottom (the list scrolls, so last-in-list
+  would bury it). F24b fits on the summary after an empty workout.
+
+### New (found during the consult)
+- [ ] F25 bug · Template time estimate: "djdhdud, 1 exercise · about
+      1360 min" and Full Body A/B "5 exercises · about 5 min". The
+      estimate seems to use real session length, and one session ran
+      ~22 h (Home: "5 workouts · 22 h 53 m"). Owner: the workout had
+      no end limit and was still running the next day. Needs a rule for
+      stale workouts (auto-end or ask) plus an estimate that ignores
+      outliers.
+      Decided (owner): no set for 2 h = forgotten. On open: "Still
+      training? Your last set was at 18:42 yesterday." → Finish at last
+      set (primary; end time = last set, not now) / Keep going /
+      Discard (only if no sets). The lock-screen notification turns into
+      "Workout still running? Tap to finish". Not opened for 24 h:
+      auto-finish at the last set, snackbar on next open. Time
+      estimates skip auto-finished sessions. Touches the domain: own
+      step, after F20 and F23. Check whether Edit workout can fix
+      the existing 22 h session's end time.
+
 ## Round D — features (11f+, own step files)
 - [ ] F18 idea · Workout: every set starts at 0 kg, even for a lift
       done last week (holding + up to 120 kg). Start from the

@@ -21,7 +21,16 @@
 - [x] 11c Device feedback A1: profile + sheets + settings bugs (F1, F3a, F7, F10, F12) — d3b7634
 - [x] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c) — 3694d71
 - [x] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16) — dfeaf5d
-- [ ] 11f+ Device feedback C/D: after design talk, deferred
+- [ ] 11f Feedback: F20 hold +/- digits and speed, F23 stat tiles
+- [ ] 11g Feedback: F1 + F12 profile sync conflict (avatar revert, backup "not possible")
+- [ ] 11h Feedback: F21a short swipe shows Delete, F21d snackbar timer line
+- [ ] 11i Feedback: F15 3 recent + See all, F24a empty workout last, F24b save as template
+- [ ] 11j Feedback: F6 height and body weight wheels
+- [ ] 11k Feedback: F13 delete account screen
+- [ ] 11l Feedback: F3b typing off sheets (notes, quick create, name/units inline)
+- [ ] 11m Feedback: F25 stale workouts (2 h rule, auto-finish, estimates)
+- [ ] 11n Feedback: F18 prefill sets from last session or template
+- [ ] 11o Feedback: F5 edge swipe back (only with gesture nav; last)
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
