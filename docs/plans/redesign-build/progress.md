@@ -20,7 +20,7 @@
 - [x] 11b Cross-flow: backup, re-download, small states (steps/11-cross-flow-states.md) — 5c4299b
 - [x] 11c Device feedback A1: profile + sheets + settings bugs (F1, F3a, F7, F10, F12) — d3b7634
 - [x] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c) — 3694d71
-- [x] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16) — HASH
+- [x] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16) — dfeaf5d
 - [ ] 11f+ Device feedback C/D: after design talk, deferred
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 

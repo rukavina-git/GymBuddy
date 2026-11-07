@@ -34,18 +34,18 @@ before code.
 - [x] F21c bug (3694d71) · Workout: Undo on the delete snackbar does nothing.
 
 ## Round B — quick cuts and small fixes (step 11e)
-- [x] F2 feel · Avatar picker: remove the licence line under the
+- [x] F2 feel (dfeaf5d) · Avatar picker: remove the licence line under the
       pictures (credits move to the licences page, Plan 9).
-- [x] F4 feel · Profile: remove "Use your letter". New profiles get a
+- [x] F4 feel (dfeaf5d) · Profile: remove "Use your letter". New profiles get a
       random animal avatar by default.
-- [x] F8 feel · Profile: remove the "used later for BMI…" footer
+- [x] F8 feel (dfeaf5d) · Profile: remove the "used later for BMI…" footer
       (that belongs in the privacy policy, Plan 9).
-- [x] F14 feel · Remove the tip "Text size and animation follow your
+- [x] F14 feel (dfeaf5d) · Remove the tip "Text size and animation follow your
       phone settings". Tips must be about the app, not Android.
-- [x] F9 feel · Export: the "Saved" message is hard to read (dark on
+- [x] F9 feel (dfeaf5d) · Export: the "Saved" message is hard to read (dark on
       dark) and too short. Ties in with the snackbar redesign (F21d).
-- [x] F11 idea · Settings → Set / change password: a show/hide eye.
-- [x] F16 feel · Progress: the collapsed "Progress" title shows a
+- [x] F11 idea (dfeaf5d) · Settings → Set / change password: a show/hide eye.
+- [x] F16 feel (dfeaf5d) · Progress: the collapsed "Progress" title shows a
       hard square box when scrolling; make it smooth.
 
 ## Round C — design consults (11f+: Impeccable, then Figma, then code)
