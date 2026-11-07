@@ -11,12 +11,12 @@ before code.
 ## Round A — bugs (11c = A1: F1–F12, 11d = A2: F17–F21c)
 - [ ] F1 bug · Profile picture: the picked avatar shows for a second,
       then goes back to empty.
-- [x] F3a bug (cfa11a5) · All bottom sheets: the sheet draws over the Android
+- [x] F3a bug (d3b7634) · All bottom sheets: the sheet draws over the Android
       navigation bar (inset bug). Fix the insets now; whether to keep
       sheets at all is F3b.
-- [x] F7 bug (cfa11a5) · Height sheet: Save is off screen; you have to scroll
+- [x] F7 bug (d3b7634) · Height sheet: Save is off screen; you have to scroll
       the sheet up to see it.
-- [x] F10 bug (cfa11a5) · Settings → Set a password: the field borders are
+- [x] F10 bug (d3b7634) · Settings → Set a password: the field borders are
       invisible (the fields work).
 - [ ] F12 bug? · Back up (You): 2 changes waiting, "Back up" says
       it's not possible right now. Find out whether the backend was
