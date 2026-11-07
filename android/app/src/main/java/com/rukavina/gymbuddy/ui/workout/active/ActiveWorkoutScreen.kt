@@ -30,7 +30,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import com.rukavina.gymbuddy.ui.exercises.page.ExerciseNoteSheet
+import com.rukavina.gymbuddy.ui.exercises.page.ExerciseNoteEditor
 import com.rukavina.gymbuddy.ui.design.AppIconButton
 import com.rukavina.gymbuddy.ui.theme.FullShape
 import androidx.compose.ui.semantics.Role
@@ -377,7 +377,7 @@ internal fun ActiveWorkoutContent(
             onReorder = { sheet = if (it) WorkoutSheet.Reorder else WorkoutSheet.Exercises },
             onDismiss = { sheet = null },
         )
-        WorkoutSheet.Note -> NoteSheet(
+        WorkoutSheet.Note -> WorkoutNoteEditor(
             note = state.note,
             onSave = { sheet = null; actions.onNote(it) },
             onDismiss = { sheet = null },
@@ -393,10 +393,9 @@ internal fun ActiveWorkoutContent(
             )
         }
         WorkoutSheet.YourNote -> exercise?.let { ex ->
-            ExerciseNoteSheet(
+            ExerciseNoteEditor(
                 exerciseName = ex.exerciseName,
                 note = state.userNotes[ex.exerciseId],
-                editing = false,
                 onSave = { sheet = null; actions.onUserNote(ex.exerciseId, it) },
                 onDismiss = { sheet = null },
             )

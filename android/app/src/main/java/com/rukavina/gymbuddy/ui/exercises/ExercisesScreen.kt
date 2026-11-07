@@ -50,7 +50,7 @@ import com.rukavina.gymbuddy.ui.design.rememberLargeTitleState
 import com.rukavina.gymbuddy.ui.exercise.equipmentLabel
 import com.rukavina.gymbuddy.ui.exercise.muscleLabel
 import com.rukavina.gymbuddy.ui.exercises.create.ExerciseForm
-import com.rukavina.gymbuddy.ui.exercises.create.QuickCreateSheet
+import com.rukavina.gymbuddy.ui.exercises.create.QuickCreateScreen
 import com.rukavina.gymbuddy.ui.template.joinDot
 import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
@@ -99,7 +99,7 @@ fun ExercisesScreen(
         onCreateNamed = { quickName = it },
     )
     quickName?.let { name ->
-        QuickCreateSheet(
+        QuickCreateScreen(
             initialName = name,
             busy = creating,
             onCreate = viewModel::quickCreate,

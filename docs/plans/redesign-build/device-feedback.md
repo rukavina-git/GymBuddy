@@ -49,7 +49,7 @@ before code.
       hard square box when scrolling; make it smooth.
 
 ## Round C — design consults (11f+: Impeccable, then Figma, then code)
-- [ ] F3b design · Bottom sheets in general: keep them, or use
+- [x] F3b design · (HASH) Bottom sheets in general: keep them, or use
       something else?
 - [ ] F5 design · iOS-style swipe from the left edge to go back, on
       most screens. Same rules as Back: if leaving would lose data, ask

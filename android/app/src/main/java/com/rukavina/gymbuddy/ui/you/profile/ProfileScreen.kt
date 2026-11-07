@@ -81,23 +81,26 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardActions
 
 /** Raw sizes from R15-3/R15-4 (DESIGN.md §4): page avatar, edit badge, picker cell check. */
 private val PageAvatar = 96.dp
 private val Badge = 32.dp
 
-internal enum class ProfileSheet { Picture, Name, Experience, Height, BirthDate, Gender, Activity, Goal, TargetWeight }
+internal enum class ProfileSheet { Picture, Experience, Height, BirthDate, Gender, Activity, Goal, TargetWeight }
 
-/** Profile (R15-3). Every row edits in a sheet. */
+/** Profile (R15-3). Name edits inline (F3b); the other rows open a picker sheet. */
 @Composable
 fun ProfileScreen(onBack: () -> Unit, onBodyWeight: () -> Unit, viewModel: ProfileViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var sheet by rememberSaveable { mutableStateOf<ProfileSheet?>(null) }
-    ProfileContent(state, onBack, onBodyWeight, onOpen = { sheet = it })
+    ProfileContent(state, onBack, onBodyWeight, onOpen = { sheet = it }, onName = viewModel::setName)
     val close = { sheet = null }
     when (sheet) {
         ProfileSheet.Picture -> PictureSheet(state.avatarId, { viewModel.setAvatar(it); close() }, close)
-        ProfileSheet.Name -> NameSheet(state.name, { viewModel.setName(it); close() }, close)
         ProfileSheet.Experience -> ChoiceSheet(
             stringResource(R.string.profile_experience),
             ExperienceLevel.entries.map { Choice<ExperienceLevel?>(it, experienceLabel(it), experienceSub(it)) },
@@ -143,7 +146,13 @@ fun ProfileScreen(onBack: () -> Unit, onBodyWeight: () -> Unit, viewModel: Profi
 private fun <T> notSet(): List<Choice<T?>> = listOf(Choice(null, stringResource(R.string.profile_not_set)))
 
 @Composable
-internal fun ProfileContent(state: ProfileUiState, onBack: () -> Unit, onBodyWeight: () -> Unit, onOpen: (ProfileSheet) -> Unit) {
+internal fun ProfileContent(
+    state: ProfileUiState,
+    onBack: () -> Unit,
+    onBodyWeight: () -> Unit,
+    onOpen: (ProfileSheet) -> Unit,
+    onName: (String) -> Unit,
+) {
     val d = GymBuddyTheme.dimens
     val cs = MaterialTheme.colorScheme
     val dash = stringResource(R.string.profile_dash)
@@ -165,9 +174,7 @@ internal fun ProfileContent(state: ProfileUiState, onBack: () -> Unit, onBodyWei
                 }
                 item(key = "avatar") { AvatarHeader(state) { onOpen(ProfileSheet.Picture) } }
                 item(key = "name") {
-                    Surface(shape = MaterialTheme.shapes.large, color = cs.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
-                        ValueRow(stringResource(R.string.profile_name), state.name.ifBlank { dash }, { onOpen(ProfileSheet.Name) })
-                    }
+                    NameField(state.name, onName)
                     val line = when {
                         state.isGuest -> stringResource(R.string.you_guest_title)
                         state.viaGoogle && state.email.isNotBlank() -> stringResource(R.string.profile_email_google, state.email)
@@ -290,22 +297,37 @@ internal fun PictureSheet(current: String?, onPick: (String) -> Unit, onDismiss:
 private const val GRID_COLUMNS = 5
 private val PickerCell = 56.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * F3b: what to save when the inline name field is left. Trimmed; null when
+ * blank, too long or unchanged (blank reverts to [saved]).
+ */
+internal fun nameToSave(typed: String, saved: String): String? {
+    val t = typed.trim()
+    return t.takeIf { it.isNotEmpty() && it.length <= ProfileViewModel.MAX_NAME && it != saved }
+}
+
+/** Name typed in place (F3b). Saves on Done or when focus leaves; an invalid name reverts. */
 @Composable
-private fun NameSheet(current: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
-    val d = GymBuddyTheme.dimens
-    var text by rememberSaveable { mutableStateOf(current) }
-    val ok = text.isNotBlank() && text.trim().length <= ProfileViewModel.MAX_NAME
-    AppBottomSheet(onDismiss = onDismiss, title = stringResource(R.string.profile_name)) {
-        AppTextField(
-            value = text,
-            onValueChange = { text = it },
-            label = stringResource(R.string.profile_name),
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
-        )
-        PrimaryButton(stringResource(R.string.you_save), { onSave(text) }, Modifier.fillMaxWidth().padding(top = d.stackTight), enabled = ok)
-    }
+private fun NameField(saved: String, onSave: (String) -> Unit) {
+    var text by rememberSaveable(saved) { mutableStateOf(saved) }
+    val focus = LocalFocusManager.current
+    var focused by remember { mutableStateOf(false) }
+    val tooLong = text.trim().length > ProfileViewModel.MAX_NAME
+    AppTextField(
+        value = text,
+        onValueChange = { text = it },
+        label = stringResource(R.string.profile_name),
+        isError = tooLong,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
+        modifier = Modifier.fillMaxWidth().onFocusChanged { f ->
+            if (focused && !f.isFocused) {
+                val save = nameToSave(text, saved)
+                if (save != null) onSave(save) else text = saved
+            }
+            focused = f.isFocused
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

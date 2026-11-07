@@ -35,7 +35,7 @@ import com.rukavina.gymbuddy.ui.design.AppChip
 import com.rukavina.gymbuddy.ui.design.AppSnackbar
 import com.rukavina.gymbuddy.ui.exercises.CreateNamed
 import com.rukavina.gymbuddy.ui.exercises.ListMuscleChips
-import com.rukavina.gymbuddy.ui.exercises.create.QuickCreateSheet
+import com.rukavina.gymbuddy.ui.exercises.create.QuickCreateScreen
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
@@ -87,7 +87,7 @@ fun ExercisePickerScreen(
         snackbar = snackbar,
     )
     quickName?.let { name ->
-        QuickCreateSheet(initialName = name, busy = creating, onCreate = viewModel::quickCreate, onDismiss = { quickName = null })
+        QuickCreateScreen(initialName = name, busy = creating, onCreate = viewModel::quickCreate, onDismiss = { quickName = null })
     }
 }
 

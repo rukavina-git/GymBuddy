@@ -40,7 +40,7 @@ class YouUiTest {
     )
     private val actions = YouActions(
         nav = nav,
-        onUnits = {},
+        onUnits = { calls += "units:$it" },
         onRestBuzz = {},
         onNotification = {},
         onExport = {},
@@ -84,5 +84,12 @@ class YouUiTest {
     fun backedUpShowsHowLongAgo() {
         show(YouUiState(isLoading = false, userEmail = "k@example.com", backup = BackupLine.BackedUp(clock.millis() - 2 * 60_000)))
         rule.onNodeWithText("Backed up · 2 min ago").assertIsDisplayed()
+    }
+
+    @Test
+    fun unitsToggleSavesOnTap() {
+        show(YouUiState(isLoading = false, isGuest = true))
+        rule.onNodeWithText("lb · mi").performClick()
+        assertEquals(listOf("units:IMPERIAL"), calls)
     }
 }

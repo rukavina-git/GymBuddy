@@ -36,6 +36,11 @@ import com.rukavina.gymbuddy.ui.design.PrimaryButton
 import com.rukavina.gymbuddy.ui.template.clock
 import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
+import com.rukavina.gymbuddy.ui.design.FullScreenEditor
+import com.rukavina.gymbuddy.ui.design.rememberOpenFocus
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
 
 /** Rest choices on R13-10, in seconds; "Other" types any time. */
 val RestChoices = listOf(60, 90, 120, 150, 180, 240, 300)
@@ -110,51 +115,31 @@ fun ExerciseRestSheet(
 
 private const val REST_COLUMNS = 4
 
-/**
- * Your note for this exercise (Figma R13-14): shown everywhere, edited
- * here. With a note and [editing] false it reads first, "Edit note"
- * opens the field; otherwise the field is open.
- */
-@OptIn(ExperimentalMaterial3Api::class)
+/** Your note on an exercise (F3b: a full screen, not a sheet). Opens ready to type. */
 @Composable
-fun ExerciseNoteSheet(
+fun ExerciseNoteEditor(
     exerciseName: String,
     note: String?,
-    editing: Boolean,
     onSave: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val d = GymBuddyTheme.dimens
-    var edit by rememberSaveable { mutableStateOf(editing || note.isNullOrBlank()) }
     var text by rememberSaveable { mutableStateOf(note.orEmpty()) }
-    AppBottomSheet(
-        onDismiss = onDismiss,
+    FullScreenEditor(
         title = stringResource(R.string.exercise_note_title),
         subtitle = stringResource(R.string.exercise_note_subtitle, exerciseName),
+        onClose = onDismiss,
+        actionLabel = stringResource(R.string.exercise_note_save),
+        onAction = { onSave(text) },
     ) {
-        if (!edit) {
-            Text(note.orEmpty(), style = MaterialTheme.typography.bodyLarge)
-            AppTextButton(
-                text = stringResource(R.string.exercise_edit_note),
-                onClick = { edit = true },
-                icon = AppIcons.Ui.Edit,
-                modifier = Modifier.padding(top = d.group),
-            )
-        } else {
-            AppTextField(
-                value = text,
-                onValueChange = { text = it },
-                label = stringResource(R.string.exercise_note_label),
-                placeholder = stringResource(R.string.exercise_note_placeholder),
-                singleLine = false,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            PrimaryButton(
-                text = stringResource(R.string.exercise_note_save),
-                onClick = { onSave(text) },
-                modifier = Modifier.fillMaxWidth().padding(top = d.group),
-            )
-        }
+        AppTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = stringResource(R.string.exercise_note_label),
+            placeholder = stringResource(R.string.exercise_note_placeholder),
+            singleLine = false,
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+            modifier = Modifier.fillMaxWidth().focusRequester(rememberOpenFocus()),
+        )
     }
 }
 

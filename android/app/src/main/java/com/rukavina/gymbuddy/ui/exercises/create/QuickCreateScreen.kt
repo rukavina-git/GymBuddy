@@ -2,7 +2,6 @@ package com.rukavina.gymbuddy.ui.exercises.create
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,19 +16,18 @@ import androidx.compose.foundation.text.KeyboardOptions
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
-import com.rukavina.gymbuddy.ui.design.AppBottomSheet
+import com.rukavina.gymbuddy.ui.design.FullScreenEditor
 import com.rukavina.gymbuddy.ui.design.AppTextField
-import com.rukavina.gymbuddy.ui.design.PrimaryButton
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 
 /**
  * Create C (Figma R13-6): from a search with no match, in the Exercises
  * tab and the picker. Name comes prefilled from the search text (words
  * capitalised); equipment, steps and rest are added later on its page.
+ * F3b: a full screen, not a sheet, so the keyboard has room.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuickCreateSheet(
+fun QuickCreateScreen(
     initialName: String,
     busy: Boolean,
     onCreate: (ExerciseForm) -> Unit,
@@ -39,7 +37,14 @@ fun QuickCreateSheet(
     var name by rememberSaveable { mutableStateOf(titleCase(initialName)) }
     var tracking by rememberSaveable { mutableStateOf(ExerciseTrackingType.WEIGHT_REPS) }
     var muscle by rememberSaveable { mutableStateOf<MuscleGroup?>(null) }
-    AppBottomSheet(onDismiss = onDismiss, title = stringResource(R.string.create_title_new)) {
+    FullScreenEditor(
+        title = stringResource(R.string.create_title_new),
+        onClose = onDismiss,
+        actionLabel = stringResource(R.string.create_create),
+        onAction = { onCreate(ExerciseForm(name = name, tracking = tracking, mainMuscle = muscle)) },
+        actionEnabled = name.isNotBlank() && !busy,
+        actionLoading = busy,
+    ) {
         AppTextField(
             value = name,
             onValueChange = { name = it },
@@ -56,13 +61,6 @@ fun QuickCreateSheet(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = d.stack),
-        )
-        PrimaryButton(
-            text = stringResource(R.string.create_create),
-            onClick = { onCreate(ExerciseForm(name = name, tracking = tracking, mainMuscle = muscle)) },
-            enabled = name.isNotBlank() && !busy,
-            loading = busy,
-            modifier = Modifier.fillMaxWidth().padding(top = d.group),
         )
     }
 }

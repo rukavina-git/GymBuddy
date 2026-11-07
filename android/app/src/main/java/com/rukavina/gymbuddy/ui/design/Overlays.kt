@@ -28,6 +28,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -235,4 +245,61 @@ fun AppMenuItem(
         colors = MenuDefaults.itemColors(textColor = color, leadingIconColor = color),
         contentPadding = PaddingValues(horizontal = GymBuddyTheme.dimens.group),
     )
+}
+
+/**
+ * F3b: typing happens on a full screen, not a sheet. A full-screen dialog
+ * over the caller (its ViewModel and state stay put): ✕ + [title] on top,
+ * [content] scrolls, the [actionLabel] button is pinned above the keyboard
+ * (like 11k). System back and ✕ call [onClose]; nothing is saved then.
+ */
+@Composable
+fun FullScreenEditor(
+    title: String,
+    onClose: () -> Unit,
+    actionLabel: String,
+    onAction: () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    actionEnabled: Boolean = true,
+    actionLoading: Boolean = false,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val d = GymBuddyTheme.dimens
+    val cs = MaterialTheme.colorScheme
+    Dialog(
+        onDismissRequest = onClose,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+    ) {
+        Surface(modifier.fillMaxSize(), color = cs.background) {
+            Column(Modifier.fillMaxSize().systemBarsPadding().imePadding()) {
+                BackTopBar(onBack = onClose, title = title, close = true)
+                Column(
+                    Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
+                        .padding(horizontal = d.insetScreen, vertical = d.stack),
+                    verticalArrangement = Arrangement.spacedBy(d.stackTight),
+                ) {
+                    if (subtitle != null) {
+                        Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = cs.onSurfaceVariant)
+                    }
+                    content()
+                }
+                PrimaryButton(
+                    text = actionLabel,
+                    onClick = onAction,
+                    enabled = actionEnabled,
+                    loading = actionLoading,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = d.insetScreen, vertical = d.stack),
+                )
+            }
+        }
+    }
+}
+
+/** Focuses the field it is attached to once, when it first appears (editors open ready to type). */
+@Composable
+fun rememberOpenFocus(): FocusRequester {
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    return focus
 }

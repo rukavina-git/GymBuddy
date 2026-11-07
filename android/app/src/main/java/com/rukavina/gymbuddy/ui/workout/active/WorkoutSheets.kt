@@ -50,6 +50,11 @@ import com.rukavina.gymbuddy.ui.theme.AppIcons
 import com.rukavina.gymbuddy.ui.theme.FullShape
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 import com.rukavina.gymbuddy.ui.workout.ActiveExercise
+import com.rukavina.gymbuddy.ui.design.FullScreenEditor
+import com.rukavina.gymbuddy.ui.design.rememberOpenFocus
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
 
 /** Done mark in a sheet row, same as the set row's (DESIGN.md §4 raw size, owed). */
 private val Mark = 28.dp
@@ -201,25 +206,24 @@ private fun ExerciseSheetRow(
     }
 }
 
-/** ⋯ → Workout note: one text field, saved as the session's notes. */
-@OptIn(ExperimentalMaterial3Api::class)
+/** ⋯ → Workout note (F3b: a full screen, not a sheet), saved as the session's notes. */
 @Composable
-internal fun NoteSheet(note: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
-    val d = GymBuddyTheme.dimens
+internal fun WorkoutNoteEditor(note: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
     var text by rememberSaveable { mutableStateOf(note) }
-    AppBottomSheet(onDismiss = onDismiss, title = stringResource(R.string.workout_note_title)) {
+    FullScreenEditor(
+        title = stringResource(R.string.workout_note_title),
+        onClose = onDismiss,
+        actionLabel = stringResource(R.string.workout_note_save),
+        onAction = { onSave(text) },
+    ) {
         AppTextField(
             value = text,
             onValueChange = { text = it },
             label = stringResource(R.string.workout_note_label),
             placeholder = stringResource(R.string.workout_note_placeholder),
             singleLine = false,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        PrimaryButton(
-            text = stringResource(R.string.workout_note_save),
-            onClick = { onSave(text) },
-            modifier = Modifier.fillMaxWidth().padding(top = d.group),
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+            modifier = Modifier.fillMaxWidth().focusRequester(rememberOpenFocus()),
         )
     }
 }

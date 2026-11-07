@@ -147,10 +147,9 @@ fun ExercisePageScreen(
             onPick = { sheet = null; viewModel.setRest(it) },
             onDismiss = { sheet = null },
         )
-        PageSheet.Note -> ExerciseNoteSheet(
+        PageSheet.Note -> ExerciseNoteEditor(
             exerciseName = exercise.name,
             note = state.user.note,
-            editing = true,
             onSave = { sheet = null; viewModel.setNote(it) },
             onDismiss = { sheet = null },
         )

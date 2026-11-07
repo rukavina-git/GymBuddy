@@ -22,8 +22,6 @@
     <string name="you_units">Units</string>
     <string name="you_units_metric">kg · km</string>
     <string name="you_units_imperial">lb · mi</string>
-    <string name="you_units_metric_long">Metric (kg, km)</string>
-    <string name="you_units_imperial_long">Imperial (lb, mi)</string>
     <string name="you_rest_buzz">Rest buzz</string>
     <string name="you_notification">Workout notification</string>
     <string name="you_notification_sub">Lock screen controls, in Android settings</string>

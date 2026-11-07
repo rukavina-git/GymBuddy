@@ -25,13 +25,18 @@
 - [x] 11g Feedback: F1 + F12 avatar revert, backup "not possible" (stale Render build; steps/11g-profile-sync.md) — 2576fc9
 - [x] 11i Feedback: F24b save as template + F6 height/weight wheels (11j folded in; steps/11i-template-and-wheels.md) — 391a60f
 - [x] 11k Feedback: F13 delete account screen (steps/11k-delete-account-screen.md) — 192e59b
-- [ ] 11l Feedback: F3b typing off sheets (notes, quick create, name/units inline)
+- [x] 11l Feedback: F3b typing off sheets (steps/11l-typing-off-sheets.md) — HASH
 - [ ] 11m Feedback: F25 stale workouts (2 h rule, auto-finish, estimates)
 - [ ] 11n Feedback: F18 prefill sets from last session or template
 - [ ] 11o Feedback: F5 edge swipe back (only with gesture nav; last)
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11l: Figma waived (owner "go"). Units toggle uses the short labels (kg · km | lb · mi); the long
+  strings are deleted. A name over 40 chars reverts on leave (field shows error while typing).
+  Phone: units, inline name (Done saves), quick create (Exercises), exercise page note checked;
+  workout note, workout "Your note" and picker quick create NOT run on phone (would create a
+  session on the owner's account); they share `FullScreenEditor` with the checked ones.
 - 11k: Figma waived by owner. Body weight entries not listed (LocalDataCounts has no body weight;
   would touch data). "Your account and its backup" is always the first lost line, not only when
   counts are empty. Button + "You'll confirm…" are pinned under the scroll so they sit above the
@@ -519,6 +524,11 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- 11l: `FullScreenEditor` (ui/design/Overlays.kt) is a full-screen `Dialog`, not a nav route; it
+  keeps the caller's ViewModel. `rememberOpenFocus()` focuses a field on open.
+- 11l reviewer, not fixed: inline name saves only on focus loss (Done); top-bar back while typing
+  may drop the edit (check on phone). No test for `ExerciseNoteEditor` or NameField focus.
+  `UnitsToggleWidth = 200.dp` raw; unused imports left in YouScreen/ExerciseSheets/WorkoutSheets.
 - 11k: DeleteAccountScreen has its own `YouViewModel` (DeleteAccount nav entry), separate from
   the You page's; they share no state. Deletion/progress dialogs now live only on that screen.
 - 11k reviewer, not fixed: no Compose test for the error line or busy/loading state; the

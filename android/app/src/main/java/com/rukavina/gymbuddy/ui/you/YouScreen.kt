@@ -68,6 +68,8 @@ import com.rukavina.gymbuddy.ui.theme.FullShape
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 import kotlinx.coroutines.launch
 import java.time.Clock
+import com.rukavina.gymbuddy.ui.design.SegmentedButtons
+import androidx.compose.foundation.layout.width
 
 /** Raw size from R15-2 (DESIGN.md §4): avatar on the account card. */
 private val CardAvatar = 48.dp
@@ -122,7 +124,7 @@ fun YouScreen(nav: YouNav, viewModel: YouViewModel = hiltViewModel()) {
     }
     val actions = YouActions(
         nav = nav,
-        onUnits = { open(YouSheet.Units) },
+        onUnits = viewModel::setUnits,
         onRestBuzz = viewModel::setRestBuzz,
         onNotification = {
             context.startActivity(
@@ -144,7 +146,6 @@ fun YouScreen(nav: YouNav, viewModel: YouViewModel = hiltViewModel()) {
 
     val counts by viewModel.counts.collectAsStateWithLifecycle()
     when (sheet) {
-        YouSheet.Units -> UnitsSheet(state.units, { viewModel.setUnits(it); sheet = null }, { sheet = null })
         YouSheet.Export -> ExportSheet(
             counts = counts,
             saving = exportState == ExportUiState.Saving,
@@ -176,11 +177,11 @@ fun YouScreen(nav: YouNav, viewModel: YouViewModel = hiltViewModel()) {
     )
 }
 
-internal enum class YouSheet { Units, Export, Erase, Password }
+internal enum class YouSheet { Export, Erase, Password }
 
 internal data class YouActions(
     val nav: YouNav,
-    val onUnits: () -> Unit,
+    val onUnits: (PreferredUnits) -> Unit,
     val onRestBuzz: (Boolean) -> Unit,
     val onNotification: () -> Unit,
     val onExport: () -> Unit,
@@ -210,11 +211,7 @@ internal fun YouContent(state: YouUiState, actions: YouActions, clock: Clock) {
                 }
                 item(key = "workout") {
                     Group(stringResource(R.string.you_group_workout)) {
-                        ValueRow(
-                            stringResource(R.string.you_units),
-                            stringResource(if (state.units == PreferredUnits.IMPERIAL) R.string.you_units_imperial else R.string.you_units_metric),
-                            actions.onUnits,
-                        )
+                        UnitsRow(state.units, actions.onUnits)
                         RowDivider()
                         SwitchRow(stringResource(R.string.you_rest_buzz), state.restBuzz, actions.onRestBuzz)
                         RowDivider()
@@ -364,30 +361,25 @@ private fun SwitchRow(title: String, checked: Boolean, onChange: (Boolean) -> Un
     }
 }
 
-/** One choice for now (decision 3): metric or imperial for weight and distance. */
-@OptIn(ExperimentalMaterial3Api::class)
+/** One choice for now (decision 3): metric or imperial. Inline toggle, tap saves (F3b). */
 @Composable
-private fun UnitsSheet(current: PreferredUnits, onPick: (PreferredUnits) -> Unit, onDismiss: () -> Unit) {
+private fun UnitsRow(current: PreferredUnits, onPick: (PreferredUnits) -> Unit) {
     val d = GymBuddyTheme.dimens
-    val c = GymBuddyTheme.colors
-    val cs = MaterialTheme.colorScheme
-    AppBottomSheet(onDismiss = onDismiss, title = stringResource(R.string.you_units)) {
-        listOf(
-            PreferredUnits.METRIC to R.string.you_units_metric_long,
-            PreferredUnits.IMPERIAL to R.string.you_units_imperial_long,
-        ).forEach { (units, label) ->
-            val selected = units == current
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = d.control)
-                    .selectable(selected = selected, role = Role.RadioButton, onClick = { onPick(units) }),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(d.stack),
-            ) {
-                RadioButton(selected = selected, onClick = null, colors = RadioButtonDefaults.colors(selectedColor = c.cobalt, unselectedColor = cs.outline))
-                Text(stringResource(label), style = MaterialTheme.typography.bodyLarge)
-            }
-        }
+    val options = listOf(PreferredUnits.METRIC, PreferredUnits.IMPERIAL)
+    Row(
+        Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
+            .heightIn(min = d.control).padding(horizontal = d.insetCard, vertical = d.stackTight),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(d.stack),
+    ) {
+        Text(stringResource(R.string.you_units), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        SegmentedButtons(
+            options = listOf(stringResource(R.string.you_units_metric), stringResource(R.string.you_units_imperial)),
+            selectedIndex = options.indexOf(current),
+            onSelect = { onPick(options[it]) },
+            modifier = Modifier.width(UnitsToggleWidth),
+        )
     }
 }
+
+private val UnitsToggleWidth = 200.dp

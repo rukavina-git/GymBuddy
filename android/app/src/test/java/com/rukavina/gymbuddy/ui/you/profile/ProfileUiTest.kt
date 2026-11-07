@@ -49,10 +49,12 @@ class ProfileUiTest {
                     onBack = {},
                     onBodyWeight = { opened += "weight" },
                     onOpen = { opened += it },
+                    onName = {},
                 )
             }
         }
         rule.onNodeWithText("k@x.y · signed in with Google").assertExists()
+        rule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Body weight"))
         rule.onNodeWithText("Body weight").performClick()
         rule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Target weight"))
         assertEquals(true, rule.onAllNodesWithText("—").fetchSemanticsNodes().size >= 5)
