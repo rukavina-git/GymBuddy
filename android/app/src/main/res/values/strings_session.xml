@@ -2,11 +2,8 @@
 <resources>
     <!-- Session detail (Plan 7 step 09a, Figma 107:15763) -->
     <string name="session_time_range">%1$s–%2$s</string>
-    <string name="session_distance">distance</string>
     <string name="session_per_km">per km</string>
     <string name="session_per_mi">per mi</string>
-    <string name="session_km">%s km</string>
-    <string name="session_mi">%s mi</string>
     <string name="session_km_label">km</string>
     <string name="session_mi_label">mi</string>
     <string name="session_start_again">Start %s again</string>

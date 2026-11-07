@@ -80,6 +80,8 @@ data class YouNav(
     val onHiddenExercises: () -> Unit,
     val onHiddenTemplates: () -> Unit,
     val onAbout: () -> Unit,
+    /** Delete account screen (F13). */
+    val onDeleteAccount: () -> Unit,
     /** Signed out, erased or deleted. */
     val onLeft: () -> Unit,
 )
@@ -116,7 +118,6 @@ fun YouScreen(nav: YouNav, viewModel: YouViewModel = hiltViewModel()) {
 
     val open = { s: YouSheet ->
         if (s == YouSheet.Export || s == YouSheet.Erase) viewModel.loadCounts()
-        if (s == YouSheet.Delete) viewModel.loadDeletionWarning()
         sheet = s
     }
     val actions = YouActions(
@@ -133,7 +134,7 @@ fun YouScreen(nav: YouNav, viewModel: YouViewModel = hiltViewModel()) {
         onRetryBackup = viewModel::retryBackup,
         onPassword = { open(YouSheet.Password) },
         onSignOut = viewModel::signOut,
-        onDelete = { open(YouSheet.Delete) },
+        onDelete = nav.onDeleteAccount,
     )
 
     Box(Modifier.fillMaxSize()) {
@@ -162,16 +163,6 @@ fun YouScreen(nav: YouNav, viewModel: YouViewModel = hiltViewModel()) {
             onDone = { message -> sheet = null; scope.launch { snackbar.showSnackbar(message) } },
             onDismiss = { sheet = null },
         )
-        YouSheet.Delete -> {
-            val unsynced by viewModel.deletionUnsyncedLines.collectAsStateWithLifecycle()
-            DeleteAccountFlow(
-                isGoogleOnly = state.isGoogleOnly,
-                counts = counts,
-                unsyncedLines = unsynced,
-                viewModel = viewModel,
-                onClose = { sheet = null },
-            )
-        }
         null -> Unit
     }
 
@@ -183,15 +174,9 @@ fun YouScreen(nav: YouNav, viewModel: YouViewModel = hiltViewModel()) {
         onRetry = viewModel::retryLogout,
         onCancel = viewModel::cancelLogout,
     )
-    val deletionState by viewModel.accountDeletionState.collectAsStateWithLifecycle()
-    DeletionProgressDialogs(
-        state = deletionState,
-        onRetry = viewModel::retryAccountDeletion,
-        onDismiss = viewModel::dismissAccountDeletion,
-    )
 }
 
-internal enum class YouSheet { Units, Export, Erase, Password, Delete }
+internal enum class YouSheet { Units, Export, Erase, Password }
 
 internal data class YouActions(
     val nav: YouNav,

@@ -35,6 +35,7 @@ class YouUiTest {
         onHiddenExercises = {},
         onHiddenTemplates = {},
         onAbout = {},
+        onDeleteAccount = {},
         onLeft = {},
     )
     private val actions = YouActions(

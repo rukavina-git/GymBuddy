@@ -160,6 +160,24 @@ fun DangerButton(
     )
 }
 
+/** Filled red, full width: only the final step of an action you can't undo (Delete account screen). */
+@Composable
+fun DangerFilledButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    loading: Boolean = false,
+) {
+    val cs = MaterialTheme.colorScheme
+    PillButton(
+        text = text, onClick = onClick, modifier = modifier, size = ButtonSize.Medium, enabled = enabled, icon = null,
+        container = if (enabled || loading) cs.error else cs.surfaceContainerHigh,
+        content = if (enabled || loading) cs.onError else GymBuddyTheme.colors.disabled,
+        loading = loading,
+    )
+}
+
 enum class IconButtonStyle { Lime, Raised, High, Plain }
 
 /** 48dp round icon button. Lime only for a primary action (Play). */

@@ -29,6 +29,7 @@ object NavRoutes {
     const val You = "you"
     const val Profile = "profile"
     const val About = "about"
+    const val DeleteAccount = "delete_account"
     const val ActiveWorkout = "active_workout"
     const val WorkoutSummary = "workout_summary"
     const val TemplatePage = "template/{templateId}"

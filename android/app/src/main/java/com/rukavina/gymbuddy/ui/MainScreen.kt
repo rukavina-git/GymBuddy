@@ -84,6 +84,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import com.rukavina.gymbuddy.ui.guest.GuestMergeViewModel
 import com.rukavina.gymbuddy.ui.you.AboutScreen
+import com.rukavina.gymbuddy.ui.you.DeleteAccountScreen
 import com.rukavina.gymbuddy.ui.you.HiddenExercisesScreen
 import com.rukavina.gymbuddy.ui.you.HiddenTemplatesScreen
 import com.rukavina.gymbuddy.ui.you.YouNav
@@ -434,11 +435,18 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                         onHiddenExercises = { bottomNavController.navigate(NavRoutes.HiddenExercises) },
                         onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
                         onAbout = { bottomNavController.navigate(NavRoutes.About) },
+                        onDeleteAccount = { bottomNavController.navigate(NavRoutes.DeleteAccount) { launchSingleTop = true } },
                         onLeft = { rootNavController.openWelcome() },
                     ),
                 )
             }
 
+            composable(NavRoutes.DeleteAccount) {
+                DeleteAccountScreen(
+                    onBack = { bottomNavController.popBackStack() },
+                    onLeft = { rootNavController.openWelcome() },
+                )
+            }
             composable(NavRoutes.About) {
                 AboutScreen(
                     onBack = { bottomNavController.popBackStack() },

@@ -24,7 +24,7 @@
 - [x] 11f Feedback: F20, F23, F15, F24a, F21a, F21d (grown: owner asked for bigger feedback steps) — aa75b70
 - [x] 11g Feedback: F1 + F12 avatar revert, backup "not possible" (stale Render build; steps/11g-profile-sync.md) — 2576fc9
 - [x] 11i Feedback: F24b save as template + F6 height/weight wheels (11j folded in; steps/11i-template-and-wheels.md) — 391a60f
-- [ ] 11k Feedback: F13 delete account screen
+- [x] 11k Feedback: F13 delete account screen (steps/11k-delete-account-screen.md) — HASH
 - [ ] 11l Feedback: F3b typing off sheets (notes, quick create, name/units inline)
 - [ ] 11m Feedback: F25 stale workouts (2 h rule, auto-finish, estimates)
 - [ ] 11n Feedback: F18 prefill sets from last session or template
@@ -32,6 +32,12 @@
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11k: Figma waived by owner. Body weight entries not listed (LocalDataCounts has no body weight;
+  would touch data). "Your account and its backup" is always the first lost line, not only when
+  counts are empty. Button + "You'll confirm…" are pinned under the scroll so they sit above the
+  keyboard (phone check: in-scroll button was hidden by it). New `DangerFilledButton` in
+  ui/design/Buttons.kt. Phone: screen, counts and enable-on-"delete" checked; the real delete +
+  re-auth was NOT run (phone is on the owner's account; needs a throwaway account).
 - 11i: 11j (F6) folded in on owner request; Figma waived by owner. Target weight also moved to
   wheels (it shared the deleted NumberSheet). Feet wheel is 2–8, not 1–8 (1 ft < 50 cm floor).
   Profile height row now shows "5 ft 9 in" in imperial. Body weight hint and ± stepper strings
@@ -513,6 +519,10 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- 11k: DeleteAccountScreen has its own `YouViewModel` (DeleteAccount nav entry), separate from
+  the You page's; they share no state. Deletion/progress dialogs now live only on that screen.
+- 11k reviewer, not fixed: no Compose test for the error line or busy/loading state; the
+  password path's busy lives in `DeletePasswordDialog`, the screen's `busy` covers Google only.
 - 11i: `WheelPicker` (ui/design) only reads [selected] when still; two-wheel values (whole +
   tenth) can show e.g. 700.5 while 700.0 is stored at range edges (reviewer NIT, display only).
 - 11i reviewer, not fixed: no test for a failed template save / retry; the saved-id assert passes

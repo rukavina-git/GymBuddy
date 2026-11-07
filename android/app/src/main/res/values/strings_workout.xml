@@ -51,9 +51,7 @@
     <string name="workout_save_failed">Couldn\'t save the workout. Try again.</string>
     <string name="workout_nothing_logged">No sets done yet. Log a set or discard the workout.</string>
     <string name="summary_title">%s done</string>
-    <string name="summary_time">time</string>
     <string name="summary_sets">sets</string>
-    <string name="summary_lifted">lifted</string>
     <!-- F23: stat tiles keep the number on one line; the unit goes in the label. -->
     <string name="summary_minutes_label">min</string>
     <string name="summary_lifted_unit">%s lifted</string>

@@ -52,9 +52,25 @@
     <string name="you_back_up_and_sign_out">Back up and sign out</string>
     <string name="you_sign_out_anyway">Sign out anyway</string>
     <string name="you_signing_out">Backing up…</string>
-    <string name="you_delete_title">Delete your account?</string>
-    <string name="you_delete_body">This deletes your account, its backup and everything on this phone: %1$s. You can\'t undo this.</string>
-    <string name="you_delete_body_empty">This deletes your account, its backup and everything on this phone. You can\'t undo this.</string>
+    <!-- Delete account screen (F13) -->
+    <string name="you_delete_heading">This can\'t be undone</string>
+    <string name="you_delete_intro">Your account, its backup and everything on this phone are deleted for good.</string>
+    <string name="you_delete_lost">What you lose</string>
+    <string name="you_delete_lost_account">Your account and its backup</string>
+    <string name="you_delete_word">delete</string>
+    <string name="you_delete_type_label">Type %1$s to confirm</string>
+    <plurals name="you_delete_lost_workouts">
+        <item quantity="one">%d workout</item>
+        <item quantity="other">%d workouts</item>
+    </plurals>
+    <plurals name="you_delete_lost_templates">
+        <item quantity="one">%d template</item>
+        <item quantity="other">%d templates</item>
+    </plurals>
+    <plurals name="you_delete_lost_exercises">
+        <item quantity="one">%d custom exercise</item>
+        <item quantity="other">%d custom exercises</item>
+    </plurals>
     <string name="you_delete_unsynced">Not backed up yet: %1$s.</string>
     <string name="you_delete_confirm_google">You\'ll confirm with Google next.</string>
     <string name="you_delete_confirm_password">You\'ll confirm with your password next.</string>

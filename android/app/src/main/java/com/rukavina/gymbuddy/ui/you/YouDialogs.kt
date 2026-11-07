@@ -13,7 +13,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -151,91 +150,44 @@ internal fun joinLines(lines: List<String>): String = when (lines.size) {
     else -> lines.dropLast(1).joinToString(", ") + " and " + lines.last()
 }
 
-/**
- * Delete account (R15-9 without the keep radio, decision 4): confirm,
- * then Google or a password dialog re-authenticates, then the
- * deletion states take over.
- */
+/** Delete account re-auth for password accounts (after the F13 screen). */
 @Composable
-internal fun DeleteAccountFlow(
-    isGoogleOnly: Boolean,
-    counts: LocalDataCounts?,
-    unsyncedLines: List<String>,
-    viewModel: YouViewModel,
-    onClose: () -> Unit,
-) {
-    val context = LocalContext.current
-    var askPassword by rememberSaveable { mutableStateOf(false) }
+internal fun DeletePasswordDialog(viewModel: YouViewModel, onClose: () -> Unit) {
+    var password by rememberSaveable { mutableStateOf("") }
     var busy by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
-    if (askPassword) {
-        var password by rememberSaveable { mutableStateOf("") }
-        AppChoiceDialog(
-            title = stringResource(R.string.you_delete_password_title),
-            body = stringResource(R.string.you_delete_password_body),
-            actions = listOf(
-                DialogAction(stringResource(R.string.you_cancel), onClose, enabled = !busy),
-                DialogAction(
-                    stringResource(R.string.you_delete_account),
-                    {
-                        busy = true
-                        viewModel.deleteAccountWithPassword(password) { ok, message ->
-                            busy = false
-                            if (ok) onClose() else error = message
-                        }
-                    },
-                    DialogActionTone.Danger,
-                    enabled = !busy && password.isNotEmpty(),
-                ),
-            ),
-            onDismiss = { if (!busy) onClose() },
-        ) {
-            AppTextField(
-                value = password,
-                onValueChange = { password = it; error = null },
-                label = stringResource(R.string.you_password),
-                isError = error != null,
-                helper = error,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                container = AppTextFieldDefaults.onDialog,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        return
-    }
-    val what = counts?.takeUnless { it.isEmpty }?.let { countsText(it) }
-    val body = buildString {
-        append(what?.let { stringResource(R.string.you_delete_body, it) } ?: stringResource(R.string.you_delete_body_empty))
-        if (unsyncedLines.isNotEmpty()) append("\n\n").append(stringResource(R.string.you_delete_unsynced, joinLines(unsyncedLines)))
-        append("\n\n").append(stringResource(if (isGoogleOnly) R.string.you_delete_confirm_google else R.string.you_delete_confirm_password))
-        error?.let { append("\n\n").append(it) }
-    }
-    val webClientId = stringResource(R.string.default_web_client_id)
     AppChoiceDialog(
-        title = stringResource(R.string.you_delete_title),
-        body = body,
+        title = stringResource(R.string.you_delete_password_title),
+        body = stringResource(R.string.you_delete_password_body),
         actions = listOf(
             DialogAction(stringResource(R.string.you_cancel), onClose, enabled = !busy),
             DialogAction(
                 stringResource(R.string.you_delete_account),
                 {
-                    if (isGoogleOnly) {
-                        busy = true
-                        viewModel.deleteAccountWithGoogle(context, webClientId) { ok, message ->
-                            busy = false
-                            if (ok) onClose() else error = message
-                        }
-                    } else {
-                        askPassword = true
+                    busy = true
+                    viewModel.deleteAccountWithPassword(password) { ok, message ->
+                        busy = false
+                        if (ok) onClose() else error = message
                     }
                 },
                 DialogActionTone.Danger,
-                enabled = !busy && counts != null,
+                enabled = !busy && password.isNotEmpty(),
             ),
         ),
         onDismiss = { if (!busy) onClose() },
-    )
+    ) {
+        AppTextField(
+            value = password,
+            onValueChange = { password = it; error = null },
+            label = stringResource(R.string.you_password),
+            isError = error != null,
+            helper = error,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            container = AppTextFieldDefaults.onDialog,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 @Composable
