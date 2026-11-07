@@ -22,7 +22,7 @@
 - [x] 11d Device feedback A2: workout bugs (F17, F22, F19, F21a-c) — 3694d71
 - [x] 11e Device feedback B: quick cuts (F2, F4, F8, F14, F9, F11, F16) — dfeaf5d
 - [x] 11f Feedback: F20, F23, F15, F24a, F21a, F21d (grown: owner asked for bigger feedback steps) — aa75b70
-- [x] 11g Feedback: F1 + F12 avatar revert, backup "not possible" (stale Render build; steps/11g-profile-sync.md)
+- [x] 11g Feedback: F1 + F12 avatar revert, backup "not possible" (stale Render build; steps/11g-profile-sync.md) — 2576fc9
 - [ ] 11i Feedback: F24b save as template after an empty workout
 - [ ] 11j Feedback: F6 height and body weight wheels
 - [ ] 11k Feedback: F13 delete account screen
