@@ -25,7 +25,7 @@
 - [x] 11g Feedback: F1 + F12 avatar revert, backup "not possible" (stale Render build; steps/11g-profile-sync.md) — 2576fc9
 - [x] 11i Feedback: F24b save as template + F6 height/weight wheels (11j folded in; steps/11i-template-and-wheels.md) — 391a60f
 - [x] 11k Feedback: F13 delete account screen (steps/11k-delete-account-screen.md) — 192e59b
-- [x] 11l Feedback: F3b typing off sheets (steps/11l-typing-off-sheets.md) — HASH
+- [x] 11l Feedback: F3b typing off sheets (steps/11l-typing-off-sheets.md) — 438ff54
 - [ ] 11m Feedback: F25 stale workouts (2 h rule, auto-finish, estimates)
 - [ ] 11n Feedback: F18 prefill sets from last session or template
 - [ ] 11o Feedback: F5 edge swipe back (only with gesture nav; last)
