@@ -26,6 +26,8 @@ data class WorkoutNotice(
     val units: PreferredUnits,
     val resting: Boolean,
     val paused: Boolean,
+    /** F25: no set for 2 h; shows "Workout still running? Tap to finish". */
+    val stale: Boolean = false,
     /** Wall-clock ms at which the counter read 0:00; null while paused. */
     val counterBase: Long? = null,
 )
@@ -45,8 +47,7 @@ interface RestBuzzScheduler {
 
 /** Null when no workout runs. [WorkoutNotice.counterBase] is left for the caller. */
 fun ActiveWorkoutUiState.toNotice(): WorkoutNotice? {
-    // Unfinished (R17-E2) is paused until Resume: no notification.
-    if (!running || unfinishedSince != null) return null
+    if (!running) return null
     val exercise = liveExercise()
     return WorkoutNotice(
         workoutTitle = workoutTitle,
@@ -57,6 +58,8 @@ fun ActiveWorkoutUiState.toNotice(): WorkoutNotice? {
         units = preferredUnits,
         resting = liveRest() != null,
         paused = !isTimerRunning,
+        // Unfinished (R17-E2, F25): paused until Resume; the notification asks to finish.
+        stale = unfinishedSince != null,
     )
 }
 

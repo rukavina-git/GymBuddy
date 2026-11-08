@@ -112,4 +112,13 @@
     <string name="home_unfinished_last">Last set %1$s at %2$s</string>
     <string name="home_unfinished_resume">Resume</string>
     <string name="home_unfinished_finish">Finish</string>
+    <!-- 11m stale workouts (F25) -->
+    <string name="home_unfinished_started">Started %1$s at %2$s, no sets</string>
+    <string name="workout_stale_title">Still training?</string>
+    <string name="workout_stale_body">Your last set was %1$s at %2$s.</string>
+    <string name="workout_stale_body_no_sets">You started %1$s at %2$s and logged no sets.</string>
+    <string name="workout_stale_finish">Finish at last set</string>
+    <string name="workout_notice_stale_title">Workout still running?</string>
+    <string name="workout_notice_stale_text">Tap to finish</string>
+    <string name="workout_auto_finished">%1$s was finished at your last set, %2$s at %3$s.</string>
 </resources>

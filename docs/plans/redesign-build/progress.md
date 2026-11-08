@@ -26,12 +26,20 @@
 - [x] 11i Feedback: F24b save as template + F6 height/weight wheels (11j folded in; steps/11i-template-and-wheels.md) — 391a60f
 - [x] 11k Feedback: F13 delete account screen (steps/11k-delete-account-screen.md) — 192e59b
 - [x] 11l Feedback: F3b typing off sheets (steps/11l-typing-off-sheets.md) — 438ff54
-- [ ] 11m Feedback: F25 stale workouts (2 h rule, auto-finish, estimates)
+- [x] 11m Feedback: F25 stale workouts (steps/11m-stale-workouts.md) — HASH
 - [ ] 11n Feedback: F18 prefill sets from last session or template
 - [ ] 11o Feedback: F5 edge swipe back (only with gesture nav; last)
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11m: Figma waived (owner "go"). The code already had the R17-E2 Home "Unfinished workout" card
+  (3 h since last draft write, restore only); reused it instead of a new dialog (owner "go"). Rule
+  is now 2 h since the last done set or Resume (`resumedAt`), checked on every timer tick and on
+  ON_RESUME, plus restore. Card/dialog: Resume + Finish (at last set); Discard only with no sets.
+  Workout screen shows the same choice as an AppDialog. Notification stays on and says "Workout
+  still running? Tap to finish" (VM tick, not a WorkoutService schedule). 24 h → auto-finish on
+  open/resume, snackbar without View (needs session id; skipped). No auto-finished flag (would need
+  Room + API); estimate = median, sessions > 4 h ignored. 24 h with no sets drops the draft.
 - 11l: Figma waived (owner "go"). Units toggle uses the short labels (kg · km | lb · mi); the long
   strings are deleted. A name over 40 chars reverts on leave (field shows error while typing).
   Phone: units, inline name (Done saves), quick create (Exercises), exercise page note checked;
@@ -524,6 +532,20 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- 11m: stale/expired is only detected while the timer ticks, on ON_RESUME or on restore. A paused
+  workout in the background never goes stale until the app is opened.
+- 11m: Home uses `clock.zone`, and the injected Clock is `Clock.systemUTC()`, so Home's card time
+  and week days are in UTC (pre-existing; phone showed "9:04 PM" for 22:04 CET). Fix: use
+  `ZoneId.systemDefault()` in HomeViewModel (check its tests).
+- 11m reviewer, not fixed:
+  - SHOULD: auto-finish while the workout screen is on top leaves an empty workout screen (it
+    leaves only on summary/discard). Fix: leave when `autoFinished != null`.
+  - SHOULD: a failed auto-finish save leaves a paused workout with no card/dialog, only the error;
+    retried on next ON_RESUME. No test.
+  - No tests for StaleDialog, the Home card button switch, the tick → Expired path or the snackbar.
+  - NIT: `AutoFinished` was inserted under FinishPreview's KDoc; snackbar time ignores app locale.
+- 11m phone check: backdated the draft in the DB (run-as cat out, edit JSON, cp back). The
+  existing 22 h djdhdud session (Tue Nov 3) is still there; the owner can fix its end in Edit workout.
 - 11l: `FullScreenEditor` (ui/design/Overlays.kt) is a full-screen `Dialog`, not a nav route; it
   keeps the caller's ViewModel. `rememberOpenFocus()` focuses a field on open.
 - 11l reviewer, not fixed: inline name saves only on focus loss (Done); top-bar back while typing

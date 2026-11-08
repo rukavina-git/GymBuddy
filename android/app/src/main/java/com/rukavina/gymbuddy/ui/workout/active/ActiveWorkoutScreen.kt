@@ -1,5 +1,13 @@
 package com.rukavina.gymbuddy.ui.workout.active
 
+import com.rukavina.gymbuddy.ui.template.relativeDay
+import androidx.compose.ui.platform.LocalConfiguration
+import java.util.Locale
+import java.time.format.FormatStyle
+import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+import java.time.LocalDate
+import java.time.Instant
 import androidx.compose.foundation.layout.wrapContentWidth
 import kotlin.math.roundToInt
 import androidx.compose.ui.unit.dp
@@ -259,6 +267,37 @@ fun ActiveWorkoutScreen(
         )
         null -> Unit
     }
+    state.unfinishedSince?.let { since ->
+        StaleDialog(
+            since = since,
+            hasSets = state.doneSets > 0,
+            onFinish = viewModel::finishUnfinished,
+            onDiscard = viewModel::discardWorkout,
+            onKeepGoing = viewModel::resumeUnfinished,
+        )
+    }
+}
+
+/**
+ * F25: no set for 2 h. "Still training? Your last set was today at
+ * 18:42." Keep going · Finish at last set; with no sets, Discard.
+ */
+@Composable
+private fun StaleDialog(since: Long, hasSets: Boolean, onFinish: () -> Unit, onDiscard: () -> Unit, onKeepGoing: () -> Unit) {
+    val zone = ZoneId.systemDefault()
+    val locale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
+    val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
+        .format(Instant.ofEpochMilli(since).atZone(zone))
+    val day = relativeDay(since, LocalDate.now(zone), zone)
+    AppDialog(
+        title = stringResource(R.string.workout_stale_title),
+        body = stringResource(if (hasSets) R.string.workout_stale_body else R.string.workout_stale_body_no_sets, day, time),
+        confirmLabel = stringResource(if (hasSets) R.string.workout_stale_finish else R.string.workout_discard),
+        onConfirm = if (hasSets) onFinish else onDiscard,
+        dismissLabel = stringResource(R.string.workout_keep_going),
+        onDismiss = onKeepGoing,
+        destructive = !hasSets,
+    )
 }
 
 internal data class WorkoutActions(

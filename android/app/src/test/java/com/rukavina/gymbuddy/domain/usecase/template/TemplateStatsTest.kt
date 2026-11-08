@@ -48,6 +48,18 @@ class TemplateStatsTest {
     }
 
     @Test
+    fun averageMinutesIsTheMedianAndSkipsSessionsOverFourHours() {
+        val sessions = listOf(
+            session("s1", "a", thu, durationSeconds = 40 * 60),
+            session("s2", "a", thu, durationSeconds = 50 * 60),
+            session("s3", "a", thu, durationSeconds = 120 * 60),
+            session("s4", "a", thu, durationSeconds = 22 * 60 * 60), // left running (F25)
+        )
+        assertEquals(50, TemplateStats.averageMinutes("a", sessions))
+        assertNull(TemplateStats.averageMinutes("a", listOf(session("s", "a", thu, durationSeconds = 5 * 60 * 60))))
+    }
+
+    @Test
     fun homeShowsThreeMostRecentlyDone() {
         val templates = listOf("a", "b", "c", "d").map { template(it) }
         val sessions = listOf(

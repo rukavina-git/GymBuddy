@@ -23,7 +23,9 @@ data class ActiveWorkoutDraft(
     /** Rest running after the last done set, null when none. */
     val rest: Rest? = null,
     /** Workout note (Plan 7 06b); saved as the session's notes. */
-    val note: String = ""
+    val note: String = "",
+    /** Last "Keep going" on a stale workout (11m, epoch ms); null if none. */
+    val resumedAt: Long? = null,
 ) {
     /**
      * Rest after set [afterSetId], counted on the workout clock: it began
@@ -56,6 +58,10 @@ data class ActiveWorkoutDraft(
         val duration: String,
         val distance: String,
         val notes: String,
-        val isCompleted: Boolean
+        val isCompleted: Boolean,
+        /** When Done was tapped (11m, epoch ms). Older drafts lack it. */
+        val doneAt: Long? = null,
+        /** The workout clock (seconds) at Done (11m). */
+        val doneAtElapsed: Long? = null,
     )
 }

@@ -88,6 +88,20 @@ class ActiveWorkoutDraftRepositoryImplTest {
     }
 
     @Test
+    fun `a draft written before set times existed still loads`() = runTest {
+        val old = """{"title":"Push Day","templateId":null,"templateTitle":null,"startedAt":1,"elapsedSeconds":60,
+            "isTimerRunning":true,"savedAt":2,"exercises":[{"id":"e","exerciseId":"x","exerciseName":"Bench",
+            "trackingType":"WEIGHT_REPS","plannedSets":1,"plannedReps":8,"restSeconds":90,"sets":[{"id":"s",
+            "setNumber":1,"reps":"8","weight":"60","duration":"","distance":"","notes":"","isCompleted":true}]}]}""".trimIndent()
+        db.activeWorkoutDraftDao().upsert(ActiveWorkoutDraftEntity(payloadJson = old, updatedAt = 0))
+        val loaded = repository.load()!!
+        val set = loaded.exercises.single().sets.single()
+        assertEquals(null, set.doneAt)
+        assertEquals(null, set.doneAtElapsed)
+        assertEquals(null, loaded.resumedAt)
+    }
+
+    @Test
     fun `saving again replaces the single draft`() = runTest {
         repository.save(draft)
         repository.save(draft.copy(title = "Leg Day"))

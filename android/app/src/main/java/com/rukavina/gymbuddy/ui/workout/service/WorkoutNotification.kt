@@ -23,6 +23,11 @@ data class WorkoutNotificationText(val title: String, val text: String?, val sub
  */
 fun workoutNotificationText(res: Resources, notice: WorkoutNotice): WorkoutNotificationText {
     val workout = notice.workoutTitle.ifBlank { res.getString(R.string.workout_empty_title) }
+    if (notice.stale) {
+        return WorkoutNotificationText(
+            res.getString(R.string.workout_notice_stale_title), res.getString(R.string.workout_notice_stale_text), workout,
+        )
+    }
     val sub = when {
         notice.paused -> res.getString(R.string.workout_notice_paused, workout)
         notice.resting -> res.getString(R.string.workout_notice_rest, workout)

@@ -366,8 +366,9 @@ private fun InProgressCard(workout: RunningWorkout, zone: ZoneId, onClick: () ->
 }
 
 /**
- * R17-E2: a workout left 3 h+ ago. "Push A · 12 sets", "Last set
- * yesterday at 19:02"; Discard (confirms) · Resume · Finish (lime).
+ * R17-E2 / F25: no set for 2 h. "Push A · 12 sets", "Last set
+ * yesterday at 19:02"; Resume · Finish (lime, at the last set). With no
+ * sets: Discard (confirms) · Resume.
  */
 @Composable
 private fun UnfinishedCard(workout: RunningWorkout, since: Long, today: LocalDate, zone: ZoneId, actions: UnfinishedActions) {
@@ -391,7 +392,10 @@ private fun UnfinishedCard(workout: RunningWorkout, since: Long, today: LocalDat
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                stringResource(R.string.home_unfinished_last, relativeDay(since, today, zone), time),
+                stringResource(
+                    if (workout.setsDone > 0) R.string.home_unfinished_last else R.string.home_unfinished_started,
+                    relativeDay(since, today, zone), time,
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = cs.onSurfaceVariant,
             )
@@ -399,9 +403,14 @@ private fun UnfinishedCard(workout: RunningWorkout, since: Long, today: LocalDat
                 Modifier.fillMaxWidth().padding(top = d.stack),
                 horizontalArrangement = Arrangement.spacedBy(d.stackTight),
             ) {
-                OutlineButton(stringResource(R.string.workout_discard), { confirm = true }, Modifier.weight(1f), size = ButtonSize.Small)
+                // F25: Finish ends at the last set; with no sets there is nothing to finish, only Discard.
+                if (workout.setsDone == 0) {
+                    OutlineButton(stringResource(R.string.workout_discard), { confirm = true }, Modifier.weight(1f), size = ButtonSize.Small)
+                }
                 OutlineButton(stringResource(R.string.home_unfinished_resume), actions.onResume, Modifier.weight(1f), size = ButtonSize.Small)
-                PrimaryButton(stringResource(R.string.home_unfinished_finish), actions.onFinish, Modifier.weight(1f), size = ButtonSize.Small)
+                if (workout.setsDone > 0) {
+                    PrimaryButton(stringResource(R.string.home_unfinished_finish), actions.onFinish, Modifier.weight(1f), size = ButtonSize.Small)
+                }
             }
         }
     }

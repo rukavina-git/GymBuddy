@@ -1,5 +1,13 @@
 package com.rukavina.gymbuddy.ui
 
+import com.rukavina.gymbuddy.ui.template.relativeDay
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.Lifecycle
+import java.time.format.FormatStyle
+import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+import java.time.LocalDate
+import java.time.Instant
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -222,6 +230,19 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
         if (finishingFromHome && workoutState.summary != null) {
             finishingFromHome = false
             bottomNavController.navigate(NavRoutes.WorkoutSummary) { launchSingleTop = true }
+        }
+    }
+    // F25: back in the app, a workout left 2 h / 24 h without a set goes unfinished / finishes.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { activeWorkoutViewModel.checkStale() }
+    workoutState.autoFinished?.let { done ->
+        val zone = ZoneId.systemDefault()
+        val day = relativeDay(done.endedAt, LocalDate.now(zone), zone)
+        val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(Instant.ofEpochMilli(done.endedAt).atZone(zone))
+        val message = stringResource(R.string.workout_auto_finished, done.title, day, time)
+        LaunchedEffect(done) {
+            // In Main's scope: clearing autoFinished leaves this effect.
+            scope.launch { snackbar.showSnackbar(message) }
+            activeWorkoutViewModel.autoFinishShown()
         }
     }
     val unfinished = UnfinishedActions(

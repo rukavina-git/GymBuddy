@@ -27,17 +27,27 @@ object TemplateStats {
             .groupBy { it.templateId!! }
             .mapValues { (_, s) -> s.maxOf(::doneAt) }
 
+    /** Sessions longer than this are left-open outliers, not a real length (F25). */
+    const val MAX_ESTIMATE_SECONDS = 4 * 60 * 60
+
     /**
-     * "about N min" (Figma flag, owner): the average length of this
-     * template's finished sessions, rounded to 5 min (at least 5). Null
+     * "about N min" (Figma flag, owner): the median length of this
+     * template's finished sessions, rounded to 5 min (at least 5).
+     * Sessions over 4 h don't count (F25: a workout left running). Null
      * until there is one finished session with a length.
      */
     fun averageMinutes(templateId: String, sessions: List<WorkoutSession>): Int? {
         val lengths = sessions
-            .filter { it.deletedAt == null && it.templateId == templateId && it.endedAt != null && it.durationSeconds > 0 }
+            .filter {
+                it.deletedAt == null && it.templateId == templateId && it.endedAt != null &&
+                    it.durationSeconds in 1..MAX_ESTIMATE_SECONDS
+            }
             .map { it.durationSeconds }
+            .sorted()
         if (lengths.isEmpty()) return null
-        val minutes = lengths.average() / 60.0
+        val mid = lengths.size / 2
+        val median = if (lengths.size % 2 == 1) lengths[mid].toDouble() else (lengths[mid - 1] + lengths[mid]) / 2.0
+        val minutes = median / 60.0
         return ((minutes / 5.0).roundToInt() * 5).coerceAtLeast(5)
     }
 

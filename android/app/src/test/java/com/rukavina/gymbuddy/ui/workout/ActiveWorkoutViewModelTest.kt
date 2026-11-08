@@ -756,14 +756,14 @@ class ActiveWorkoutViewModelTest {
     }
 
     @Test
-    fun `a draft left under 3 h restores live, not unfinished`() {
+    fun `a set under 2 h ago restores live, not unfinished`() {
         val draftRepo = FakeActiveWorkoutDraftRepository()
         val clock = MutableClock()
         val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
         first.startWorkoutFromTemplate(oneSetBench)
         first.fillFirstSet("10", "60")
 
-        clock.advanceSeconds(3 * 60 * 60 - 1)
+        clock.advanceSeconds(2 * 60 * 60 - 1)
         val (second, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
 
         assertNull(second.uiState.value.unfinishedSince)
@@ -771,35 +771,58 @@ class ActiveWorkoutViewModelTest {
     }
 
     @Test
-    fun `a draft left 3 h+ restores paused as unfinished, and Finish ends at the last write`() {
+    fun `no set for 2 h restores paused as unfinished, and Finish ends at the last set`() {
         val draftRepo = FakeActiveWorkoutDraftRepository()
         val clock = MutableClock()
         val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
         first.startWorkoutFromTemplate(oneSetBench)
+        clock.advanceSeconds(30 * 60)
         first.fillFirstSet("10", "60")
-        val lastWrite = draftRepo.draft!!.savedAt
-        val elapsed = draftRepo.draft!!.elapsedSeconds
+        val setAt = clock.millis
+        val set = first.uiState.value.exercises.single().sets.single()
+        assertEquals(setAt, set.doneAt)
+        clock.advanceSeconds(10 * 60)
+        first.updateNote("later write") // the last write is after the set
 
         clock.advanceSeconds(20 * 60 * 60)
         val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
 
         val restored = second.uiState.value
-        assertEquals(lastWrite, restored.unfinishedSince)
+        assertEquals(setAt, restored.unfinishedSince)
         assertFalse(restored.isTimerRunning)
-        assertEquals("no away time", elapsed, restored.elapsedSeconds)
         assertNull("no live bar until Resume", restored.toLiveBarState())
-        assertNull("no notification until Resume", restored.toNotice())
+        assertTrue("the notification asks to finish", restored.toNotice()!!.stale)
 
         second.finishUnfinished()
 
         val saved = sessionRepo.created.single()
-        assertEquals(lastWrite, saved.endedAt)
-        assertEquals(elapsed.toInt(), saved.durationSeconds)
+        assertEquals(setAt, saved.endedAt)
+        assertEquals(set.doneAtElapsed!!.toInt(), saved.durationSeconds)
         assertNull(draftRepo.draft)
     }
 
     @Test
-    fun `Resume on an unfinished workout restarts the timer`() {
+    fun `a running workout goes unfinished 2 h after its last set`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (viewModel, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.fillFirstSet("10", "60")
+        val setAt = clock.millis
+
+        clock.advanceSeconds(2 * 60 * 60 - 1)
+        viewModel.checkStale()
+        assertNull(viewModel.uiState.value.unfinishedSince)
+
+        clock.advanceSeconds(1)
+        viewModel.checkStale()
+        assertEquals(setAt, viewModel.uiState.value.unfinishedSince)
+        assertFalse(viewModel.uiState.value.isTimerRunning)
+        assertEquals("kept across process death", setAt, draftRepo.draft!!.exercises.single().sets.single().doneAt)
+    }
+
+    @Test
+    fun `Resume on an unfinished workout restarts the timer and asks again 2 h later`() {
         val draftRepo = FakeActiveWorkoutDraftRepository()
         val clock = MutableClock()
         val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
@@ -809,10 +832,78 @@ class ActiveWorkoutViewModelTest {
         clock.advanceSeconds(4 * 60 * 60)
         val (second, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
         second.resumeUnfinished()
+        val resumedAt = clock.millis
 
         assertNull(second.uiState.value.unfinishedSince)
         assertTrue(second.uiState.value.isTimerRunning)
         assertEquals(clock.millis, draftRepo.draft!!.savedAt)
+        assertEquals(resumedAt, draftRepo.draft!!.resumedAt)
+
+        clock.advanceSeconds(60 * 60)
+        second.checkStale()
+        assertNull("not yet: resumed an hour ago", second.uiState.value.unfinishedSince)
+        clock.advanceSeconds(60 * 60)
+        second.checkStale()
+        assertEquals(resumedAt, second.uiState.value.unfinishedSince)
+    }
+
+    @Test
+    fun `no set for 24 h finishes at the last set on open, without a summary`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+        val setAt = clock.millis
+
+        clock.advanceSeconds(25 * 60 * 60)
+        val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        assertEquals(setAt, sessionRepo.created.single().endedAt)
+        val state = second.uiState.value
+        assertNull(state.summary)
+        assertEquals(setAt, state.autoFinished!!.endedAt)
+        assertFalse(state.running)
+        assertNull(draftRepo.draft)
+
+        second.autoFinishShown()
+        assertNull(second.uiState.value.autoFinished)
+    }
+
+    @Test
+    fun `no set for 24 h and none done drops the workout`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+
+        clock.advanceSeconds(25 * 60 * 60)
+        val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        assertTrue(sessionRepo.created.isEmpty())
+        assertFalse(second.uiState.value.running)
+        assertNull(second.uiState.value.autoFinished)
+        assertNull(draftRepo.draft)
+    }
+
+    @Test
+    fun `a draft from before set times counts its sets as done at the last write`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+        clock.advanceSeconds(30 * 60)
+        first.updateNote("later write")
+        val old = draftRepo.draft!!
+        draftRepo.draft = old.copy(exercises = old.exercises.map { ex ->
+            ex.copy(sets = ex.sets.map { it.copy(doneAt = null, doneAtElapsed = null) })
+        })
+
+        clock.advanceSeconds(3 * 60 * 60)
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        assertEquals(old.savedAt, second.uiState.value.unfinishedSince)
     }
 
     @Test

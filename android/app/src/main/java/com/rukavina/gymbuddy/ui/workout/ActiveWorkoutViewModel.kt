@@ -21,6 +21,7 @@ import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
+import com.rukavina.gymbuddy.domain.usecase.workout.StaleWorkout
 import com.rukavina.gymbuddy.ui.design.KeypadInput
 import com.rukavina.gymbuddy.ui.design.KeypadValue
 import com.rukavina.gymbuddy.ui.template.editor.TemplateEditorViewModel
@@ -64,7 +65,11 @@ data class WorkoutSet(
     val duration: String = "",
     val distance: String = "",
     val notes: String = "",
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    /** When Done was tapped, epoch ms (11m); null until done. */
+    val doneAt: Long? = null,
+    /** The workout clock (seconds) at Done (11m). */
+    val doneAtElapsed: Long? = null,
 )
 
 /**
@@ -97,6 +102,9 @@ data class WorkoutKeypad(val exerciseId: String, val setId: String, val field: S
 }
 
 /** Finish dialog numbers (Figma 53:3493 / 53:3594). Lifted is in display units. */
+/** A workout left 24 h+ that was finished at its last set on open (F25). */
+data class AutoFinished(val title: String, val endedAt: Long)
+
 data class FinishPreview(val minutes: Long, val sets: Int, val lifted: Float, val setsLeft: Int)
 
 /** One "What you did" row: the heaviest (then longest/most) set. */
@@ -162,10 +170,15 @@ data class ActiveWorkoutUiState(
     /** The last draft write failed (R17-B1); cleared by the next good write. */
     val unsaved: UnsavedSet? = null,
     /**
-     * Restored from a draft last written 3 h+ ago (R17-E2): paused, Home
-     * asks Discard / Resume / Finish. The draft's savedAt, null otherwise.
+     * Stale (R17-E2, F25): no set or resume for 2 h. Paused; Home and the
+     * workout ask Resume / Finish at last set (Discard with no sets).
+     * The [lastActivity] it went stale at, null otherwise.
      */
     val unfinishedSince: Long? = null,
+    /** Last Resume of a stale workout (F25), epoch ms. */
+    val resumedAt: Long? = null,
+    /** Set when an expired workout was auto-finished; Main shows a snackbar. */
+    val autoFinished: AutoFinished? = null,
 ) {
     /**
      * A workout runs: started (an empty workout has no exercises yet) and
@@ -175,6 +188,16 @@ data class ActiveWorkoutUiState(
     val currentExercise: ActiveExercise? get() = exercises.getOrNull(currentExerciseIndex)
     val doneSets: Int get() = exercises.sumOf { ex -> ex.sets.count { it.isCompleted } }
     val setsLeft: Int get() = exercises.sumOf { ex -> ex.sets.count { !it.isCompleted } }
+    /** Latest done set, resume or start, epoch ms (F25). */
+    val lastActivity: Long get() = StaleWorkout.lastActivity(
+        workoutStartTime,
+        exercises.flatMap { ex -> ex.sets.mapNotNull { it.doneAt } },
+        resumedAt,
+    )
+    /** "Finish at last set": the latest done set's time and clock (F25). */
+    val endAtLastSet: StaleWorkout.End? get() = StaleWorkout.endAtLastSet(
+        exercises.flatMap { ex -> ex.sets.mapNotNull { s -> s.doneAt?.let { it to (s.doneAtElapsed ?: 0L) } } }
+    )
     /** The next set to log is the last one left in the workout: Done finishes. */
     val lastSetLeft: Boolean get() = setsLeft == 1 && currentExercise?.currentSet != null
 }
@@ -338,6 +361,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     /**
      * Resumes a workout the process lost. Skipped if a workout was
      * already started or ended in this ViewModel before the read finished.
+     * F25: no set for 2 h → paused as unfinished; for 24 h → finished at
+     * the last set (dropped if it has none).
      */
     private fun restoreDraft() {
         viewModelScope.launch {
@@ -346,33 +371,71 @@ class ActiveWorkoutViewModel @Inject constructor(
             if (current.running || current.workoutSaved || current.workoutDiscarded) {
                 return@launch
             }
-            // Left 3 h+ ago: paused, no away time; Home asks what to do (R17-E2).
-            val stale = clock.millis() - draft.savedAt >= UNFINISHED_AFTER_MS
-            // A running timer kept counting while the app was gone.
-            val awaySeconds = if (draft.isTimerRunning && !stale) {
-                ((clock.millis() - draft.savedAt) / 1000).coerceAtLeast(0)
-            } else {
-                0L
+            // Drafts from before 11m have no set times: their done sets count as done at the last write.
+            val exercises = draft.exercises.map { it.toActiveExercise(draft.savedAt, draft.elapsedSeconds) }
+            val restored = current.copy(
+                workoutTitle = draft.title,
+                workoutStartTime = draft.startedAt,
+                elapsedSeconds = draft.elapsedSeconds,
+                isTimerRunning = false,
+                exercises = exercises,
+                templateId = draft.templateId,
+                templateTitle = draft.templateTitle,
+                currentExerciseIndex = draft.currentExerciseIndex.coerceIn(0, (exercises.size - 1).coerceAtLeast(0)),
+                rest = draft.rest?.let { RestState(it.afterSetId, it.startedAtElapsed, it.seconds) },
+                note = draft.note,
+                resumedAt = draft.resumedAt,
+            )
+            val now = clock.millis()
+            when (StaleWorkout.status(restored.lastActivity, now)) {
+                StaleWorkout.Status.Expired -> {
+                    _uiState.value = restored
+                    autoFinish()
+                }
+                StaleWorkout.Status.Stale -> _uiState.value = restored.copy(rest = null, unfinishedSince = restored.lastActivity)
+                StaleWorkout.Status.Active -> {
+                    // A running timer kept counting while the app was gone.
+                    val away = if (draft.isTimerRunning) ((now - draft.savedAt) / 1000).coerceAtLeast(0) else 0L
+                    _uiState.value = restored.copy(elapsedSeconds = draft.elapsedSeconds + away, isTimerRunning = draft.isTimerRunning)
+                    if (draft.isTimerRunning) startTimer()
+                }
             }
-            val exercises = draft.exercises.map { it.toActiveExercise() }
-            _uiState.update { state ->
-                state.copy(
-                    workoutTitle = draft.title,
-                    workoutStartTime = draft.startedAt,
-                    elapsedSeconds = draft.elapsedSeconds + awaySeconds,
-                    isTimerRunning = draft.isTimerRunning && !stale,
-                    exercises = exercises,
-                    templateId = draft.templateId,
-                    templateTitle = draft.templateTitle,
-                    currentExerciseIndex = draft.currentExerciseIndex.coerceIn(0, (exercises.size - 1).coerceAtLeast(0)),
-                    rest = if (stale) null else draft.rest?.let { RestState(it.afterSetId, it.startedAtElapsed, it.seconds) },
-                    note = draft.note,
-                    unfinishedSince = if (stale) draft.savedAt else null,
-                )
-            }
-            if (draft.isTimerRunning && !stale) startTimer()
         }
     }
+
+    /**
+     * F25: called every timer tick and when the app comes to the
+     * foreground. 2 h without a set (or resume) pauses the workout as
+     * unfinished; 24 h finishes it at the last set.
+     */
+    fun checkStale() {
+        val state = _uiState.value
+        if (!state.running || state.isLoading) return
+        when (StaleWorkout.status(state.lastActivity, clock.millis())) {
+            StaleWorkout.Status.Active -> Unit
+            StaleWorkout.Status.Stale -> if (state.unfinishedSince == null) {
+                timerJob?.cancel()
+                _uiState.update {
+                    it.copy(unfinishedSince = it.lastActivity, isTimerRunning = false, rest = null, keypad = null, dialog = null)
+                }
+                persistDraft()
+            }
+            StaleWorkout.Status.Expired -> autoFinish()
+        }
+    }
+
+    /** Finish at the last set without asking, or drop a workout with no sets (F25). */
+    private fun autoFinish() {
+        val end = _uiState.value.endAtLastSet
+        if (end == null) {
+            discardWorkout()
+        } else {
+            saveWorkout(endedAt = end.endedAt, durationSeconds = end.durationSeconds, auto = true)
+        }
+    }
+
+    /** Main showed the auto-finish snackbar. */
+    fun autoFinishShown() = _uiState.update { it.copy(autoFinished = null) }
 
     private fun persistDraft() {
         val state = _uiState.value
@@ -383,18 +446,23 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** "Try again · set N" (R17-B1): write the draft again. */
     fun retrySave() = persistDraft()
 
-    /** Unfinished workout → Resume (R17-E2): the timer picks up where it stopped. */
+    /**
+     * Unfinished workout → Resume (R17-E2): the timer picks up where it
+     * stopped. F25: asks again 2 h after this (or the next set).
+     */
     fun resumeUnfinished() {
         if (_uiState.value.unfinishedSince == null) return
-        _uiState.update { it.copy(unfinishedSince = null, isTimerRunning = true) }
+        _uiState.update { it.copy(unfinishedSince = null, isTimerRunning = true, resumedAt = clock.millis()) }
         startTimer()
         persistDraft()
     }
 
-    /** Unfinished workout → Finish (R17-E2): saves it ending at the last write. */
+    /** Unfinished workout → Finish (F25): saves it ending at the last done set. */
     fun finishUnfinished() {
-        val since = _uiState.value.unfinishedSince ?: return
-        saveWorkout(endedAt = since)
+        val state = _uiState.value
+        if (state.unfinishedSince == null) return
+        val end = state.endAtLastSet ?: return
+        saveWorkout(endedAt = end.endedAt, durationSeconds = end.durationSeconds)
     }
 
     private fun clearDraft() {
@@ -529,6 +597,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(elapsedSeconds = state.elapsedSeconds + 1)
                 }
+                checkStale()
             }
         }
     }
@@ -675,7 +744,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         lastDoneSetNumber = doneIndex + 1
         val sets = exercise.sets.mapIndexed { i, s ->
             when {
-                i == doneIndex -> s.copy(isCompleted = true)
+                i == doneIndex -> s.copy(isCompleted = true, doneAt = clock.millis(), doneAtElapsed = state.elapsedSeconds)
                 i > doneIndex && !s.isCompleted -> s.copy(
                     weight = set.weight, reps = set.reps, duration = set.duration, distance = set.distance,
                 )
@@ -896,9 +965,10 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /**
      * Save the workout's done sets and stop the timer. Undone sets are
-     * dropped (decision 6). On success the summary is ready.
+     * dropped (decision 6). On success the summary is ready; with [auto]
+     * (F25 auto-finish) there is no summary, [ActiveWorkoutUiState.autoFinished] instead.
      */
-    fun saveWorkout(endedAt: Long? = null) {
+    fun saveWorkout(endedAt: Long? = null, durationSeconds: Long? = null, auto: Boolean = false) {
         // A second tap while the first save runs would store the workout twice.
         if (_uiState.value.isLoading) return
         _uiState.update { it.copy(isLoading = true, dialog = null) }
@@ -954,11 +1024,12 @@ class ActiveWorkoutViewModel @Inject constructor(
             }
 
             val end = endedAt ?: clock.millis()
+            val duration = durationSeconds ?: state.elapsedSeconds
             val workoutSession = WorkoutSession(
                 id = idGenerator.newId(),
                 startedAt = state.workoutStartTime,
                 endedAt = end,
-                durationSeconds = state.elapsedSeconds.toInt(),
+                durationSeconds = duration.toInt(),
                 title = state.workoutTitle.ifBlank { "Workout" },
                 templateId = state.templateId,
                 templateTitle = state.templateTitle,
@@ -974,7 +1045,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                         title = workoutSession.title,
                         startedAt = state.workoutStartTime,
                         endedAt = end,
-                        durationSeconds = state.elapsedSeconds,
+                        durationSeconds = duration,
                         sets = kept.sumOf { it.second.size },
                         lifted = lifted(state.exercises),
                         units = state.preferredUnits,
@@ -995,7 +1066,10 @@ class ActiveWorkoutViewModel @Inject constructor(
                             note = "",
                             rest = null,
                             keypad = null,
-                            summary = summary,
+                            summary = if (auto) null else summary,
+                            autoFinished = if (auto) AutoFinished(workoutSession.title, end) else null,
+                            unfinishedSince = null,
+                            resumedAt = null,
                         )
                     }
                 }
@@ -1094,8 +1168,6 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     companion object {
-        /** A draft last written this long ago restores as unfinished (R17-E2). */
-        const val UNFINISHED_AFTER_MS = 3 * 60 * 60 * 1000L
         /** The hint shows until this many workouts are saved. */
         const val HINT_WORKOUTS = 3
         /** Rest when the template has none; 7.10's setting replaces it. */
@@ -1136,6 +1208,7 @@ private fun ActiveWorkoutUiState.toDraft(now: Long) = ActiveWorkoutDraft(
     currentExerciseIndex = currentExerciseIndex,
     rest = rest?.let { ActiveWorkoutDraft.Rest(it.afterSetId, it.startedAtElapsed, it.seconds) },
     note = note,
+    resumedAt = resumedAt,
     exercises = exercises.map { exercise ->
         ActiveWorkoutDraft.Exercise(
             id = exercise.id,
@@ -1155,14 +1228,16 @@ private fun ActiveWorkoutUiState.toDraft(now: Long) = ActiveWorkoutDraft(
                     duration = set.duration,
                     distance = set.distance,
                     notes = set.notes,
-                    isCompleted = set.isCompleted
+                    isCompleted = set.isCompleted,
+                    doneAt = set.doneAt,
+                    doneAtElapsed = set.doneAtElapsed,
                 )
             }
         )
     }
 )
 
-private fun ActiveWorkoutDraft.Exercise.toActiveExercise() = ActiveExercise(
+private fun ActiveWorkoutDraft.Exercise.toActiveExercise(savedAt: Long, savedElapsed: Long) = ActiveExercise(
     id = id,
     exerciseId = exerciseId,
     exerciseName = exerciseName,
@@ -1176,7 +1251,9 @@ private fun ActiveWorkoutDraft.Exercise.toActiveExercise() = ActiveExercise(
             duration = set.duration,
             distance = set.distance,
             notes = set.notes,
-            isCompleted = set.isCompleted
+            isCompleted = set.isCompleted,
+            doneAt = set.doneAt ?: savedAt.takeIf { set.isCompleted },
+            doneAtElapsed = set.doneAtElapsed ?: savedElapsed.takeIf { set.isCompleted },
         )
     },
     plannedSets = plannedSets,
