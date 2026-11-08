@@ -60,14 +60,14 @@ fails the build if the two drift.
 
 ## Status
 
-| Component        | State                                                      |
-|------------------|------------------------------------------------------------|
-| API contract     | Complete                                                   |
-| Android          | Schema and offline layer complete; sync engine not started |
-| Backend          | In progress                                                |
-| iOS              | Not started                                                |
-| CI/CD            | Android and API builds; release automation not started     |
-| Deployment       | Local only                                                 |
+| Component        | State                                                                                   |
+|------------------|-----------------------------------------------------------------------------------------|
+| API contract     | Complete                                                                                |
+| Android          | Sync engine complete (offline outbox, push, pull, resync); redesigned UI being built    |
+| Backend          | Deployed at api.rukavina.app                                                            |
+| iOS              | Not started                                                                             |
+| CI/CD            | Android and backend builds, sync E2E tests, API codegen and docs, CodeQL; OWASP on demand. Release pipeline not started |
+| Deployment       | Backend live; Android app in testing, not on Google Play yet                            |
 
 ## Stack
 
