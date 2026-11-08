@@ -65,7 +65,7 @@ fails the build if the two drift.
 | API contract     | Complete                                                                                |
 | Android          | Sync engine complete (offline outbox, push, pull, resync); redesigned UI being built    |
 | Backend          | Deployed at api.rukavina.app                                                            |
-| iOS              | Not started                                                                             |
+| iOS              | Planned for v2                                                                          |
 | CI/CD            | Android and backend builds, sync E2E tests, API codegen and docs, CodeQL; OWASP on demand. Release pipeline not started |
 | Deployment       | Backend live; Android app in testing, not on Google Play yet                            |
 
