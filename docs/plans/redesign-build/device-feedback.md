@@ -105,7 +105,7 @@ before code.
   would bury it). F24b fits on the summary after an empty workout.
 
 ### New (found during the consult)
-- [ ] F25 bug · Template time estimate: "djdhdud, 1 exercise · about
+- [x] F25 bug · (f97be80) Template time estimate: "djdhdud, 1 exercise · about
       1360 min" and Full Body A/B "5 exercises · about 5 min". The
       estimate seems to use real session length, and one session ran
       ~22 h (Home: "5 workouts · 22 h 53 m"). Owner: the workout had
