@@ -27,11 +27,17 @@
 - [x] 11k Feedback: F13 delete account screen (steps/11k-delete-account-screen.md) — 192e59b
 - [x] 11l Feedback: F3b typing off sheets (steps/11l-typing-off-sheets.md) — 438ff54
 - [x] 11m Feedback: F25 stale workouts (steps/11m-stale-workouts.md) — f97be80
-- [ ] 11n Feedback: F18 prefill sets from last session or template
+- [x] 11n Feedback: F18 prefill sets from last session or template (steps/11n-prefill-sets.md) — HASH
 - [ ] 11o Feedback: F5 edge swipe back (only with gesture nav; last)
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
+- 11n: Owner "go" on the step file covered the Figma waiver and the "last-time numbers" scope note
+  (values only, no history label). `lastSets` doesn't check `isCompleted` or `endedAt`: saved
+  sessions hold only logged sets. The step's `prefillSets(planned, last, fields)` is split:
+  pure `LastPerformance.prefill(last, count)` + VM `prefilledFrom` (field filter + display units).
+  Fallback is per field: a last set with reps but no weight keeps the template's weight. The VM
+  reads `sessionRepository` directly, not GetAllWorkoutSessionsUseCase.
 - 11m: Figma waived (owner "go"). The code already had the R17-E2 Home "Unfinished workout" card
   (3 h since last draft write, restore only); reused it instead of a new dialog (owner "go"). Rule
   is now 2 h since the last done set or Resume (`resumedAt`), checked on every timer tick and on
@@ -532,6 +538,13 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
+- 11n: many of the owner's past sets have no weight (e.g. RDL in the latest Full Body B), so those
+  still start empty; that's correct. Phone check: Lat Pulldown 357.5 kg (template) and Bench
+  162.5 kg (added) prefilled. The Lat Pulldown 357.5 kg is odd test data, not a bug.
+- 11n reviewer, not fixed (SHOULD): no `endedAt != null` filter; no test that last beats a template
+  `plannedWeightKg`, for the tracking-type field filter, for the no-history 3 × 10 default, or for
+  the `pastSessions()` error path. Prefill loads every session with sets (fine now; a DAO query
+  later if it gets slow).
 - 11m: stale/expired is only detected while the timer ticks, on ON_RESUME or on restore. A paused
   workout in the background never goes stale until the app is opened.
 - 11m: Home uses `clock.zone`, and the injected Clock is `Clock.systemUTC()`, so Home's card time

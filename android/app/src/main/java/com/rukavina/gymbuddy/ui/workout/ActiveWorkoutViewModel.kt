@@ -21,6 +21,7 @@ import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
 import com.rukavina.gymbuddy.domain.usecase.exercise.GetAllExercisesIncludingHiddenUseCase
 import com.rukavina.gymbuddy.domain.usecase.workout.CreateWorkoutSessionUseCase
+import com.rukavina.gymbuddy.domain.usecase.workout.LastPerformance
 import com.rukavina.gymbuddy.domain.usecase.workout.StaleWorkout
 import com.rukavina.gymbuddy.ui.design.KeypadInput
 import com.rukavina.gymbuddy.ui.design.KeypadValue
@@ -503,8 +504,9 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /**
-     * Start a new workout from a template. Sets start from the template's
-     * targets, so − / + and Done work right away.
+     * Start a new workout from a template. Sets start from the last
+     * session's numbers (F18), else the template's targets, so − / + and
+     * Done work right away.
      */
     fun startWorkoutFromTemplate(template: WorkoutTemplate) {
         viewModelScope.launch {
@@ -516,6 +518,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             val exerciseMap = availableExercises.associateBy { it.id }
             val workoutId = clock.millis()
             val units = _uiState.value.preferredUnits
+            val past = pastSessions()
 
             val activeExercises = template.templateExercises
                 .sortedBy { it.orderIndex }
@@ -526,6 +529,10 @@ class ActiveWorkoutViewModel @Inject constructor(
                     val exerciseTrackingType = exerciseMap[templateExercise.exerciseId]?.trackingType
                         ?: templateExercise.exerciseTrackingType
                     val fields = SetFields.of(exerciseTrackingType)
+                    val last = LastPerformance.prefill(
+                        LastPerformance.lastSets(past, templateExercise.exerciseId),
+                        templateExercise.plannedSets,
+                    )
                     val sets = (1..templateExercise.plannedSets).mapIndexed { setIndex, setNumber ->
                         WorkoutSet(
                             id = "${workoutId}_ex${exerciseIndex}_set${setIndex}",
@@ -540,7 +547,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                             distance = if (SetField.Distance in fields) {
                                 templateExercise.plannedDistanceMeters?.let(SetFields::format).orEmpty()
                             } else "",
-                        )
+                        ).prefilledFrom(last[setIndex], fields, units)
                     }
 
                     ActiveExercise(
@@ -783,8 +790,9 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /**
      * ⋯ → Add exercise / sheet "+ Add exercise": appends the picked
-     * exercises with the editor's defaults (3 sets, 10 reps where reps
-     * count, no weight) and shows the first one. Unknown ids are skipped.
+     * exercises with 3 sets from the last session (F18), else the
+     * editor's defaults (10 reps where reps count, no weight), and shows
+     * the first one. Unknown ids are skipped.
      */
     fun addExercises(exerciseIds: List<String>) {
         if (exerciseIds.isEmpty()) return
@@ -792,8 +800,15 @@ class ActiveWorkoutViewModel @Inject constructor(
             if (availableExercises.isEmpty()) setExercises(getAllExercisesIncludingHiddenUseCase().first())
             val byId = availableExercises.associateBy { it.id }
             val rests = userStates()
+            val past = pastSessions()
+            val units = _uiState.value.preferredUnits
             val added = exerciseIds.mapNotNull { byId[it] }.map { exercise ->
-                val reps = SetField.Reps in SetFields.of(exercise.trackingType)
+                val fields = SetFields.of(exercise.trackingType)
+                val reps = SetField.Reps in fields
+                val last = LastPerformance.prefill(
+                    LastPerformance.lastSets(past, exercise.id),
+                    TemplateEditorViewModel.DEFAULT_SETS,
+                )
                 ActiveExercise(
                     id = idGenerator.newId(),
                     exerciseId = exercise.id,
@@ -804,7 +819,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                             id = idGenerator.newId(),
                             setNumber = n,
                             reps = if (reps) TemplateEditorViewModel.DEFAULT_REPS.toString() else "",
-                        )
+                        ).prefilledFrom(last[n - 1], fields, units)
                     },
                     plannedSets = TemplateEditorViewModel.DEFAULT_SETS,
                     plannedReps = if (reps) TemplateEditorViewModel.DEFAULT_REPS else null,
@@ -848,6 +863,30 @@ class ActiveWorkoutViewModel @Inject constructor(
             it.copy(exercises = list, currentExerciseIndex = list.indexOfFirst { e -> e.id == shown }.coerceAtLeast(0))
         }
         persistDraft()
+    }
+
+    /** Saved sessions for F18 prefill; empty on error (prefill is a nicety). */
+    private suspend fun pastSessions(): List<WorkoutSession> = try {
+        sessionRepository.getAllWorkoutSessions().first()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        emptyList()
+    }
+
+    /** F18: values from [last] where it has them and the exercise tracks them; else this set's own. */
+    private fun WorkoutSet.prefilledFrom(
+        last: com.rukavina.gymbuddy.domain.model.WorkoutSet?,
+        fields: List<SetField>,
+        units: PreferredUnits,
+    ): WorkoutSet {
+        if (last == null) return this
+        return copy(
+            reps = last.reps?.takeIf { SetField.Reps in fields }?.toString() ?: reps,
+            weight = last.weightKg?.takeIf { SetField.Weight in fields }?.let { displayWeight(it, units) } ?: weight,
+            duration = last.durationSeconds?.takeIf { SetField.Duration in fields }?.toString() ?: duration,
+            distance = last.distanceMeters?.takeIf { SetField.Distance in fields }?.let(SetFields::format) ?: distance,
+        )
     }
 
     private suspend fun userStates() = try {

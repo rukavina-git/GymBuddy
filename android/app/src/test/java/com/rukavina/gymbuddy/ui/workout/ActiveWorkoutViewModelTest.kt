@@ -1543,4 +1543,69 @@ class ActiveWorkoutViewModelTest {
         assertEquals("ex-bench", saved.exerciseId)
         assertEquals(1, saved.sets.size)
     }
+
+    // --- F18 prefill from the last session (11n) ---
+
+    private fun pastBench(vararg kgReps: Pair<Float, Int>) = WorkoutSession(
+        id = "past",
+        startedAt = 1_000L,
+        durationSeconds = 600,
+        title = "Past",
+        performedExercises = listOf(
+            com.rukavina.gymbuddy.domain.model.PerformedExercise(
+                id = "past-pe",
+                exerciseId = "ex-bench",
+                orderIndex = 0,
+                exerciseName = "Bench Press",
+                exerciseCategory = ExerciseCategory.STRENGTH,
+                exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
+                exercisePrimaryMuscles = emptyList(),
+                sets = kgReps.mapIndexed { i, (kg, reps) ->
+                    com.rukavina.gymbuddy.domain.model.WorkoutSet(
+                        id = "past-s$i", weightKg = kg, reps = reps, isCompleted = true, orderIndex = i,
+                    )
+                },
+            )
+        ),
+    )
+
+    @Test
+    fun `template start prefills from the last session`() {
+        val (viewModel, _, _) = buildViewModel(
+            sessionRepo = FakeWorkoutSessionRepository(listOf(pastBench(80f to 8, 85f to 6))),
+        )
+        viewModel.startWorkoutFromTemplate(
+            WorkoutTemplate(
+                id = "t", title = "Push",
+                templateExercises = listOf(
+                    templateExercise("ex-bench", orderIndex = 0, plannedSets = 3, plannedReps = 10),
+                    templateExercise("ex-plank", orderIndex = 1, plannedSets = 1, plannedReps = null),
+                ),
+            )
+        )
+        val state = viewModel.uiState.value
+        val bench = state.exercises[0].sets
+        val units = state.preferredUnits
+        assertEquals(
+            listOf(80f, 85f, 85f).map { ActiveWorkoutViewModel.displayWeight(it, units) },
+            bench.map { it.weight },
+        )
+        assertEquals(listOf("8", "6", "6"), bench.map { it.reps })
+        assertTrue(bench.none { it.isCompleted })
+        // No history for plank: template values stay.
+        assertEquals("", state.exercises[1].sets.single().weight)
+    }
+
+    @Test
+    fun `added exercise prefills from the last session`() {
+        val (viewModel, _, _) = buildViewModel(
+            sessionRepo = FakeWorkoutSessionRepository(listOf(pastBench(60f to 12))),
+        )
+        viewModel.startEmptyWorkout("Workout")
+        viewModel.addExercises(listOf("ex-bench"))
+        val state = viewModel.uiState.value
+        val sets = state.exercises.single().sets
+        assertEquals(3, sets.size)
+        assertTrue(sets.all { it.weight == ActiveWorkoutViewModel.displayWeight(60f, state.preferredUnits) && it.reps == "12" })
+    }
 }

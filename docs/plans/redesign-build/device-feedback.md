@@ -123,7 +123,7 @@ before code.
       the existing 22 h session's end time.
 
 ## Round D — features (11f+, own step files)
-- [ ] F18 idea · Workout: every set starts at 0 kg, even for a lift
+- [x] F18 idea · (HASH) · Workout: every set starts at 0 kg, even for a lift
       done last week (holding + up to 120 kg). Start from the
       template's target weight; if there is none, from the last
       session's numbers. Probably always prefer the last session.
