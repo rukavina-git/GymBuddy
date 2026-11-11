@@ -28,7 +28,7 @@
 - [x] 11l Feedback: F3b typing off sheets (steps/11l-typing-off-sheets.md) — 438ff54
 - [x] 11m Feedback: F25 stale workouts (steps/11m-stale-workouts.md) — f97be80
 - [x] 11n Feedback: F18 prefill sets from last session or template (steps/11n-prefill-sets.md) — a9f6b58
-- [x] 11o Feedback: F5 edge swipe back, 3-button nav only (steps/11o-edge-swipe-back.md) — 4c3684f
+- [x] 11o Feedback: F5 edge swipe back (steps/11o-edge-swipe-back.md) — built in 4c3684f, removed again: postponed to v2
 - [ ] 12 Device pass, CI green, PR develop → main (me)
 
 ## Deviations
@@ -545,11 +545,9 @@
   `res/values/strings_progress.xml`.
 
 ## Gotchas
-- 11o reviewer (not fixed): a pointer cancel mid-drag can leave the page offset (reset not in
-  finally) or count as a release and fire Back; after a commit the NavHost is still shifted while the
-  pop transition plays. Check on the phone. Landscape with the 3-button bar on the left has a left
-  gesture inset, so the swipe is off there. Tests miss short-swipe snap-back, vertical/leftward drags
-  and the AppNavHost route rule. MainScreen/AppNavHost diffs are mostly re-indent (`git diff -w`).
+- 11o: owner tried it on the phone: it works, but it feels jerky next to iOS or Gmail. Removed again
+  and moved to v2 (architecture plan §14.2). A v2 attempt should drive the predictive-back animation
+  (scrub the real previous screen) instead of shifting the NavHost.
 - 11n: many of the owner's past sets have no weight (e.g. RDL in the latest Full Body B), so those
   still start empty; that's correct. Phone check: Lat Pulldown 357.5 kg (template) and Bench
   162.5 kg (added) prefilled. The Lat Pulldown 357.5 kg is odd test data, not a bug.

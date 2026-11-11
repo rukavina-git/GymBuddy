@@ -987,6 +987,7 @@ The distinguishing feature of this list is that **the storage for most of it alr
 | Croatian translation (Language row in Settings) | Strings only |
 | Import (Strong/Hevy CSV, own export files of any formatVersion) | ADR 0015 readers |
 | Widgets | No storage impact |
+| iOS-style left-edge swipe back on 3-button navigation (F5; a first try in Plan 7 step 11o felt jerky) | No storage impact |
 | UI overhaul, including full filter surface | No storage impact |
 
 **The freeze is the point.** Anything not on the v1 list goes to the backlog without exception, regardless of how small it seems while already in the relevant file. Scope creep in a familiar codebase with no deadline remains the most likely cause of this project not shipping.

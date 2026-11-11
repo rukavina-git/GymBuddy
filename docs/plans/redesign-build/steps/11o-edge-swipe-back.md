@@ -1,5 +1,8 @@
 # 11o Feedback: F5 edge swipe back
 
+> Postponed to v2. Built in 4c3684f; on the phone it worked but felt jerky
+> next to iOS or Gmail, so the code was removed. See progress.md Gotchas.
+
 ## Problem
 F5: owner wants an iOS-style swipe from the left edge to go back on
 most screens, with the same rules as Back (ask first if leaving loses
