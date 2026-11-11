@@ -51,7 +51,7 @@ before code.
 ## Round C — design consults (11f+: Impeccable, then Figma, then code)
 - [x] F3b design · (438ff54) Bottom sheets in general: keep them, or use
       something else?
-- [x] F5 design · (HASH) iOS-style swipe from the left edge to go back, on
+- [x] F5 design · (4c3684f) iOS-style swipe from the left edge to go back, on
       most screens. Same rules as Back: if leaving would lose data, ask
       first. Big change.
 - [x] F6 design · (391a60f) Height and weight input: a 4-digit keypad limit for
