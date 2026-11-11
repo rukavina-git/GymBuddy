@@ -56,6 +56,18 @@ interface ExerciseDao {
     @Query("SELECT * FROM exercises WHERE id = :id AND deletedAt IS NULL")
     suspend fun getExerciseById(id: String): ExerciseEntity?
 
+    /** One exercise as it changes; null once deleted (the exercise page closes). */
+    @Query("SELECT * FROM exercises WHERE id = :id AND deletedAt IS NULL")
+    fun observeExercise(id: String): Flow<ExerciseEntity?>
+
+    /** These ids, deleted ones included (template editor: "Deleted exercise" rows). */
+    @Query("SELECT * FROM exercises WHERE id IN (:ids)")
+    suspend fun getExercisesAnyState(ids: List<String>): List<ExerciseEntity>
+
+    /** Undo a delete: a plain upsert push with deletedAt null brings it back on the server too. */
+    @Query("UPDATE exercises SET deletedAt = NULL, updatedAt = :updatedAt, syncState = 'PENDING' WHERE id = :id")
+    suspend fun restoreExercise(id: String, updatedAt: Long)
+
     /**
      * Search exercises by name (case-insensitive).
      * @param query Search query (will be wrapped with % for LIKE query)

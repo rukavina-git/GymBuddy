@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Session detail (Plan 7 step 09a, Figma 107:15763) -->
+    <string name="session_time_range">%1$s–%2$s</string>
+    <string name="session_per_km">per km</string>
+    <string name="session_per_mi">per mi</string>
+    <string name="session_km_label">km</string>
+    <string name="session_mi_label">mi</string>
+    <string name="session_start_again">Start %s again</string>
+    <string name="session_exercise_page">%s page</string>
+    <string name="session_deleted">%s deleted</string>
+    <string name="session_set_number">Set %d</string>
+    <string name="state_expanded">Expanded</string>
+    <string name="state_collapsed">Collapsed</string>
+    <!-- Edit workout (Plan 7 step 09b, Figma 107:16270) -->
+    <string name="session_menu_edit">Edit workout</string>
+    <string name="session_edit_title">Edit workout</string>
+    <string name="session_edit_arrow">→</string>
+    <string name="session_add_set">+ Add set</string>
+    <string name="session_edit_date">Date, %s</string>
+    <string name="session_edit_start">Start time, %s</string>
+    <string name="session_edit_end">End time, %s</string>
+    <string name="session_edit_ok">OK</string>
+</resources>

@@ -101,7 +101,9 @@ class GuestMergeTest {
         currentUid = { holder.owner },
         accountEmail = { "a@example.com" },
         signOut = { events += "signOut" },
-        setGuest = { events += "setGuest($it)" }
+        setGuest = { events += "setGuest($it)" },
+        afterMerge = { events += "afterMerge($it)" },
+        onCancel = { events += "onCancel" }
     )
 
     @Test
@@ -230,7 +232,7 @@ class GuestMergeTest {
 
         val done = coordinator.state.value as GuestMergeState.Done
         assertEquals(LocalDataCounts(1, 1, 1), done.receipt.added)
-        assertEquals(listOf("syncNow", "setGuest(false)", "requestSync"), events)
+        assertEquals(listOf("syncNow", "setGuest(false)", "afterMerge(uid-a)", "requestSync"), events)
         assertFalse(file(null).exists())
     }
 
@@ -268,7 +270,7 @@ class GuestMergeTest {
         coordinator.cancel()
 
         assertEquals(GuestMergeState.Idle, coordinator.state.value)
-        assertEquals(listOf("syncNow", "setGuest(true)", "signOut"), events)
+        assertEquals(listOf("syncNow", "setGuest(true)", "onCancel", "signOut"), events)
         assertEquals(1, merge.openCounts().workouts)
         holder.switchTo(null)
         assertEquals(LocalDataCounts(1, 1, 1), merge.openCounts())

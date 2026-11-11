@@ -203,6 +203,17 @@ interface SyncDao {
      */
     @Transaction
     suspend fun wipeLocalUserData() {
+        wipeForResync()
+        wipeActiveWorkoutDraft()
+    }
+
+    /**
+     * [wipeLocalUserData] minus the in-progress workout draft, for a 410
+     * re-download (Plan 7 11a): sets logged meanwhile must survive. The
+     * draft's exercise ids stay valid; own exercises come back in the pull.
+     */
+    @Transaction
+    suspend fun wipeForResync() {
         wipeSessions()
         wipeCustomExercises()
         wipeCustomTemplates()
@@ -211,7 +222,6 @@ interface SyncDao {
         wipeProfiles()
         wipeOutbox()
         wipeMeta()
-        wipeActiveWorkoutDraft()
         wipeBodyWeightEntries()
     }
 }

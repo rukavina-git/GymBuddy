@@ -7,7 +7,7 @@
 - [x] 05 Profile fields (steps/05-profile-fields.md) — 291c23b
 - [x] 06 Plans + default templates (steps/06-plans.md) — 224ea8e
 - [x] 07 Data export (steps/07-export.md) — 1f4f248
-- [ ] 08 CI green, PR develop → main (me)
+- [x] 08 CI green, PR develop → main (me) — PR #6, 596850c
 
 ## Deviations
 - 01: Signed out opens `gym_buddy_signed_out.db` (the step file didn't

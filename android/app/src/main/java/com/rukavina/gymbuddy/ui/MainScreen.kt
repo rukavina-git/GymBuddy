@@ -1,16 +1,51 @@
 package com.rukavina.gymbuddy.ui
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import com.rukavina.gymbuddy.ui.template.relativeDay
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.Lifecycle
+import java.time.format.FormatStyle
+import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+import java.time.LocalDate
+import java.time.Instant
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.rukavina.gymbuddy.R
+import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
+import com.rukavina.gymbuddy.ui.design.LargeTitleTopBar
+import com.rukavina.gymbuddy.ui.home.HomeScreen
+import com.rukavina.gymbuddy.ui.home.UnfinishedActions
+import com.rukavina.gymbuddy.ui.home.toRunningWorkout
+import com.rukavina.gymbuddy.ui.template.TemplateDeleteViewModel
+import com.rukavina.gymbuddy.ui.template.editor.TemplateEditorScreen
+import com.rukavina.gymbuddy.ui.template.editor.TemplateEditorViewModel
+import com.rukavina.gymbuddy.ui.template.picker.ExercisePickerScreen
+import com.rukavina.gymbuddy.ui.template.picker.ExercisePickerViewModel
+import com.rukavina.gymbuddy.ui.template.page.TemplatePageScreen
+import com.rukavina.gymbuddy.ui.template.page.TemplatePageViewModel
+import com.rukavina.gymbuddy.ui.progress.AllSessionsScreen
+import com.rukavina.gymbuddy.ui.progress.AllSessionsViewModel
+import com.rukavina.gymbuddy.ui.progress.ProgressScreen
+import com.rukavina.gymbuddy.ui.progress.session.SessionDeleteViewModel
+import com.rukavina.gymbuddy.ui.progress.session.SessionDetailScreen
+import com.rukavina.gymbuddy.ui.progress.session.SessionDetailViewModel
+import com.rukavina.gymbuddy.ui.progress.session.SessionEditScreen
+import com.rukavina.gymbuddy.ui.workouts.WorkoutsScreen
+import kotlinx.coroutines.launch
+import com.rukavina.gymbuddy.ui.theme.fadeThroughIn
+import com.rukavina.gymbuddy.ui.theme.fadeThroughOut
+import com.rukavina.gymbuddy.ui.theme.sharedAxisIn
+import com.rukavina.gymbuddy.ui.theme.sharedAxisOut
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,7 +62,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Box
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,32 +71,40 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import com.rukavina.gymbuddy.BuildConfig
-import com.rukavina.gymbuddy.navigation.BottomNavItem
+import com.rukavina.gymbuddy.ui.design.NavTab
+import com.rukavina.gymbuddy.ui.frame.AppFrame
+import com.rukavina.gymbuddy.ui.frame.isFullScreen
+import com.rukavina.gymbuddy.ui.frame.navigateToTab
+import com.rukavina.gymbuddy.ui.frame.route
+import com.rukavina.gymbuddy.ui.frame.selectedTab
+import com.rukavina.gymbuddy.ui.frame.toLiveBarState
 import com.rukavina.gymbuddy.navigation.NavRoutes
-import com.rukavina.gymbuddy.ui.exercise.ExerciseScreen
-import com.rukavina.gymbuddy.ui.exercise.ExerciseDetailsScreen
-import com.rukavina.gymbuddy.ui.exercise.ExerciseViewModel
-import com.rukavina.gymbuddy.ui.profile.ProfileScreen
-import com.rukavina.gymbuddy.ui.profile.ProfileViewModel
-import com.rukavina.gymbuddy.ui.profile.edit.EditActivityLevelScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditBirthdateScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditBioScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditFitnessGoalScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditGenderScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditHeightScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditNameScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditTargetWeightScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditUnitsScreen
-import com.rukavina.gymbuddy.ui.profile.edit.EditWeightScreen
+import com.rukavina.gymbuddy.ui.exercises.ExercisesScreen
+import com.rukavina.gymbuddy.ui.exercises.create.ExerciseEditScreen
+import com.rukavina.gymbuddy.ui.exercises.create.ExerciseEditViewModel
+import com.rukavina.gymbuddy.ui.exercises.page.ExercisePageScreen
+import com.rukavina.gymbuddy.ui.exercises.page.ExercisePageViewModel
 import com.rukavina.gymbuddy.ui.guest.GuestMergeDialogs
+import com.rukavina.gymbuddy.navigation.openWelcome
+import com.rukavina.gymbuddy.ui.design.AppSnackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
 import com.rukavina.gymbuddy.ui.guest.GuestMergeViewModel
-import com.rukavina.gymbuddy.ui.settings.AboutScreen
-import com.rukavina.gymbuddy.ui.settings.AppPreferencesScreen
-import com.rukavina.gymbuddy.ui.settings.HiddenExercisesScreen
-import com.rukavina.gymbuddy.ui.settings.HiddenTemplatesScreen
-import com.rukavina.gymbuddy.ui.settings.SettingsScreen
+import com.rukavina.gymbuddy.ui.you.AboutScreen
+import com.rukavina.gymbuddy.ui.you.DeleteAccountScreen
+import com.rukavina.gymbuddy.ui.you.HiddenExercisesScreen
+import com.rukavina.gymbuddy.ui.you.HiddenTemplatesScreen
+import com.rukavina.gymbuddy.ui.you.YouNav
+import com.rukavina.gymbuddy.ui.you.YouScreen
+import com.rukavina.gymbuddy.ui.you.body.BodyWeightScreen
+import com.rukavina.gymbuddy.ui.you.profile.ProfileScreen
 import com.rukavina.gymbuddy.ui.settings.debug.SyncDebugScreen
-import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutScreen
+import com.rukavina.gymbuddy.ui.workout.active.ActiveWorkoutScreen
+import com.rukavina.gymbuddy.ui.workout.active.WorkoutSummaryScreen
+import com.rukavina.gymbuddy.ui.auth.CreateFrom
+import com.rukavina.gymbuddy.ui.theme.collapseIntoLiveBar
+import com.rukavina.gymbuddy.ui.theme.growFromLiveBar
 import com.rukavina.gymbuddy.ui.workout.ActiveWorkoutViewModel
 
 
@@ -71,8 +114,11 @@ fun MainScreen(rootNavController: NavHostController) {
     val ownerReady by guestMergeViewModel.ownerReady.collectAsState()
     val mergeState by guestMergeViewModel.state.collectAsState()
 
+    // Receipts and failures from the merge (Figma "14 · Receipt") show over the tabs.
+    val snackbar = remember { SnackbarHostState() }
     GuestMergeDialogs(
         state = mergeState,
+        snackbar = snackbar,
         onAdd = guestMergeViewModel::add,
         onCancel = guestMergeViewModel::cancel,
         onDismiss = guestMergeViewModel::dismiss
@@ -83,13 +129,8 @@ fun MainScreen(rootNavController: NavHostController) {
     val authGateViewModel: AuthGateViewModel = hiltViewModel()
     val gateState by authGateViewModel.state.collectAsState()
     val deletedCounts by authGateViewModel.counts.collectAsState()
-    val toLogin = {
-        rootNavController.navigate(NavRoutes.Login) {
-            popUpTo(NavRoutes.Main) { inclusive = true }
-        }
-    }
     LaunchedEffect(Unit) {
-        authGateViewModel.erased.collect { toLogin() }
+        authGateViewModel.erased.collect { rootNavController.openWelcome() }
     }
     (gateState as? AuthGateState.AccountDeleted)?.let { deleted ->
         LaunchedEffect(deleted) { authGateViewModel.loadCounts() }
@@ -104,10 +145,13 @@ fun MainScreen(rootNavController: NavHostController) {
     if (ownerReady) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (gateState is AuthGateState.SessionExpired) {
-                SessionExpiredBanner(onSignIn = toLogin, modifier = Modifier.statusBarsPadding())
+                SessionExpiredBanner(
+                    onSignIn = { rootNavController.navigate(NavRoutes.signIn()) },
+                    modifier = Modifier.statusBarsPadding()
+                )
             }
             Box(modifier = Modifier.weight(1f)) {
-                MainContent(rootNavController)
+                MainContent(rootNavController, snackbar)
             }
         }
     } else {
@@ -118,224 +162,335 @@ fun MainScreen(rootNavController: NavHostController) {
 }
 
 @Composable
-private fun MainContent(rootNavController: NavHostController) {
+private fun MainContent(rootNavController: NavHostController, snackbar: SnackbarHostState) {
     val bottomNavController = rememberNavController()
-    val backStackEntry = bottomNavController.currentBackStackEntryAsState()
-    val currentDestination = backStackEntry.value?.destination
+    val backStackEntry by bottomNavController.currentBackStackEntryAsState()
+    val backStack by bottomNavController.currentBackStack.collectAsState()
+    val currentRoute = backStackEntry?.destination?.route
+    val tab = selectedTab(backStack.map { it.destination.route })
 
     // Create ViewModels at MainScreen level so they survive navigation
     val activeWorkoutViewModel: ActiveWorkoutViewModel = hiltViewModel()
-    val profileViewModel: ProfileViewModel = hiltViewModel()
+    val workoutState by activeWorkoutViewModel.uiState.collectAsState()
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                val bottomNavItems = listOf(
-                    BottomNavItem.Home,
-                    BottomNavItem.Workouts,
-                    BottomNavItem.Exercises,
-                    BottomNavItem.Statistics,
-                    BottomNavItem.Settings
+    val openWorkout = { bottomNavController.navigate(NavRoutes.ActiveWorkout) { launchSingleTop = true } }
+    val workoutRunning by remember { derivedStateOf { workoutState.running } }
+    val startTemplate: (WorkoutTemplate) -> Unit = { template ->
+        // Start is hidden while a workout runs (Figma 85:10122), so there is nothing to replace.
+        if (!activeWorkoutViewModel.hasActiveWorkout()) activeWorkoutViewModel.startWorkoutFromTemplate(template)
+        openWorkout()
+    }
+    val openTemplate: (String) -> Unit = { id -> bottomNavController.navigate(NavRoutes.templatePage(id)) }
+    val openSession: (String) -> Unit = { id -> bottomNavController.navigate(NavRoutes.sessionDetail(id)) }
+
+    // Delete (Undo): the tombstone is written only when the snackbar goes without Undo.
+    val scope = rememberCoroutineScope()
+    val templateDeletes: TemplateDeleteViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val offerUndoDelete: (String, String) -> Unit = { id, title ->
+        scope.launch {
+            var settled = false
+            try {
+                val result = snackbar.showSnackbar(
+                    message = context.getString(R.string.template_deleted, title),
+                    actionLabel = context.getString(R.string.undo),
+                    duration = SnackbarDuration.Indefinite,
                 )
-                bottomNavItems.forEach { item ->
-                    val selected =
-                        currentDestination?.hierarchy?.any { it.route == item.route } == true
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            bottomNavController.navigate(item.route) {
-                                // Pop up to the main graph start destination to avoid building a big back stack
-                                popUpTo(NavRoutes.Home) { inclusive = false }
-                                launchSingleTop = true
-                            }
-                        },
-                        icon = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label) },
-                        alwaysShowLabel = true
-                    )
-                }
+                settled = true
+                if (result == SnackbarResult.ActionPerformed) templateDeletes.undo(id) else templateDeletes.commit(id)
+            } finally {
+                // Main left mid-snackbar (sign-out, owner switch): keep the template.
+                if (!settled) templateDeletes.undo(id)
             }
         }
+    }
+    // Session Delete (Undo, R14-5): tombstoned at once, Undo restores it (step 09 decision 2).
+    val sessionDeletes: SessionDeleteViewModel = hiltViewModel()
+    val offerUndoSessionDelete: (String, String) -> Unit = { id, title ->
+        sessionDeletes.delete(id)
+        scope.launch {
+            val result = snackbar.showSnackbar(
+                message = context.getString(R.string.session_deleted, title),
+                actionLabel = context.getString(R.string.undo),
+                duration = SnackbarDuration.Indefinite,
+            )
+            if (result == SnackbarResult.ActionPerformed) sessionDeletes.restore(id)
+        }
+    }
+    // Pop the workout (or its summary) first so no tab saves it into its back stack.
+    val leaveWorkout = {
+        bottomNavController.popBackStack(NavRoutes.ActiveWorkout, inclusive = true)
+        bottomNavController.popBackStack(NavRoutes.WorkoutSummary, inclusive = true)
+        bottomNavController.navigateToTab(NavTab.Workouts)
+    }
+
+    // Unfinished → Finish on Home (R17-E2): show the summary once the save lands.
+    var finishingFromHome by remember { mutableStateOf(false) }
+    LaunchedEffect(finishingFromHome, workoutState.summary != null) {
+        if (finishingFromHome && workoutState.summary != null) {
+            finishingFromHome = false
+            bottomNavController.navigate(NavRoutes.WorkoutSummary) { launchSingleTop = true }
+        }
+    }
+    // F25: back in the app, a workout left 2 h / 24 h without a set goes unfinished / finishes.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { activeWorkoutViewModel.checkStale() }
+    workoutState.autoFinished?.let { done ->
+        val zone = ZoneId.systemDefault()
+        val day = relativeDay(done.endedAt, LocalDate.now(zone), zone)
+        val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(Instant.ofEpochMilli(done.endedAt).atZone(zone))
+        val message = stringResource(R.string.workout_auto_finished, done.title, day, time)
+        LaunchedEffect(done) {
+            // In Main's scope: clearing autoFinished leaves this effect.
+            scope.launch { snackbar.showSnackbar(message) }
+            activeWorkoutViewModel.autoFinishShown()
+        }
+    }
+    val unfinished = UnfinishedActions(
+        onDiscard = activeWorkoutViewModel::discardWorkout,
+        onResume = { activeWorkoutViewModel.resumeUnfinished(); openWorkout() },
+        onFinish = { finishingFromHome = true; activeWorkoutViewModel.finishUnfinished() },
+    )
+
+    AppFrame(
+        selectedTab = tab,
+        onSelectTab = bottomNavController::navigateToTab,
+        fullScreen = isFullScreen(currentRoute),
+        liveBar = workoutState.toLiveBarState(),
+        onLiveBarClick = openWorkout,
+        snackbarHost = { SnackbarHost(snackbar) { AppSnackbar(it) } },
     ) { paddingValues ->
         NavHost(
             navController = bottomNavController,
             startDestination = NavRoutes.Home,
             modifier = Modifier.padding(paddingValues),
-            enterTransition = { fadeIn(animationSpec = tween(300)) + slideInHorizontally(animationSpec = tween(300)) { it / 4 } },
-            exitTransition = { fadeOut(animationSpec = tween(300)) },
-            popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-            popExitTransition = { fadeOut(animationSpec = tween(300)) + slideOutHorizontally(animationSpec = tween(300)) { it / 4 } }
+            enterTransition = { if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward = true) },
+            exitTransition = { if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward = true) },
+            popEnterTransition = { if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward = false) },
+            popExitTransition = { if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward = false) },
         ) {
             composable(NavRoutes.Home) {
                 HomeScreen(
-                    activeWorkoutViewModel = activeWorkoutViewModel,
-                    onNavigateToWorkout = {
-                        bottomNavController.navigate(NavRoutes.ActiveWorkout)
+                    workoutRunning = workoutRunning,
+                    onStartTemplate = startTemplate,
+                    onOpenTemplate = openTemplate,
+                    onAllTemplates = { bottomNavController.navigateToTab(NavTab.Workouts) },
+                    onOpenWeek = { bottomNavController.navigateToTab(NavTab.Progress) },
+                    workout = workoutState.toRunningWorkout(),
+                    onOpenWorkout = openWorkout,
+                    onEmptyWorkout = {
+                        if (!activeWorkoutViewModel.hasActiveWorkout()) {
+                            activeWorkoutViewModel.startEmptyWorkout(context.getString(R.string.workout_empty_title))
+                        }
+                        openWorkout()
                     },
-                    onNavigateToTemplates = {
-                        bottomNavController.navigate(NavRoutes.Workouts)
-                    },
-                    onNavigateToProfile = {
-                        bottomNavController.navigate(NavRoutes.Settings)
-                    }
+                    unfinished = unfinished,
                 )
             }
             composable(NavRoutes.Workouts) {
-                CombinedWorkoutsScreen(
-                    activeWorkoutViewModel = activeWorkoutViewModel,
-                    onStartWorkout = { bottomNavController.navigate(NavRoutes.ActiveWorkout) }
+                WorkoutsScreen(
+                    onOpenTemplate = openTemplate,
+                    onNewTemplate = { bottomNavController.navigate(NavRoutes.templateEditor()) },
+                    onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
+                )
+            }
+            composable(
+                route = NavRoutes.TemplatePage,
+                arguments = listOf(
+                    navArgument(TemplatePageViewModel.ARG_TEMPLATE_ID) { type = NavType.StringType },
+                ),
+            ) { entry ->
+                TemplatePageScreen(
+                    workoutRunning = workoutRunning,
+                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    onStart = startTemplate,
+                    onEdit = { id -> bottomNavController.navigate(NavRoutes.templateEditor(id)) },
+                    // A copy replaces this page; a starter's pencil copy then opens its editor on top.
+                    onOpenCopy = { id, edit ->
+                        bottomNavController.navigate(NavRoutes.templatePage(id)) {
+                            popUpTo(entry.destination.id) { inclusive = true }
+                        }
+                        if (edit) bottomNavController.navigate(NavRoutes.templateEditor(id))
+                    },
+                    onDeleted = { id, title ->
+                        bottomNavController.popBackStack(entry.destination.id, inclusive = true)
+                        offerUndoDelete(id, title)
+                    },
+                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                )
+            }
+            composable(
+                route = NavRoutes.TemplateEditor,
+                arguments = listOf(
+                    navArgument(TemplateEditorViewModel.ARG_TEMPLATE_ID) {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                val picked by entry.savedStateHandle
+                    .getStateFlow<ArrayList<String>?>(ExercisePickerViewModel.RESULT_PICKED, null)
+                    .collectAsState()
+                TemplateEditorScreen(
+                    onClose = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    onAddExercises = { ids -> bottomNavController.navigate(NavRoutes.exercisePicker(ids)) },
+                    picked = picked,
+                    onPickedHandled = { entry.savedStateHandle[ExercisePickerViewModel.RESULT_PICKED] = null },
+                )
+            }
+            composable(
+                route = NavRoutes.ExercisePicker,
+                arguments = listOf(
+                    navArgument(ExercisePickerViewModel.ARG_IN_TEMPLATE) { type = NavType.StringType; defaultValue = "" },
+                ),
+            ) { entry ->
+                ExercisePickerScreen(
+                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    onAdd = { ids ->
+                        bottomNavController.previousBackStackEntry?.savedStateHandle
+                            ?.set(ExercisePickerViewModel.RESULT_PICKED, ArrayList(ids))
+                        bottomNavController.popBackStack(entry.destination.id, inclusive = true)
+                    },
                 )
             }
             composable(NavRoutes.Exercises) {
-                ExerciseScreen(navController = bottomNavController)
+                ExercisesScreen(
+                    onOpen = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id)) },
+                    onNew = { bottomNavController.navigate(NavRoutes.exerciseEdit()) },
+                    onHidden = { bottomNavController.navigate(NavRoutes.HiddenExercises) },
+                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                )
             }
             composable(
-                route = NavRoutes.ExerciseDetails,
-                arguments = listOf(navArgument("exerciseId") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
-                val exerciseViewModel: ExerciseViewModel = hiltViewModel()
-                val uiState = exerciseViewModel.uiState.collectAsState().value
-                val exercise = uiState.exercises.find { it.id == exerciseId }
-                val note = exerciseViewModel.selectedExerciseNote.collectAsState().value
-
-                LaunchedEffect(exerciseId) {
-                    exerciseViewModel.loadExerciseNote(exerciseId)
-                }
-
-                if (exercise != null) {
-                    ExerciseDetailsScreen(
-                        exercise = exercise,
-                        note = note,
-                        onNavigateBack = { bottomNavController.navigateUp() },
-                        onUpdateNote = { newNote ->
-                            exerciseViewModel.updateExerciseNote(exerciseId, newNote)
-                        }
-                    )
-                }
+                route = NavRoutes.ExercisePage,
+                arguments = listOf(
+                    navArgument(ExercisePageViewModel.ARG_EXERCISE_ID) { type = NavType.StringType },
+                    navArgument(ExercisePageViewModel.ARG_AT_PROGRESS) { type = NavType.BoolType; defaultValue = false },
+                ),
+            ) { entry ->
+                val pageExerciseId = entry.arguments?.getString(ExercisePageViewModel.ARG_EXERCISE_ID)
+                ExercisePageScreen(
+                    onOpenSession = { id -> bottomNavController.navigate(NavRoutes.sessionDetail(id, pageExerciseId)) },
+                    onAllSessions = { id -> bottomNavController.navigate(NavRoutes.allSessions(id)) },
+                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    onEdit = { id -> bottomNavController.navigate(NavRoutes.exerciseEdit(id)) },
+                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                )
             }
-            composable(NavRoutes.Statistics) { StatisticsScreen() }
-            composable(NavRoutes.Settings) {
-                SettingsScreen(
-                    bottomNavController = bottomNavController,
-                    rootNavController = rootNavController
+            composable(
+                route = NavRoutes.ExerciseEdit,
+                arguments = listOf(
+                    navArgument(ExerciseEditViewModel.ARG_EXERCISE_ID) {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                ExerciseEditScreen(
+                    onClose = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    // A new exercise opens its page in the editor's place; an edit goes back to the page.
+                    onSaved = { id, isNew ->
+                        if (isNew) {
+                            bottomNavController.navigate(NavRoutes.exercisePage(id)) {
+                                popUpTo(entry.destination.id) { inclusive = true }
+                            }
+                        } else {
+                            bottomNavController.popBackStack(entry.destination.id, inclusive = true)
+                        }
+                    },
+                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                )
+            }
+            composable(NavRoutes.Progress) {
+                ProgressScreen(
+                    onOpenLift = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id, atProgress = true)) },
+                    onOpenSession = openSession,
+                    onAllSessions = { bottomNavController.navigate(NavRoutes.allSessions()) },
+                    onStartWorkout = { bottomNavController.navigateToTab(NavTab.Workouts) },
+                )
+            }
+            composable(
+                route = NavRoutes.AllSessions,
+                arguments = listOf(
+                    navArgument(AllSessionsViewModel.ARG_EXERCISE_ID) {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                AllSessionsScreen(
+                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                    onOpenSession = openSession,
+                )
+            }
+            composable(
+                route = NavRoutes.SessionDetail,
+                arguments = listOf(
+                    navArgument(SessionDetailViewModel.ARG_SESSION_ID) { type = NavType.StringType },
+                    navArgument(SessionDetailViewModel.ARG_EXERCISE_ID) {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                // Pop only this entry, and only while it is on top (a gone session and Delete both leave).
+                val leave = { if (bottomNavController.currentBackStackEntry == entry) bottomNavController.popBackStack() }
+                SessionDetailScreen(
+                    workoutRunning = workoutRunning,
+                    onBack = { leave() },
+                    onOpenExercise = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id)) },
+                    onStartAgain = startTemplate,
+                    onEdit = { id -> bottomNavController.navigate(NavRoutes.sessionEdit(id)) },
+                    onDelete = { id, title -> leave(); offerUndoSessionDelete(id, title) },
+                )
+            }
+            composable(
+                route = NavRoutes.SessionEdit,
+                arguments = listOf(navArgument(SessionDetailViewModel.ARG_SESSION_ID) { type = NavType.StringType }),
+            ) { entry ->
+                SessionEditScreen(
+                    onClose = { if (bottomNavController.currentBackStackEntry == entry) bottomNavController.popBackStack() },
+                )
+            }
+            composable(NavRoutes.You) {
+                YouScreen(
+                    YouNav(
+                        onProfile = { bottomNavController.navigate(NavRoutes.Profile) },
+                        onCreateAccount = { rootNavController.navigate(NavRoutes.createAccount(CreateFrom.SETTINGS)) },
+                        onSignIn = { rootNavController.navigate(NavRoutes.signIn()) },
+                        onHiddenExercises = { bottomNavController.navigate(NavRoutes.HiddenExercises) },
+                        onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
+                        onAbout = { bottomNavController.navigate(NavRoutes.About) },
+                        onDeleteAccount = { bottomNavController.navigate(NavRoutes.DeleteAccount) { launchSingleTop = true } },
+                        onLeft = { rootNavController.openWelcome() },
+                    ),
                 )
             }
 
+            composable(NavRoutes.DeleteAccount) {
+                DeleteAccountScreen(
+                    onBack = { bottomNavController.popBackStack() },
+                    onLeft = { rootNavController.openWelcome() },
+                )
+            }
             composable(NavRoutes.About) {
-                AboutScreen(navController = bottomNavController)
+                AboutScreen(
+                    onBack = { bottomNavController.popBackStack() },
+                    onSyncDebug = { bottomNavController.navigate(NavRoutes.SyncDebug) },
+                )
             }
             composable(NavRoutes.Profile) {
                 ProfileScreen(
-                    rootNavController = rootNavController,
-                    bottomNavController = bottomNavController,
-                    viewModel = profileViewModel
+                    onBack = { bottomNavController.popBackStack() },
+                    onBodyWeight = { bottomNavController.navigate(NavRoutes.BodyWeight) },
                 )
             }
 
-            composable(NavRoutes.EditName) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditNameScreen(
-                    navController = bottomNavController,
-                    currentName = uiState.name,
-                    onSave = { profileViewModel.onNameSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditBio) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditBioScreen(
-                    navController = bottomNavController,
-                    currentBio = uiState.bio,
-                    onSave = { profileViewModel.onBioSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditBirthdate) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditBirthdateScreen(
-                    navController = bottomNavController,
-                    currentBirthDate = uiState.birthDate,
-                    onSave = { profileViewModel.onBirthDateSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditWeight) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditWeightScreen(
-                    navController = bottomNavController,
-                    currentWeight = uiState.weight ?: 70f,
-                    preferredUnits = uiState.preferredUnits,
-                    onSave = { profileViewModel.onWeightSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditHeight) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditHeightScreen(
-                    navController = bottomNavController,
-                    currentHeight = uiState.height ?: 170f,
-                    preferredUnits = uiState.preferredUnits,
-                    onSave = { profileViewModel.onHeightSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditTargetWeight) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditTargetWeightScreen(
-                    navController = bottomNavController,
-                    currentTargetWeight = uiState.targetWeight ?: 70f,
-                    preferredUnits = uiState.preferredUnits,
-                    onSave = { profileViewModel.onTargetWeightSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditGender) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditGenderScreen(
-                    navController = bottomNavController,
-                    currentGender = uiState.gender,
-                    onSave = { profileViewModel.onGenderSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditFitnessGoal) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditFitnessGoalScreen(
-                    navController = bottomNavController,
-                    currentGoal = uiState.fitnessGoal,
-                    onSave = { profileViewModel.onFitnessGoalSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditActivityLevel) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditActivityLevelScreen(
-                    navController = bottomNavController,
-                    currentLevel = uiState.activityLevel,
-                    onSave = { profileViewModel.onActivityLevelSaved(it) }
-                )
-            }
-
-            composable(NavRoutes.EditUnits) {
-                val uiState = profileViewModel.uiState.collectAsState().value
-                EditUnitsScreen(
-                    navController = bottomNavController,
-                    currentUnits = uiState.preferredUnits,
-                    onSave = { profileViewModel.onPreferredUnitsSaved(it) }
-                )
+            composable(NavRoutes.BodyWeight) {
+                BodyWeightScreen(onBack = { bottomNavController.popBackStack() })
             }
 
             composable(NavRoutes.HiddenExercises) {
-                HiddenExercisesScreen(navController = bottomNavController)
+                HiddenExercisesScreen(onBack = { bottomNavController.popBackStack() })
             }
 
             composable(NavRoutes.HiddenTemplates) {
-                HiddenTemplatesScreen(navController = bottomNavController)
-            }
-
-            composable(NavRoutes.AppPreferences) {
-                AppPreferencesScreen(navController = bottomNavController)
+                HiddenTemplatesScreen(onBack = { bottomNavController.popBackStack() })
             }
             if (BuildConfig.DEBUG) {
                 composable(NavRoutes.SyncDebug) {
@@ -343,21 +498,46 @@ private fun MainContent(rootNavController: NavHostController) {
                 }
             }
 
-            composable(NavRoutes.ActiveWorkout) {
+            // ⌄ / Back shrink the workout into the live bar; the bar grows it back (motion.md #10).
+            composable(
+                NavRoutes.ActiveWorkout,
+                enterTransition = { growFromLiveBar },
+                popExitTransition = { collapseIntoLiveBar },
+            ) { entry ->
+                val picked by entry.savedStateHandle
+                    .getStateFlow<ArrayList<String>?>(ExercisePickerViewModel.RESULT_PICKED, null)
+                    .collectAsState()
                 ActiveWorkoutScreen(
                     viewModel = activeWorkoutViewModel,
-                    onWorkoutComplete = {
-                        bottomNavController.navigate(NavRoutes.Workouts) {
-                            popUpTo(NavRoutes.Workouts) { inclusive = false }
+                    onAddExercises = { ids -> bottomNavController.navigate(NavRoutes.exercisePicker(ids)) },
+                    picked = picked,
+                    onPickedHandled = { entry.savedStateHandle[ExercisePickerViewModel.RESULT_PICKED] = null },
+                    onCollapse = { bottomNavController.popBackStack(NavRoutes.ActiveWorkout, inclusive = true) },
+                    onSaved = {
+                        bottomNavController.navigate(NavRoutes.WorkoutSummary) {
+                            popUpTo(NavRoutes.ActiveWorkout) { inclusive = true }
                         }
                     },
-                    onWorkoutDiscarded = {
-                        bottomNavController.navigate(NavRoutes.Workouts) {
-                            popUpTo(NavRoutes.Workouts) { inclusive = false }
-                        }
-                    }
+                    onDiscarded = leaveWorkout,
+                )
+            }
+            composable(NavRoutes.WorkoutSummary) {
+                WorkoutSummaryScreen(
+                    viewModel = activeWorkoutViewModel,
+                    onDone = leaveWorkout,
+                    onCreateAccount = { rootNavController.navigate(NavRoutes.createAccount(CreateFrom.SETTINGS)) },
+                    onEditTemplate = { id ->
+                        leaveWorkout()
+                        bottomNavController.navigate(NavRoutes.templateEditor(id))
+                    },
                 )
             }
         }
     }
 }
+/** Both ends are tab roots: fade-through, no slide (tabs have no order). */
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch() =
+    NavTab.entries.any { it.route == initialState.destination.route } &&
+        NavTab.entries.any { it.route == targetState.destination.route }
+
+

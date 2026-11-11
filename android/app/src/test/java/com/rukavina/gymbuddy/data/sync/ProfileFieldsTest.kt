@@ -14,8 +14,9 @@ import com.rukavina.gymbuddy.domain.model.TrainingDays
 import com.rukavina.gymbuddy.domain.model.UserProfile
 import com.rukavina.gymbuddy.testutil.MainDispatcherRule
 import com.rukavina.gymbuddy.testutil.testPreferencesDataStore
-import com.rukavina.gymbuddy.ui.profile.ProfileField
-import com.rukavina.gymbuddy.ui.profile.ProfileViewModel
+import com.rukavina.gymbuddy.data.repository.BodyWeightRepositoryImpl
+import com.rukavina.gymbuddy.ui.you.profile.ProfileViewModel
+import com.rukavina.gymbuddy.ui.you.profile.SignInInfo
 import kotlinx.coroutines.runBlocking
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -97,11 +98,15 @@ class ProfileFieldsTest {
     @Test
     fun `saving from the profile screen keeps experience, avatar and consent`() = runBlocking {
         profiles.saveProfile(full)
-        val viewModel = ProfileViewModel(profiles, AppPreferencesRepository(testPreferencesDataStore()), clock)
-        waitFor { viewModel.uiState.value.name == full.name }
+        val viewModel = ProfileViewModel(
+            profiles,
+            BodyWeightRepositoryImpl(holder, OutboxRecorder(holder, clock), clock),
+            AppPreferencesRepository(testPreferencesDataStore()),
+            object : SignInInfo() { override fun read() = Info("", false) },
+            clock,
+        )
 
-        viewModel.onFieldChanged(ProfileField.Name, "Renamed")
-        viewModel.onSaveClick()
+        viewModel.setName("Renamed")
         waitFor { profiles.getProfile(UID)?.name == "Renamed" }
 
         assertNewFields(full, profiles.getProfile(UID)!!)

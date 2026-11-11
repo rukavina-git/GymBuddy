@@ -71,6 +71,37 @@ class ActiveWorkoutDraftRepositoryImplTest {
     }
 
     @Test
+    fun `rest and the current exercise round-trip`() = runTest {
+        val withRest = draft.copy(currentExerciseIndex = 0, rest = ActiveWorkoutDraft.Rest("set-0", 540L, 120))
+        repository.save(withRest)
+        assertEquals(withRest, repository.load())
+    }
+
+    @Test
+    fun `a draft written before rest and current exercise existed still loads`() = runTest {
+        val old = """{"title":"Push Day","templateId":null,"templateTitle":null,"startedAt":1,"elapsedSeconds":60,
+            "isTimerRunning":true,"savedAt":2,"exercises":[]}""".trimIndent()
+        db.activeWorkoutDraftDao().upsert(ActiveWorkoutDraftEntity(payloadJson = old, updatedAt = 0))
+        val loaded = repository.load()!!
+        assertEquals(0, loaded.currentExerciseIndex)
+        assertEquals(null, loaded.rest)
+    }
+
+    @Test
+    fun `a draft written before set times existed still loads`() = runTest {
+        val old = """{"title":"Push Day","templateId":null,"templateTitle":null,"startedAt":1,"elapsedSeconds":60,
+            "isTimerRunning":true,"savedAt":2,"exercises":[{"id":"e","exerciseId":"x","exerciseName":"Bench",
+            "trackingType":"WEIGHT_REPS","plannedSets":1,"plannedReps":8,"restSeconds":90,"sets":[{"id":"s",
+            "setNumber":1,"reps":"8","weight":"60","duration":"","distance":"","notes":"","isCompleted":true}]}]}""".trimIndent()
+        db.activeWorkoutDraftDao().upsert(ActiveWorkoutDraftEntity(payloadJson = old, updatedAt = 0))
+        val loaded = repository.load()!!
+        val set = loaded.exercises.single().sets.single()
+        assertEquals(null, set.doneAt)
+        assertEquals(null, set.doneAtElapsed)
+        assertEquals(null, loaded.resumedAt)
+    }
+
+    @Test
     fun `saving again replaces the single draft`() = runTest {
         repository.save(draft)
         repository.save(draft.copy(title = "Leg Day"))
@@ -96,5 +127,12 @@ class ActiveWorkoutDraftRepositoryImplTest {
         repository.save(draft)
         db.syncDao().wipeLocalUserData()
         assertNull(repository.load())
+    }
+
+    @Test
+    fun `a 410 re-download wipe keeps the draft`() = runTest {
+        repository.save(draft)
+        db.syncDao().wipeForResync()
+        assertEquals(draft, repository.load())
     }
 }

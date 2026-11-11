@@ -19,6 +19,8 @@ import com.rukavina.gymbuddy.data.sync.SyncScheduler
 import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
+import com.rukavina.gymbuddy.data.repository.ConsentRecorder
+import com.rukavina.gymbuddy.data.sync.GuestMergeState
 import com.rukavina.gymbuddy.data.sync.GuestMerge
 import com.rukavina.gymbuddy.data.sync.GuestMergeCoordinator
 import com.rukavina.gymbuddy.domain.sync.SyncReason
@@ -77,7 +79,8 @@ object SyncModule {
             // Only the signed-in account's own file syncs, never another owner's outbox (ADR 0014).
             isSignedIn = { auth.currentUid.let { it != null && it == holder.owner } },
             // Shared with the holder, so a database switch never runs mid-cycle.
-            mutex = holder.lock
+            mutex = holder.lock,
+            owner = holder.ownerFlow
         )
 
     @Provides
@@ -134,7 +137,8 @@ object SyncModule {
         scheduler: SyncScheduler,
         auth: AuthSession,
         owners: DataOwnerStore,
-        preferences: AppPreferencesRepository
+        preferences: AppPreferencesRepository,
+        consent: ConsentRecorder
     ) = GuestMergeCoordinator(
         merge,
         syncNow = { scheduler.syncNow(SyncReason.SIGNED_IN) },
@@ -142,7 +146,9 @@ object SyncModule {
         currentUid = { auth.currentUid },
         accountEmail = { owners.email },
         signOut = { auth.signOut() },
-        setGuest = { preferences.setGuest(it) }
+        setGuest = { preferences.setGuest(it) },
+        afterMerge = { consent.applyTo(it) },
+        onCancel = { consent.clear() }
     )
 
     @Provides
@@ -153,7 +159,8 @@ object SyncModule {
         merge: GuestMerge,
         firebase: FirebaseAuthSession,
         coordinator: GuestMergeCoordinator,
-        preferences: AppPreferencesRepository
+        preferences: AppPreferencesRepository,
+        consent: ConsentRecorder
     ) = AuthGate(
         holder,
         owners,
@@ -164,7 +171,12 @@ object SyncModule {
         clearFailure = { firebase.clearFailure() },
         firebaseEmail = { firebase.currentEmail },
         dropDeadSession = { firebase.signOut() },
-        afterSignIn = { coordinator.onOwnerChanged(it) },
+        afterSignIn = {
+            coordinator.onOwnerChanged(it)
+            // While the merge question is open the account's profile may still
+            // come from the guest; afterMerge records the consent then.
+            if (coordinator.state.value !is GuestMergeState.Asking) consent.applyTo(it)
+        },
         setGuest = { preferences.setGuest(it) },
         scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     )

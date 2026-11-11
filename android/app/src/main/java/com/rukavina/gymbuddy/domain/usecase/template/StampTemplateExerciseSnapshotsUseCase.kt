@@ -19,11 +19,16 @@ class StampTemplateExerciseSnapshotsUseCase @Inject constructor(
     /**
      * @return the template with every TemplateExercise's exerciseName and
      * exerciseTrackingType populated.
+     * A deleted exercise still counts (Plan 7 step 07: templates keep it
+     * and still start with it), so the lookup includes deleted ones.
      * @throws IllegalArgumentException if a referenced exercise cannot be found.
      */
     suspend operator fun invoke(template: WorkoutTemplate): WorkoutTemplate {
+        val known = exerciseRepository
+            .getExercisesAnyState(template.templateExercises.map { it.exerciseId })
+            .associateBy { it.id }
         val templateExercises = template.templateExercises.map { templateExercise ->
-            val exercise = exerciseRepository.getExerciseById(templateExercise.exerciseId)
+            val exercise = known[templateExercise.exerciseId]
                 ?: throw IllegalArgumentException("Exercise ${templateExercise.exerciseId} not found")
 
             templateExercise.copy(

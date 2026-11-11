@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.GymBuddy" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Soft Dark, dark only (design/DESIGN.md). Window background is
+         colour.surface.ground so launch doesn't flash white. -->
+    <style name="Theme.GymBuddy" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/ground</item>
+    </style>
 </resources>

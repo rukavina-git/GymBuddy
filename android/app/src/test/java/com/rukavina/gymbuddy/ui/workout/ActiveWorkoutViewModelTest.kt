@@ -1,6 +1,9 @@
 package com.rukavina.gymbuddy.ui.workout
 
+import com.rukavina.gymbuddy.ui.workout.service.toNotice
+import com.rukavina.gymbuddy.ui.frame.toLiveBarState
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
+import com.rukavina.gymbuddy.data.sync.InMemoryDataOwnerStore
 import com.rukavina.gymbuddy.domain.model.DifficultyLevel
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.ExerciseCategory
@@ -17,13 +20,17 @@ import com.rukavina.gymbuddy.domain.usecase.workout.ValidateWorkoutSessionSetsUs
 import com.rukavina.gymbuddy.domain.model.WorkoutSession
 import com.rukavina.gymbuddy.domain.repository.WorkoutSessionRepository
 import com.rukavina.gymbuddy.testutil.FakeActiveWorkoutDraftRepository
+import com.rukavina.gymbuddy.testutil.FakeRestBuzzScheduler
+import com.rukavina.gymbuddy.testutil.FakeWorkoutServiceStarter
 import com.rukavina.gymbuddy.testutil.FakeExerciseRepository
 import com.rukavina.gymbuddy.testutil.FakeWorkoutSessionRepository
 import com.rukavina.gymbuddy.testutil.FixedIdGenerator
 import com.rukavina.gymbuddy.testutil.MainDispatcherRule
 import com.rukavina.gymbuddy.testutil.MutableClock
 import com.rukavina.gymbuddy.testutil.testPreferencesDataStore
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -33,8 +40,12 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import com.rukavina.gymbuddy.testutil.FakeWorkoutTemplateRepository
+import com.rukavina.gymbuddy.domain.usecase.template.CreateWorkoutTemplateUseCase
+import com.rukavina.gymbuddy.domain.usecase.template.StampTemplateExerciseSnapshotsUseCase
 
 /**
  * ActiveWorkoutViewModel holds the active-workout state machine - starting
@@ -114,13 +125,24 @@ class ActiveWorkoutViewModelTest {
         restSeconds = restSeconds
     )
 
+    // DataStore reads hop to IO and resume on Main; cancel the scopes before
+    // MainDispatcherRule resets Main, or they land in the next test class.
+    private val created = mutableListOf<ActiveWorkoutViewModel>()
+
+    @After
+    fun cancelViewModels() = created.forEach { it.viewModelScope.cancel() }
+
     private fun buildViewModel(
         exerciseRepo: FakeExerciseRepository = FakeExerciseRepository(listOf(benchPress, plank, sprint)),
         sessionRepo: FakeWorkoutSessionRepository = FakeWorkoutSessionRepository(),
         idGenerator: FixedIdGenerator = FixedIdGenerator((0..20).map { "id-$it" }),
         sessionRepository: WorkoutSessionRepository = sessionRepo,
         draftRepo: FakeActiveWorkoutDraftRepository = FakeActiveWorkoutDraftRepository(),
-        clock: MutableClock = MutableClock()
+        clock: MutableClock = MutableClock(),
+        owners: InMemoryDataOwnerStore = InMemoryDataOwnerStore(),
+        service: FakeWorkoutServiceStarter = FakeWorkoutServiceStarter(),
+        buzz: FakeRestBuzzScheduler = FakeRestBuzzScheduler(),
+        templateRepo: FakeWorkoutTemplateRepository = FakeWorkoutTemplateRepository(),
     ): Triple<ActiveWorkoutViewModel, FakeWorkoutSessionRepository, FixedIdGenerator> {
         val appPreferencesRepository = AppPreferencesRepository(testPreferencesDataStore())
         val viewModel = ActiveWorkoutViewModel(
@@ -134,8 +156,15 @@ class ActiveWorkoutViewModelTest {
             appPreferencesRepository = appPreferencesRepository,
             idGenerator = idGenerator,
             draftRepository = draftRepo,
-            clock = clock
+            sessionRepository = sessionRepository,
+            owners = owners,
+            clock = clock,
+            workoutService = service,
+            restBuzz = buzz,
+            exerciseRepository = exerciseRepo,
+            createTemplate = CreateWorkoutTemplateUseCase(templateRepo, idGenerator, StampTemplateExerciseSnapshotsUseCase(exerciseRepo)),
         )
+        created += viewModel
         return Triple(viewModel, sessionRepo, idGenerator)
     }
 
@@ -169,7 +198,8 @@ class ActiveWorkoutViewModelTest {
         assertEquals(ExerciseTrackingType.WEIGHT_REPS, benchExercise.exerciseTrackingType)
         assertEquals(3, benchExercise.sets.size)
         assertEquals(listOf(1, 2, 3), benchExercise.sets.map { it.setNumber })
-        assertTrue(benchExercise.sets.all { it.reps.isEmpty() && it.weight.isEmpty() && !it.isCompleted })
+        // Sets start from the template's targets (reps 8, no weight).
+        assertTrue(benchExercise.sets.all { it.reps == "8" && it.weight.isEmpty() && !it.isCompleted })
 
         val plankExercise = state.exercises[1]
         assertEquals("ex-plank", plankExercise.exerciseId)
@@ -273,8 +303,19 @@ class ActiveWorkoutViewModelTest {
             appPreferencesRepository = appPreferencesRepository,
             idGenerator = idGenerator,
             draftRepository = FakeActiveWorkoutDraftRepository(),
-            clock = MutableClock()
+            sessionRepository = FakeWorkoutSessionRepository(),
+            owners = InMemoryDataOwnerStore(),
+            clock = MutableClock(),
+            workoutService = FakeWorkoutServiceStarter(),
+            restBuzz = FakeRestBuzzScheduler(),
+            exerciseRepository = FakeExerciseRepository(listOf(benchPress)),
+            createTemplate = CreateWorkoutTemplateUseCase(
+                FakeWorkoutTemplateRepository(),
+                FixedIdGenerator((0..20).map { "t-$it" }),
+                StampTemplateExerciseSnapshotsUseCase(FakeExerciseRepository(listOf(benchPress))),
+            ),
         )
+        created += viewModel
 
         val template = WorkoutTemplate(
             id = "template-1",
@@ -286,6 +327,7 @@ class ActiveWorkoutViewModelTest {
         viewModel.updateSetReps(exercise.id, exercise.sets[0].id, "10")
         viewModel.updateSetWeight(exercise.id, exercise.sets[0].id, "60")
 
+        viewModel.logDone()
         viewModel.saveWorkout()
 
         val state = viewModel.uiState.value
@@ -314,6 +356,7 @@ class ActiveWorkoutViewModelTest {
         viewModel.updateSetReps(exercise.id, exercise.sets[0].id, "10")
         viewModel.updateSetWeight(exercise.id, exercise.sets[0].id, "60")
 
+        viewModel.logDone()
         viewModel.saveWorkout()
 
         val state = viewModel.uiState.value
@@ -347,6 +390,7 @@ class ActiveWorkoutViewModelTest {
         viewModel.updateSetReps(benchExercise.id, benchExercise.sets[0].id, "10")
         // Plank's only set is left untouched - not filled in, so it's dropped.
 
+        viewModel.logDone()
         viewModel.saveWorkout()
 
         val saved = sessionRepo.created.single()
@@ -445,9 +489,12 @@ class ActiveWorkoutViewModelTest {
         viewModel.updateSetDuration(plankExercise.id, plankExercise.sets[0].id, "60")
 
         val sprintExercise = viewModel.uiState.value.exercises.single { it.exerciseId == "ex-sprint" }
-        viewModel.updateSetWeight(sprintExercise.id, sprintExercise.sets[0].id, "0")
+        viewModel.updateSetWeight(sprintExercise.id, sprintExercise.sets[0].id, "20")
         viewModel.updateSetDistance(sprintExercise.id, sprintExercise.sets[0].id, "400")
 
+        viewModel.logDone()
+        viewModel.logDone()
+        viewModel.logDone()
         viewModel.saveWorkout()
 
         val saved = sessionRepo.created.single()
@@ -465,7 +512,7 @@ class ActiveWorkoutViewModelTest {
 
         val sprintSet = saved.performedExercises.single { it.exerciseId == "ex-sprint" }.sets.single()
         assertNull(sprintSet.reps)
-        assertEquals(0f, sprintSet.weightKg)
+        assertEquals(20f, sprintSet.weightKg)
         assertNull(sprintSet.durationSeconds)
         assertEquals(400f, sprintSet.distanceMeters)
     }
@@ -495,8 +542,19 @@ class ActiveWorkoutViewModelTest {
             appPreferencesRepository = appPreferencesRepository,
             idGenerator = FixedIdGenerator((0..20).map { "id-$it" }),
             draftRepository = FakeActiveWorkoutDraftRepository(),
-            clock = MutableClock()
+            sessionRepository = FakeWorkoutSessionRepository(),
+            owners = InMemoryDataOwnerStore(),
+            clock = MutableClock(),
+            workoutService = FakeWorkoutServiceStarter(),
+            restBuzz = FakeRestBuzzScheduler(),
+            exerciseRepository = FakeExerciseRepository(listOf(benchPress)),
+            createTemplate = CreateWorkoutTemplateUseCase(
+                FakeWorkoutTemplateRepository(),
+                FixedIdGenerator((0..20).map { "t-$it" }),
+                StampTemplateExerciseSnapshotsUseCase(FakeExerciseRepository(listOf(benchPress))),
+            ),
         )
+        created += vmWithImperialPrefs
 
         // DataStore's read is genuine background-thread I/O, not virtual
         // time - UnconfinedTestDispatcher makes loadUserPreferences()'s
@@ -520,6 +578,7 @@ class ActiveWorkoutViewModelTest {
         // 220 lbs entered - must be stored as kg, not the raw display value.
         vmWithImperialPrefs.updateSetWeight(exercise.id, exercise.sets[0].id, "220")
 
+        vmWithImperialPrefs.done()
         vmWithImperialPrefs.saveWorkout()
 
         val savedSet = sessionRepo.created.single().performedExercises.single().sets.single()
@@ -534,10 +593,23 @@ class ActiveWorkoutViewModelTest {
         templateExercises = listOf(templateExercise("ex-bench", orderIndex = 0, plannedSets = 1))
     )
 
+    /** Done, with a weight first when the set has none (F17: Done needs weight > 0). */
+    private fun ActiveWorkoutViewModel.logDone() {
+        val exercise = uiState.value.currentExercise
+        val set = exercise?.currentSet
+        if (exercise != null && set != null && SetField.Weight in SetFields.of(exercise.exerciseTrackingType) &&
+            (SetFields.value(set, SetField.Weight) ?: 0f) <= 0f
+        ) {
+            updateSetWeight(exercise.id, set.id, "20")
+        }
+        done()
+    }
+
     private fun ActiveWorkoutViewModel.fillFirstSet(reps: String, weight: String) {
         val exercise = uiState.value.exercises[0]
         updateSetReps(exercise.id, exercise.sets[0].id, reps)
         updateSetWeight(exercise.id, exercise.sets[0].id, weight)
+        logDone()
     }
 
     /** Fails every create until [failing] is false; can also hold a create open on [gate]. */
@@ -558,6 +630,7 @@ class ActiveWorkoutViewModelTest {
         }
         override suspend fun updateWorkoutSession(workoutSession: WorkoutSession) = Unit
         override suspend fun deleteWorkoutSession(id: String) = Unit
+        override suspend fun restoreWorkoutSession(id: String) = Unit
     }
 
     @Test
@@ -661,6 +734,178 @@ class ActiveWorkoutViewModelTest {
         assertNull("a saved workout must not come back", draftRepo.draft)
     }
 
+    // --- 11a: couldn't save (R17-B1), unfinished workout (R17-E2) ---
+
+    @Test
+    fun `a failed draft write shows the unsaved set, and Try again clears it`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (viewModel, _, _) = buildViewModel(draftRepo = draftRepo)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        draftRepo.failSaves = true
+
+        viewModel.fillFirstSet("10", "60") // ends with Done
+
+        assertEquals(UnsavedSet(1), viewModel.uiState.value.unsaved)
+        assertTrue("the numbers stay on screen", viewModel.uiState.value.exercises.single().sets.single().isCompleted)
+
+        draftRepo.failSaves = false
+        viewModel.retrySave()
+
+        assertNull(viewModel.uiState.value.unsaved)
+        assertTrue(draftRepo.draft!!.exercises.single().sets.single().isCompleted)
+    }
+
+    @Test
+    fun `a set under 2 h ago restores live, not unfinished`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+
+        clock.advanceSeconds(2 * 60 * 60 - 1)
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        assertNull(second.uiState.value.unfinishedSince)
+        assertTrue(second.uiState.value.isTimerRunning)
+    }
+
+    @Test
+    fun `no set for 2 h restores paused as unfinished, and Finish ends at the last set`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        clock.advanceSeconds(30 * 60)
+        first.fillFirstSet("10", "60")
+        val setAt = clock.millis
+        val set = first.uiState.value.exercises.single().sets.single()
+        assertEquals(setAt, set.doneAt)
+        clock.advanceSeconds(10 * 60)
+        first.updateNote("later write") // the last write is after the set
+
+        clock.advanceSeconds(20 * 60 * 60)
+        val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        val restored = second.uiState.value
+        assertEquals(setAt, restored.unfinishedSince)
+        assertFalse(restored.isTimerRunning)
+        assertNull("no live bar until Resume", restored.toLiveBarState())
+        assertTrue("the notification asks to finish", restored.toNotice()!!.stale)
+
+        second.finishUnfinished()
+
+        val saved = sessionRepo.created.single()
+        assertEquals(setAt, saved.endedAt)
+        assertEquals(set.doneAtElapsed!!.toInt(), saved.durationSeconds)
+        assertNull(draftRepo.draft)
+    }
+
+    @Test
+    fun `a running workout goes unfinished 2 h after its last set`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (viewModel, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.fillFirstSet("10", "60")
+        val setAt = clock.millis
+
+        clock.advanceSeconds(2 * 60 * 60 - 1)
+        viewModel.checkStale()
+        assertNull(viewModel.uiState.value.unfinishedSince)
+
+        clock.advanceSeconds(1)
+        viewModel.checkStale()
+        assertEquals(setAt, viewModel.uiState.value.unfinishedSince)
+        assertFalse(viewModel.uiState.value.isTimerRunning)
+        assertEquals("kept across process death", setAt, draftRepo.draft!!.exercises.single().sets.single().doneAt)
+    }
+
+    @Test
+    fun `Resume on an unfinished workout restarts the timer and asks again 2 h later`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+
+        clock.advanceSeconds(4 * 60 * 60)
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        second.resumeUnfinished()
+        val resumedAt = clock.millis
+
+        assertNull(second.uiState.value.unfinishedSince)
+        assertTrue(second.uiState.value.isTimerRunning)
+        assertEquals(clock.millis, draftRepo.draft!!.savedAt)
+        assertEquals(resumedAt, draftRepo.draft!!.resumedAt)
+
+        clock.advanceSeconds(60 * 60)
+        second.checkStale()
+        assertNull("not yet: resumed an hour ago", second.uiState.value.unfinishedSince)
+        clock.advanceSeconds(60 * 60)
+        second.checkStale()
+        assertEquals(resumedAt, second.uiState.value.unfinishedSince)
+    }
+
+    @Test
+    fun `no set for 24 h finishes at the last set on open, without a summary`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+        val setAt = clock.millis
+
+        clock.advanceSeconds(25 * 60 * 60)
+        val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        assertEquals(setAt, sessionRepo.created.single().endedAt)
+        val state = second.uiState.value
+        assertNull(state.summary)
+        assertEquals(setAt, state.autoFinished!!.endedAt)
+        assertFalse(state.running)
+        assertNull(draftRepo.draft)
+
+        second.autoFinishShown()
+        assertNull(second.uiState.value.autoFinished)
+    }
+
+    @Test
+    fun `no set for 24 h and none done drops the workout`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+
+        clock.advanceSeconds(25 * 60 * 60)
+        val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        assertTrue(sessionRepo.created.isEmpty())
+        assertFalse(second.uiState.value.running)
+        assertNull(second.uiState.value.autoFinished)
+        assertNull(draftRepo.draft)
+    }
+
+    @Test
+    fun `a draft from before set times counts its sets as done at the last write`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val clock = MutableClock()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.fillFirstSet("10", "60")
+        clock.advanceSeconds(30 * 60)
+        first.updateNote("later write")
+        val old = draftRepo.draft!!
+        draftRepo.draft = old.copy(exercises = old.exercises.map { ex ->
+            ex.copy(sets = ex.sets.map { it.copy(doneAt = null, doneAtElapsed = null) })
+        })
+
+        clock.advanceSeconds(3 * 60 * 60)
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo, clock = clock)
+
+        assertEquals(old.savedAt, second.uiState.value.unfinishedSince)
+    }
+
     @Test
     fun `a paused timer stays paused on restore and away time is not counted`() {
         val draftRepo = FakeActiveWorkoutDraftRepository()
@@ -700,5 +945,667 @@ class ActiveWorkoutViewModelTest {
         viewModel.saveWorkout()
 
         assertNotNull(draftRepo.draft)
+    }
+
+    // --- Plan 7 06a: logging ---
+
+    private val twoExercises = WorkoutTemplate(
+        id = "template-2",
+        title = "Push A",
+        templateExercises = listOf(
+            templateExercise("ex-bench", orderIndex = 0, plannedSets = 2, plannedReps = 8, restSeconds = 90),
+            templateExercise("ex-plank", orderIndex = 1, plannedSets = 1, plannedReps = null, restSeconds = null)
+        )
+    )
+
+    /** Events sent so far (the channel is buffered). */
+    private fun ActiveWorkoutViewModel.drainEvents(): List<WorkoutEvent> {
+        val out = mutableListOf<WorkoutEvent>()
+        kotlinx.coroutines.runBlocking {
+            kotlinx.coroutines.withTimeoutOrNull(50) { events.collect { out += it } }
+        }
+        return out
+    }
+
+    @Test
+    fun `done logs the current set, starts its rest and carries its values to the next set`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.step(SetField.Weight, plus = true) // 0 → 2.5
+        viewModel.step(SetField.Reps, plus = true) // 8 → 9
+
+        viewModel.logDone()
+
+        val state = viewModel.uiState.value
+        val bench = state.exercises[0]
+        assertTrue(bench.sets[0].isCompleted)
+        assertEquals("2.5", bench.sets[1].weight)
+        assertEquals("9", bench.sets[1].reps)
+        assertEquals(RestState(bench.sets[0].id, state.elapsedSeconds, 90), state.rest)
+        assertEquals(0, state.currentExerciseIndex)
+        assertEquals(listOf(WorkoutEvent.SetDone), viewModel.drainEvents())
+    }
+
+    @Test
+    fun `finishing an exercise moves to the next one with sets left, and the last set opens Finish`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.logDone()
+        viewModel.logDone()
+        assertEquals(1, viewModel.uiState.value.currentExerciseIndex)
+        assertTrue(viewModel.uiState.value.lastSetLeft)
+
+        // Plank has no target: Done is rejected until it has a time.
+        viewModel.logDone()
+        assertFalse(viewModel.uiState.value.exercises[1].sets[0].isCompleted)
+        viewModel.step(SetField.Duration, plus = true)
+        viewModel.logDone()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.exercises.all { it.allDone })
+        assertEquals(WorkoutDialog.Finish, state.dialog)
+        // Plank has no rest of its own: the default.
+        assertEquals(ActiveWorkoutViewModel.DEFAULT_REST_SECONDS, state.rest!!.seconds)
+    }
+
+    @Test
+    fun `Done on 0 kg is rejected with the rule, and the set stays open`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        val exercise = viewModel.uiState.value.exercises[0]
+        viewModel.updateSetWeight(exercise.id, exercise.sets[0].id, "0")
+        viewModel.drainEvents()
+
+        viewModel.done()
+
+        assertEquals(listOf(WorkoutEvent.DoneRejected(SetRule.OverZeroWeight)), viewModel.drainEvents())
+        assertFalse(viewModel.uiState.value.exercises[0].sets[0].isCompleted)
+    }
+
+    @Test
+    fun `steppers stop at the floor and reject`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(twoExercises.copy(
+            templateExercises = listOf(templateExercise("ex-bench", orderIndex = 0, plannedSets = 1, plannedReps = 1))
+        ))
+        viewModel.drainEvents()
+        viewModel.step(SetField.Reps, plus = false)
+        viewModel.step(SetField.Weight, plus = false)
+
+        val set = viewModel.uiState.value.exercises[0].sets[0]
+        assertEquals("1", set.reps)
+        assertEquals("0", set.weight)
+        assertEquals(listOf(WorkoutEvent.Rejected), viewModel.drainEvents())
+    }
+
+    @Test
+    fun `keypad Next walks weight then reps, saves typed values and refuses 0 reps`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.openKeypad(SetField.Weight)
+        listOf(8, 2).forEach { viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Digit(it)) }
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Decimal, ',')
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Digit(5))
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Next)
+
+        var state = viewModel.uiState.value
+        assertEquals("82.5", state.exercises[0].sets[0].weight)
+        assertEquals(SetField.Reps, state.keypad!!.field)
+        assertEquals(null, viewModel.nextField(state.keypad!!))
+
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Backspace)
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Digit(0))
+        assertEquals(SetRule.AtLeastOneRep, viewModel.uiState.value.keypad!!.rule)
+        viewModel.drainEvents()
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Next)
+        assertNotNull("0 reps keeps the keypad open", viewModel.uiState.value.keypad)
+        assertEquals(listOf(WorkoutEvent.Rejected), viewModel.drainEvents())
+
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Backspace)
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Digit(6))
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Next)
+        state = viewModel.uiState.value
+        assertNull(state.keypad)
+        assertEquals("6", state.exercises[0].sets[0].reps)
+    }
+
+    @Test
+    fun `keypad on time takes m ss digits and Cancel keeps the old value`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.selectExercise(1)
+        viewModel.openKeypad(SetField.Duration)
+        listOf(1, 3, 0).forEach { viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Digit(it)) }
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Next)
+        assertEquals("90", viewModel.uiState.value.exercises[1].sets[0].duration)
+
+        viewModel.openKeypad(SetField.Duration)
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Digit(5))
+        viewModel.keypad(com.rukavina.gymbuddy.ui.design.KeypadInput.Cancel)
+        assertEquals("90", viewModel.uiState.value.exercises[1].sets[0].duration)
+    }
+
+    @Test
+    fun `deleting a set and undoing puts it back in place with its rest`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.logDone()
+        val before = viewModel.uiState.value
+        val bench = before.exercises[0]
+        viewModel.drainEvents()
+
+        viewModel.deleteSet(bench.id, bench.sets[0].id)
+        var state = viewModel.uiState.value
+        assertEquals(listOf(bench.sets[1].id), state.exercises[0].sets.map { it.id })
+        assertEquals(1, state.exercises[0].sets[0].setNumber)
+        assertNull(state.rest)
+        assertEquals(listOf(WorkoutEvent.SetDeleted(bench.sets[0].id)), viewModel.drainEvents())
+
+        viewModel.undoDelete(bench.sets[0].id)
+        state = viewModel.uiState.value
+        assertEquals(before.exercises, state.exercises)
+        assertEquals(before.rest, state.rest)
+    }
+
+    @Test
+    fun `finish saves only done sets and builds the summary`() {
+        val (viewModel, sessionRepo, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        val bench = viewModel.uiState.value.exercises[0]
+        viewModel.updateSetWeight(bench.id, bench.sets[0].id, "80")
+        viewModel.logDone() // 80 × 8; set 2 now 80 × 8 too
+        viewModel.step(SetField.Weight, plus = true)
+        viewModel.logDone() // 82.5 × 8; plank left undone
+
+        val preview = viewModel.finishPreview()
+        assertEquals(2, preview.sets)
+        assertEquals(1, preview.setsLeft)
+        assertEquals(80f * 8 + 82.5f * 8, preview.lifted, 0.01f)
+
+        viewModel.requestFinish()
+        viewModel.saveWorkout()
+
+        val saved = sessionRepo.created.single()
+        assertEquals(listOf("ex-bench"), saved.performedExercises.map { it.exerciseId })
+        val summary = viewModel.uiState.value.summary!!
+        assertEquals(2, summary.sets)
+        assertEquals("82.5", summary.exercises.single().top.weight)
+        assertTrue("a guest is offered a backup", summary.offerBackup)
+        assertNull(viewModel.uiState.value.dialog)
+        assertFalse(viewModel.hasActiveWorkout())
+
+        viewModel.dismissBackup()
+        assertFalse(viewModel.uiState.value.summary!!.offerBackup)
+        viewModel.closeSummary()
+        assertNull(viewModel.uiState.value.summary)
+    }
+
+    @Test
+    fun `an account gets no backup card`() {
+        val (viewModel, _, _) = buildViewModel(owners = InMemoryDataOwnerStore("uid-1"))
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.logDone()
+        viewModel.saveWorkout()
+        assertFalse(viewModel.uiState.value.summary!!.offerBackup)
+    }
+
+    @Test
+    fun `a failed save sends SaveFailed`() {
+        val repo = ControllableSessionRepository().apply { failing = true }
+        val (viewModel, _, _) = buildViewModel(sessionRepository = repo)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.logDone()
+        viewModel.drainEvents()
+        viewModel.saveWorkout()
+        assertEquals(listOf(WorkoutEvent.SaveFailed("disk full")), viewModel.drainEvents())
+        assertNull(viewModel.uiState.value.summary)
+    }
+
+    @Test
+    fun `rest and the current exercise survive process death`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo)
+        first.startWorkoutFromTemplate(twoExercises)
+        first.done()
+        first.selectExercise(1)
+        val before = first.uiState.value
+
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo)
+        val restored = second.uiState.value
+        assertEquals(1, restored.currentExerciseIndex)
+        assertEquals(before.rest, restored.rest)
+    }
+
+    @Test
+    fun `the hint shows until three workouts are saved`() {
+        val few = FakeWorkoutSessionRepository(
+            (1..2).map { com.rukavina.gymbuddy.testutil.TemplateFixtures.session("s$it", null, endedAt = 1L) }
+        )
+        assertTrue(buildViewModel(sessionRepo = few).first.uiState.value.showHint)
+        val many = FakeWorkoutSessionRepository(
+            (1..3).map { com.rukavina.gymbuddy.testutil.TemplateFixtures.session("s$it", null, endedAt = 1L) }
+        )
+        assertFalse(buildViewModel(sessionRepo = many).first.uiState.value.showHint)
+    }
+
+    // --- around the workout (06b) ---
+
+    @Test
+    fun `an empty workout runs with no exercises and survives process death`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo)
+        first.startEmptyWorkout("Workout")
+
+        val state = first.uiState.value
+        assertTrue(state.running)
+        assertTrue(first.hasActiveWorkout())
+        assertTrue(state.exercises.isEmpty())
+        assertNull(state.templateId)
+        assertNotNull(draftRepo.draft)
+
+        val (second, _, _) = buildViewModel(draftRepo = draftRepo)
+        assertTrue(second.hasActiveWorkout())
+        assertEquals("Workout", second.uiState.value.workoutTitle)
+    }
+
+    @Test
+    fun `adding exercises from the picker appends them with defaults and shows the first`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+
+        viewModel.addExercises(listOf("ex-plank", "unknown", "ex-bench"))
+
+        val state = viewModel.uiState.value
+        assertEquals(listOf("ex-bench", "ex-plank", "ex-bench"), state.exercises.map { it.exerciseId })
+        assertEquals(1, state.currentExerciseIndex)
+        val plank = state.exercises[1]
+        assertEquals(3, plank.sets.size)
+        // Plank is timed: no reps target. Bench gets 10 reps, no weight.
+        assertTrue(plank.sets.all { it.reps.isEmpty() })
+        assertTrue(state.exercises[2].sets.all { it.reps == "10" && it.weight.isEmpty() })
+        assertEquals(3, state.exercises.map { it.id }.toSet().size)
+    }
+
+    @Test
+    fun `adding an exercise to an empty workout makes it loggable`() {
+        val (viewModel, sessionRepo, _) = buildViewModel()
+        viewModel.startEmptyWorkout("Workout")
+        viewModel.addExercises(listOf("ex-bench"))
+
+        viewModel.logDone()
+        viewModel.saveWorkout()
+
+        val saved = sessionRepo.created.single()
+        assertEquals("Workout", saved.title)
+        assertNull(saved.templateId)
+        assertEquals(1, saved.performedExercises.single().sets.size)
+    }
+
+    @Test
+    fun `an empty workout can be saved as a template once`() {
+        val templates = FakeWorkoutTemplateRepository()
+        val (viewModel, _, _) = buildViewModel(templateRepo = templates)
+        viewModel.startEmptyWorkout("Legs")
+        viewModel.addExercises(listOf("ex-bench", "ex-plank"))
+        val bench = viewModel.uiState.value.exercises[0]
+        viewModel.updateSetReps(bench.id, bench.sets[0].id, "8")
+        viewModel.logDone()
+        viewModel.logDone()
+        viewModel.saveWorkout()
+
+        val summary = viewModel.uiState.value.summary!!
+        val draft = summary.template!!
+        assertEquals("Legs", draft.title)
+        viewModel.saveSummaryAsTemplate()
+        viewModel.saveSummaryAsTemplate()
+
+        val saved = templates.created.single()
+        assertEquals(draft.id, viewModel.uiState.value.summary!!.savedTemplateId)
+        assertEquals(summary.exercises.size, saved.templateExercises.size)
+        val first = saved.templateExercises.first()
+        assertEquals("ex-bench", first.exerciseId)
+        assertEquals(0, first.orderIndex)
+        assertEquals(summary.exercises.first().setCount, first.plannedSets)
+        assertEquals(summary.exercises.first().top.reps.toIntOrNull(), first.plannedReps)
+        assertNull("no weight in a template", first.plannedWeightKg)
+    }
+
+    @Test
+    fun `a template workout offers no save as template`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.logDone()
+        viewModel.saveWorkout()
+        assertNull(viewModel.uiState.value.summary!!.template)
+    }
+
+    @Test
+    fun `add set copies the last set's values and numbers it`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.fillFirstSet("8", "60")
+
+        viewModel.addSet()
+
+        val sets = viewModel.uiState.value.exercises[0].sets
+        assertEquals(2, sets.size)
+        assertEquals(2, sets[1].setNumber)
+        assertEquals("8", sets[1].reps)
+        assertEquals("60", sets[1].weight)
+        assertFalse(sets[1].isCompleted)
+    }
+
+    @Test
+    fun `reorder moves an exercise and the shown one stays shown`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (viewModel, _, _) = buildViewModel(draftRepo = draftRepo)
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        val bench = viewModel.uiState.value.exercises[0].id
+
+        viewModel.moveExercise(bench, 1)
+
+        val state = viewModel.uiState.value
+        assertEquals(listOf("ex-plank", "ex-bench"), state.exercises.map { it.exerciseId })
+        assertEquals(1, state.currentExerciseIndex)
+        assertEquals(listOf("ex-plank", "ex-bench"), draftRepo.draft!!.exercises.map { it.exerciseId })
+
+        // Past either end: nothing happens.
+        viewModel.moveExercise(bench, 1)
+        viewModel.moveExercise(state.exercises[0].id, -1)
+        assertEquals(state.exercises, viewModel.uiState.value.exercises)
+    }
+
+    @Test
+    fun `the workout note is kept in the draft and saved as the session's notes`() {
+        val draftRepo = FakeActiveWorkoutDraftRepository()
+        val (first, _, _) = buildViewModel(draftRepo = draftRepo)
+        first.startWorkoutFromTemplate(oneSetBench)
+        first.updateNote("  shoulder was tight  ")
+
+        val (second, sessionRepo, _) = buildViewModel(draftRepo = draftRepo)
+        assertEquals("  shoulder was tight  ", second.uiState.value.note)
+        second.logDone()
+        second.saveWorkout()
+        assertEquals("shoulder was tight", sessionRepo.created.single().notes)
+    }
+
+    @Test
+    fun `a blank note saves no notes`() {
+        val (viewModel, sessionRepo, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.updateNote("   ")
+        viewModel.fillFirstSet("8", "60")
+        viewModel.saveWorkout()
+        assertNull(sessionRepo.created.single().notes)
+    }
+
+    @Test
+    fun `rest timer changes this exercise's rest and the rest running after it`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.logDone()
+
+        viewModel.setRest(150)
+        viewModel.setRest(0) // ignored
+
+        val state = viewModel.uiState.value
+        assertEquals(150, state.exercises[0].restSeconds)
+        assertEquals(150, state.rest!!.seconds)
+        assertNull(state.exercises[1].restSeconds)
+
+        // A rest after another exercise's set keeps its length.
+        viewModel.selectExercise(1)
+        viewModel.setRest(60)
+        assertEquals(150, viewModel.uiState.value.rest!!.seconds)
+        assertEquals(60, viewModel.uiState.value.exercises[1].restSeconds)
+    }
+
+    // --- 06c: workout service + rest buzz ---
+
+    private fun ActiveWorkoutViewModel.awaitBuzz(on: Boolean) = kotlinx.coroutines.runBlocking {
+        kotlinx.coroutines.withTimeout(2_000) { uiState.first { it.restBuzz == on } }
+    }
+
+    @Test
+    fun `the service follows the running workout and stops on discard`() {
+        val service = FakeWorkoutServiceStarter()
+        val clock = MutableClock()
+        val (viewModel, _, _) = buildViewModel(service = service, clock = clock)
+        assertTrue("no workout yet: nothing pushed", service.notices.isEmpty())
+
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        var notice = service.last!!
+        assertEquals("Push A", notice.workoutTitle)
+        assertEquals("Bench Press", notice.exerciseName)
+        assertEquals(1, notice.set!!.setNumber)
+        assertEquals(2, notice.setCount)
+        assertFalse(notice.resting)
+        assertEquals(clock.millis, notice.counterBase)
+
+        viewModel.logDone()
+        notice = service.last!!
+        assertTrue(notice.resting)
+        assertEquals(2, notice.set!!.setNumber)
+
+        viewModel.toggleTimer()
+        assertTrue(service.last!!.paused)
+        assertNull(service.last!!.counterBase)
+
+        viewModel.discardWorkout()
+        assertNull(service.last)
+    }
+
+    @Test
+    fun `the service stops once the workout is saved`() {
+        val service = FakeWorkoutServiceStarter()
+        val (viewModel, _, _) = buildViewModel(service = service)
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.logDone()
+        viewModel.saveWorkout()
+        assertTrue(viewModel.uiState.value.workoutSaved)
+        assertNull(service.last)
+    }
+
+    @Test
+    fun `buzz off never schedules`() {
+        val buzz = FakeRestBuzzScheduler()
+        val (viewModel, _, _) = buildViewModel(buzz = buzz)
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.logDone()
+        viewModel.setRest(60)
+        assertTrue(buzz.calls.none { it.startsWith("schedule") })
+        assertNull(buzz.pending)
+    }
+
+    @Test
+    fun `buzz follows rest start, change, undo, pause and discard`() {
+        val buzz = FakeRestBuzzScheduler()
+        val (viewModel, _, _) = buildViewModel(buzz = buzz)
+        viewModel.setRestBuzz(true)
+        viewModel.awaitBuzz(true)
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        assertNull("no rest yet", buzz.pending)
+
+        viewModel.logDone()
+        assertEquals(90L, buzz.pending)
+
+        viewModel.setRest(60)
+        assertEquals(60L, buzz.pending)
+
+        val bench = viewModel.uiState.value.exercises[0]
+        viewModel.deleteSet(bench.id, bench.sets[0].id)
+        assertNull("its set is gone", buzz.pending)
+        viewModel.undoDelete(bench.sets[0].id)
+        assertEquals(60L, buzz.pending)
+
+        viewModel.toggleTimer()
+        assertNull("paused", buzz.pending)
+        viewModel.toggleTimer()
+        assertEquals(60L, buzz.pending)
+
+        viewModel.discardWorkout()
+        assertNull(buzz.pending)
+    }
+
+    @Test
+    fun `turning the buzz off cancels it, and no buzz once every set is done`() {
+        val buzz = FakeRestBuzzScheduler()
+        val (viewModel, _, _) = buildViewModel(buzz = buzz)
+        viewModel.setRestBuzz(true)
+        viewModel.awaitBuzz(true)
+        viewModel.startWorkoutFromTemplate(twoExercises)
+        viewModel.logDone()
+        assertEquals(90L, buzz.pending)
+        viewModel.setRestBuzz(false)
+        viewModel.awaitBuzz(false)
+        assertNull(buzz.pending)
+
+        viewModel.setRestBuzz(true)
+        viewModel.awaitBuzz(true)
+        viewModel.logDone() // bench done, rest before the plank
+        assertEquals(90L, buzz.pending)
+        viewModel.step(SetField.Duration, plus = true)
+        viewModel.logDone() // last set: nothing to rest for
+        assertNull(buzz.pending)
+    }
+
+    // --- 7.7: notes, your rest, deleted exercises ---
+
+    @Test
+    fun `template notes ride along and your notes follow the repository`() = kotlinx.coroutines.runBlocking {
+        val repo = FakeExerciseRepository(listOf(benchPress, plank, sprint))
+        val (viewModel, _, _) = buildViewModel(exerciseRepo = repo)
+        viewModel.startWorkoutFromTemplate(
+            WorkoutTemplate(
+                id = "t", title = "Push",
+                templateExercises = listOf(templateExercise("ex-bench", 0).copy(notes = "  Pause 1 s  "), templateExercise("ex-plank", 1)),
+            ),
+        )
+        assertEquals(listOf("Pause 1 s", null), viewModel.uiState.value.exercises.map { it.templateNote })
+
+        repo.updateExerciseNote("ex-bench", "Notch 3")
+        assertEquals(mapOf("ex-bench" to "Notch 3"), viewModel.uiState.value.userNotes)
+        viewModel.saveUserNote("ex-bench", "   ")
+        assertEquals(emptyMap<String, String>(), viewModel.uiState.value.userNotes)
+        assertNull(repo.getExerciseNote("ex-bench"))
+    }
+
+    @Test
+    fun `a deleted exercise still starts with its template snapshot`() {
+        val (viewModel, _, _) = buildViewModel()
+        viewModel.startWorkoutFromTemplate(
+            WorkoutTemplate(
+                id = "t", title = "Core",
+                templateExercises = listOf(
+                    templateExercise("gone", 0).copy(exerciseName = "Cable Crunch", exerciseTrackingType = ExerciseTrackingType.REPS_ONLY),
+                ),
+            ),
+        )
+        val ex = viewModel.uiState.value.exercises.single()
+        assertEquals("Cable Crunch", ex.exerciseName)
+        assertEquals(ExerciseTrackingType.REPS_ONLY, ex.exerciseTrackingType)
+    }
+
+    @Test
+    fun `added exercises use your rest for them`() = kotlinx.coroutines.runBlocking {
+        val repo = FakeExerciseRepository(listOf(benchPress, plank, sprint))
+        repo.setExerciseRest("ex-plank", 45)
+        val (viewModel, _, _) = buildViewModel(exerciseRepo = repo)
+        viewModel.startEmptyWorkout("Workout")
+        viewModel.addExercises(listOf("ex-plank", "ex-bench"))
+        assertEquals(listOf(45, null), viewModel.uiState.value.exercises.map { it.restSeconds })
+    }
+
+    @Test
+    fun `template note survives the draft`() {
+        val drafts = FakeActiveWorkoutDraftRepository()
+        val (viewModel, _, _) = buildViewModel(draftRepo = drafts)
+        viewModel.startWorkoutFromTemplate(
+            WorkoutTemplate(id = "t", title = "Push", templateExercises = listOf(templateExercise("ex-bench", 0).copy(notes = "Pins 4"))),
+        )
+        assertEquals("Pins 4", drafts.draft!!.exercises.single().templateNote)
+    }
+
+    @Test
+    fun `a workout with a deleted exercise still saves`() = kotlinx.coroutines.runBlocking {
+        val repo = FakeExerciseRepository(listOf(benchPress, plank, sprint))
+        repo.deleteExercise("ex-bench")
+        val (viewModel, sessionRepo, _) = buildViewModel(exerciseRepo = repo)
+        viewModel.startWorkoutFromTemplate(
+            WorkoutTemplate(
+                id = "t", title = "Push",
+                templateExercises = listOf(templateExercise("ex-bench", 0, plannedSets = 1).copy(exerciseName = "Bench Press", plannedWeightKg = 80f)),
+            ),
+        )
+        viewModel.logDone()
+        viewModel.saveWorkout()
+        val saved = sessionRepo.created.single().performedExercises.single()
+        assertEquals("ex-bench", saved.exerciseId)
+        assertEquals(1, saved.sets.size)
+    }
+
+    // --- F18 prefill from the last session (11n) ---
+
+    private fun pastBench(vararg kgReps: Pair<Float, Int>) = WorkoutSession(
+        id = "past",
+        startedAt = 1_000L,
+        durationSeconds = 600,
+        title = "Past",
+        performedExercises = listOf(
+            com.rukavina.gymbuddy.domain.model.PerformedExercise(
+                id = "past-pe",
+                exerciseId = "ex-bench",
+                orderIndex = 0,
+                exerciseName = "Bench Press",
+                exerciseCategory = ExerciseCategory.STRENGTH,
+                exerciseTrackingType = ExerciseTrackingType.WEIGHT_REPS,
+                exercisePrimaryMuscles = emptyList(),
+                sets = kgReps.mapIndexed { i, (kg, reps) ->
+                    com.rukavina.gymbuddy.domain.model.WorkoutSet(
+                        id = "past-s$i", weightKg = kg, reps = reps, isCompleted = true, orderIndex = i,
+                    )
+                },
+            )
+        ),
+    )
+
+    @Test
+    fun `template start prefills from the last session`() {
+        val (viewModel, _, _) = buildViewModel(
+            sessionRepo = FakeWorkoutSessionRepository(listOf(pastBench(80f to 8, 85f to 6))),
+        )
+        viewModel.startWorkoutFromTemplate(
+            WorkoutTemplate(
+                id = "t", title = "Push",
+                templateExercises = listOf(
+                    templateExercise("ex-bench", orderIndex = 0, plannedSets = 3, plannedReps = 10),
+                    templateExercise("ex-plank", orderIndex = 1, plannedSets = 1, plannedReps = null),
+                ),
+            )
+        )
+        val state = viewModel.uiState.value
+        val bench = state.exercises[0].sets
+        val units = state.preferredUnits
+        assertEquals(
+            listOf(80f, 85f, 85f).map { ActiveWorkoutViewModel.displayWeight(it, units) },
+            bench.map { it.weight },
+        )
+        assertEquals(listOf("8", "6", "6"), bench.map { it.reps })
+        assertTrue(bench.none { it.isCompleted })
+        // No history for plank: template values stay.
+        assertEquals("", state.exercises[1].sets.single().weight)
+    }
+
+    @Test
+    fun `added exercise prefills from the last session`() {
+        val (viewModel, _, _) = buildViewModel(
+            sessionRepo = FakeWorkoutSessionRepository(listOf(pastBench(60f to 12))),
+        )
+        viewModel.startEmptyWorkout("Workout")
+        viewModel.addExercises(listOf("ex-bench"))
+        val state = viewModel.uiState.value
+        val sets = state.exercises.single().sets
+        assertEquals(3, sets.size)
+        assertTrue(sets.all { it.weight == ActiveWorkoutViewModel.displayWeight(60f, state.preferredUnits) && it.reps == "12" })
     }
 }

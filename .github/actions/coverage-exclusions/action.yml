@@ -65,6 +65,8 @@ runs:
           'app/src/main/java/**/*Dialog.kt'
           'app/src/main/java/**/*BottomSheet.kt'
           'app/src/main/java/**/ui/components/**'
+          # Plan 7 component library (composables, like ui/components).
+          'app/src/main/java/**/ui/design/**'
           'app/src/main/java/**/PasswordTextField.kt'
           'app/src/main/java/**/ProfileTextField.kt'
           'app/src/main/java/**/SettingsComponents.kt'
@@ -80,6 +82,20 @@ runs:
           'app/src/main/java/**/ui/guest/GuestMergeDialogs.kt'
           'app/src/main/java/**/ui/settings/ExportSheet.kt'
           'app/src/main/java/**/navigation/AuthNavGraph.kt'
+          # Plan 7 composable-only files and nav wiring (same rationale).
+          'app/src/main/java/**/ui/exercises/page/ExerciseSheets.kt'
+          'app/src/main/java/**/ui/you/BodyWheels.kt'
+          'app/src/main/java/**/ui/auth/GoogleSheet.kt'
+          'app/src/main/java/**/navigation/StartNavGraph.kt'
+          'app/src/main/java/**/navigation/AppNavHost.kt'
+          'app/src/main/java/**/ui/exercises/create/FormParts.kt'
+          'app/src/main/java/**/ui/you/YouRows.kt'
+          # Thin wrappers over Firebase Auth / Credential Manager and the
+          # Android foreground service: faking those in a JVM test proves
+          # little. Covered end to end (Sync E2E) and on the device instead.
+          'app/src/main/java/**/data/auth/AuthClient.kt'
+          'app/src/main/java/**/ui/workout/service/WorkoutService.kt'
+          'app/src/main/java/**/ui/workout/service/WorkoutServiceController.kt'
           'app/src/main/java/**/ui/theme/**'
           'app/src/main/java/**/di/**'
           'app/src/main/java/**/GymBuddyApplication.kt'

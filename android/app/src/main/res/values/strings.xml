@@ -1,8 +1,39 @@
 <resources>
     <string name="app_name">Gym Buddy</string>
-    <string name="welcome_auth">Welcome to Gym Buddy</string>
-    <string name="password_visible">Password Visible</string>
-    <string name="password_hidden">Password Hidden</string>
+
+    <!-- Design library (ui/design) -->
+    <string name="cd_back">Back</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="cd_more">More options</string>
+    <string name="cd_dismiss">Dismiss</string>
+    <string name="cd_show_password">Show password</string>
+    <string name="cd_hide_password">Hide password</string>
+    <string name="cd_collapse_workout">Minimise workout</string>
+    <string name="cd_workout_progress">Workout progress</string>
+    <string name="cd_start">Start</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_workouts">Workouts</string>
+    <string name="tab_exercises">Exercises</string>
+    <string name="tab_progress">Progress</string>
+    <string name="tab_you">You</string>
+    <string name="live_bar_set">Set %1$d of %2$d</string>
+    <string name="live_bar_all_done">All sets done</string>
+    <string name="live_bar_set_done">Set %1$d of %2$d done</string>
+    <string name="live_bar_rest">rest %s</string>
+    <string name="live_bar_rest_over">rest +%s</string>
+    <string name="tag_pr">PR</string>
+    <string name="cd_decrease">Decrease</string>
+    <string name="cd_increase">Increase</string>
+    <string name="cd_backspace">Delete last digit</string>
+    <string name="keypad_cancel">Cancel</string>
+    <string name="keypad_next">Next</string>
+    <string name="state_working">Working</string>
+    <string name="state_set_done">Done</string>
+    <string name="state_set_upcoming">Not done yet</string>
+    <string name="week_day_rest">%1$s, no workout</string>
+    <string name="week_day_done">%1$s, worked out</string>
+    <string name="week_day_today">%1$s, today, no workout yet</string>
+    <string name="week_day_today_done">%1$s, today, worked out</string>
 
     <string name="default_web_client_id">740806913339-pl47aju2kugtjoih804gcscf2fc26e71.apps.googleusercontent.com</string>
 </resources>

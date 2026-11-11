@@ -83,21 +83,21 @@ roadmap-details.md §3.
 - [x] 6.6 Plans (templates to rotate through) + rework of the default
       templates and starter plans (data model change)
 - [x] 6.7 Data export: versioned JSON (ADR 0015; CSV dropped)
-- [ ] 6.8 (me) CI green, PR develop → main
+- [x] 6.8 (me) CI green, PR develop → main (PR #6, 596850c)
 
 ## Plan 7: redesign build (Compose)
 
-- [ ] 7.1 Theme: tokens.json → colour, type (tnum), shape, motion, haptics
-- [ ] 7.2 Icons + component library (01 System)
-- [ ] 7.3 App frame: 5-tab nav, top bars, predictive back
-- [ ] 7.4 Onboarding + auth (UI for 6.2, 6.3)
-- [ ] 7.5 Home + Templates (Workouts tab, plans from 6.6)
-- [ ] 7.6 Active workout (keypad, live bar, swipe + undo, rest)
-- [ ] 7.7 Exercise page + create
-- [ ] 7.8 Progress tab (replaces Sessions + Stats)
-- [ ] 7.9 Session detail
-- [ ] 7.10 You + Settings (UI for 6.4, 6.5, 6.7)
-- [ ] 7.11 Cross-flow states: error, offline, empty, sync
+- [x] 7.1 Theme: tokens.json → colour, type (tnum), shape, motion, haptics
+- [x] 7.2 Icons + component library (01 System)
+- [x] 7.3 App frame: 5-tab nav, top bars, predictive back
+- [x] 7.4 Onboarding + auth (UI for 6.2, 6.3)
+- [x] 7.5 Home + Templates (Workouts tab, plans from 6.6)
+- [x] 7.6 Active workout (keypad, live bar, swipe + undo, rest)
+- [x] 7.7 Exercise page + create
+- [x] 7.8 Progress tab (replaces Sessions + Stats)
+- [x] 7.9 Session detail
+- [x] 7.10 You + Settings (UI for 6.4, 6.5, 6.7)
+- [x] 7.11 Cross-flow states: error, offline, empty, sync
 - [ ] 7.12 (me) Device pass on the current backend, CI green, PR develop → main
 
 ## Plan 5: environments (test + prod), after Plan 7

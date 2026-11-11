@@ -87,6 +87,10 @@ interface WorkoutSessionDao {
     @Query("UPDATE workout_sessions SET deletedAt = :deletedAt, updatedAt = :updatedAt, syncState = 'PENDING' WHERE id = :id")
     suspend fun deleteWorkoutSession(id: String, deletedAt: Long, updatedAt: Long)
 
+    /** Undo a delete: a plain upsert push with deletedAt null brings it back on the server too. */
+    @Query("UPDATE workout_sessions SET deletedAt = NULL, updatedAt = :updatedAt, syncState = 'PENDING' WHERE id = :id")
+    suspend fun restoreWorkoutSession(id: String, updatedAt: Long)
+
     /**
      * Delete performed exercises for a workout session.
      * Used when updating workout session to replace all performed exercises.

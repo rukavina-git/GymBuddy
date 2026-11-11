@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Exercises tab (85:10376) -->
+    <string name="exercises_title">Exercises</string>
+    <string name="exercises_search">Search exercises</string>
+    <string name="exercises_new">New exercise</string>
+    <string name="exercises_none">No exercise called \"%1$s\"</string>
+    <string name="exercises_none_body">Add it as your own.</string>
+    <string name="exercises_create_named">Create \"%1$s\"</string>
+    <string name="exercises_hidden">Hidden exercises</string>
+    <string name="exercises_created">%1$s created</string>
+    <string name="exercises_create_failed">Couldn\'t create the exercise. Try again.</string>
+
+    <!-- Exercise page (R13-1, R13-7, R13-8) -->
+    <string name="exercise_yours">your exercise</string>
+    <string name="exercise_last">Last</string>
+    <string name="exercise_best">Best</string>
+    <string name="exercise_first_time">First time</string>
+    <string name="exercise_photo_offline">Photo shows when you\'re online</string>
+    <string name="exercise_rest_row">Rest %1$s between sets</string>
+    <string name="exercise_rest_cd">Rest between sets: %1$s. Change</string>
+    <string name="exercise_your_note">Your note</string>
+    <string name="exercise_add_note">Add note</string>
+    <string name="exercise_edit_note">Edit note</string>
+    <string name="exercise_history">History</string>
+    <string name="exercise_how_to">How to</string>
+    <string name="exercise_add_steps">Add steps</string>
+    <string name="exercise_tips">Tips</string>
+    <string name="exercise_muscles_equipment">Muscles and equipment</string>
+    <string name="exercise_main">Main: %1$s</string>
+    <string name="exercise_also">Also works: %1$s</string>
+    <string name="exercise_equipment">Equipment: %1$s</string>
+    <string name="exercise_photo_cd">Photo of %1$s</string>
+    <string name="exercise_step">%1$d. %2$s</string>
+    <string name="exercise_tip">• %1$s</string>
+
+    <!-- ⋯ menu (R13-9) -->
+    <string name="exercise_menu_edit">Edit</string>
+    <string name="exercise_menu_add_to_template">Add to template</string>
+    <string name="exercise_menu_hide">Hide from lists</string>
+    <string name="exercise_menu_delete">Delete</string>
+    <string name="exercise_hidden_done">%1$s hidden from lists</string>
+    <string name="exercise_deleted_done">%1$s deleted</string>
+    <string name="exercise_add_to_template_title">Add to template</string>
+    <string name="exercise_add_to_template_none">You have no templates of your own yet.</string>
+    <string name="exercise_added_to">Added to %1$s</string>
+    <string name="exercise_action_failed">Couldn\'t save. Try again.</string>
+
+    <!-- Rest sheet (R13-10) -->
+    <string name="exercise_rest_title">Rest between sets</string>
+    <string name="exercise_rest_other">Other</string>
+    <string name="exercise_rest_hint">Used when you add this exercise to a template or workout.</string>
+    <string name="exercise_rest_default">Use my default (%1$s)</string>
+    <string name="exercise_rest_keypad">Rest for %1$s</string>
+    <string name="exercise_rest_save">Save</string>
+
+    <!-- Note sheet (R13-14) -->
+    <string name="exercise_note_title">Your note</string>
+    <string name="exercise_note_subtitle">%1$s · every workout</string>
+    <string name="exercise_note_label">Note</string>
+    <string name="exercise_note_placeholder">Seat height, grip, cues</string>
+    <string name="exercise_note_save">Save note</string>
+    <string name="cd_your_note">Your note</string>
+    <string name="cd_your_note_set">Your note (has a note)</string>
+
+    <!-- Delete own (R13-11) -->
+    <string name="exercise_delete_title">Delete %1$s?</string>
+    <string name="exercise_delete_used">Used in %1$s. They keep it until you change them.</string>
+    <string name="exercise_delete_past">Past workouts keep it too.</string>
+    <string name="exercise_delete_hide">Hide instead</string>
+    <string name="exercise_delete_hide_body">Removes it from lists and search, nothing else.</string>
+    <string name="exercise_delete_confirm">Delete</string>
+    <string name="list_and">%1$s and %2$s</string>
+
+    <!-- Create A (R13-4) and Create C (R13-6) -->
+    <string name="create_title_new">New exercise</string>
+    <string name="create_title_edit">Edit exercise</string>
+    <string name="create_save">Save</string>
+    <string name="create_create">Create</string>
+    <string name="create_name">Name</string>
+    <string name="create_name_error">Give it a name</string>
+    <string name="create_what_you_log">What you log</string>
+    <string name="create_main_muscle">Main muscle</string>
+    <string name="create_equipment">Equipment</string>
+    <string name="create_more">More</string>
+    <string name="create_more_details">More details</string>
+    <string name="create_more_details_body">Other muscles, how-to steps, rest</string>
+    <string name="create_other_muscles">Other muscles</string>
+    <string name="create_steps">How-to steps</string>
+    <string name="create_steps_helper">One step per line</string>
+    <string name="create_rest">Rest between sets</string>
+    <string name="create_difficulty">Difficulty</string>
+    <string name="create_kind">Kind</string>
+    <string name="create_quick_hint">Add equipment, how-to and rest later on its page.</string>
+    <string name="create_each_set">Each set: %1$s</string>
+    <string name="create_save_failed">Couldn\'t save the exercise. Try again.</string>
+    <string name="tracking_weight_reps">Weight + reps</string>
+    <string name="tracking_reps_only">Reps only</string>
+    <string name="tracking_duration">Time</string>
+    <string name="tracking_weight_duration">Weight + time</string>
+    <string name="tracking_distance_duration">Distance + time</string>
+    <string name="tracking_weight_distance">Weight + distance</string>
+    <string name="difficulty_beginner">Beginner</string>
+    <string name="difficulty_intermediate">Intermediate</string>
+    <string name="difficulty_advanced">Advanced</string>
+    <string name="kind_compound">Compound</string>
+    <string name="kind_isolation">Isolation</string>
+
+    <!-- Template editor: deleted exercise (R13-12) -->
+    <string name="editor_deleted">Deleted exercise · still starts with this template</string>
+    <string name="editor_swap">Swap</string>
+    <string name="editor_remove">Remove</string>
+    <string name="editor_restore">Restore</string>
+</resources>

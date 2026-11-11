@@ -12,7 +12,11 @@ class FakeActiveWorkoutDraftRepository(
 
     override suspend fun load(): ActiveWorkoutDraft? = draft
 
+    /** Every save throws, like a full disk (R17-B1). */
+    var failSaves = false
+
     override suspend fun save(draft: ActiveWorkoutDraft) {
+        if (failSaves) throw IllegalStateException("disk full")
         this.draft = draft
         saveCount++
     }

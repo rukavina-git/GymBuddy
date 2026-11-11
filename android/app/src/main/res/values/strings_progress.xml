@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress tab (Plan 7 step 08, Figma 62:5195) -->
+    <string name="progress_this_week">This week</string>
+    <plurals name="progress_sessions">
+        <item quantity="one">%d session</item>
+        <item quantity="other">%d sessions</item>
+    </plurals>
+    <string name="progress_change_lift">Change lift</string>
+    <plurals name="progress_more">
+        <item quantity="one">You lift %1$s more than %2$d week ago.</item>
+        <item quantity="other">You lift %1$s more than %2$d weeks ago.</item>
+    </plurals>
+    <plurals name="progress_less">
+        <item quantity="one">You lift %1$s less than %2$d week ago.</item>
+        <item quantity="other">You lift %1$s less than %2$d weeks ago.</item>
+    </plurals>
+    <plurals name="progress_same">
+        <item quantity="one">You lift the same as %d week ago.</item>
+        <item quantity="other">You lift the same as %d weeks ago.</item>
+    </plurals>
+    <string name="progress_heaviest">Heaviest set each session</string>
+    <string name="progress_heaviest_range">Heaviest set each session · %1$s → %2$s</string>
+    <string name="progress_chart_cd">%1$s. %2$s chart, %3$s.</string>
+    <string name="progress_recent">Recent</string>
+    <string name="progress_all_sessions">All sessions</string>
+    <string name="progress_see_all">See all</string>
+    <string name="progress_empty_title">No workouts yet</string>
+    <string name="progress_empty_body">Finish a workout and it shows up here, with your weekly totals.</string>
+    <string name="progress_start">Start a workout</string>
+    <string name="progress_lift_sheet">Lift on Progress</string>
+    <string name="progress_lift_sheet_sub">Lifts you have logged 3 or more times</string>
+    <string name="progress_section">Progress</string>
+    <string name="progress_show_on_progress">Show on Progress</string>
+    <string name="progress_tap_row">Tap a row to open the session</string>
+    <string name="progress_latest">Latest</string>
+    <string name="progress_all_n_sessions">All %d sessions</string>
+
+    <!-- All sessions (R7-7/8/9) -->
+    <string name="sessions_search">Search workouts</string>
+    <string name="sessions_exercise">Exercise</string>
+    <string name="sessions_clear_exercise">Clear exercise filter</string>
+    <string name="sessions_pick_exercise">Filter by exercise</string>
+    <string name="sessions_no_match_title">No sessions match \"%s\"</string>
+    <string name="sessions_no_match_body">Search looks at workout names, like Legs or Push A.</string>
+    <string name="sessions_none_title">No sessions with %s</string>
+    <string name="sessions_clear_search">Clear search</string>
+    <string name="sessions_filtered_sets">%1$s  %2$s</string>
+</resources>

@@ -11,6 +11,8 @@ import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.domain.model.EntitySource
 import com.rukavina.gymbuddy.domain.model.SyncState
 import com.rukavina.gymbuddy.domain.model.Exercise
+import com.rukavina.gymbuddy.domain.model.ExerciseUserState
+import com.rukavina.gymbuddy.data.local.entity.UserExerciseStateEntity
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -124,4 +126,33 @@ class ExerciseRepositoryImpl @Inject constructor(
             ExerciseMapper.toDomainList(entities)
         }
     }
+
+    override fun observeExercise(id: String): Flow<Exercise?> =
+        holder.observe { it.exerciseDao().observeExercise(id) }.map { e -> e?.let(ExerciseMapper::toDomain) }
+
+    override suspend fun getExercisesAnyState(ids: List<String>): List<Exercise> =
+        if (ids.isEmpty()) emptyList() else ExerciseMapper.toDomainList(exerciseDao.getExercisesAnyState(ids.distinct()))
+
+    override suspend fun restoreExercise(id: String) {
+        outbox.record(SyncEntityType.EXERCISE, id) { db ->
+            db.exerciseDao().restoreExercise(id, clock.millis())
+        }
+    }
+
+    override fun observeUserState(exerciseId: String): Flow<ExerciseUserState> =
+        holder.observe { it.userExerciseStateDao().observeState(exerciseId) }
+            .map { it?.toUserState() ?: ExerciseUserState(exerciseId) }
+
+    override fun observeUserStates(): Flow<Map<String, ExerciseUserState>> =
+        holder.observe { it.userExerciseStateDao().observeAll() }
+            .map { rows -> rows.associate { it.exerciseId to it.toUserState() } }
+
+    override suspend fun setExerciseRest(exerciseId: String, seconds: Int?) {
+        outbox.record(SyncEntityType.USER_EXERCISE_STATE, exerciseId) { db ->
+            db.userExerciseStateDao().setDefaultRest(exerciseId, seconds, clock.millis())
+        }
+    }
 }
+
+private fun UserExerciseStateEntity.toUserState() =
+    ExerciseUserState(exerciseId = exerciseId, hidden = isHidden, note = note, restSeconds = defaultRestSeconds)

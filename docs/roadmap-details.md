@@ -272,9 +272,14 @@ Plan 8 on, nothing under test touches prod data.
     page, reached from About.
 9.2 **Privacy policy + terms** (Q-11). Written in the repo, published
     at a public URL on rukavina.app, linked in-app and in Play.
+    In-app: "Terms" and "Privacy policy" in the consent screen's
+    footer (and Sign in / You) become tappable links to those pages;
+    Plan 7.4 ships them as plain text (owner, 2026-11-03).
 9.3 **Web account deletion.** Play requires a URL where users can ask
     for deletion without the app.
-9.4 **Compliance pass.** Health-data consent, 16+ audience,
+9.4 **Compliance pass.** Health-data consent (since 7.4: given by
+    tapping "Agree and create account" on its own consent screen, not
+    a checkbox; check this counts as explicit consent), 16+ audience,
     Crashlytics payloads (no PII), timer/notification rules. Checklist:
     docs/council/2026-11-02-onboarding.md.
 9.5 **(me)** Play Console: Data safety (Firebase Auth + Crashlytics),

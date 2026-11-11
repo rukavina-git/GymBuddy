@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App icon monochrome, from design/brand/app-icon-monochrome.svg (108dp adaptive canvas). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M26.5,54H32L37.5,41.625L44.375,70.5L51.25,36.125L59.5,66.375L65,47.125L70.5,60.875L74.625,54H81.5"
+        android:strokeWidth="5"
+        android:strokeColor="#FFF3F4F6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

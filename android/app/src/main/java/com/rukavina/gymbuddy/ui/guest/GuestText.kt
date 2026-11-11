@@ -23,6 +23,17 @@ internal fun receiptText(receipt: GuestMergeReceipt): String {
     return if (receipt.keptAccountProfile) "$added Kept your account's profile." else added
 }
 
+/** "k…@gmail.com was deleted. Your 14 workouts … are still on this phone." */
+internal fun deletedText(email: String?, counts: LocalDataCounts?): String {
+    val who = email?.let(::maskEmail) ?: "Your account"
+    val what = counts?.takeUnless { it.isEmpty }?.let { "Your ${countsText(it)} are" } ?: "Your data is"
+    return "$who was deleted. $what still on this phone."
+}
+
+/** "Erase 14 workouts?": the count is always said before an erase. */
+internal fun eraseTitle(counts: LocalDataCounts?): String =
+    counts?.takeUnless { it.isEmpty }?.let { "Erase ${countsText(it)}?" } ?: "Erase all data?"
+
 /** "5 workouts, 1 template and 2 exercises"; zero counts are left out. */
 fun countsText(counts: LocalDataCounts): String {
     val parts = listOfNotNull(

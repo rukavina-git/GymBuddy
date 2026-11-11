@@ -8,3 +8,9 @@
 # Root composite build (IDE only)
 /.gradle/
 /build/
+
+# Android SDK path, written by the IDE for the root composite build
+/local.properties
+
+# Impeccable design-tool scratch (critiques, question seeds)
+/.impeccable/

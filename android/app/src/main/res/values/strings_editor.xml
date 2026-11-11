@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Template editor + exercise picker (Plan 7 step 05b). -->
+<resources>
+    <string name="editor_title_edit">Edit template</string>
+    <string name="editor_title_new">New template</string>
+    <string name="editor_save">Save</string>
+    <string name="editor_name">Name</string>
+    <string name="editor_name_placeholder">e.g. Push day</string>
+    <string name="editor_name_error">Give it a name</string>
+    <string name="editor_empty_hint">Add exercises in the order you do them.</string>
+    <string name="editor_add_exercise">Add exercise</string>
+    <string name="editor_add_note">Add note</string>
+    <string name="editor_note">Note</string>
+    <string name="editor_note_done">Done</string>
+    <string name="editor_save_failed">Couldn\'t save. Try again.</string>
+    <string name="editor_removed">%s removed</string>
+    <plurals name="editor_added">
+        <item quantity="one">%d exercise added at the end</item>
+        <item quantity="other">%d exercises added at the end</item>
+    </plurals>
+    <string name="editor_discard_title">Discard changes?</string>
+    <string name="editor_discard_body">Your edits to %s will be lost.</string>
+    <string name="editor_discard_body_new">This template won\'t be saved.</string>
+    <string name="editor_keep_editing">Keep editing</string>
+    <string name="editor_discard">Discard</string>
+
+    <string name="chip_reps">%d reps</string>
+    <string name="chip_reps_empty">— reps</string>
+    <string name="chip_weight_empty">— %s</string>
+    <string name="chip_time_empty">— time</string>
+    <string name="chip_distance_empty">— m</string>
+    <string name="rest_none">no rest</string>
+
+    <string name="field_sets">sets</string>
+    <string name="field_reps">reps</string>
+    <string name="field_time">time</string>
+    <string name="field_distance">m</string>
+    <string name="field_rest">rest</string>
+    <string name="keypad_label">%1$s · %2$s</string>
+    <string name="keypad_next_field">Next: %s</string>
+    <string name="keypad_done">Done</string>
+
+    <string name="cd_reorder">Reorder %s</string>
+    <string name="a11y_move_up">Move up</string>
+    <string name="a11y_move_down">Move down</string>
+    <string name="a11y_remove">Remove</string>
+    <string name="cd_rest">Rest %s</string>
+
+    <string name="picker_title">Add exercise</string>
+    <string name="picker_search">Search exercises</string>
+    <string name="picker_all">All</string>
+    <string name="picker_in_template">In template</string>
+    <string name="picker_add">Add %d</string>
+    <string name="picker_add_none">Add</string>
+    <string name="picker_none">No exercises match \"%s\"</string>
+    <string name="cd_picked">Picked, number %d</string>
+    <string name="cd_not_picked">Not picked</string>
+
+    <string name="muscle_chest">Chest</string>
+    <string name="muscle_back">Back</string>
+    <string name="muscle_legs">Legs</string>
+    <string name="muscle_shoulders">Shoulders</string>
+    <string name="muscle_arms">Arms</string>
+    <string name="muscle_core">Core</string>
+    <string name="muscle_other">Other</string>
+
+    <string name="equipment_barbell">Barbell</string>
+    <string name="equipment_dumbbell">Dumbbells</string>
+    <string name="equipment_kettlebell">Kettlebell</string>
+    <string name="equipment_cable">Cable</string>
+    <string name="equipment_machine">Machine</string>
+    <string name="equipment_bodyweight">Bodyweight</string>
+    <string name="equipment_resistance_band">Band</string>
+    <string name="equipment_ez_bar">EZ bar</string>
+    <string name="equipment_trap_bar">Trap bar</string>
+    <string name="equipment_pull_up_bar">Pull-up bar</string>
+    <string name="equipment_bench">Bench</string>
+    <string name="equipment_medicine_ball">Medicine ball</string>
+    <string name="equipment_suspension_trainer">Suspension trainer</string>
+    <string name="equipment_smith_machine">Smith machine</string>
+</resources>

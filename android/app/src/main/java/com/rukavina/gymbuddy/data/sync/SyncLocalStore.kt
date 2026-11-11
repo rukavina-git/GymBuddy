@@ -304,6 +304,9 @@ class SyncLocalStore(private val holder: DatabaseHolder, private val clock: Cloc
     /** Everything the signed-in user owns, plus the cursor and outbox. Reference data and the discarded-change log stay. */
     suspend fun wipeUserData() = syncDao.wipeLocalUserData()
 
+    /** [wipeUserData] but keeps the workout draft, for a 410 re-download. */
+    suspend fun wipeForResync() = syncDao.wipeForResync()
+
     /** [wipeUserData] plus the discarded-change log - for logout, when nothing of this user may remain. */
     suspend fun wipeEverythingForLogout() = transaction {
         syncDao.wipeLocalUserData()

@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.data.repository
 
+import com.rukavina.gymbuddy.domain.model.ExerciseUserState
 import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import androidx.room.Room
 import com.rukavina.gymbuddy.data.local.db.AppDatabase
@@ -135,5 +136,34 @@ class ExerciseRepositoryImplTest {
         val read = repository.getExerciseById("ex-1")!!
         assertEquals("Bench Press (edited)", read.name)
         assertEquals(laterClock.millis(), read.updatedAt)
+    }
+
+    @Test
+    fun `observeExercise and getExercisesAnyState see deleted exercises, restore brings it back`() = runBlocking {
+        repository.createExercise(exercise("ex-1"))
+        repository.createExercise(exercise("ex-2"))
+        repository.deleteExercise("ex-1")
+
+        assertTrue(repository.getExercisesAnyState(emptyList()).isEmpty())
+        assertEquals(setOf("ex-1", "ex-2"), repository.getExercisesAnyState(listOf("ex-1", "ex-2", "ex-1")).map { it.id }.toSet())
+        assertNull(repository.observeExercise("missing").first())
+
+        repository.restoreExercise("ex-1")
+        assertEquals("ex-1", repository.getExerciseById("ex-1")?.id)
+        assertEquals("ex-1", repository.observeExercise("ex-1").first()?.id)
+    }
+
+    @Test
+    fun `user state defaults, then reflects rest, note and hidden`() = runBlocking {
+        repository.createExercise(exercise("ex-1"))
+        assertEquals(ExerciseUserState("ex-1"), repository.observeUserState("ex-1").first())
+
+        repository.setExerciseRest("ex-1", 120)
+        repository.hideExercise("ex-1")
+
+        val state = repository.observeUserState("ex-1").first()
+        assertEquals(120, state.restSeconds)
+        assertTrue(state.hidden)
+        assertEquals(state, repository.observeUserStates().first()["ex-1"])
     }
 }

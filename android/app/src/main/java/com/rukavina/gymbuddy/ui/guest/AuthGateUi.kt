@@ -1,15 +1,14 @@
 package com.rukavina.gymbuddy.ui.guest
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,29 +16,50 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.data.sync.LocalDataCounts
+import com.rukavina.gymbuddy.ui.design.AppChoiceDialog
+import com.rukavina.gymbuddy.ui.design.AppDialog
+import com.rukavina.gymbuddy.ui.design.AppLinkButton
+import com.rukavina.gymbuddy.ui.design.DialogAction
+import com.rukavina.gymbuddy.ui.design.DialogActionTone
+import com.rukavina.gymbuddy.ui.theme.AppIcons
+import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 
 /*
- * Plain session-expired banner and account-deleted dialog, worded as Figma
- * "16 · Session expired" and "20 · Account deleted elsewhere" (node
- * 114-20520). Restyled in Plan 7.4.
+ * Session expired banner and account-deleted dialog, Figma "16 · Session
+ * expired" and "20 · Account deleted elsewhere" (node 114-20520).
  */
 
+/** "Backup paused": logging goes on, changes back up after signing in again. */
 @Composable
 fun SessionExpiredBanner(onSignIn: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(color = MaterialTheme.colorScheme.secondaryContainer, modifier = modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+    val d = GymBuddyTheme.dimens
+    val cs = MaterialTheme.colorScheme
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = cs.surfaceContainer,
+        modifier = modifier.fillMaxWidth().padding(horizontal = d.insetScreen, vertical = d.stackTight),
+    ) {
+        Row(
+            modifier = Modifier.padding(start = d.group, end = d.hairline),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(d.stack),
+        ) {
+            Icon(painterResource(AppIcons.Ui.CloudOff), null, Modifier.size(d.iconSmall), tint = cs.onSurfaceVariant)
             Text(
-                "Backup paused. Sign in again to keep backing up.",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f)
+                stringResource(R.string.expired_banner),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f).padding(vertical = d.stack),
             )
-            TextButton(onClick = onSignIn) { Text("Sign in") }
+            AppLinkButton(stringResource(R.string.expired_sign_in), onSignIn)
         }
     }
 }
 
+/** Keep as guest (lime) or Erase, which always shows the counts and asks again. */
 @Composable
 fun AccountDeletedDialog(
     email: String?,
@@ -48,27 +68,25 @@ fun AccountDeletedDialog(
     onErase: () -> Unit
 ) {
     var confirmErase by remember { mutableStateOf(false) }
-    val what = counts?.let { if (it.isEmpty) "Your data is" else "Your ${countsText(it)} are" } ?: "Your data is"
-    val who = email?.let(::maskEmail) ?: "Your account"
     if (!confirmErase) {
-        AlertDialog(
-            onDismissRequest = {}, // a choice is needed
-            text = { Text("$who was deleted. $what still on this phone.") },
-            confirmButton = { Button(onClick = onKeep) { Text("Keep on this phone") } },
-            dismissButton = { TextButton(onClick = { confirmErase = true }) { Text("Erase…") } }
+        AppChoiceDialog(
+            title = stringResource(R.string.deleted_title),
+            body = deletedText(email, counts),
+            actions = listOf(
+                DialogAction(stringResource(R.string.deleted_erase), { confirmErase = true }, DialogActionTone.Danger),
+                DialogAction(stringResource(R.string.deleted_keep), onKeep, DialogActionTone.Lime),
+            ),
+            onDismiss = null, // a choice is needed
         )
     } else {
-        AlertDialog(
-            onDismissRequest = { confirmErase = false },
-            title = { Text(counts?.takeUnless { it.isEmpty }?.let { "Erase ${countsText(it)}?" } ?: "Erase all data?") },
-            text = { Text("There's no other copy. This can't be undone.") },
-            confirmButton = {
-                Button(
-                    onClick = onErase,
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) { Text("Erase") }
-            },
-            dismissButton = { TextButton(onClick = { confirmErase = false }) { Text("Cancel") } }
+        AppDialog(
+            title = eraseTitle(counts),
+            body = stringResource(R.string.erase_body),
+            confirmLabel = stringResource(R.string.erase_confirm),
+            onConfirm = onErase,
+            dismissLabel = stringResource(R.string.cancel),
+            onDismiss = { confirmErase = false },
+            destructive = true,
         )
     }
 }

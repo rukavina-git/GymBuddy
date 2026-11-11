@@ -35,9 +35,8 @@ import java.util.concurrent.TimeUnit
  *   that survives the app being swiped away
  *
  * The other triggers live with their callers. Session completion is in
- * CreateWorkoutSessionUseCase, pull-to-refresh in
- * WorkoutSessionViewModel, the pre-logout flush in LogoutCoordinator,
- * and sign-in in FirebaseAuthSession. None of them fire on an ordinary
+ * CreateWorkoutSessionUseCase, the pre-logout flush in
+ * LogoutCoordinator, and sign-in in FirebaseAuthSession. None of them fire on an ordinary
  * local write.
  */
 object SyncTriggers {
