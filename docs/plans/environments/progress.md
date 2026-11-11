@@ -1,7 +1,7 @@
 # Progress
 
 - [x] 01 ADR 0016: VPS hosting + environment split (7430654)
-- [x] 02 Server setup script (HASH)
+- [x] 02 Server setup script (2d7d299)
 - [ ] 03 Server stack: compose, nginx, certbot
 - [ ] 04 CI: image to GHCR, SSH deploy, backups
 - [ ] 05 (me) Buy VPS, cut over from Render + Neon
