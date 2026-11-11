@@ -38,3 +38,12 @@
   restarts the stack (restart only if daemon.json changed); use
   `reload-or-restart ssh` (24.04 uses ssh.socket); README should say the
   `docker` group is root-equivalent before step 04 gives CI that key.
+- Owner note (2026-11-12): the VPS is already bought. netcup installed
+  Debian 13 (trixie) minimal, not Ubuntu 24.04. setup.sh hardcodes
+  Docker's Ubuntu repo, so before step 05 either pick the repo from
+  `/etc/os-release` `ID` (and update ADR 0016) or reinstall Ubuntu
+  24.04 in the netcup panel. Owner decides when we get there.
+- Step 05 checklist must include: change the root password (netcup
+  mailed it), check the ED25519 host key fingerprint from the netcup
+  email on first SSH, `ssh-copy-id root@<host>` before setup.sh. The
+  netcup panel firewall only blocks SMTP; leave it.
