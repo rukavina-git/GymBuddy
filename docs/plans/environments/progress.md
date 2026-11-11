@@ -1,6 +1,6 @@
 # Progress
 
-- [x] 01 ADR 0016: VPS hosting + environment split (HASH)
+- [x] 01 ADR 0016: VPS hosting + environment split (7430654)
 - [ ] 02 Server setup script
 - [ ] 03 Server stack: compose, nginx, certbot
 - [ ] 04 CI: image to GHCR, SSH deploy, backups
