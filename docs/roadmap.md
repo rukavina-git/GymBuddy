@@ -100,15 +100,16 @@ roadmap-details.md §3.
 - [x] 7.11 Cross-flow states: error, offline, empty, sync
 - [x] 7.12 (me) Device pass on the current backend, CI green, PR develop → main (PR #7)
 
-## Plan 5: environments (test + prod), after Plan 7
+## Plan 5: environments (VPS, then staging + prod)
 
-- [ ] 5.1 ADR: staging + prod split (backend, database, Firebase, app)
-- [ ] 5.2 Backend: staging service in render.yaml, backups prod only
-- [ ] 5.3 Android: `staging` / `prod` flavors (app id suffix, own
-      Firebase config, API URL); CI builds both
-- [ ] 5.4 (me) Staging Firebase project, Neon branch, Render service,
-      DNS api-staging.rukavina.app, secrets
-- [ ] 5.5 (me) CI green, PR develop → main
+- [ ] 5.1 ADR 0016: VPS hosting (netcup, nginx) + environment split
+- [ ] 5.2 Server setup script (hardening, Docker, swap)
+- [ ] 5.3 Server stack: compose, nginx, certbot
+- [ ] 5.4 CI: image to GHCR, SSH deploy, backups on the VPS
+- [ ] 5.5 (me) Buy VPS, cut over from Render + Neon
+- [ ] 5.6 Staging stack on the same box, Render removed (spec change)
+- [ ] 5.7 Android: `staging` / `prod` flavors; CI builds both
+- [ ] 5.8 (me) Staging Firebase, DNS, secrets, CI green, PR develop → main
 
 ## Plan 8: delivery (CI/CD + fastlane)
 

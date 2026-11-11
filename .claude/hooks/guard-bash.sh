@@ -65,7 +65,15 @@ done < <(sed -E 's/(&&|\|\||;|\|)/\n/g' <<<"$cmd")
 grep -Eq -- 'keystore\.properties|google-services\.json|service-account[^[:space:]]*\.json|firebase-adminsdk|\.jks([[:space:]"'\'']|$)|keystores/|(^|[[:space:]/"'\''])\.env([[:space:]"'\'']|$)|find-generic-password' <<<"$cmd" \
   && block "command touches a secret file or the keychain"
 
-grep -Eiq -- '(^|[^[:alnum:]_-])(fastlane|deploy)([[:space:]]|$)|docker[[:space:]]+push|gh[[:space:]]+release|gradlew[^|;&]*[[:space:]]publish|--prod([[:space:]]|=|$)|[[:space:]]prod(uction)?([[:space:]]|$)' <<<"$cmd" \
+# Deploy/prod check ignores prose: heredoc bodies (file content) and the
+# quoted text after -m/--message/--body/--title/--notes/echo/printf
+# (commit messages, PR text). Other quoted strings, e.g. bash -c "...",
+# are still checked.
+scan=$(perl -0777 -pe '
+  s/(<<-?[ \t]*([\x27"]?)(\w+)\2)([^\n]*)\n.*?\n[ \t]*\3(?=\n|$)/$1$4/gs;
+  s/(-m|--message|--body|--title|--notes|echo|printf)([ \t]+|=)("(?:\\.|[^"\\])*"|\x27[^\x27]*\x27)/$1 MSG/gs;
+' <<<"$cmd")
+grep -Eiq -- '(^|[^[:alnum:]_-])(fastlane|deploy)([[:space:]]|$)|docker[[:space:]]+push|gh[[:space:]]+release|gradlew[^|;&]*[[:space:]]publish|--prod([[:space:]]|=|$)|[[:space:]]prod(uction)?([[:space:]]|$)' <<<"$scan" \
   && block "deploy/prod command"
 
 # Merged feature-branch deletion: always the user's call via the prompt.
