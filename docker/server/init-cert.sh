@@ -17,11 +17,15 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 env_file=".env"
 if [[ -z "${API_HOST:-}" && -f "$env_file" ]]; then
   API_HOST="$(sed -n 's/^API_HOST=//p' "$env_file" | tail -n1)"
+  # Strip optional quotes, as compose does, so the cert path matches nginx's.
+  API_HOST="${API_HOST%\"}"; API_HOST="${API_HOST#\"}"
+  API_HOST="${API_HOST%\'}"; API_HOST="${API_HOST#\'}"
 fi
 [[ -n "${API_HOST:-}" ]] || die "API_HOST is required"
 [[ -n "${CERT_EMAIL:-}" ]] || die "CERT_EMAIL is required"
 
-if docker compose ps --status running --services | grep -qx nginx; then
+# A restarting nginx (no cert yet) also holds port 80.
+if docker compose ps --status running --status restarting --services | grep -qx nginx; then
   die "nginx holds port 80; run: docker compose stop nginx"
 fi
 

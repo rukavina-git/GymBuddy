@@ -18,7 +18,7 @@ for prod only (staging is step 06) and tests it locally.
     `JAVA_TOOL_OPTIONS=-Xmx300m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m`,
     `LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs` (both as in render.yaml).
     No `ports`. `restart: unless-stopped` on every service.
-  - `nginx`: `nginx:1.28-alpine` (stable), the only service with
+  - `nginx`: `nginx:1.30-alpine` (stable), the only service with
     `ports: 80, 443`. Config from a template (`/etc/nginx/templates`,
     nginx's built-in envsubst) using `${API_HOST}`.
   - `certbot`: `certbot/certbot`, shares the cert and webroot volumes,

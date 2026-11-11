@@ -47,16 +47,13 @@
   Docker's Ubuntu repo, so before step 05 either pick the repo from
   `/etc/os-release` `ID` (and update ADR 0016) or reinstall Ubuntu
   24.04 in the netcup panel. Owner decides when we get there.
-- 03: nginx resolves `backend` once at startup. Replacing the backend
-  container (any deploy) gives it a new IP, so nginx 502s until its 6 h
-  reload. Step 04's deploy must run `docker compose exec nginx nginx -s
-  reload` after the swap, or switch the template to `resolver
-  127.0.0.11` + a variable `proxy_pass`; smoke-test a backend swap.
-- 03 reviewer NITs left open: init-cert.sh copies a quoted `API_HOST`
-  from the env file with its quotes; its nginx check misses a
-  restarting nginx that still holds port 80; `.env.example` should warn
-  that compose expands `$` in unquoted values and that
-  `POSTGRES_PASSWORD` only applies on a fresh volume.
+- 03: nginx proxies via `resolver 127.0.0.11` + a variable, so it
+  re-resolves `backend` (10 s cache). Tested: backend swapped to a new
+  IP, health 200 with no nginx reload. Step 04's deploy needs no
+  reload, but its smoke test should keep a backend swap check.
+- 03: init-cert.sh strips quotes from `API_HOST` and also refuses while
+  nginx is restarting. `.env.example` warns about `$` expansion and
+  that `DB_PASSWORD` only applies to a fresh volume (use ALTER ROLE).
 - 03: the smoke run used a fake service account (generated RSA key) and
   a self-signed cert seeded into the letsencrypt volume at
   `live/localhost/`; reuse that for later stack tests.
