@@ -88,6 +88,8 @@ runs:
           'app/src/main/java/**/ui/auth/GoogleSheet.kt'
           'app/src/main/java/**/navigation/StartNavGraph.kt'
           'app/src/main/java/**/navigation/AppNavHost.kt'
+          'app/src/main/java/**/ui/exercises/create/FormParts.kt'
+          'app/src/main/java/**/ui/you/YouRows.kt'
           # Thin wrappers over Firebase Auth / Credential Manager and the
           # Android foreground service: faking those in a JVM test proves
           # little. Covered end to end (Sync E2E) and on the device instead.
