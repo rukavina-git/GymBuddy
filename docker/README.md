@@ -36,9 +36,41 @@ and turns off SSH password login. Root keeps key login.
 Keep the root session open until `ssh deploy@<host> docker ps` works
 from a second terminal.
 
+The `docker` group is root-equivalent: anyone with the deploy key can
+mount `/` into a container. Treat that key like root's (step 04 puts
+it in GitHub secrets).
+
 Docker writes its own iptables rules, so a port published in compose
 bypasses ufw. Never publish Postgres or the backend; only nginx gets
 80/443.
+
+## Server stack
+
+`docker/server/` is the prod stack for the VPS (ADR 0016): Postgres 17,
+the backend image, nginx (TLS, the only service with ports) and
+certbot. It is separate from the local dev `compose.yaml`, which
+publishes 5432/8080 and builds the image.
+
+As `deploy`, once:
+
+    mkdir -p /opt/gymbuddy        # as root: then chown deploy:deploy
+    scp -r docker/server/{compose.yaml,init-cert.sh,nginx} deploy@<host>:/opt/gymbuddy/
+    # on the server: copy .env.example to /opt/gymbuddy/.env, fill it,
+    # chmod 600 it
+    cd /opt/gymbuddy
+    CERT_EMAIL=<you> ./init-cert.sh   # STAGING_CA=1 for a test cert first
+    docker compose up -d
+    curl https://<API_HOST>/v1/health
+
+- `init-cert.sh` gets the first cert with certbot standalone on port
+  80, so nginx must be stopped while it runs. nginx can't start
+  without a cert.
+- After that the `certbot` service tries `certbot renew --webroot`
+  every 12 h, and nginx reloads every 6 h to pick up a new cert.
+- Unknown `Host` gets no response (444 on 80, TLS handshake refused on
+  443), so scanners hitting the IP see nothing.
+- The env file is owned by `deploy`, mode 0600: compose runs as
+  `deploy`, and `deploy` is root-equivalent anyway.
 
 ## Hosting
 
@@ -74,6 +106,10 @@ transaction pooler breaks, and one small instance doesn't need pooling.
 | `JAVA_TOOL_OPTIONS` | `render.yaml` | heap limits for 512 MB, not secret |
 | `BACKUP_DATABASE_URL` | GitHub Actions secret | `postgresql://<user>:<password>@<direct-host>/<db>?sslmode=require` (libpq form, password included) |
 | `BACKUP_PASSPHRASE` | GitHub Actions secret + password manager | long random string; without it no backup can be restored |
+| `BACKEND_IMAGE` | VPS `/opt/gymbuddy/.env` | backend image tag (not secret) |
+| `API_HOST` | VPS `/opt/gymbuddy/.env` | `api.rukavina.app` (not secret) |
+| `DB_PASSWORD` | VPS `/opt/gymbuddy/.env` + password manager | Postgres `gymbuddy` role password |
+| `FIREBASE_CREDENTIALS_B64` | VPS `/opt/gymbuddy/.env` | as for Render |
 
 Render's `PORT=8080` is in `render.yaml`; it only tells Render which
 port the container listens on.
@@ -116,13 +152,5 @@ to the target server):
 
 ### Moving to a VPS
 
-1. Add a Caddy service to `compose.yaml` that proxies to `backend:8080`
-   and gets a certificate for `api.rukavina.app`.
-2. Put `DB_PASSWORD` and `FIREBASE_CREDENTIALS_B64` in `docker/.env`
-   on the server; `docker compose up -d --build`.
-3. Pause the Render service, take a fresh dump (manual workflow run),
-   restore it into the compose `db` with `restore.sh`.
-4. Repoint the `api.rukavina.app` DNS record to the VPS, check
-   `/v1/health`, then point `BACKUP_DATABASE_URL` at the new database.
-5. Delete the Render service and Neon project once the VPS has run a
-   few days with good backups.
+Plan 5 (ADR 0016) does this: "Server setup" and "Server stack" above,
+then the cutover checklist in Plan 5 step 05.

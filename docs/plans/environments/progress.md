@@ -2,7 +2,7 @@
 
 - [x] 01 ADR 0016: VPS hosting + environment split (7430654)
 - [x] 02 Server setup script (2d7d299)
-- [ ] 03 Server stack: compose, nginx, certbot
+- [x] 03 Server stack: compose, nginx, certbot (HASH)
 - [ ] 04 CI: image to GHCR, SSH deploy, backups
 - [ ] 05 (me) Buy VPS, cut over from Render + Neon
 - [ ] 06 Staging stack, Render removed (spec change)
@@ -18,6 +18,10 @@
   step didn't list: the script aborts if root has no SSH key (netcup's default
   is a root password; turning off password login would lock root out).
   Also installs `gnupg` and `openssh-server`.
+- 03: nginx tag is `1.30-alpine` (current stable), not `1.28-alpine`;
+  certbot pinned to `v5.10.0`. The server env file is `deploy`-owned
+  0600, not root-only; ADR 0016 and the overview reworded to match.
+  The step 02 setup.sh SHOULD-FIX items were done here.
 
 ## Gotchas
 
@@ -43,6 +47,19 @@
   Docker's Ubuntu repo, so before step 05 either pick the repo from
   `/etc/os-release` `ID` (and update ADR 0016) or reinstall Ubuntu
   24.04 in the netcup panel. Owner decides when we get there.
+- 03: nginx resolves `backend` once at startup. Replacing the backend
+  container (any deploy) gives it a new IP, so nginx 502s until its 6 h
+  reload. Step 04's deploy must run `docker compose exec nginx nginx -s
+  reload` after the swap, or switch the template to `resolver
+  127.0.0.11` + a variable `proxy_pass`; smoke-test a backend swap.
+- 03 reviewer NITs left open: init-cert.sh copies a quoted `API_HOST`
+  from the env file with its quotes; its nginx check misses a
+  restarting nginx that still holds port 80; `.env.example` should warn
+  that compose expands `$` in unquoted values and that
+  `POSTGRES_PASSWORD` only applies on a fresh volume.
+- 03: the smoke run used a fake service account (generated RSA key) and
+  a self-signed cert seeded into the letsencrypt volume at
+  `live/localhost/`; reuse that for later stack tests.
 - Step 05 checklist must include: change the root password (netcup
   mailed it), check the ED25519 host key fingerprint from the netcup
   email on first SSH, `ssh-copy-id root@<host>` before setup.sh. The

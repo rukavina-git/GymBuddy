@@ -41,7 +41,7 @@ uptime check, a second server.
 - Postgres and the backend port are never published to the internet;
   only nginx listens on 80/443. SSH by key only.
 - No secret in the repo. Secrets live in GitHub secrets and a
-  root-only env file on the server; `docker/README.md` lists each one.
+  deploy-only (0600) env file on the server; `docker/README.md` lists each one.
 - Prod data is never lost: the cutover keeps Neon until the owner
   deletes it; a backup is restored on the VPS as a test first.
 - `api/openapi.yaml`: only step 6 adds the staging server. Room schema,

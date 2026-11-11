@@ -32,8 +32,10 @@ export DEBIAN_FRONTEND=noninteractive
 
 log "packages"
 apt-get update -q
-apt-get upgrade -yq
-apt-get install -yq --no-install-recommends \
+# Keep existing conffiles so a changed default can't stop the run with a prompt.
+APT_OPTS=(-yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold)
+apt-get upgrade "${APT_OPTS[@]}"
+apt-get install "${APT_OPTS[@]}" --no-install-recommends \
   ufw unattended-upgrades ca-certificates curl gnupg openssh-server
 
 log "docker"
@@ -47,15 +49,19 @@ codename="$(. /etc/os-release && echo "$VERSION_CODENAME")"
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $codename stable" \
   > /etc/apt/sources.list.d/docker.list
 apt-get update -q
-apt-get install -yq docker-ce docker-ce-cli containerd.io docker-compose-plugin
+apt-get install "${APT_OPTS[@]}" docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
 install -d -m 0755 /etc/docker
-cat > /etc/docker/daemon.json <<'EOF'
-{
+daemon_json='{
   "log-driver": "json-file",
   "log-opts": { "max-size": "10m", "max-file": "3" }
-}
-EOF
+}'
+# Restarting Docker restarts the whole stack, so only do it on a change.
+docker_changed=0
+if [[ "$(cat /etc/docker/daemon.json 2>/dev/null)" != "$daemon_json" ]]; then
+  printf '%s\n' "$daemon_json" > /etc/docker/daemon.json
+  docker_changed=1
+fi
 
 log "deploy user: $DEPLOY_USER"
 if ! id "$DEPLOY_USER" >/dev/null 2>&1; then
@@ -95,10 +101,11 @@ if [[ "$SKIP_SYSTEMD" == "1" ]]; then
 fi
 
 log "services"
-systemctl reload ssh
+# Ubuntu 24.04 starts sshd via ssh.socket; reload-or-restart covers both.
+systemctl reload-or-restart ssh
 systemctl enable --now unattended-upgrades
 systemctl enable docker
-systemctl restart docker
+if [[ "$docker_changed" == "1" ]]; then systemctl restart docker; fi
 
 log "firewall"
 ufw default deny incoming
@@ -109,13 +116,16 @@ ufw allow 443/tcp
 ufw --force enable
 
 log "swap"
-if ! swapon --show --noheadings | grep -q .; then
-  fallocate -l 2G /swapfile
-  chmod 0600 /swapfile
-  mkswap /swapfile
-  swapon /swapfile
+# Only touch fstab for a swapfile this script made (now or on an earlier run).
+if [[ -f /swapfile ]] || ! swapon --show --noheadings | grep -q .; then
+  if [[ ! -f /swapfile ]]; then
+    fallocate -l 2G /swapfile
+    chmod 0600 /swapfile
+    mkswap /swapfile
+  fi
+  swapon --show=NAME --noheadings | grep -qx /swapfile || swapon /swapfile
+  grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
 fi
-grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
 echo 'vm.swappiness=10' > /etc/sysctl.d/99-gymbuddy.conf
 sysctl -q --system
 

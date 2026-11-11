@@ -48,8 +48,10 @@ come to about 1.3–1.4 GB.
   -Fc`, gpg AES256, encrypted artifact only) but reaches the database
   over SSH instead of a public connection string, one dump per
   environment database.
-- **Secrets** live in GitHub secrets and a root-only env file on the
-  server; `docker/README.md` lists each one. None in the repo.
+- **Secrets** live in GitHub secrets and an env file on the server
+  (owner `deploy`, mode 0600; `deploy` runs compose and is
+  root-equivalent through the `docker` group). `docker/README.md`
+  lists each one. None in the repo.
 - **DNS** stays at Cloudflare. The api records are DNS-only (grey
   cloud), so TLS ends on our nginx.
 
