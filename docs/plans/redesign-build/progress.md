@@ -29,7 +29,7 @@
 - [x] 11m Feedback: F25 stale workouts (steps/11m-stale-workouts.md) — f97be80
 - [x] 11n Feedback: F18 prefill sets from last session or template (steps/11n-prefill-sets.md) — a9f6b58
 - [x] 11o Feedback: F5 edge swipe back (steps/11o-edge-swipe-back.md) — built in 4c3684f, removed again: postponed to v2
-- [ ] 12 Device pass, CI green, PR develop → main (me)
+- [x] 12 Device pass, CI green, PR develop → main (me) — PR #7, merged 41821bf
 
 ## Deviations
 - 11o: Owner "go" covered the Figma waiver and the reading "in-app swipe only for 3-button nav".

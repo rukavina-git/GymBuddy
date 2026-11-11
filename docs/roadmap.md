@@ -98,7 +98,7 @@ roadmap-details.md §3.
 - [x] 7.9 Session detail
 - [x] 7.10 You + Settings (UI for 6.4, 6.5, 6.7)
 - [x] 7.11 Cross-flow states: error, offline, empty, sync
-- [ ] 7.12 (me) Device pass on the current backend, CI green, PR develop → main
+- [x] 7.12 (me) Device pass on the current backend, CI green, PR develop → main (PR #7)
 
 ## Plan 5: environments (test + prod), after Plan 7
 
