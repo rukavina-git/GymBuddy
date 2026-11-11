@@ -25,6 +25,10 @@ private val tabByRoute = NavTab.entries.associateBy { it.route }
 fun selectedTab(backStackRoutes: List<String?>): NavTab =
     backStackRoutes.asReversed().firstNotNullOfOrNull { tabByRoute[it] } ?: NavTab.Home
 
+/** F5: edge swipe back everywhere except tab roots and the workout (its set cards swipe right for Done). */
+fun edgeSwipeBackEnabled(route: String?): Boolean =
+    route != null && route !in tabByRoute && route != NavRoutes.ActiveWorkout
+
 /** The workout, its summary, template editor, exercise picker and Edit workout run full screen: no nav bar, no live bar. */
 fun isFullScreen(route: String?): Boolean =
     route == NavRoutes.ActiveWorkout || route == NavRoutes.WorkoutSummary ||

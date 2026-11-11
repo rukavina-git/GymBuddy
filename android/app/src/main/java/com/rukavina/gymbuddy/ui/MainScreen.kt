@@ -73,6 +73,8 @@ import androidx.navigation.NavType
 import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.ui.design.NavTab
 import com.rukavina.gymbuddy.ui.frame.AppFrame
+import com.rukavina.gymbuddy.ui.frame.EdgeSwipeBack
+import com.rukavina.gymbuddy.ui.frame.edgeSwipeBackEnabled
 import com.rukavina.gymbuddy.ui.frame.isFullScreen
 import com.rukavina.gymbuddy.ui.frame.navigateToTab
 import com.rukavina.gymbuddy.ui.frame.route
@@ -259,278 +261,280 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
         onLiveBarClick = openWorkout,
         snackbarHost = { SnackbarHost(snackbar) { AppSnackbar(it) } },
     ) { paddingValues ->
-        NavHost(
-            navController = bottomNavController,
-            startDestination = NavRoutes.Home,
-            modifier = Modifier.padding(paddingValues),
-            enterTransition = { if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward = true) },
-            exitTransition = { if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward = true) },
-            popEnterTransition = { if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward = false) },
-            popExitTransition = { if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward = false) },
-        ) {
-            composable(NavRoutes.Home) {
-                HomeScreen(
-                    workoutRunning = workoutRunning,
-                    onStartTemplate = startTemplate,
-                    onOpenTemplate = openTemplate,
-                    onAllTemplates = { bottomNavController.navigateToTab(NavTab.Workouts) },
-                    onOpenWeek = { bottomNavController.navigateToTab(NavTab.Progress) },
-                    workout = workoutState.toRunningWorkout(),
-                    onOpenWorkout = openWorkout,
-                    onEmptyWorkout = {
-                        if (!activeWorkoutViewModel.hasActiveWorkout()) {
-                            activeWorkoutViewModel.startEmptyWorkout(context.getString(R.string.workout_empty_title))
-                        }
-                        openWorkout()
-                    },
-                    unfinished = unfinished,
-                )
-            }
-            composable(NavRoutes.Workouts) {
-                WorkoutsScreen(
-                    onOpenTemplate = openTemplate,
-                    onNewTemplate = { bottomNavController.navigate(NavRoutes.templateEditor()) },
-                    onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
-                )
-            }
-            composable(
-                route = NavRoutes.TemplatePage,
-                arguments = listOf(
-                    navArgument(TemplatePageViewModel.ARG_TEMPLATE_ID) { type = NavType.StringType },
-                ),
-            ) { entry ->
-                TemplatePageScreen(
-                    workoutRunning = workoutRunning,
-                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
-                    onStart = startTemplate,
-                    onEdit = { id -> bottomNavController.navigate(NavRoutes.templateEditor(id)) },
-                    // A copy replaces this page; a starter's pencil copy then opens its editor on top.
-                    onOpenCopy = { id, edit ->
-                        bottomNavController.navigate(NavRoutes.templatePage(id)) {
-                            popUpTo(entry.destination.id) { inclusive = true }
-                        }
-                        if (edit) bottomNavController.navigate(NavRoutes.templateEditor(id))
-                    },
-                    onDeleted = { id, title ->
-                        bottomNavController.popBackStack(entry.destination.id, inclusive = true)
-                        offerUndoDelete(id, title)
-                    },
-                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
-                )
-            }
-            composable(
-                route = NavRoutes.TemplateEditor,
-                arguments = listOf(
-                    navArgument(TemplateEditorViewModel.ARG_TEMPLATE_ID) {
-                        type = NavType.StringType; nullable = true; defaultValue = null
-                    },
-                ),
-            ) { entry ->
-                val picked by entry.savedStateHandle
-                    .getStateFlow<ArrayList<String>?>(ExercisePickerViewModel.RESULT_PICKED, null)
-                    .collectAsState()
-                TemplateEditorScreen(
-                    onClose = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
-                    onAddExercises = { ids -> bottomNavController.navigate(NavRoutes.exercisePicker(ids)) },
-                    picked = picked,
-                    onPickedHandled = { entry.savedStateHandle[ExercisePickerViewModel.RESULT_PICKED] = null },
-                )
-            }
-            composable(
-                route = NavRoutes.ExercisePicker,
-                arguments = listOf(
-                    navArgument(ExercisePickerViewModel.ARG_IN_TEMPLATE) { type = NavType.StringType; defaultValue = "" },
-                ),
-            ) { entry ->
-                ExercisePickerScreen(
-                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
-                    onAdd = { ids ->
-                        bottomNavController.previousBackStackEntry?.savedStateHandle
-                            ?.set(ExercisePickerViewModel.RESULT_PICKED, ArrayList(ids))
-                        bottomNavController.popBackStack(entry.destination.id, inclusive = true)
-                    },
-                )
-            }
-            composable(NavRoutes.Exercises) {
-                ExercisesScreen(
-                    onOpen = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id)) },
-                    onNew = { bottomNavController.navigate(NavRoutes.exerciseEdit()) },
-                    onHidden = { bottomNavController.navigate(NavRoutes.HiddenExercises) },
-                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
-                )
-            }
-            composable(
-                route = NavRoutes.ExercisePage,
-                arguments = listOf(
-                    navArgument(ExercisePageViewModel.ARG_EXERCISE_ID) { type = NavType.StringType },
-                    navArgument(ExercisePageViewModel.ARG_AT_PROGRESS) { type = NavType.BoolType; defaultValue = false },
-                ),
-            ) { entry ->
-                val pageExerciseId = entry.arguments?.getString(ExercisePageViewModel.ARG_EXERCISE_ID)
-                ExercisePageScreen(
-                    onOpenSession = { id -> bottomNavController.navigate(NavRoutes.sessionDetail(id, pageExerciseId)) },
-                    onAllSessions = { id -> bottomNavController.navigate(NavRoutes.allSessions(id)) },
-                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
-                    onEdit = { id -> bottomNavController.navigate(NavRoutes.exerciseEdit(id)) },
-                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
-                )
-            }
-            composable(
-                route = NavRoutes.ExerciseEdit,
-                arguments = listOf(
-                    navArgument(ExerciseEditViewModel.ARG_EXERCISE_ID) {
-                        type = NavType.StringType; nullable = true; defaultValue = null
-                    },
-                ),
-            ) { entry ->
-                ExerciseEditScreen(
-                    onClose = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
-                    // A new exercise opens its page in the editor's place; an edit goes back to the page.
-                    onSaved = { id, isNew ->
-                        if (isNew) {
-                            bottomNavController.navigate(NavRoutes.exercisePage(id)) {
+        EdgeSwipeBack(enabled = edgeSwipeBackEnabled(currentRoute)) {
+            NavHost(
+                navController = bottomNavController,
+                startDestination = NavRoutes.Home,
+                modifier = Modifier.padding(paddingValues),
+                enterTransition = { if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward = true) },
+                exitTransition = { if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward = true) },
+                popEnterTransition = { if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward = false) },
+                popExitTransition = { if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward = false) },
+            ) {
+                composable(NavRoutes.Home) {
+                    HomeScreen(
+                        workoutRunning = workoutRunning,
+                        onStartTemplate = startTemplate,
+                        onOpenTemplate = openTemplate,
+                        onAllTemplates = { bottomNavController.navigateToTab(NavTab.Workouts) },
+                        onOpenWeek = { bottomNavController.navigateToTab(NavTab.Progress) },
+                        workout = workoutState.toRunningWorkout(),
+                        onOpenWorkout = openWorkout,
+                        onEmptyWorkout = {
+                            if (!activeWorkoutViewModel.hasActiveWorkout()) {
+                                activeWorkoutViewModel.startEmptyWorkout(context.getString(R.string.workout_empty_title))
+                            }
+                            openWorkout()
+                        },
+                        unfinished = unfinished,
+                    )
+                }
+                composable(NavRoutes.Workouts) {
+                    WorkoutsScreen(
+                        onOpenTemplate = openTemplate,
+                        onNewTemplate = { bottomNavController.navigate(NavRoutes.templateEditor()) },
+                        onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
+                    )
+                }
+                composable(
+                    route = NavRoutes.TemplatePage,
+                    arguments = listOf(
+                        navArgument(TemplatePageViewModel.ARG_TEMPLATE_ID) { type = NavType.StringType },
+                    ),
+                ) { entry ->
+                    TemplatePageScreen(
+                        workoutRunning = workoutRunning,
+                        onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                        onStart = startTemplate,
+                        onEdit = { id -> bottomNavController.navigate(NavRoutes.templateEditor(id)) },
+                        // A copy replaces this page; a starter's pencil copy then opens its editor on top.
+                        onOpenCopy = { id, edit ->
+                            bottomNavController.navigate(NavRoutes.templatePage(id)) {
                                 popUpTo(entry.destination.id) { inclusive = true }
                             }
-                        } else {
+                            if (edit) bottomNavController.navigate(NavRoutes.templateEditor(id))
+                        },
+                        onDeleted = { id, title ->
                             bottomNavController.popBackStack(entry.destination.id, inclusive = true)
-                        }
-                    },
-                    onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
-                )
-            }
-            composable(NavRoutes.Progress) {
-                ProgressScreen(
-                    onOpenLift = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id, atProgress = true)) },
-                    onOpenSession = openSession,
-                    onAllSessions = { bottomNavController.navigate(NavRoutes.allSessions()) },
-                    onStartWorkout = { bottomNavController.navigateToTab(NavTab.Workouts) },
-                )
-            }
-            composable(
-                route = NavRoutes.AllSessions,
-                arguments = listOf(
-                    navArgument(AllSessionsViewModel.ARG_EXERCISE_ID) {
-                        type = NavType.StringType; nullable = true; defaultValue = null
-                    },
-                ),
-            ) { entry ->
-                AllSessionsScreen(
-                    onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
-                    onOpenSession = openSession,
-                )
-            }
-            composable(
-                route = NavRoutes.SessionDetail,
-                arguments = listOf(
-                    navArgument(SessionDetailViewModel.ARG_SESSION_ID) { type = NavType.StringType },
-                    navArgument(SessionDetailViewModel.ARG_EXERCISE_ID) {
-                        type = NavType.StringType; nullable = true; defaultValue = null
-                    },
-                ),
-            ) { entry ->
-                // Pop only this entry, and only while it is on top (a gone session and Delete both leave).
-                val leave = { if (bottomNavController.currentBackStackEntry == entry) bottomNavController.popBackStack() }
-                SessionDetailScreen(
-                    workoutRunning = workoutRunning,
-                    onBack = { leave() },
-                    onOpenExercise = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id)) },
-                    onStartAgain = startTemplate,
-                    onEdit = { id -> bottomNavController.navigate(NavRoutes.sessionEdit(id)) },
-                    onDelete = { id, title -> leave(); offerUndoSessionDelete(id, title) },
-                )
-            }
-            composable(
-                route = NavRoutes.SessionEdit,
-                arguments = listOf(navArgument(SessionDetailViewModel.ARG_SESSION_ID) { type = NavType.StringType }),
-            ) { entry ->
-                SessionEditScreen(
-                    onClose = { if (bottomNavController.currentBackStackEntry == entry) bottomNavController.popBackStack() },
-                )
-            }
-            composable(NavRoutes.You) {
-                YouScreen(
-                    YouNav(
-                        onProfile = { bottomNavController.navigate(NavRoutes.Profile) },
-                        onCreateAccount = { rootNavController.navigate(NavRoutes.createAccount(CreateFrom.SETTINGS)) },
-                        onSignIn = { rootNavController.navigate(NavRoutes.signIn()) },
-                        onHiddenExercises = { bottomNavController.navigate(NavRoutes.HiddenExercises) },
-                        onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
-                        onAbout = { bottomNavController.navigate(NavRoutes.About) },
-                        onDeleteAccount = { bottomNavController.navigate(NavRoutes.DeleteAccount) { launchSingleTop = true } },
-                        onLeft = { rootNavController.openWelcome() },
-                    ),
-                )
-            }
-
-            composable(NavRoutes.DeleteAccount) {
-                DeleteAccountScreen(
-                    onBack = { bottomNavController.popBackStack() },
-                    onLeft = { rootNavController.openWelcome() },
-                )
-            }
-            composable(NavRoutes.About) {
-                AboutScreen(
-                    onBack = { bottomNavController.popBackStack() },
-                    onSyncDebug = { bottomNavController.navigate(NavRoutes.SyncDebug) },
-                )
-            }
-            composable(NavRoutes.Profile) {
-                ProfileScreen(
-                    onBack = { bottomNavController.popBackStack() },
-                    onBodyWeight = { bottomNavController.navigate(NavRoutes.BodyWeight) },
-                )
-            }
-
-            composable(NavRoutes.BodyWeight) {
-                BodyWeightScreen(onBack = { bottomNavController.popBackStack() })
-            }
-
-            composable(NavRoutes.HiddenExercises) {
-                HiddenExercisesScreen(onBack = { bottomNavController.popBackStack() })
-            }
-
-            composable(NavRoutes.HiddenTemplates) {
-                HiddenTemplatesScreen(onBack = { bottomNavController.popBackStack() })
-            }
-            if (BuildConfig.DEBUG) {
-                composable(NavRoutes.SyncDebug) {
-                    SyncDebugScreen(navController = bottomNavController)
+                            offerUndoDelete(id, title)
+                        },
+                        onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                    )
                 }
-            }
+                composable(
+                    route = NavRoutes.TemplateEditor,
+                    arguments = listOf(
+                        navArgument(TemplateEditorViewModel.ARG_TEMPLATE_ID) {
+                            type = NavType.StringType; nullable = true; defaultValue = null
+                        },
+                    ),
+                ) { entry ->
+                    val picked by entry.savedStateHandle
+                        .getStateFlow<ArrayList<String>?>(ExercisePickerViewModel.RESULT_PICKED, null)
+                        .collectAsState()
+                    TemplateEditorScreen(
+                        onClose = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                        onAddExercises = { ids -> bottomNavController.navigate(NavRoutes.exercisePicker(ids)) },
+                        picked = picked,
+                        onPickedHandled = { entry.savedStateHandle[ExercisePickerViewModel.RESULT_PICKED] = null },
+                    )
+                }
+                composable(
+                    route = NavRoutes.ExercisePicker,
+                    arguments = listOf(
+                        navArgument(ExercisePickerViewModel.ARG_IN_TEMPLATE) { type = NavType.StringType; defaultValue = "" },
+                    ),
+                ) { entry ->
+                    ExercisePickerScreen(
+                        onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                        onAdd = { ids ->
+                            bottomNavController.previousBackStackEntry?.savedStateHandle
+                                ?.set(ExercisePickerViewModel.RESULT_PICKED, ArrayList(ids))
+                            bottomNavController.popBackStack(entry.destination.id, inclusive = true)
+                        },
+                    )
+                }
+                composable(NavRoutes.Exercises) {
+                    ExercisesScreen(
+                        onOpen = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id)) },
+                        onNew = { bottomNavController.navigate(NavRoutes.exerciseEdit()) },
+                        onHidden = { bottomNavController.navigate(NavRoutes.HiddenExercises) },
+                        onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                    )
+                }
+                composable(
+                    route = NavRoutes.ExercisePage,
+                    arguments = listOf(
+                        navArgument(ExercisePageViewModel.ARG_EXERCISE_ID) { type = NavType.StringType },
+                        navArgument(ExercisePageViewModel.ARG_AT_PROGRESS) { type = NavType.BoolType; defaultValue = false },
+                    ),
+                ) { entry ->
+                    val pageExerciseId = entry.arguments?.getString(ExercisePageViewModel.ARG_EXERCISE_ID)
+                    ExercisePageScreen(
+                        onOpenSession = { id -> bottomNavController.navigate(NavRoutes.sessionDetail(id, pageExerciseId)) },
+                        onAllSessions = { id -> bottomNavController.navigate(NavRoutes.allSessions(id)) },
+                        onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                        onEdit = { id -> bottomNavController.navigate(NavRoutes.exerciseEdit(id)) },
+                        onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                    )
+                }
+                composable(
+                    route = NavRoutes.ExerciseEdit,
+                    arguments = listOf(
+                        navArgument(ExerciseEditViewModel.ARG_EXERCISE_ID) {
+                            type = NavType.StringType; nullable = true; defaultValue = null
+                        },
+                    ),
+                ) { entry ->
+                    ExerciseEditScreen(
+                        onClose = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                        // A new exercise opens its page in the editor's place; an edit goes back to the page.
+                        onSaved = { id, isNew ->
+                            if (isNew) {
+                                bottomNavController.navigate(NavRoutes.exercisePage(id)) {
+                                    popUpTo(entry.destination.id) { inclusive = true }
+                                }
+                            } else {
+                                bottomNavController.popBackStack(entry.destination.id, inclusive = true)
+                            }
+                        },
+                        onMessage = { message -> scope.launch { snackbar.showSnackbar(message) } },
+                    )
+                }
+                composable(NavRoutes.Progress) {
+                    ProgressScreen(
+                        onOpenLift = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id, atProgress = true)) },
+                        onOpenSession = openSession,
+                        onAllSessions = { bottomNavController.navigate(NavRoutes.allSessions()) },
+                        onStartWorkout = { bottomNavController.navigateToTab(NavTab.Workouts) },
+                    )
+                }
+                composable(
+                    route = NavRoutes.AllSessions,
+                    arguments = listOf(
+                        navArgument(AllSessionsViewModel.ARG_EXERCISE_ID) {
+                            type = NavType.StringType; nullable = true; defaultValue = null
+                        },
+                    ),
+                ) { entry ->
+                    AllSessionsScreen(
+                        onBack = { bottomNavController.popBackStack(entry.destination.id, inclusive = true) },
+                        onOpenSession = openSession,
+                    )
+                }
+                composable(
+                    route = NavRoutes.SessionDetail,
+                    arguments = listOf(
+                        navArgument(SessionDetailViewModel.ARG_SESSION_ID) { type = NavType.StringType },
+                        navArgument(SessionDetailViewModel.ARG_EXERCISE_ID) {
+                            type = NavType.StringType; nullable = true; defaultValue = null
+                        },
+                    ),
+                ) { entry ->
+                    // Pop only this entry, and only while it is on top (a gone session and Delete both leave).
+                    val leave = { if (bottomNavController.currentBackStackEntry == entry) bottomNavController.popBackStack() }
+                    SessionDetailScreen(
+                        workoutRunning = workoutRunning,
+                        onBack = { leave() },
+                        onOpenExercise = { id -> bottomNavController.navigate(NavRoutes.exercisePage(id)) },
+                        onStartAgain = startTemplate,
+                        onEdit = { id -> bottomNavController.navigate(NavRoutes.sessionEdit(id)) },
+                        onDelete = { id, title -> leave(); offerUndoSessionDelete(id, title) },
+                    )
+                }
+                composable(
+                    route = NavRoutes.SessionEdit,
+                    arguments = listOf(navArgument(SessionDetailViewModel.ARG_SESSION_ID) { type = NavType.StringType }),
+                ) { entry ->
+                    SessionEditScreen(
+                        onClose = { if (bottomNavController.currentBackStackEntry == entry) bottomNavController.popBackStack() },
+                    )
+                }
+                composable(NavRoutes.You) {
+                    YouScreen(
+                        YouNav(
+                            onProfile = { bottomNavController.navigate(NavRoutes.Profile) },
+                            onCreateAccount = { rootNavController.navigate(NavRoutes.createAccount(CreateFrom.SETTINGS)) },
+                            onSignIn = { rootNavController.navigate(NavRoutes.signIn()) },
+                            onHiddenExercises = { bottomNavController.navigate(NavRoutes.HiddenExercises) },
+                            onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
+                            onAbout = { bottomNavController.navigate(NavRoutes.About) },
+                            onDeleteAccount = { bottomNavController.navigate(NavRoutes.DeleteAccount) { launchSingleTop = true } },
+                            onLeft = { rootNavController.openWelcome() },
+                        ),
+                    )
+                }
 
-            // ⌄ / Back shrink the workout into the live bar; the bar grows it back (motion.md #10).
-            composable(
-                NavRoutes.ActiveWorkout,
-                enterTransition = { growFromLiveBar },
-                popExitTransition = { collapseIntoLiveBar },
-            ) { entry ->
-                val picked by entry.savedStateHandle
-                    .getStateFlow<ArrayList<String>?>(ExercisePickerViewModel.RESULT_PICKED, null)
-                    .collectAsState()
-                ActiveWorkoutScreen(
-                    viewModel = activeWorkoutViewModel,
-                    onAddExercises = { ids -> bottomNavController.navigate(NavRoutes.exercisePicker(ids)) },
-                    picked = picked,
-                    onPickedHandled = { entry.savedStateHandle[ExercisePickerViewModel.RESULT_PICKED] = null },
-                    onCollapse = { bottomNavController.popBackStack(NavRoutes.ActiveWorkout, inclusive = true) },
-                    onSaved = {
-                        bottomNavController.navigate(NavRoutes.WorkoutSummary) {
-                            popUpTo(NavRoutes.ActiveWorkout) { inclusive = true }
-                        }
-                    },
-                    onDiscarded = leaveWorkout,
-                )
-            }
-            composable(NavRoutes.WorkoutSummary) {
-                WorkoutSummaryScreen(
-                    viewModel = activeWorkoutViewModel,
-                    onDone = leaveWorkout,
-                    onCreateAccount = { rootNavController.navigate(NavRoutes.createAccount(CreateFrom.SETTINGS)) },
-                    onEditTemplate = { id ->
-                        leaveWorkout()
-                        bottomNavController.navigate(NavRoutes.templateEditor(id))
-                    },
-                )
+                composable(NavRoutes.DeleteAccount) {
+                    DeleteAccountScreen(
+                        onBack = { bottomNavController.popBackStack() },
+                        onLeft = { rootNavController.openWelcome() },
+                    )
+                }
+                composable(NavRoutes.About) {
+                    AboutScreen(
+                        onBack = { bottomNavController.popBackStack() },
+                        onSyncDebug = { bottomNavController.navigate(NavRoutes.SyncDebug) },
+                    )
+                }
+                composable(NavRoutes.Profile) {
+                    ProfileScreen(
+                        onBack = { bottomNavController.popBackStack() },
+                        onBodyWeight = { bottomNavController.navigate(NavRoutes.BodyWeight) },
+                    )
+                }
+
+                composable(NavRoutes.BodyWeight) {
+                    BodyWeightScreen(onBack = { bottomNavController.popBackStack() })
+                }
+
+                composable(NavRoutes.HiddenExercises) {
+                    HiddenExercisesScreen(onBack = { bottomNavController.popBackStack() })
+                }
+
+                composable(NavRoutes.HiddenTemplates) {
+                    HiddenTemplatesScreen(onBack = { bottomNavController.popBackStack() })
+                }
+                if (BuildConfig.DEBUG) {
+                    composable(NavRoutes.SyncDebug) {
+                        SyncDebugScreen(navController = bottomNavController)
+                    }
+                }
+
+                // ⌄ / Back shrink the workout into the live bar; the bar grows it back (motion.md #10).
+                composable(
+                    NavRoutes.ActiveWorkout,
+                    enterTransition = { growFromLiveBar },
+                    popExitTransition = { collapseIntoLiveBar },
+                ) { entry ->
+                    val picked by entry.savedStateHandle
+                        .getStateFlow<ArrayList<String>?>(ExercisePickerViewModel.RESULT_PICKED, null)
+                        .collectAsState()
+                    ActiveWorkoutScreen(
+                        viewModel = activeWorkoutViewModel,
+                        onAddExercises = { ids -> bottomNavController.navigate(NavRoutes.exercisePicker(ids)) },
+                        picked = picked,
+                        onPickedHandled = { entry.savedStateHandle[ExercisePickerViewModel.RESULT_PICKED] = null },
+                        onCollapse = { bottomNavController.popBackStack(NavRoutes.ActiveWorkout, inclusive = true) },
+                        onSaved = {
+                            bottomNavController.navigate(NavRoutes.WorkoutSummary) {
+                                popUpTo(NavRoutes.ActiveWorkout) { inclusive = true }
+                            }
+                        },
+                        onDiscarded = leaveWorkout,
+                    )
+                }
+                composable(NavRoutes.WorkoutSummary) {
+                    WorkoutSummaryScreen(
+                        viewModel = activeWorkoutViewModel,
+                        onDone = leaveWorkout,
+                        onCreateAccount = { rootNavController.navigate(NavRoutes.createAccount(CreateFrom.SETTINGS)) },
+                        onEditTemplate = { id ->
+                            leaveWorkout()
+                            bottomNavController.navigate(NavRoutes.templateEditor(id))
+                        },
+                    )
+                }
             }
         }
     }
