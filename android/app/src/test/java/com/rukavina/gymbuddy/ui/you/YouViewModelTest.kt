@@ -18,6 +18,7 @@ import android.net.Uri
 import com.rukavina.gymbuddy.data.repository.UserProfileRepository
 import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
 import com.rukavina.gymbuddy.data.sync.FakeAuthSession
+import com.rukavina.gymbuddy.domain.model.PreferredUnits
 import com.rukavina.gymbuddy.data.sync.LogoutCoordinator
 import com.rukavina.gymbuddy.data.sync.OutboxRecorder
 import com.rukavina.gymbuddy.data.sync.SyncFixtures
@@ -84,6 +85,8 @@ class YouViewModelTest {
     fun tearDown() = db.close()
 
     private var online = true
+    private var syncCycles = 0
+    private lateinit var prefs: AppPreferencesRepository
 
     private fun buildViewModel(
         coordinator: LogoutCoordinator = LogoutCoordinator(store, { true }, auth, direct),
@@ -99,12 +102,12 @@ class YouViewModelTest {
             guestMerge = GuestMerge(holder),
             preferences = AppPreferencesRepository(
                 PreferenceDataStoreFactory.create(produceFile = { java.io.File.createTempFile("prefs", ".preferences_pb").also { it.delete() } })
-            ),
+            ).also { prefs = it },
             dataExporter = DataExporter(holder, "test", clock),
             exercises = ExerciseRepositoryImpl(holder, recorder, clock),
             templates = WorkoutTemplateRepositoryImpl(holder, recorder, clock),
             store = store,
-            scheduler = SyncScheduler({}, { 0 }, { false }, CoroutineScope(Dispatchers.Unconfined)),
+            scheduler = SyncScheduler({ syncCycles++ }, { 0 }, { true }, CoroutineScope(Dispatchers.Unconfined)),
             onlineCheck = object : OnlineCheck(org.robolectric.RuntimeEnvironment.getApplication()) {
                 override fun isOnline() = online
             },
@@ -145,6 +148,24 @@ class YouViewModelTest {
 
         assertEquals(LogoutUiState.UnsyncedWarning(listOf("1 custom exercise")), vm.awaitSettled())
         assertEquals(0, auth.signOuts)
+    }
+
+    @Test
+    fun `units and rest buzz are saved`() = runBlocking {
+        val vm = buildViewModel()
+        vm.setUnits(PreferredUnits.IMPERIAL)
+        vm.setRestBuzz(true)
+        withTimeout(5_000) { prefs.preferredUnits.first { it == PreferredUnits.IMPERIAL } }
+        withTimeout(5_000) { prefs.restBuzz.first { it } }
+        Unit
+    }
+
+    @Test
+    fun `retry backup asks for a manual sync`() {
+        val vm = buildViewModel()
+        val before = syncCycles
+        vm.retryBackup()
+        assertEquals(before + 1, syncCycles)
     }
 
     @Test
