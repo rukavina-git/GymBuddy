@@ -102,7 +102,7 @@ roadmap-details.md §3.
 
 ## Plan 5: environments (VPS, then staging + prod)
 
-- [ ] 5.1 ADR 0016: VPS hosting (netcup, nginx) + environment split
+- [x] 5.1 ADR 0016: VPS hosting (netcup, nginx) + environment split
 - [ ] 5.2 Server setup script (hardening, Docker, swap)
 - [ ] 5.3 Server stack: compose, nginx, certbot
 - [ ] 5.4 CI: image to GHCR, SSH deploy, backups on the VPS

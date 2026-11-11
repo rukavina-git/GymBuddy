@@ -322,6 +322,10 @@ owner's company uses it. Plan: `docs/plans/environments`.
 
 ## 4. Hosting
 
+**Current choice: self-hosted VPS, see [ADR 0016](adr/0016-vps-hosting-and-environments.md)
+(owner, 2026-11-11).** The text below is the original Render + Neon
+choice, kept as history.
+
 Goal for now: free, easy to set up, easy to leave. Later: paid
 hosting of my own (e.g. DigitalOcean).
 
