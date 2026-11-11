@@ -62,9 +62,12 @@ come to about 1.3–1.4 GB.
 | Let's Encrypt certificates | free, no use restrictions |
 | PostgreSQL | PostgreSQL Licence (BSD-style) |
 | Docker Engine | Apache 2.0 |
+| Docker Compose | Apache 2.0 |
+| ufw | GPL-3.0, server only |
+| unattended-upgrades | GPL-2.0, server only |
 | Ubuntu | free to use; components under OSS licences |
 
-We only run these tools and don't ship them in the app, so their
+We only run these tools on the server and never ship them in the app, so their
 licences put no conditions on selling the app.
 
 ## Consequences

@@ -18,6 +18,28 @@ Two services:
 No Caddy yet - Render terminates TLS (see Hosting). It earns its place
 when the backend moves to a VPS.
 
+## Server setup
+
+`docker/server/setup.sh` hardens a fresh Ubuntu 24.04 VPS (ADR 0016).
+Run it once as root; running it again is safe.
+
+    ssh-copy-id root@<host>     # the script refuses to run without a root key
+    scp docker/server/setup.sh root@<host>:
+    ssh root@<host> 'DEPLOY_PUBKEY="$(cat)" bash setup.sh' < ~/.ssh/id_ed25519.pub
+
+It installs Docker + Compose (Docker's apt repo), ufw (deny incoming
+except 22/80/443), unattended-upgrades (security only, no auto-reboot),
+2 GB swap (`vm.swappiness=10`) and Docker log rotation (10 MB × 3). It
+creates a `deploy` user (key only, no password, no sudo, in `docker`)
+and turns off SSH password login. Root keeps key login.
+
+Keep the root session open until `ssh deploy@<host> docker ps` works
+from a second terminal.
+
+Docker writes its own iptables rules, so a port published in compose
+bypasses ufw. Never publish Postgres or the backend; only nginx gets
+80/443.
+
 ## Hosting
 
 Render free web service (Docker, Frankfurt) running `backend/Dockerfile`,
