@@ -109,10 +109,11 @@ roadmap-details.md §3.
 - [x] 5.5 (me) Buy VPS, cut over from Render + Neon
 - [x] 5.6 Test stack on the same box (spec change)
 - [x] 5.7 Android: `qa` / `prod` flavors (app "GymBuddy Test"); CI builds both
-- [ ] 5.8 (me) Test Firebase, DNS, secrets, CI green, PR develop → main
+- [x] 5.8 (me) Test Firebase, DNS, secrets, CI green, PR develop → main
 
 ## Plan 8: delivery (CI/CD + fastlane)
 
+- [ ] 8.0 Deploy secrets into GitHub environments, prod gated (do first)
 - [ ] 8.1 CI gates: Android Lint, SonarQube (Q-E). OWASP is 10.0
 - [ ] 8.2 Signed release AAB on a `v*` tag, versionCode from the tag
 - [ ] 8.3 fastlane: test build to testers, prod AAB to the Play

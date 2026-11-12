@@ -7,7 +7,7 @@
 - [x] 05 (me) Buy VPS, cut over from Render + Neon (e693e39, b6ac3fb)
 - [x] 06 Test stack (spec change; Render removed in 05) (5e67a4f)
 - [x] 07 Android qa / prod flavors (b009b36)
-- [ ] 08 (me) Test Firebase, DNS, secrets, CI green, PR develop → main
+- [x] 08 (me) Test Firebase, DNS, secrets, CI green, PR develop → main (PR #8)
 
 ## Deviations
 
@@ -71,6 +71,15 @@
   (planned for 08) and relabelled the prod one `gymbuddy-prod`.
   Claude's hook blocks shell commands naming google-services.json, so
   the owner moved the prod file to `src/prod/` by hand.
+- 08: Firebase test project, `GOOGLE_SERVICES_JSON_QA` and green CI
+  were already done in 07; the step file's items 1–4 were only
+  checked. Test env file written on the box (Firebase key stored as
+  JSON in Bitwarden, converted with `base64 -w0`). Both Deploy runs
+  used `sha-f3050fe`; backup run by hand from main green. Phone check:
+  qa app synced; DB counts prod 1 user / 1 workout, test 1 / 3. Not
+  done: UptimeRobot monitor for api-test (optional). Extra, not in
+  the step: Play Store icon (80ddaf6), `docs/infrastructure.md`
+  (public, no host details) and a private infra PDF in ~/Documents.
 
 ## Gotchas
 
@@ -177,3 +186,9 @@
 - 07 reviewer NITs left: build-apk could `mkdir -p app/src/qa` too
   (now relies on strings.xml); the old root-level ignore line is kept
   (harmless, the plugin doesn't look there).
+- 08 for Plan 8: `DEPLOY_*` are still repo secrets and the `prod`
+  environment has no reviewer, so any workflow can deploy prod. Move
+  them into the environments before auto-deploy (8.4). Scheduled
+  workflows (backup) run from main: changes to them only take
+  effect after a develop → main PR. The owner's SSH key is on the Mac
+  only; on Windows SSH fails with "Permission denied (publickey)".

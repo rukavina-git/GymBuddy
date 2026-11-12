@@ -4,7 +4,9 @@ name: Deploy backend
 # docker/server/deploy.sh over SSH as the deploy user; that script
 # checks health and rolls back on failure. Auto-deploy: Plan 8.4.
 # target picks the stack: prod in /opt/gymbuddy, test in
-# /opt/gymbuddy-test (same box, same deploy key).
+# /opt/gymbuddy-test (same box, same deploy key). DEPLOY_* are
+# environment secrets: prod needs the owner's approval and runs only
+# from main or a v* tag; test runs from develop or main.
 
 on:
   workflow_dispatch:
@@ -46,7 +48,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_SSH_KEY" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
-            echo "::error::DEPLOY_HOST, DEPLOY_SSH_KEY and DEPLOY_KNOWN_HOSTS must be set (repo secrets)"
+            echo "::error::DEPLOY_HOST, DEPLOY_SSH_KEY and DEPLOY_KNOWN_HOSTS must be set (environment secrets of $TARGET)"
             exit 1
           fi
           case "$TARGET" in
