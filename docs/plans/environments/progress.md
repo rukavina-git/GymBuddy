@@ -3,7 +3,7 @@
 - [x] 01 ADR 0016: VPS hosting + environment split (7430654)
 - [x] 02 Server setup script (2d7d299)
 - [x] 03 Server stack: compose, nginx, certbot (2be942d)
-- [x] 04 CI: image to GHCR, SSH deploy, backups (HASH)
+- [x] 04 CI: image to GHCR, SSH deploy, backups (d66f4a4)
 - [ ] 05 (me) Buy VPS, cut over from Render + Neon
 - [ ] 06 Staging stack, Render removed (spec change)
 - [ ] 07 Android staging / prod flavors
