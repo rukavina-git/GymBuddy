@@ -1,7 +1,7 @@
 # Progress
 
 - [x] 00 Deploy secrets into environments, prod gated (0aa3afe, PR #9)
-- [x] 01 CI gates: Android Lint, SonarQube (Q-E) (HASH)
+- [x] 01 CI gates: Android Lint, SonarQube (Q-E) (b36a470)
 - [ ] 02 Signed release AAB on a `v*` tag
 - [ ] 03 fastlane: testers, Play internal, store listing
 - [ ] 04 Backend CD: develop → test, `v*` → prod
