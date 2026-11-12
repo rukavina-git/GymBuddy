@@ -20,7 +20,8 @@ when the backend moves to a VPS.
 
 ## Server setup
 
-`docker/server/setup.sh` hardens a fresh Ubuntu 24.04 VPS (ADR 0016).
+`docker/server/setup.sh` hardens a fresh Debian 13 or Ubuntu 24.04
+VPS (ADR 0016); it refuses other distros.
 Run it once as root; running it again is safe.
 
     ssh-copy-id root@<host>     # the script refuses to run without a root key

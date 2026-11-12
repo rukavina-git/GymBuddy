@@ -31,6 +31,12 @@
   PATH shim for `docker pull` (images exist only locally) and gpg in a
   `postgres:17` container (no gpg on the Mac).
 
+- 05 (prep, not ticked): owner chose option A (keep Debian 13).
+  setup.sh picks Docker's repo from `/etc/os-release` `ID` (debian or
+  ubuntu, others refused); README and ADR 0016 updated. Tested with
+  SKIP_SYSTEMD=1 in debian:13 and ubuntu:24.04 (fedora:41 refused).
+  The checklist itself is still open; the owner runs it with Claude.
+
 ## Gotchas
 
 - 01: Postgres is not public, so the nightly backup (step 04) must run
@@ -84,3 +90,15 @@
   The VPS restore streams the dump into `pg_restore` via stdin
   (untested that way; restore.sh from a file was tested). Backups
   produce a pipe-made custom dump: don't restore it with `-j`.
+- 05 reviewer items left open for the checklist run: (a) step 8 runs
+  `init-cert.sh` twice (staging CA, then real) but it passes
+  `--keep-until-expiring`, so the staging cert may stay; check the
+  issuer or delete the staging lineage first. (b) Debian's default
+  unattended-upgrades also applies point releases, so README's
+  "security only" is wrong there; fix the doc or limit origins.
+  NITs: `chown deploy:deploy /opt/gymbuddy` (path missing in step 6
+  and README); scan `DEPLOY_KNOWN_HOSTS` with the same name/IP as
+  `DEPLOY_HOST`; the `api` record is likely a CNAME to Render: replace
+  with A, no stray AAAA (rollback re-creates the CNAME); step 7 row
+  counts are compared to the dump, not live Neon; setup.sh header
+  example uses `sudo` (Debian minimal has none).

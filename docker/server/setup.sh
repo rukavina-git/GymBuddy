@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Hardens a fresh Ubuntu 24.04 box for GymBuddy (ADR 0016).
+# Hardens a fresh Debian 13 or Ubuntu 24.04 box for GymBuddy (ADR 0016).
 # Run as root, once; running it again is safe.
 #
 #   sudo DEPLOY_PUBKEY="ssh-ed25519 AAAA... you@laptop" bash setup.sh
@@ -28,6 +28,14 @@ if [[ ! -s /root/.ssh/authorized_keys ]]; then
   log "warning: root has no SSH key (allowed only with SKIP_SYSTEMD=1)"
 fi
 
+# Docker's apt repo is per distro; only these two are tested.
+# shellcheck source=/dev/null
+os_id="$(. /etc/os-release && echo "$ID")"
+case "$os_id" in
+  debian|ubuntu) ;;
+  *) die "unsupported OS '$os_id' (need debian or ubuntu)" ;;
+esac
+
 export DEBIAN_FRONTEND=noninteractive
 
 log "packages"
@@ -41,12 +49,12 @@ apt-get install "${APT_OPTS[@]}" --no-install-recommends \
 log "docker"
 install -m 0755 -d /etc/apt/keyrings
 if [[ ! -s /etc/apt/keyrings/docker.asc ]]; then
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  curl -fsSL "https://download.docker.com/linux/$os_id/gpg" -o /etc/apt/keyrings/docker.asc
   chmod a+r /etc/apt/keyrings/docker.asc
 fi
 # shellcheck source=/dev/null
 codename="$(. /etc/os-release && echo "$VERSION_CODENAME")"
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $codename stable" \
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/$os_id $codename stable" \
   > /etc/apt/sources.list.d/docker.list
 apt-get update -q
 apt-get install "${APT_OPTS[@]}" docker-ce docker-ce-cli containerd.io docker-compose-plugin
@@ -101,7 +109,8 @@ if [[ "$SKIP_SYSTEMD" == "1" ]]; then
 fi
 
 log "services"
-# Ubuntu 24.04 starts sshd via ssh.socket; reload-or-restart covers both.
+# The unit is ssh on both; Ubuntu 24.04 starts it via ssh.socket.
+# reload-or-restart covers both.
 systemctl reload-or-restart ssh
 systemctl enable --now unattended-upgrades
 systemctl enable docker

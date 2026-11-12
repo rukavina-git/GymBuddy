@@ -19,8 +19,8 @@ come to about 1.3–1.4 GB.
 ## Decision
 
 - **One VPS.** netcup VPS nano (2 vCore, 2 GB RAM, 60 GB, EU,
-  €3.88/month), Ubuntu LTS, 2 GB swap. A setup script in the repo
-  hardens a fresh box: SSH by key only, ufw allowing 22/80/443,
+  €3.88/month), Debian 13 (Ubuntu 24.04 also works), 2 GB swap. A
+  setup script in the repo hardens a fresh box: SSH by key only, ufw allowing 22/80/443,
   unattended-upgrades, a non-root deploy user, Docker.
 - **Docker Compose runs everything.** The backend stays host-agnostic:
   the same `backend/Dockerfile` image, configured only through env vars.
@@ -67,7 +67,7 @@ come to about 1.3–1.4 GB.
 | Docker Compose | Apache 2.0 |
 | ufw | GPL-3.0, server only |
 | unattended-upgrades | GPL-2.0, server only |
-| Ubuntu | free to use; components under OSS licences |
+| Debian (Ubuntu also supported) | free to use; components under OSS licences, server only |
 
 We only run these tools on the server and never ship them in the app, so their
 licences put no conditions on selling the app.
