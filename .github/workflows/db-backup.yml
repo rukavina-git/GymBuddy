@@ -5,8 +5,9 @@ name: DB Backup
 # file is uploaded. Restore: docker/README.md "Restore".
 #
 # Postgres on the VPS is not public, so pg_dump runs there via
-# SSH + docker compose exec (ADR 0016). Skips itself when the
-# DEPLOY_* secrets are empty.
+# SSH + docker compose exec (ADR 0016). The DEPLOY_* secrets live in
+# the `backup` environment (no reviewer, main only), so nightly runs
+# don't wait for approval. Skips itself when they are empty.
 
 on:
   schedule:
@@ -25,6 +26,7 @@ jobs:
     name: Dump and encrypt (VPS)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    environment: backup
     steps:
       - name: Dump database
         env:
@@ -35,7 +37,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_SSH_KEY" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
-            echo "::notice::DEPLOY_* secrets not set; skipping the VPS backup"
+            echo "::notice::DEPLOY_* secrets not set in the backup environment; skipping the VPS backup"
             exit 0
           fi
           if [ -z "$BACKUP_PASSPHRASE" ]; then

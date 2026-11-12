@@ -137,8 +137,8 @@ or `/opt/gymbuddy-test`, which:
 
 nginx is not reloaded: it re-resolves the backend by itself. The same
 script works by hand on the server. The workflow uses the GitHub
-environment named like the target (`prod`, `test`); add a required
-reviewer to `prod` to gate prod deploys.
+environment named like the target (`prod`, `test`); see the
+environments table under Secrets.
 Auto-deploy on push waits for Plan 8.4.
 
 ### Secrets
@@ -146,9 +146,9 @@ Auto-deploy on push waits for Plan 8.4.
 | Secret | Where | Value |
 |---|---|---|
 | `BACKUP_PASSPHRASE` | GitHub Actions secret + password manager | long random string; without it no backup can be restored |
-| `DEPLOY_HOST` | GitHub Actions secret | VPS host name or IP |
-| `DEPLOY_SSH_KEY` | GitHub Actions secret | private key of the `deploy` user (root-equivalent, see Server setup). Used by deploy and backup |
-| `DEPLOY_KNOWN_HOSTS` | GitHub Actions secret | `ssh-keyscan -t ed25519 <host>` output, checked against the fingerprint netcup mailed |
+| `DEPLOY_HOST` | GitHub environment secret (`prod`, `test`, `backup`) | VPS host name or IP |
+| `DEPLOY_SSH_KEY` | GitHub environment secret (`prod`, `test`, `backup`) + password manager | private key of the `deploy` user (root-equivalent, see Server setup). Used by deploy and backup |
+| `DEPLOY_KNOWN_HOSTS` | GitHub environment secret (`prod`, `test`, `backup`) | `ssh-keyscan <host>` output (lines without `#`), checked against the fingerprint netcup mailed |
 | `BACKEND_IMAGE` | VPS `/opt/gymbuddy/.env` | `ghcr.io/rukavina-git/gymbuddy-backend:sha-<7>`; `deploy.sh` rewrites it (not secret) |
 | `API_HOST` | VPS `/opt/gymbuddy/.env` | `api.rukavina.app` (not secret) |
 | `DB_PASSWORD` | VPS `/opt/gymbuddy/.env` + password manager | Postgres `gymbuddy` role password |
@@ -158,13 +158,26 @@ Auto-deploy on push waits for Plan 8.4.
 | `DB_PASSWORD` | VPS `/opt/gymbuddy-test/.env` + password manager | test Postgres password, not prod's |
 | `FIREBASE_CREDENTIALS_B64` | VPS `/opt/gymbuddy-test/.env` + password manager | service account of the test Firebase project (step 08) |
 
+The `DEPLOY_*` secrets are not repo-level: each GitHub environment
+holds its own copy (same values), so only workflows that pass the
+environment can reach the box.
+
+| Environment | Branches / tags | Reviewer | Used by |
+|---|---|---|---|
+| `prod` | `main`, tags `v*` | owner | deploy.yml, target prod |
+| `test` | `develop`, `main` | none | deploy.yml, target test |
+| `backup` | `main` | none (nightly can't wait) | db-backup.yml |
+
+Option, not built: one SSH key per environment, or a forced-command
+key for backups, so a leaked test key can't touch prod.
+
 ### Backups
 
 `.github/workflows/db-backup.yml` runs nightly (02:30 UTC) and on manual
 trigger. It SSHes in as `deploy` and runs `docker compose exec -T db
 pg_dump -Fc` on the server (Postgres isn't public). The dump streams
-over SSH into gpg on the runner. It skips itself with a notice when
-the `DEPLOY_*` secrets are empty.
+over SSH into gpg on the runner. It runs in the `backup` environment
+and skips itself with a notice when its `DEPLOY_*` secrets are empty.
 
 It encrypts with `gpg --symmetric` (AES256) and upload only the
 `.gpg` file (`gymbuddy-vps-<ts>.dump.gpg`) as an artifact kept
