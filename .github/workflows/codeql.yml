@@ -42,7 +42,7 @@ jobs:
             build-mode: manual
             module: android
             java-version: '17'
-            gradle-task: :app:compileDebugKotlin :app:compileDebugUnitTestKotlin
+            gradle-task: :app:compileQaDebugKotlin :app:compileQaDebugUnitTestKotlin
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,8 +57,8 @@ jobs:
       - name: Create google-services.json
         if: matrix.module == 'android'
         env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/src/google-services.json
+          GOOGLE_SERVICES_JSON_QA: ${{ secrets.GOOGLE_SERVICES_JSON_QA }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON_QA" > android/app/src/qa/google-services.json
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4

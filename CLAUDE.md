@@ -17,8 +17,9 @@ Kotlin backend, sharing nothing but the OpenAPI contract.
 - api:      npm ci · npm run lint · npm run generate:kotlin
 - backend:  ./gradlew build · ./gradlew test (needs Docker: Testcontainers)
             ./gradlew bootRun (needs DATABASE_URL, FIREBASE_CREDENTIALS_B64)
-- android:  ./gradlew assembleDebug · ./gradlew testDebugUnitTest
-            (JDK 17, needs app/src/google-services.json)
+- android:  ./gradlew assembleQaDebug · ./gradlew testQaDebugUnitTest
+            (JDK 17, needs app/src/{qa,prod}/google-services.json;
+            flavors qa → test backend, prod → prod backend)
 - Root settings.gradle.kts is an IDE-only composite build (includes
   backend and android). Don't add build logic there; keep both
   wrappers on the same Gradle version as the root one.

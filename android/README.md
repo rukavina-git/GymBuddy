@@ -7,11 +7,19 @@ Native Android client. Kotlin, Jetpack Compose, offline-first.
 Open the `android/` directory in Android Studio — not the repository
 root, which has no Gradle build.
 
-Requires JDK 17 and a `google-services.json` from the Firebase console,
-placed at `app/src/`. Neither is in the repository.
+Requires JDK 17 and one `google-services.json` per flavor from the
+Firebase console. Neither is in the repository.
 
-    ./gradlew assembleDebug
-    ./gradlew testDebugUnitTest
+| Flavor | App | Backend | Firebase project | Config file |
+|---|---|---|---|---|
+| `qa` | GymBuddy Test (`.qa` id) | api-test.rukavina.app | gymbuddy-test | `app/src/qa/google-services.json` |
+| `prod` | Gym Buddy | api.rukavina.app | gymbuddy-prod | `app/src/prod/google-services.json` |
+
+Both install side by side. `-Pgymbuddy.apiBaseUrl=http://10.0.2.2:8080/`
+points either flavor at a local backend (emulator).
+
+    ./gradlew assembleQaDebug        # or assembleProdDebug
+    ./gradlew testQaDebugUnitTest    # tests run on qa only, CI too
     ./gradlew jacocoTestReport
 
 Coverage report lands at `app/build/reports/jacoco/test/html/index.html`.

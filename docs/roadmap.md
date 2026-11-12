@@ -108,7 +108,7 @@ roadmap-details.md §3.
 - [x] 5.4 CI: image to GHCR, SSH deploy, backups on the VPS
 - [x] 5.5 (me) Buy VPS, cut over from Render + Neon
 - [x] 5.6 Test stack on the same box (spec change)
-- [ ] 5.7 Android: `qa` / `prod` flavors (app "GymBuddy Test"); CI builds both
+- [x] 5.7 Android: `qa` / `prod` flavors (app "GymBuddy Test"); CI builds both
 - [ ] 5.8 (me) Test Firebase, DNS, secrets, CI green, PR develop → main
 
 ## Plan 8: delivery (CI/CD + fastlane)

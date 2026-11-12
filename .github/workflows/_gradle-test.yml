@@ -10,7 +10,7 @@ name: (reusable) Gradle test + JaCoCo
 # gradle-task defaults to the backend's own task name. Android has no
 # plain `test` lifecycle task (application modules only get
 # variant-specific ones), so android-build.yml overrides this to
-# `testDebugUnitTest jacocoTestReport`.
+# `testQaDebugUnitTest jacocoTestReport`.
 #
 # secret-file-path/secret-file-content let a caller drop one
 # secret-sourced file into the module directory before the build runs -

@@ -62,6 +62,15 @@
   not `test`: AGP rejects flavor names starting with "test".
   Memory, both stacks idle locally: backends 431 + 395 MB, Postgres
   85 + 42, nginx 17, certbot 29: about 1 GB.
+- 07: owner chose unit tests on `qa` only (roadmap said both). The
+  jobs that only test/compile (test, codeql, sonar-full, sync-e2e,
+  owasp) write only the qa json from the new `GOOGLE_SERVICES_JSON_QA`
+  secret; build-apk writes both and uploads both APKs in one
+  `app-debug` artifact (step file said every job writes both). No fake
+  json: the owner made the real `gymbuddy-test` Firebase project now
+  (planned for 08) and relabelled the prod one `gymbuddy-prod`.
+  Claude's hook blocks shell commands naming google-services.json, so
+  the owner moved the prod file to `src/prod/` by hand.
 
 ## Gotchas
 
@@ -156,3 +165,15 @@
   (move to environment secrets to really gate); `docker compose down`
   on prod can't remove gymbuddy-edge while test is attached, and
   test can't start until prod is up.
+- 07: the google-services plugin does NOT search `app/src/`; each
+  flavor needs `src/<flavor>/google-services.json`. Gradle configures
+  with no json at all; only that variant's process task fails. CI
+  checkout has `src/qa/` (strings.xml is committed); build-apk makes
+  `src/prod/`.
+- 07 for 08: Android CI stays red until `GOOGLE_SERVICES_JSON_QA`
+  exists. Test backend needs the gymbuddy-test service account as
+  `FIREBASE_CREDENTIALS_B64` (key in Bitwarden). Device checks now use
+  `installQaDebug`. qa sign-in not checked yet (needs test backend).
+- 07 reviewer NITs left: build-apk could `mkdir -p app/src/qa` too
+  (now relies on strings.xml); the old root-level ignore line is kept
+  (harmless, the plugin doesn't look there).
