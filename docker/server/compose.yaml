@@ -1,7 +1,9 @@
 # Server stack (prod). Lives in /opt/gymbuddy on the VPS next to an
 # env file (see .env.example and docker/README.md "Server stack").
 # Only nginx publishes ports: Docker's iptables rules bypass ufw, so
-# db and backend stay on the internal network (ADR 0016).
+# db and backend stay on the internal network (ADR 0016). nginx also
+# joins gymbuddy-edge, where the staging stack (staging/compose.yaml)
+# attaches its backend; staging's db never joins it.
 name: gymbuddy
 
 services:
@@ -33,6 +35,13 @@ services:
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
     expose:
       - "8080"
+    networks:
+      default:
+        # nginx proxies to this alias, never to "backend": staging's
+        # backend is also called "backend" and nginx sits on both
+        # networks, so that name would resolve to either stack.
+        aliases:
+          - backend-prod
     depends_on:
       db:
         condition: service_healthy
@@ -45,6 +54,10 @@ services:
       - "443:443"
     environment:
       API_HOST: ${API_HOST:?must be set}
+      STAGING_API_HOST: ${STAGING_API_HOST:?must be set}
+    networks:
+      - default
+      - edge
     volumes:
       # The image's envsubst step renders this to conf.d/default.conf,
       # replacing the stock default server.
@@ -70,6 +83,10 @@ services:
       /bin/sh -c 'trap exit TERM; while :; do
       certbot renew --webroot -w /var/www/certbot --quiet;
       sleep 12h & wait $${!}; done'
+
+networks:
+  edge:
+    name: gymbuddy-edge
 
 volumes:
   db-data:

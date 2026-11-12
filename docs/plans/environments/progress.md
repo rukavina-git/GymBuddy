@@ -5,7 +5,7 @@
 - [x] 03 Server stack: compose, nginx, certbot (2be942d)
 - [x] 04 CI: image to GHCR, SSH deploy, backups (d66f4a4)
 - [x] 05 (me) Buy VPS, cut over from Render + Neon (e693e39, b6ac3fb)
-- [ ] 06 Staging stack (spec change; Render removed in 05)
+- [x] 06 Staging stack (spec change; Render removed in 05) (HASH)
 - [ ] 07 Android staging / prod flavors
 - [ ] 08 (me) Staging Firebase, DNS, secrets, CI green, PR develop → main
 
@@ -47,6 +47,16 @@
   `main` (404 from develop), so it moves to 08. Phone: push verified on
   the server (1 user, 1 workout, 3 sets); pull after reinstall not
   re-checked. Uptime monitor already existed on the same URL.
+- 06: init-cert.sh uses `--cert-name $API_HOST` with both `-d` names
+  (not `--expand`): a changed name list reissues the lineage despite
+  `--keep-until-expiring`; same names rerun is a no-op. Not in the
+  step: prod backend gets alias `backend-prod` and nginx proxies to
+  it, because plain `backend` resolved to staging's backend over the
+  shared network (found by the smoke test: prod requests hit staging).
+  Shared ssl_* and resolver moved to http level in the template.
+  init-cert.sh against real Let's Encrypt not tested (needs the box).
+  Memory, both stacks idle locally: backends 431 + 395 MB, Postgres
+  85 + 42, nginx 17, certbot 29: about 1 GB.
 
 ## Gotchas
 
@@ -124,3 +134,20 @@
 - 05 for 06: Render removal is done; 06 is only the staging stack +
   spec server. Pasted base64 can wrap: check `.env` with `wc -l`.
 - 05 for 08: run the Deploy workflow (`sha-` tag) once it's on main.
+- 06 for 08, rollout order on the live box (wrong order breaks prod):
+  1. add `STAGING_API_HOST=api-staging.rukavina.app` to
+  /opt/gymbuddy's env file FIRST (compose's `:?` check otherwise fails
+  every compose command there, incl. deploy.sh and the nightly
+  backup); 2. DNS A record `api-staging` (grey cloud); 3. copy new
+  compose.yaml + nginx template + init-cert.sh together, `docker
+  compose up -d` (recreates backend + nginx: ~30 s planned downtime);
+  4. `WEBROOT=1 CERT_EMAIL=… ./init-cert.sh` (only works once nginx
+  runs the new template), `docker compose exec nginx nginx -s reload`;
+  5. staging dir + env file, `up -d`; 6. `staging` GitHub environment.
+  A staging deploy fails its health check until step 4 is done.
+- 06 reviewer left open: init-cert WEBROOT could precheck the
+  challenge path (token + curl) before spending an LE attempt;
+  `DEPLOY_*` are repo secrets, so the `prod` reviewer gate is weak
+  (move to environment secrets to really gate); `docker compose down`
+  on prod can't remove gymbuddy-edge while staging is attached, and
+  staging can't start until prod is up.

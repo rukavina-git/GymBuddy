@@ -3,10 +3,20 @@ name: Deploy backend
 # Manual deploy of a GHCR image tag to the VPS (ADR 0016). Runs
 # docker/server/deploy.sh over SSH as the deploy user; that script
 # checks health and rolls back on failure. Auto-deploy: Plan 8.4.
+# target picks the stack: prod in /opt/gymbuddy, staging in
+# /opt/gymbuddy-staging (same box, same deploy key).
 
 on:
   workflow_dispatch:
     inputs:
+      target:
+        description: "Stack to deploy to"
+        required: true
+        type: choice
+        options:
+          - staging
+          - prod
+        default: staging
       image_tag:
         description: "Image tag from the backend build, e.g. sha-abc1234"
         required: true
@@ -16,18 +26,19 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-prod
+  group: deploy-${{ inputs.target }}
   cancel-in-progress: false
 
 jobs:
   deploy:
-    name: Deploy to prod
+    name: Deploy to ${{ inputs.target }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment: prod
+    environment: ${{ inputs.target }}
     steps:
       - name: Deploy over SSH
         env:
+          TARGET: ${{ inputs.target }}
           IMAGE_TAG: ${{ inputs.image_tag }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -38,6 +49,11 @@ jobs:
             echo "::error::DEPLOY_HOST, DEPLOY_SSH_KEY and DEPLOY_KNOWN_HOSTS must be set (repo secrets)"
             exit 1
           fi
+          case "$TARGET" in
+            prod) dir=/opt/gymbuddy ;;
+            staging) dir=/opt/gymbuddy-staging ;;
+            *) echo "::error::unknown target: $TARGET"; exit 1 ;;
+          esac
           # deploy.sh validates the full ref too; this keeps junk off the SSH command line.
           if ! [[ "$IMAGE_TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
             echo "::error::bad image tag: $IMAGE_TAG"
@@ -49,4 +65,4 @@ jobs:
           chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o BatchMode=yes \
             "deploy@$DEPLOY_HOST" \
-            "/opt/gymbuddy/deploy.sh ghcr.io/rukavina-git/gymbuddy-backend:$IMAGE_TAG"
+            "$dir/deploy.sh ghcr.io/rukavina-git/gymbuddy-backend:$IMAGE_TAG"
