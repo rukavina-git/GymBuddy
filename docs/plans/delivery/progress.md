@@ -1,6 +1,6 @@
 # Progress
 
-- [ ] 00 Deploy secrets into environments, prod gated (code done, owner checklist 4–6 open)
+- [x] 00 Deploy secrets into environments, prod gated (0aa3afe, PR #9)
 - [ ] 01 CI gates: Android Lint, SonarQube (Q-E)
 - [ ] 02 Signed release AAB on a `v*` tag
 - [ ] 03 fastlane: testers, Play internal, store listing
@@ -18,8 +18,12 @@
   deploy key". `DEPLOY_KNOWN_HOSTS` holds all 3 host key types
   (`ssh-keyscan` without `-t`), README changed to match. The stale
   `develop-gymbuddy-backend` environment (Render leftover) was deleted.
-  Not ticked: the step's Done-when needs the PR to main and the
-  owner's post-merge runs (checklist 4–6).
+  Owner run after PR #9: Backup from main green with the `.gpg`
+  artifact; Deploy test green; Deploy prod waited for review, approved,
+  green (`sha-f3050fe` over itself, 7 s, container not recreated).
+  Repo-level `DEPLOY_*` deleted, Backup green again. Root's
+  authorized_keys has no `gymbuddy-ci` line. Branch-refusal check
+  (Backup from develop) not run.
 
 ## Gotchas
 
@@ -29,8 +33,6 @@
   `gymbuddy-vps-<ts>.dump.gpg` artifact, especially after deleting
   the repo-level secrets (reviewer SHOULD-FIX, not fixed: make the
   empty case fail on `schedule`).
-- 00 reviewer NITs left: README says DEPLOY_* aren't repo-level,
-  true only after checklist step 6; `ssh-keyscan` without `-t` trusts
+- 00 reviewer NITs left: `ssh-keyscan` without `-t` trusts
   host key types not checked against netcup's mailed fingerprint.
-  Check root's authorized_keys has no `gymbuddy-ci` line either.
   Plan 5 progress still names `gymbuddy_ci` (history, left as is).
