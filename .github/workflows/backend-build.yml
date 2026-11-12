@@ -53,3 +53,45 @@ jobs:
         -Dsonar.issue.ignore.multicriteria.e1.resourceKey=src/main/resources/db/migration/**
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # Pushes the image the VPS runs (ADR 0016). Deploying it is manual:
+  # deploy.yml with one of these tags.
+  image:
+    name: Image to GHCR
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Tags
+        id: meta
+        run: |
+          image=ghcr.io/rukavina-git/gymbuddy-backend
+          {
+            echo "tags<<EOF"
+            echo "$image:sha-${GITHUB_SHA::7}"
+            echo "$image:$GITHUB_REF_NAME"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: backend
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

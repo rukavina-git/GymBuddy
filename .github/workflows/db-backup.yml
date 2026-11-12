@@ -1,8 +1,13 @@
 name: DB Backup
 
-# Nightly encrypted dump of the hosted database. The repo is public, so
+# Nightly encrypted dump of each hosted database. The repo is public, so
 # the dump is encrypted before it touches disk outside the container and
-# only the .gpg file is uploaded. Restore with docker/restore.sh.
+# only the .gpg file is uploaded. Restore: docker/README.md "Restore".
+#
+# One job per source; a job skips itself when its secrets are empty.
+# vps: Postgres on the VPS is not public, so pg_dump runs there via
+# SSH + docker compose exec (ADR 0016). neon: until the cutover is
+# done (Plan 5 step 06 removes it).
 
 on:
   schedule:
@@ -17,8 +22,53 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  backup:
-    name: Dump and encrypt
+  vps:
+    name: Dump and encrypt (VPS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Dump database
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_SSH_KEY" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
+            echo "::notice::DEPLOY_* secrets not set; skipping the VPS backup"
+            exit 0
+          fi
+          if [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::BACKUP_PASSPHRASE secret must be set"
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+          file="gymbuddy-vps-$(date -u +%Y%m%dT%H%M%SZ).dump.gpg"
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o BatchMode=yes \
+            "deploy@$DEPLOY_HOST" \
+            'cd /opt/gymbuddy && docker compose exec -T db pg_dump -Fc --no-owner -U gymbuddy gymbuddy' \
+            | gpg --batch --yes --symmetric --cipher-algo AES256 \
+                --pinentry-mode loopback \
+                --passphrase-fd 3 3<<<"$BACKUP_PASSPHRASE" \
+                --output "$file"
+          test -s "$file"
+          echo "BACKUP_FILE=$file" >> "$GITHUB_ENV"
+
+      - name: Upload encrypted dump
+        if: env.BACKUP_FILE != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BACKUP_FILE }}
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 30
+          if-no-files-found: error
+
+  neon:
+    name: Dump and encrypt (Neon)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -30,11 +80,15 @@ jobs:
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
           set -euo pipefail
-          if [ -z "$BACKUP_DATABASE_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
-            echo "::error::BACKUP_DATABASE_URL and BACKUP_PASSPHRASE secrets must be set"
+          if [ -z "$BACKUP_DATABASE_URL" ]; then
+            echo "::notice::BACKUP_DATABASE_URL not set; skipping the Neon backup"
+            exit 0
+          fi
+          if [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::BACKUP_PASSPHRASE secret must be set"
             exit 1
           fi
-          file="gymbuddy-$(date -u +%Y%m%dT%H%M%SZ).dump.gpg"
+          file="gymbuddy-neon-$(date -u +%Y%m%dT%H%M%SZ).dump.gpg"
           # pg_dump must be at least the server's major version; keep this
           # image tag in step with the Neon project's Postgres version.
           docker run --rm -e BACKUP_DATABASE_URL postgres:17 \
@@ -47,6 +101,7 @@ jobs:
           echo "BACKUP_FILE=$file" >> "$GITHUB_ENV"
 
       - name: Upload encrypted dump
+        if: env.BACKUP_FILE != ''
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BACKUP_FILE }}

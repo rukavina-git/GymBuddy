@@ -3,7 +3,7 @@
 - [x] 01 ADR 0016: VPS hosting + environment split (7430654)
 - [x] 02 Server setup script (2d7d299)
 - [x] 03 Server stack: compose, nginx, certbot (2be942d)
-- [ ] 04 CI: image to GHCR, SSH deploy, backups
+- [x] 04 CI: image to GHCR, SSH deploy, backups (HASH)
 - [ ] 05 (me) Buy VPS, cut over from Render + Neon
 - [ ] 06 Staging stack, Render removed (spec change)
 - [ ] 07 Android staging / prod flavors
@@ -22,6 +22,14 @@
   certbot pinned to `v5.10.0`. The server env file is `deploy`-owned
   0600, not root-only; ADR 0016 and the overview reworded to match.
   The step 02 setup.sh SHOULD-FIX items were done here.
+- 04: deploy.sh pulls with `docker pull <image>` before touching the
+  env file (the step said `compose pull` after); a failed pull changes
+  nothing. Added `ENV_FILE` (default `.env`) and `CURL_INSECURE=1` for
+  local tests: Claude's hooks block any file named `.env`. `DEPLOY_*`
+  secrets are repo-level, not in the `prod` environment, so the nightly
+  backup can use them; `prod` only gates deploy.yml. Local tests used a
+  PATH shim for `docker pull` (images exist only locally) and gpg in a
+  `postgres:17` container (no gpg on the Mac).
 
 ## Gotchas
 
@@ -61,3 +69,18 @@
   mailed it), check the ED25519 host key fingerprint from the netcup
   email on first SSH, `ssh-copy-id root@<host>` before setup.sh. The
   netcup panel firewall only blocks SMTP; leave it.
+- 04: reviewer SHOULD-FIX left open: (a) rollback goes by tag, so
+  deploying a mutable tag (`develop`) over itself can't roll back;
+  accept only `sha-` tags or roll back by image ID. (b) Record the
+  three docker/* actions (Apache 2.0) in the ADR 0016 licence table.
+  NITs: a `prod` reviewer gate doesn't protect the repo-level key; VPS
+  restore example still says `gymbuddy-<ts>`, artifacts are now
+  `gymbuddy-<vps|neon>-<ts>`; `.env.example` default `:local` would
+  make a first failed deploy roll back to a missing image (05: set a
+  real `sha-` tag first); `set_image` truncates then writes.
+- 04 for 05: set the GHCR package public after the first image push;
+  add `DEPLOY_HOST`, `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS` repo secrets
+  and a `prod` environment; copy `deploy.sh` to /opt/gymbuddy.
+  The VPS restore streams the dump into `pg_restore` via stdin
+  (untested that way; restore.sh from a file was tested). Backups
+  produce a pipe-made custom dump: don't restore it with `-j`.

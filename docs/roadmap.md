@@ -105,7 +105,7 @@ roadmap-details.md §3.
 - [x] 5.1 ADR 0016: VPS hosting (netcup, nginx) + environment split
 - [x] 5.2 Server setup script (hardening, Docker, swap)
 - [x] 5.3 Server stack: compose, nginx, certbot
-- [ ] 5.4 CI: image to GHCR, SSH deploy, backups on the VPS
+- [x] 5.4 CI: image to GHCR, SSH deploy, backups on the VPS
 - [ ] 5.5 (me) Buy VPS, cut over from Render + Neon
 - [ ] 5.6 Staging stack on the same box, Render removed (spec change)
 - [ ] 5.7 Android: `staging` / `prod` flavors; CI builds both

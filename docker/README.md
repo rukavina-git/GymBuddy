@@ -54,7 +54,7 @@ publishes 5432/8080 and builds the image.
 As `deploy`, once:
 
     mkdir -p /opt/gymbuddy        # as root: then chown deploy:deploy
-    scp -r docker/server/{compose.yaml,init-cert.sh,nginx} deploy@<host>:/opt/gymbuddy/
+    scp -r docker/server/{compose.yaml,init-cert.sh,deploy.sh,nginx} deploy@<host>:/opt/gymbuddy/
     # on the server: copy .env.example to /opt/gymbuddy/.env, fill it,
     # chmod 600 it
     cd /opt/gymbuddy
@@ -74,12 +74,40 @@ As `deploy`, once:
 
 ## Hosting
 
-Render free web service (Docker, Frankfurt) running `backend/Dockerfile`,
-Neon free Postgres (EU). Blueprint: `render.yaml` at the repo root. The
-image is the same one compose builds; nothing in the app knows about
-Render or Neon.
+Target (ADR 0016): the netcup VPS runs the server stack above, with
+the backend image from GHCR. Until the Plan 5 step 05 cutover, Render
+(free web service, Frankfurt, `render.yaml`) and Neon (free Postgres,
+EU) still serve `api.rukavina.app`. The image is the same everywhere;
+nothing in the app knows where it runs.
 
-### Deploys are manual
+### Image on GHCR
+
+`backend-build.yml` job "Image to GHCR" runs after the tests on every
+push to `develop` or `main` that touches `backend/`. It pushes
+`ghcr.io/rukavina-git/gymbuddy-backend:sha-<7 chars>` and
+`:<branch>` (linux/amd64). The package is public, like the repo, so
+the server pulls without a login. After the first push, set it public
+once: GitHub → Packages → gymbuddy-backend → Package settings → Change
+visibility.
+
+### Deploying to the VPS
+
+Manual: Actions → Deploy backend → Run workflow → `image_tag`, e.g.
+`sha-abc1234` (from the build run or the package page). The job SSHes
+in as `deploy` and runs `/opt/gymbuddy/deploy.sh <image>`, which:
+
+- refuses anything but a `gymbuddy-backend` GHCR tag,
+- pulls it (nothing changes if the pull fails),
+- writes it to `BACKEND_IMAGE` in `.env` and recreates only the backend,
+- polls `https://<API_HOST>/v1/health` through the local nginx for 90 s,
+- on failure writes the old image back, restarts it, and fails the job.
+
+nginx is not reloaded: it re-resolves `backend` by itself. The same
+script works by hand on the server. The workflow uses the GitHub
+environment `prod`; add a required reviewer there to gate deploys.
+Auto-deploy on push waits for Plan 8.4.
+
+### Render deploys (until step 05)
 
 `render.yaml` has `autoDeploy: false`, and the service tracks the
 `develop` branch. A merge never reaches the server by itself: after a
@@ -89,7 +117,7 @@ staging and prod, this one service is effectively the test server.
 (2026-11-07: it still ran a pre-Plan-6 build, so the server dropped
 the profile's `avatarId` on every push: device feedback F1/F12.)
 
-### Neon: direct vs pooled host
+### Neon: direct vs pooled host (until step 05)
 
 Neon gives two hosts per branch: `ep-xxx.<region>.aws.neon.tech`
 (direct) and `ep-xxx-pooler...` (PgBouncer). Use the **direct** host
@@ -106,7 +134,10 @@ transaction pooler breaks, and one small instance doesn't need pooling.
 | `JAVA_TOOL_OPTIONS` | `render.yaml` | heap limits for 512 MB, not secret |
 | `BACKUP_DATABASE_URL` | GitHub Actions secret | `postgresql://<user>:<password>@<direct-host>/<db>?sslmode=require` (libpq form, password included) |
 | `BACKUP_PASSPHRASE` | GitHub Actions secret + password manager | long random string; without it no backup can be restored |
-| `BACKEND_IMAGE` | VPS `/opt/gymbuddy/.env` | backend image tag (not secret) |
+| `DEPLOY_HOST` | GitHub Actions secret | VPS host name or IP |
+| `DEPLOY_SSH_KEY` | GitHub Actions secret | private key of the `deploy` user (root-equivalent, see Server setup). Used by deploy and backup |
+| `DEPLOY_KNOWN_HOSTS` | GitHub Actions secret | `ssh-keyscan -t ed25519 <host>` output, checked against the fingerprint netcup mailed |
+| `BACKEND_IMAGE` | VPS `/opt/gymbuddy/.env` | `ghcr.io/rukavina-git/gymbuddy-backend:sha-<7>`; `deploy.sh` rewrites it (not secret) |
 | `API_HOST` | VPS `/opt/gymbuddy/.env` | `api.rukavina.app` (not secret) |
 | `DB_PASSWORD` | VPS `/opt/gymbuddy/.env` + password manager | Postgres `gymbuddy` role password |
 | `FIREBASE_CREDENTIALS_B64` | VPS `/opt/gymbuddy/.env` | as for Render |
@@ -117,11 +148,19 @@ port the container listens on.
 ### Backups
 
 `.github/workflows/db-backup.yml` runs nightly (02:30 UTC) and on manual
-trigger. It runs `pg_dump -Fc` in a `postgres:17` container (keep the
-tag at or above Neon's Postgres major version), encrypts with
-`gpg --symmetric` (AES256), and uploads only the `.gpg` file as an
-artifact kept 30 days. The repo is public, so the dump is never stored
-unencrypted.
+trigger, one job per source. A job whose secrets are empty skips itself
+with a notice, so both run during the cutover.
+
+- `vps`: SSH as `deploy`, `docker compose exec -T db pg_dump -Fc` on
+  the server (Postgres isn't public). The dump streams over SSH into
+  gpg on the runner.
+- `neon` (until step 06): `pg_dump -Fc` in a `postgres:17` container
+  against `BACKUP_DATABASE_URL`. Keep the tag at or above Neon's major
+  version.
+
+Both encrypt with `gpg --symmetric` (AES256) and upload only the
+`.gpg` file (`gymbuddy-<vps|neon>-<ts>.dump.gpg`) as an artifact kept
+30 days. The repo is public, so the dump is never stored unencrypted.
 
 ### Restore
 
@@ -136,6 +175,18 @@ unencrypted.
    `--no-acl` skips GRANTs: a Neon dump grants to Neon-only roles
    (`neon_superuser`) that don't exist elsewhere, and the app connects
    as the database owner anyway.
+
+Onto the VPS (Postgres isn't reachable from outside): decrypt locally,
+then stream the plain dump into the db container. Stop the backend
+first so nothing writes during the restore:
+
+    gpg --decrypt gymbuddy-<ts>.dump.gpg > gymbuddy.dump
+    ssh deploy@<host> 'cd /opt/gymbuddy && docker compose stop backend'
+    ssh deploy@<host> 'cd /opt/gymbuddy && docker compose exec -T db \
+      pg_restore --clean --if-exists --no-owner --no-acl --exit-on-error \
+      -U gymbuddy -d gymbuddy' < gymbuddy.dump
+    ssh deploy@<host> 'cd /opt/gymbuddy && docker compose start backend'
+    rm gymbuddy.dump
 
 The target server must run the same Postgres major version as the
 source, or newer. A pg_dump 17 dump fails on a 16 server
