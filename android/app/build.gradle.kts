@@ -109,6 +109,14 @@ android {
         buildConfig = true
     }
 
+    // CI gate (Plan 8.1): existing issues live in the baseline, only
+    // new errors fail. Regenerate with ./gradlew updateLintBaseline.
+    lint {
+        baseline = file("lint-baseline.xml")
+        abortOnError = true
+        checkReleaseBuilds = false
+    }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
@@ -243,6 +251,7 @@ dependencies {
     testImplementation(libs.ui.test.junit)
     androidTestImplementation(libs.testExtJunit)
     androidTestImplementation(libs.espressoCore)
+    androidTestImplementation(platform(libs.androidxComposeBom))
     androidTestImplementation(libs.ui.test.junit)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)

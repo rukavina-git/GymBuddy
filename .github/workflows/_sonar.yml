@@ -54,6 +54,11 @@ on:
         required: false
         type: string
         default: ''
+      wait-for-gate:
+        description: "Wait for the SonarCloud quality gate and fail this job when it is red (Plan 8.1, ADR 0013 update). Per-build callers pass true; sonar-full.yml leaves it false (report only)."
+        required: false
+        type: boolean
+        default: false
     secrets:
       SONAR_TOKEN:
         required: true
@@ -99,9 +104,9 @@ jobs:
             -Dsonar.coverage.exclusions=${{ inputs.coverage-exclusions }}
             -Dsonar.cpd.exclusions=${{ inputs.cpd-exclusions }}
             ${{ inputs.extra-args }}
+            -Dsonar.qualitygate.wait=${{ inputs.wait-for-gate }}
             -Dsonar.projectBaseDir=${{ inputs.module-path }}
-          # No -Dsonar.qualitygate.wait, deliberately: a failing gate
-          # must show on the dashboard and any PR check annotation
-          # without failing this job. Coverage below target is a
-          # warning surfaced there, not something that blocks a merge
-          # from this workflow.
+          # qualitygate.wait=true makes a red gate (new-code coverage,
+          # new bugs/vulns) fail this job, so it blocks merges where
+          # Sonar is a required check. Since Plan 8.1; before that
+          # Sonar only reported (ADR 0013).

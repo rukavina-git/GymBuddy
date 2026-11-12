@@ -80,3 +80,17 @@ itself is unchanged and still runs and reports to the Security tab, it just
 no longer blocks merges. Cause: a classloader incompatibility between
 Gradle 9 and the `org.owasp:dependency-check-gradle` plugin. To be
 revisited before any app-store submission.
+
+## Update — 2026-11-12 (Plan 8.1)
+
+- **Sonar gate is blocking.** `_sonar.yml` has a `wait-for-gate` input;
+  `backend-build.yml` and `android-build.yml` pass `true`, so a red
+  quality gate (default "Sonar way": new-code coverage, no new
+  bugs/vulnerabilities) fails the Sonar job. `sonar-full.yml` stays
+  report-only. Supersedes "Sonar never fails a build" above.
+- **Android Lint in CI.** `android-build.yml` job `Lint` runs
+  `lintQaDebug` with `app/lint-baseline.xml` (42 errors, 62 warnings
+  at the time). Only issues not in the baseline fail. Regenerate the
+  baseline with `./gradlew updateLintBaseline` only on purpose, never
+  to silence a new error. Release-variant lint is left to the release
+  workflow (Plan 8.2).

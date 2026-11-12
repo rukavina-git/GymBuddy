@@ -43,6 +43,7 @@ jobs:
       sonar-project-key: rukavina-git_GymBuddy-backend
       coverage-report-dir: backend/build/reports/jacoco/test
       coverage-exclusions: ${{ needs.exclusions.outputs.backend }}
+      wait-for-gate: true
       # Seed migrations repeat INSERT shapes by design (generated data).
       cpd-exclusions: src/main/resources/db/migration/**
       # Seed SQL repeats literals ('DEFAULT', ids) by design, and applied

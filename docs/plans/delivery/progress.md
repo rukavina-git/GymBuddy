@@ -1,7 +1,7 @@
 # Progress
 
 - [x] 00 Deploy secrets into environments, prod gated (0aa3afe, PR #9)
-- [ ] 01 CI gates: Android Lint, SonarQube (Q-E)
+- [x] 01 CI gates: Android Lint, SonarQube (Q-E) (HASH)
 - [ ] 02 Signed release AAB on a `v*` tag
 - [ ] 03 fastlane: testers, Play internal, store listing
 - [ ] 04 Backend CD: develop → test, `v*` → prod
@@ -25,6 +25,14 @@
   authorized_keys has no `gymbuddy-ci` line. Branch-refusal check
   (Backup from develop) not run.
 
+- 01: Lint model generation failed (`ui-test-junit4` had no version on
+  `androidTestImplementation`): added `platform(compose BOM)` there.
+  Fixed pre-existing shellcheck findings in android-build.yml's Build
+  Summary (env vars, grouped redirect) so actionlint is clean. CLAUDE.md
+  line "CI doesn't run lint" updated. Owner checklist (SonarCloud gate
+  + new-code definition, Sonar green on develop, `Lint` required on
+  main) not done yet.
+
 ## Gotchas
 
 - 00 for the owner run: with empty `DEPLOY_*` the backup job exits 0
@@ -36,3 +44,10 @@
 - 00 reviewer NITs left: `ssh-keyscan` without `-t` trusts
   host key types not checked against netcup's mailed fingerprint.
   Plan 5 progress still names `gymbuddy_ci` (history, left as is).
+- 01: the lint gate only fails on Error severity (ShowToast, a warning,
+  passed; MissingPermission failed). Baseline has 105 `<issue>` entries
+  vs lint's "42 errors, 62 warnings" (ADR wording, not re-counted). The
+  Lint report artifact holds HTML + SARIF (AGP writes both by default).
+  Sonar gate now fails the job; if develop goes red on untouched code,
+  that's the gate, not this step. Reviewer NITs left: ADR count, the
+  gate only blocks main after the owner adds required checks.
