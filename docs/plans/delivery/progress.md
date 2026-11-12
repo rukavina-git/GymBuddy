@@ -31,8 +31,8 @@
   with a notice, and environment secrets fall back to repo ones. So
   a green Backup run proves nothing: check the run has the
   `gymbuddy-vps-<ts>.dump.gpg` artifact, especially after deleting
-  the repo-level secrets (reviewer SHOULD-FIX, not fixed: make the
-  empty case fail on `schedule`).
+  the repo-level secrets (reviewer SHOULD-FIX; fixed after 8.0 on
+  owner request: the empty case now fails red, on every trigger).
 - 00 reviewer NITs left: `ssh-keyscan` without `-t` trusts
   host key types not checked against netcup's mailed fingerprint.
   Plan 5 progress still names `gymbuddy_ci` (history, left as is).

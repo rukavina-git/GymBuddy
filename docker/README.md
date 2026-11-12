@@ -177,7 +177,7 @@ key for backups, so a leaked test key can't touch prod.
 trigger. It SSHes in as `deploy` and runs `docker compose exec -T db
 pg_dump -Fc` on the server (Postgres isn't public). The dump streams
 over SSH into gpg on the runner. It runs in the `backup` environment
-and skips itself with a notice when its `DEPLOY_*` secrets are empty.
+and fails (red) when its `DEPLOY_*` secrets are empty.
 
 It encrypts with `gpg --symmetric` (AES256) and upload only the
 `.gpg` file (`gymbuddy-vps-<ts>.dump.gpg`) as an artifact kept

@@ -7,7 +7,8 @@ name: DB Backup
 # Postgres on the VPS is not public, so pg_dump runs there via
 # SSH + docker compose exec (ADR 0016). The DEPLOY_* secrets live in
 # the `backup` environment (no reviewer, main only), so nightly runs
-# don't wait for approval. Skips itself when they are empty.
+# don't wait for approval. Fails (red) when they are empty, so a
+# missing secret can't skip backups silently.
 
 on:
   schedule:
@@ -37,8 +38,8 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_SSH_KEY" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
-            echo "::notice::DEPLOY_* secrets not set in the backup environment; skipping the VPS backup"
-            exit 0
+            echo "::error::DEPLOY_HOST, DEPLOY_SSH_KEY and DEPLOY_KNOWN_HOSTS must be set in the backup environment"
+            exit 1
           fi
           if [ -z "$BACKUP_PASSPHRASE" ]; then
             echo "::error::BACKUP_PASSPHRASE secret must be set"
