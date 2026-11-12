@@ -62,8 +62,8 @@ As `deploy`, once:
     docker compose up -d
     curl https://<API_HOST>/v1/health
 
-- `init-cert.sh` gets one cert for `API_HOST` and `STAGING_API_HOST`
-  (lineage named after `API_HOST`), so the staging block can never
+- `init-cert.sh` gets one cert for `API_HOST` and `TEST_API_HOST`
+  (lineage named after `API_HOST`), so the test block can never
   point at a missing cert. On a fresh box it runs certbot standalone
   on port 80, so nginx must be stopped (nginx can't start without a
   cert). With nginx running, `WEBROOT=1` goes through nginx instead
@@ -76,31 +76,31 @@ As `deploy`, once:
 - The env file is owned by `deploy`, mode 0600: compose runs as
   `deploy`, and `deploy` is root-equivalent anyway.
 
-### Staging stack
+### Test stack
 
-`docker/server/staging/compose.yaml` is a second compose project
-(`gymbuddy-staging`): its own Postgres (own volume, own password) and
+`docker/server/test/compose.yaml` is a second compose project
+(`gymbuddy-test`): its own Postgres (own volume, own password) and
 backend (`-Xmx192m`), no nginx, no ports. Prod's nginx serves it as
-`STAGING_API_HOST` over the `gymbuddy-edge` network, which the prod
-stack creates, so start prod first. Only staging's backend joins
+`TEST_API_HOST` over the `gymbuddy-edge` network, which the prod
+stack creates, so start prod first. Only test's backend joins
 `gymbuddy-edge`; neither Postgres is reachable from the other stack.
-Backups are prod only; staging data is disposable.
+Backups are prod only; test data is disposable.
 
-nginx proxies to the aliases `backend-prod` and `backend-staging`,
+nginx proxies to the aliases `backend-prod` and `backend-test`,
 never to `backend`: both stacks have a service called `backend`, and
 on the shared network that name resolves to either one (the local
-smoke test sent prod requests to staging before the aliases).
+smoke test sent prod requests to test before the aliases).
 
 As `deploy`, once (after the prod stack runs):
 
-    mkdir -p /opt/gymbuddy-staging   # as root: then chown deploy:deploy
-    scp docker/server/staging/compose.yaml docker/server/deploy.sh deploy@<host>:/opt/gymbuddy-staging/
-    # on the server: copy staging/.env.example to
-    # /opt/gymbuddy-staging/.env, fill it (own DB password, the staging
+    mkdir -p /opt/gymbuddy-test   # as root: then chown deploy:deploy
+    scp docker/server/test/compose.yaml docker/server/deploy.sh deploy@<host>:/opt/gymbuddy-test/
+    # on the server: copy test/.env.example to
+    # /opt/gymbuddy-test/.env, fill it (own DB password, the test
     # Firebase project), chmod 600 it
-    cd /opt/gymbuddy-staging && docker compose up -d
+    cd /opt/gymbuddy-test && docker compose up -d
 
-Measured locally, both stacks idle: prod backend ~430 MB, staging
+Measured locally, both stacks idle: prod backend ~430 MB, test
 backend ~395 MB, Postgres 85 + 42 MB, nginx 17 MB, certbot 29 MB:
 about 1 GB of the VPS's 2 GB.
 
@@ -124,10 +124,10 @@ visibility.
 ### Deploying to the VPS
 
 Manual: Actions → Deploy backend → Run workflow → `target`
-(`staging`, the default, or `prod`) and `image_tag`, e.g.
+(`test`, the default, or `prod`) and `image_tag`, e.g.
 `sha-abc1234` (from the build run or the package page). The job SSHes
 in as `deploy` and runs `deploy.sh <image>` in `/opt/gymbuddy` (prod)
-or `/opt/gymbuddy-staging`, which:
+or `/opt/gymbuddy-test`, which:
 
 - refuses anything but a `gymbuddy-backend` GHCR tag,
 - pulls it (nothing changes if the pull fails),
@@ -137,7 +137,7 @@ or `/opt/gymbuddy-staging`, which:
 
 nginx is not reloaded: it re-resolves the backend by itself. The same
 script works by hand on the server. The workflow uses the GitHub
-environment named like the target (`prod`, `staging`); add a required
+environment named like the target (`prod`, `test`); add a required
 reviewer to `prod` to gate prod deploys.
 Auto-deploy on push waits for Plan 8.4.
 
@@ -153,10 +153,10 @@ Auto-deploy on push waits for Plan 8.4.
 | `API_HOST` | VPS `/opt/gymbuddy/.env` | `api.rukavina.app` (not secret) |
 | `DB_PASSWORD` | VPS `/opt/gymbuddy/.env` + password manager | Postgres `gymbuddy` role password |
 | `FIREBASE_CREDENTIALS_B64` | VPS `/opt/gymbuddy/.env` + password manager | base64 service account JSON on one line (see backend/README.md) |
-| `STAGING_API_HOST` | VPS `/opt/gymbuddy/.env` | `api-staging.rukavina.app` (not secret); required, nginx serves it |
-| `BACKEND_IMAGE`, `API_HOST` | VPS `/opt/gymbuddy-staging/.env` | as for prod; `API_HOST` = the staging name |
-| `DB_PASSWORD` | VPS `/opt/gymbuddy-staging/.env` + password manager | staging Postgres password, not prod's |
-| `FIREBASE_CREDENTIALS_B64` | VPS `/opt/gymbuddy-staging/.env` + password manager | service account of the staging Firebase project (step 08) |
+| `TEST_API_HOST` | VPS `/opt/gymbuddy/.env` | `api-test.rukavina.app` (not secret); required, nginx serves it |
+| `BACKEND_IMAGE`, `API_HOST` | VPS `/opt/gymbuddy-test/.env` | as for prod; `API_HOST` = the test name |
+| `DB_PASSWORD` | VPS `/opt/gymbuddy-test/.env` + password manager | test Postgres password, not prod's |
+| `FIREBASE_CREDENTIALS_B64` | VPS `/opt/gymbuddy-test/.env` + password manager | service account of the test Firebase project (step 08) |
 
 ### Backups
 

@@ -5,9 +5,9 @@
 - [x] 03 Server stack: compose, nginx, certbot (2be942d)
 - [x] 04 CI: image to GHCR, SSH deploy, backups (d66f4a4)
 - [x] 05 (me) Buy VPS, cut over from Render + Neon (e693e39, b6ac3fb)
-- [x] 06 Staging stack (spec change; Render removed in 05) (5e67a4f)
-- [ ] 07 Android staging / prod flavors
-- [ ] 08 (me) Staging Firebase, DNS, secrets, CI green, PR develop → main
+- [x] 06 Test stack (spec change; Render removed in 05) (5e67a4f)
+- [ ] 07 Android qa / prod flavors
+- [ ] 08 (me) Test Firebase, DNS, secrets, CI green, PR develop → main
 
 ## Deviations
 
@@ -51,10 +51,15 @@
   (not `--expand`): a changed name list reissues the lineage despite
   `--keep-until-expiring`; same names rerun is a no-op. Not in the
   step: prod backend gets alias `backend-prod` and nginx proxies to
-  it, because plain `backend` resolved to staging's backend over the
-  shared network (found by the smoke test: prod requests hit staging).
+  it, because plain `backend` resolved to test's backend over the
+  shared network (found by the smoke test: prod requests hit test).
   Shared ssl_* and resolver moved to http level in the template.
   init-cert.sh against real Let's Encrypt not tested (needs the box).
+  Renamed after commit 5e67a4f (owner, 2026-11-12): "staging" is
+  "test" everywhere (TEST_API_HOST, backend-test, gymbuddy-test,
+  /opt/gymbuddy-test, api-test.rukavina.app, deploy target and GitHub
+  environment `test`, spec server "Test"). Android flavor (07) is `qa`,
+  not `test`: AGP rejects flavor names starting with "test".
   Memory, both stacks idle locally: backends 431 + 395 MB, Postgres
   85 + 42, nginx 17, certbot 29: about 1 GB.
 
@@ -113,7 +118,7 @@
   produce a pipe-made custom dump: don't restore it with `-j`.
 - 05 reviewer items left open for the checklist run: (a) step 8 runs
   `init-cert.sh` twice (staging CA, then real) but it passes
-  `--keep-until-expiring`, so the staging cert may stay; check the
+  `--keep-until-expiring`, so the LE staging-CA cert may stay; check the
   issuer or delete the staging lineage first. (b) Debian's default
   unattended-upgrades also applies point releases, so README's
   "security only" is wrong there; fix the doc or limit origins.
@@ -131,23 +136,23 @@
 - 05: Claude's guard hook blocks `ssh deploy@…`/prod commands and
   reading `.env`; the owner runs those in Terminal. `!` in Claude can't
   answer SSH prompts (host key, password).
-- 05 for 06: Render removal is done; 06 is only the staging stack +
+- 05 for 06: Render removal is done; 06 is only the test stack +
   spec server. Pasted base64 can wrap: check `.env` with `wc -l`.
 - 05 for 08: run the Deploy workflow (`sha-` tag) once it's on main.
 - 06 for 08, rollout order on the live box (wrong order breaks prod):
-  1. add `STAGING_API_HOST=api-staging.rukavina.app` to
+  1. add `TEST_API_HOST=api-test.rukavina.app` to
   /opt/gymbuddy's env file FIRST (compose's `:?` check otherwise fails
   every compose command there, incl. deploy.sh and the nightly
-  backup); 2. DNS A record `api-staging` (grey cloud); 3. copy new
+  backup); 2. DNS A record `api-test` (grey cloud); 3. copy new
   compose.yaml + nginx template + init-cert.sh together, `docker
   compose up -d` (recreates backend + nginx: ~30 s planned downtime);
   4. `WEBROOT=1 CERT_EMAIL=… ./init-cert.sh` (only works once nginx
   runs the new template), `docker compose exec nginx nginx -s reload`;
-  5. staging dir + env file, `up -d`; 6. `staging` GitHub environment.
-  A staging deploy fails its health check until step 4 is done.
+  5. test dir + env file, `up -d`; 6. `test` GitHub environment.
+  A test deploy fails its health check until step 4 is done.
 - 06 reviewer left open: init-cert WEBROOT could precheck the
   challenge path (token + curl) before spending an LE attempt;
   `DEPLOY_*` are repo secrets, so the `prod` reviewer gate is weak
   (move to environment secrets to really gate); `docker compose down`
-  on prod can't remove gymbuddy-edge while staging is attached, and
-  staging can't start until prod is up.
+  on prod can't remove gymbuddy-edge while test is attached, and
+  test can't start until prod is up.

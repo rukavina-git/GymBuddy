@@ -1,9 +1,9 @@
-# Staging stack (Plan 5 step 06). Lives in /opt/gymbuddy-staging on the
+# Test stack (Plan 5 step 06). Lives in /opt/gymbuddy-test on the
 # VPS next to its own env file (see the example next to this file) and
-# deploy.sh. The prod stack's nginx serves it as STAGING_API_HOST over
+# deploy.sh. The prod stack's nginx serves it as TEST_API_HOST over
 # the shared gymbuddy-edge network, so start prod first (it creates the
 # network). Service names match prod's, so deploy.sh works here unchanged.
-name: gymbuddy-staging
+name: gymbuddy-test
 
 services:
   db:
@@ -34,12 +34,12 @@ services:
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
     expose:
       - "8080"
-    # nginx reaches it only as backend-staging (prod's is backend-prod).
+    # nginx reaches it only as backend-test (prod's is backend-prod).
     networks:
       default:
       edge:
         aliases:
-          - backend-staging
+          - backend-test
     depends_on:
       db:
         condition: service_healthy

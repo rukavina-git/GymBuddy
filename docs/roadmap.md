@@ -100,24 +100,24 @@ roadmap-details.md §3.
 - [x] 7.11 Cross-flow states: error, offline, empty, sync
 - [x] 7.12 (me) Device pass on the current backend, CI green, PR develop → main (PR #7)
 
-## Plan 5: environments (VPS, then staging + prod)
+## Plan 5: environments (VPS, then test + prod)
 
 - [x] 5.1 ADR 0016: VPS hosting (netcup, nginx) + environment split
 - [x] 5.2 Server setup script (hardening, Docker, swap)
 - [x] 5.3 Server stack: compose, nginx, certbot
 - [x] 5.4 CI: image to GHCR, SSH deploy, backups on the VPS
 - [x] 5.5 (me) Buy VPS, cut over from Render + Neon
-- [x] 5.6 Staging stack on the same box (spec change)
-- [ ] 5.7 Android: `staging` / `prod` flavors; CI builds both
-- [ ] 5.8 (me) Staging Firebase, DNS, secrets, CI green, PR develop → main
+- [x] 5.6 Test stack on the same box (spec change)
+- [ ] 5.7 Android: `qa` / `prod` flavors (app "GymBuddy Test"); CI builds both
+- [ ] 5.8 (me) Test Firebase, DNS, secrets, CI green, PR develop → main
 
 ## Plan 8: delivery (CI/CD + fastlane)
 
 - [ ] 8.1 CI gates: Android Lint, SonarQube (Q-E). OWASP is 10.0
 - [ ] 8.2 Signed release AAB on a `v*` tag, versionCode from the tag
-- [ ] 8.3 fastlane: staging build to testers, prod AAB to the Play
+- [ ] 8.3 fastlane: test build to testers, prod AAB to the Play
       internal track, store listing kept in the repo
-- [ ] 8.4 Backend CD: develop → staging, `v*` tag → prod
+- [ ] 8.4 Backend CD: develop → test, `v*` tag → prod
 - [ ] 8.5 (me) Play Console app, upload key, service account, secrets
 - [ ] 8.6 (me) CI green, PR develop → main
 
@@ -138,7 +138,7 @@ roadmap-details.md §3.
 
 - [ ] 10.0 OWASP triage + triggers back on (fix parked on
       `feature/owasp-triage`)
-- [ ] 10.1 (me) Release build manual pass on staging, then prod: R8,
+- [ ] 10.1 (me) Release build manual pass on test, then prod: R8,
       sign-in, guest, sync, logout, account deletion
 - [ ] 10.2 (me) Internal testing track via fastlane
 - [ ] 10.3 (me) Closed testing (check the current tester rule)

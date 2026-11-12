@@ -34,10 +34,10 @@ commits ahead (Plan 3 docs only).
    entry point.
 3. **Redesign (7)** builds every screen once, on top of 6.
 4. **Environments (5)** after the redesign (owner, 2026-11-03): no
-   point splitting staging and prod before the app works. Until then
+   point splitting test and prod before the app works. Until then
    the one backend holds only my own test data. Ids kept.
 5. **Delivery (8)**: CI/CD and fastlane once there is something worth
-   shipping; testers get staging builds from here on.
+   shipping; testers get test builds from here on.
 6. **Legal (9)** describes the finished app: the policy and Data safety
    form must match what the shipped build collects.
 7. **Release (10)** last: internal → closed → production.
@@ -227,14 +227,14 @@ Plan 8 on, nothing under test touches prod data.
 Owner, 2026-11-11: move off Render + Neon to a self-hosted VPS first
 (Render's free hours can't run two always-on services), then split.
 netcup VPS nano (2 vCore, 2 GB, €3.88/mo); measured memory fits prod +
-staging (plan overview). nginx + certbot over Caddy: industry standard,
+test (plan overview). nginx + certbot over Caddy: industry standard,
 owner's company uses it. Plan: `docs/plans/environments`.
 
 5.1 **ADR 0016.** VPS, nginx + certbot, one Postgres with a database
-    per environment, images on GHCR, deploy over SSH. Staging and prod
+    per environment, images on GHCR, deploy over SSH. Test and prod
     each get their own backend container, database, Firebase project
-    and API host (api-staging.rukavina.app, api.rukavina.app). Debug
-    and staging builds point at staging; only prod release builds
+    and API host (api-test.rukavina.app, api.rukavina.app). Debug
+    and test builds point at test; only prod release builds
     point at prod. Licences recorded.
 5.2 **Server setup.** Script for a fresh Ubuntu: Docker, ufw (22, 80,
     443), SSH keys only, unattended-upgrades, 2 GB swap, deploy user.
@@ -248,16 +248,16 @@ owner's company uses it. Plan: `docs/plans/environments`.
     Restore a Neon dump on the VPS, switch api.rukavina.app, check the
     app, then turn off Render and the keep-awake ping. Keep Neon a few
     weeks.
-5.6 **Staging.** Second backend + database on the same box,
-    api-staging server block, smaller heap. Delete `render.yaml` and
-    Render/Neon docs. Spec: add the staging server. **Spec change.**
-5.7 **Android flavors.** `staging` and `prod` product flavors:
-    `applicationIdSuffix ".staging"` (both installable side by side),
+5.6 **Test.** Second backend + database on the same box,
+    api-test server block, smaller heap. Delete `render.yaml` and
+    Render/Neon docs. Spec: add the test server. **Spec change.**
+5.7 **Android flavors.** `qa` and `prod` product flavors:
+    `applicationIdSuffix ".qa"` (both installable side by side),
     own Firebase config per flavor, own API URL, app name "GymBuddy
-    Staging". The `-Pgymbuddy.apiBaseUrl` override stays. CI builds
+    Test". The `-Pgymbuddy.apiBaseUrl` override stays. CI builds
     and tests both; secrets per flavor.
-5.8 **(me)** Staging Firebase project (Auth: Google + email), DNS,
-    GitHub secrets, deploy staging. CI green, PR develop → main.
+5.8 **(me)** Test Firebase project (Auth: Google + email), DNS,
+    GitHub secrets, deploy test. CI green, PR develop → main.
 
 ### Plan 8: delivery (CI/CD + fastlane)
 
@@ -267,12 +267,12 @@ owner's company uses it. Plan: `docs/plans/environments`.
 8.2 **Release workflow.** On a `v*` tag: build a signed, minified prod
     AAB, versionCode from the tag, Crashlytics mapping upload on.
     Signing secrets in GitHub secrets.
-8.3 **fastlane** (MIT). Lanes: `staging` (staging APK to testers via
+8.3 **fastlane** (MIT). Lanes: `test` (test APK to testers via
     Firebase App Distribution), `internal` (prod AAB to the Play
     internal track), `promote` (internal → closed). Store listing text
     and screenshots in `android/fastlane/metadata`. CI runs the lanes;
     I run them by hand only as a fallback.
-8.4 **Backend CD.** Push to develop deploys staging, a `v*` tag
+8.4 **Backend CD.** Push to develop deploys test, a `v*` tag
     deploys prod (triggers on the 5.4 SSH deploy workflow). Flyway runs on start,
     as today.
 8.5 **(me)** Play Console developer account and app, Play App Signing
@@ -311,7 +311,7 @@ owner's company uses it. Plan: `docs/plans/environments`.
      (commons-lang3 classloader clash, NVD cache saved on failure,
      push/PR/weekly triggers); merge it, run, triage each finding (bump,
      replace, or suppress with a reason). Stays non-blocking (ADR 0013).
-10.1 **(me)** Release build manual pass, staging then prod: R8,
+10.1 **(me)** Release build manual pass, test then prod: R8,
      sign-in, guest, sync, logout, account deletion.
 10.2 **(me)** First prod AAB on the internal track via fastlane.
 10.3 **(me)** Closed testing. Check the current tester rule (it was 12
@@ -330,7 +330,7 @@ Goal for now: free, easy to set up, easy to leave. Later: paid
 hosting of my own (e.g. DigitalOcean).
 
 **Choice: Render free web service (Docker) + Neon free Postgres.**
-Check both free tiers at setup time, since they change. Staging (Plan
+Check both free tiers at setup time, since they change. Test (Plan
 5) uses the same pair.
 
 - Render builds `backend/Dockerfile` as is. No buildpack, so nothing
@@ -358,7 +358,7 @@ Check both free tiers at setup time, since they change. Staging (Plan
 | Q-D | Client version headers (§8.3) | Yes, done in 2.4 |
 | Q-E | SonarQube new-code gate | ADR 0013 as is; revisit in 8.1 |
 | Q-F | Can a cloud session run the tests? | Open. Needs JDK 17, Android SDK, a Firebase config stand-in, Docker. Check on first remote step |
-| Q-G | Own domain for the API | **api.rukavina.app** (live). Staging: api-staging.rukavina.app (Plan 5) |
+| Q-G | Own domain for the API | **api.rukavina.app** (live). Test: api-test.rukavina.app (Plan 5) |
 | Q-H | Can the Figma MCP draw frames? | **Yes.** Figma Console MCP since 2026-10-31 (Desktop + Bridge plugin). Starter plan: 3 pages, 1 variable mode |
 | Q-I | Test + prod environments? | **Yes,** Plan 5, after the redesign (owner 2026-11-03) |
 | Q-J | Deployment tool | **fastlane** (MIT) for Play; GitHub Actions SSH deploy for the backend (Plan 5.4, triggers in 8.4) |

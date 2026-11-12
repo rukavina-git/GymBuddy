@@ -2,8 +2,8 @@
 # env file (see .env.example and docker/README.md "Server stack").
 # Only nginx publishes ports: Docker's iptables rules bypass ufw, so
 # db and backend stay on the internal network (ADR 0016). nginx also
-# joins gymbuddy-edge, where the staging stack (staging/compose.yaml)
-# attaches its backend; staging's db never joins it.
+# joins gymbuddy-edge, where the test stack (test/compose.yaml)
+# attaches its backend; test's db never joins it.
 name: gymbuddy
 
 services:
@@ -37,7 +37,7 @@ services:
       - "8080"
     networks:
       default:
-        # nginx proxies to this alias, never to "backend": staging's
+        # nginx proxies to this alias, never to "backend": test's
         # backend is also called "backend" and nginx sits on both
         # networks, so that name would resolve to either stack.
         aliases:
@@ -54,7 +54,7 @@ services:
       - "443:443"
     environment:
       API_HOST: ${API_HOST:?must be set}
-      STAGING_API_HOST: ${STAGING_API_HOST:?must be set}
+      TEST_API_HOST: ${TEST_API_HOST:?must be set}
     networks:
       - default
       - edge

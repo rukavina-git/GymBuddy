@@ -3,8 +3,8 @@ name: Deploy backend
 # Manual deploy of a GHCR image tag to the VPS (ADR 0016). Runs
 # docker/server/deploy.sh over SSH as the deploy user; that script
 # checks health and rolls back on failure. Auto-deploy: Plan 8.4.
-# target picks the stack: prod in /opt/gymbuddy, staging in
-# /opt/gymbuddy-staging (same box, same deploy key).
+# target picks the stack: prod in /opt/gymbuddy, test in
+# /opt/gymbuddy-test (same box, same deploy key).
 
 on:
   workflow_dispatch:
@@ -14,9 +14,9 @@ on:
         required: true
         type: choice
         options:
-          - staging
+          - test
           - prod
-        default: staging
+        default: test
       image_tag:
         description: "Image tag from the backend build, e.g. sha-abc1234"
         required: true
@@ -51,7 +51,7 @@ jobs:
           fi
           case "$TARGET" in
             prod) dir=/opt/gymbuddy ;;
-            staging) dir=/opt/gymbuddy-staging ;;
+            test) dir=/opt/gymbuddy-test ;;
             *) echo "::error::unknown target: $TARGET"; exit 1 ;;
           esac
           # deploy.sh validates the full ref too; this keeps junk off the SSH command line.

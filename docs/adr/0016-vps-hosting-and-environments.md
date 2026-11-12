@@ -1,4 +1,4 @@
-# 16. Self-hosted VPS with separate staging and prod
+# 16. Self-hosted VPS with separate test and prod
 
 Date: 2026-11-12
 Status: Proposed
@@ -13,7 +13,7 @@ hours can't keep two always-on services, and the free service sleeps
 when idle (~30–60 s cold start).
 
 Measured 2026-11-11 (local compose, `-Xmx300m`): backend 403 MB idle,
-494 MB after 6k requests; Postgres 86 MB. Prod + staging + nginx + OS
+494 MB after 6k requests; Postgres 86 MB. Prod + test + nginx + OS
 come to about 1.3–1.4 GB.
 
 ## Decision
@@ -33,13 +33,13 @@ come to about 1.3–1.4 GB.
   ports stay on the Docker network.
 - **Two environments, fully separate:**
 
-  | | Prod | Staging |
+  | | Prod | Test |
   |---|---|---|
-  | Host | `api.rukavina.app` | `api-staging.rukavina.app` |
+  | Host | `api.rukavina.app` | `api-test.rukavina.app` |
   | Backend | own container | own container, smaller heap |
   | Database | own database + role | own database + role |
-  | Firebase | current project | new staging project |
-  | Android builds | prod release only | debug and staging |
+  | Firebase | current project | new test project |
+  | Android builds | prod release only | debug + `qa` flavor ("GymBuddy Test") |
 
 - **Images on GHCR.** CI builds and pushes the backend image. A manual
   GitHub Actions workflow deploys a chosen tag over SSH as the deploy
@@ -80,8 +80,8 @@ licences put no conditions on selling the app.
   live off the box, and a rebuild is the setup script, compose and a
   restore.
 - No cold starts. The keep-awake ping goes away with Render.
-- Staging and prod share CPU and RAM. A staging load test can slow prod.
-  Staging gets a smaller heap.
+- Test and prod share CPU and RAM. A test load test can slow prod.
+  Test gets a smaller heap.
 - Moving to another host stays cheap: the same script and compose on a
   new box, a restore, and a DNS change. No app update needed.
 - Render, Neon and `render.yaml` are removed after the cutover (Plan 5
