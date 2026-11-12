@@ -8,12 +8,11 @@ Updated 2026-11-02.
 
 ## Where things are
 
-- **Backend:** deployed on Render + Neon at api.rukavina.app. Sync,
+- **Backend:** on the netcup VPS at api.rukavina.app (since 2026-11-12). Sync,
   reference, /me, account deletion, tombstone job, rate limit, spec
   drift test, JSON logs with traceId/userId/client version. One
-  environment only (staging comes in Plan 5). It tracks develop and
-  only deploys by hand (docker/README.md, Hosting); brought up to
-  Plan 6 on 2026-11-07.
+  environment only (staging comes in Plan 5). Deploys by hand via the
+  Deploy workflow (docker/README.md, Hosting).
 - **Android:** v1 skeleton UI on the sync engine (outbox, push, pull,
   410 resync, logout flush-and-warn). Room v26 baseline with migration
   tests, no destructive fallback, Crashlytics. Device checks passed

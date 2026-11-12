@@ -106,8 +106,8 @@ roadmap-details.md §3.
 - [x] 5.2 Server setup script (hardening, Docker, swap)
 - [x] 5.3 Server stack: compose, nginx, certbot
 - [x] 5.4 CI: image to GHCR, SSH deploy, backups on the VPS
-- [ ] 5.5 (me) Buy VPS, cut over from Render + Neon
-- [ ] 5.6 Staging stack on the same box, Render removed (spec change)
+- [x] 5.5 (me) Buy VPS, cut over from Render + Neon
+- [ ] 5.6 Staging stack on the same box (spec change)
 - [ ] 5.7 Android: `staging` / `prod` flavors; CI builds both
 - [ ] 5.8 (me) Staging Firebase, DNS, secrets, CI green, PR develop → main
 

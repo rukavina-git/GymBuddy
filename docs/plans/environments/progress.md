@@ -4,8 +4,8 @@
 - [x] 02 Server setup script (2d7d299)
 - [x] 03 Server stack: compose, nginx, certbot (2be942d)
 - [x] 04 CI: image to GHCR, SSH deploy, backups (d66f4a4)
-- [ ] 05 (me) Buy VPS, cut over from Render + Neon
-- [ ] 06 Staging stack, Render removed (spec change)
+- [x] 05 (me) Buy VPS, cut over from Render + Neon (e693e39, e693e39)
+- [ ] 06 Staging stack (spec change; Render removed in 05)
 - [ ] 07 Android staging / prod flavors
 - [ ] 08 (me) Staging Firebase, DNS, secrets, CI green, PR develop → main
 
@@ -36,6 +36,17 @@
   ubuntu, others refused); README and ADR 0016 updated. Tested with
   SKIP_SYSTEMD=1 in debian:13 and ubuntu:24.04 (fedora:41 refused).
   The checklist itself is still open; the owner runs it with Claude.
+- 05: owner chose no migration (Render/Neon held test data only): the
+  VPS started with an empty DB, no dry run, no restore, no rollback.
+  This drops the overview invariant "prod data is never lost / restore
+  a backup first" for this cutover only. Step file rewritten to match.
+  Render/Neon cleanup moved here from 06: `render.yaml`, the `neon`
+  backup job, `BACKUP_DATABASE_URL` and the Render/Neon docs are gone;
+  the Neon project is deleted, the Render service only suspended.
+  Deploy workflow not run: `workflow_dispatch` needs `deploy.yml` on
+  `main` (404 from develop), so it moves to 08. Phone: push verified on
+  the server (1 user, 1 workout, 3 sets); pull after reinstall not
+  re-checked. Uptime monitor already existed on the same URL.
 
 ## Gotchas
 
@@ -102,3 +113,14 @@
   with A, no stray AAAA (rollback re-creates the CNAME); step 7 row
   counts are compared to the dump, not live Neon; setup.sh header
   example uses `sudo` (Debian minimal has none).
+- 05: VPS 62.83.85.218 (`v2202611456973557814.hotsrv.de`), Debian 13.
+  Cert: Let's Encrypt, expires 2027-02-10 (certbot renews). Running
+  image `sha-0af8853`. Two keys on the Mac: `~/.ssh/id_ed25519` (owner,
+  root + deploy) and `~/.ssh/gymbuddy_ci` (`DEPLOY_SSH_KEY`, deploy
+  only); both in Bitwarden, no passphrase.
+- 05: Claude's guard hook blocks `ssh deploy@…`/prod commands and
+  reading `.env`; the owner runs those in Terminal. `!` in Claude can't
+  answer SSH prompts (host key, password).
+- 05 for 06: Render removal is done; 06 is only the staging stack +
+  spec server. Pasted base64 can wrap: check `.env` with `wc -l`.
+- 05 for 08: run the Deploy workflow (`sha-` tag) once it's on main.

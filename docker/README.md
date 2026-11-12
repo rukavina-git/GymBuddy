@@ -1,6 +1,6 @@
 # Docker
 
-Compose files and Caddy config for local dev and deployment.
+Compose files for local dev and the VPS server stack.
 
 ## Local dev
 
@@ -15,8 +15,7 @@ Two services:
   healthy. Reaches Postgres only via the `DATABASE_URL` env var set here
   - no host/port/db config lives anywhere else.
 
-No Caddy yet - Render terminates TLS (see Hosting). It earns its place
-when the backend moves to a VPS.
+TLS is only on the VPS: nginx in the server stack (below).
 
 ## Server setup
 
@@ -75,11 +74,10 @@ As `deploy`, once:
 
 ## Hosting
 
-Target (ADR 0016): the netcup VPS runs the server stack above, with
-the backend image from GHCR. Until the Plan 5 step 05 cutover, Render
-(free web service, Frankfurt, `render.yaml`) and Neon (free Postgres,
-EU) still serve `api.rukavina.app`. The image is the same everywhere;
-nothing in the app knows where it runs.
+The netcup VPS (ADR 0016) runs the server stack above and serves
+`api.rukavina.app` since 2026-11-12, with the backend image from GHCR.
+Render + Neon are gone. The image is the same everywhere; nothing in
+the app knows where it runs.
 
 ### Image on GHCR
 
@@ -108,32 +106,10 @@ script works by hand on the server. The workflow uses the GitHub
 environment `prod`; add a required reviewer there to gate deploys.
 Auto-deploy on push waits for Plan 8.4.
 
-### Render deploys (until step 05)
-
-`render.yaml` has `autoDeploy: false`, and the service tracks the
-`develop` branch. A merge never reaches the server by itself: after a
-backend change lands, Render dashboard → gymbuddy-backend → Manual
-Deploy → Deploy latest commit, then wait for Live. Until Plan 5 splits
-staging and prod, this one service is effectively the test server.
-(2026-11-07: it still ran a pre-Plan-6 build, so the server dropped
-the profile's `avatarId` on every push: device feedback F1/F12.)
-
-### Neon: direct vs pooled host (until step 05)
-
-Neon gives two hosts per branch: `ep-xxx.<region>.aws.neon.tech`
-(direct) and `ep-xxx-pooler...` (PgBouncer). Use the **direct** host
-everywhere: Flyway takes a session-level advisory lock that a
-transaction pooler breaks, and one small instance doesn't need pooling.
-
 ### Secrets
 
 | Secret | Where | Value |
 |---|---|---|
-| `DATABASE_URL` | Render env | `jdbc:postgresql://<direct-host>/<db>?sslmode=require&user=<user>` (no password) |
-| `DB_PASSWORD` | Render env | Neon role password |
-| `FIREBASE_CREDENTIALS_B64` | Render env | base64 service account JSON (see backend/README.md) |
-| `JAVA_TOOL_OPTIONS` | `render.yaml` | heap limits for 512 MB, not secret |
-| `BACKUP_DATABASE_URL` | GitHub Actions secret | `postgresql://<user>:<password>@<direct-host>/<db>?sslmode=require` (libpq form, password included) |
 | `BACKUP_PASSPHRASE` | GitHub Actions secret + password manager | long random string; without it no backup can be restored |
 | `DEPLOY_HOST` | GitHub Actions secret | VPS host name or IP |
 | `DEPLOY_SSH_KEY` | GitHub Actions secret | private key of the `deploy` user (root-equivalent, see Server setup). Used by deploy and backup |
@@ -141,26 +117,18 @@ transaction pooler breaks, and one small instance doesn't need pooling.
 | `BACKEND_IMAGE` | VPS `/opt/gymbuddy/.env` | `ghcr.io/rukavina-git/gymbuddy-backend:sha-<7>`; `deploy.sh` rewrites it (not secret) |
 | `API_HOST` | VPS `/opt/gymbuddy/.env` | `api.rukavina.app` (not secret) |
 | `DB_PASSWORD` | VPS `/opt/gymbuddy/.env` + password manager | Postgres `gymbuddy` role password |
-| `FIREBASE_CREDENTIALS_B64` | VPS `/opt/gymbuddy/.env` | as for Render |
-
-Render's `PORT=8080` is in `render.yaml`; it only tells Render which
-port the container listens on.
+| `FIREBASE_CREDENTIALS_B64` | VPS `/opt/gymbuddy/.env` + password manager | base64 service account JSON on one line (see backend/README.md) |
 
 ### Backups
 
 `.github/workflows/db-backup.yml` runs nightly (02:30 UTC) and on manual
-trigger, one job per source. A job whose secrets are empty skips itself
-with a notice, so both run during the cutover.
+trigger. It SSHes in as `deploy` and runs `docker compose exec -T db
+pg_dump -Fc` on the server (Postgres isn't public). The dump streams
+over SSH into gpg on the runner. It skips itself with a notice when
+the `DEPLOY_*` secrets are empty.
 
-- `vps`: SSH as `deploy`, `docker compose exec -T db pg_dump -Fc` on
-  the server (Postgres isn't public). The dump streams over SSH into
-  gpg on the runner.
-- `neon` (until step 06): `pg_dump -Fc` in a `postgres:17` container
-  against `BACKUP_DATABASE_URL`. Keep the tag at or above Neon's major
-  version.
-
-Both encrypt with `gpg --symmetric` (AES256) and upload only the
-`.gpg` file (`gymbuddy-<vps|neon>-<ts>.dump.gpg`) as an artifact kept
+It encrypts with `gpg --symmetric` (AES256) and upload only the
+`.gpg` file (`gymbuddy-vps-<ts>.dump.gpg`) as an artifact kept
 30 days. The repo is public, so the dump is never stored unencrypted.
 
 ### Restore
@@ -168,20 +136,19 @@ Both encrypt with `gpg --symmetric` (AES256) and upload only the
 1. Download the artifact from the workflow run and unzip it.
 2. Run:
 
-       BACKUP_PASSPHRASE=... docker/restore.sh gymbuddy-<ts>.dump.gpg \
+       BACKUP_PASSPHRASE=... docker/restore.sh gymbuddy-vps-<ts>.dump.gpg \
          'postgresql://<user>:<password>@<host>/<db>?sslmode=require'
 
    Needs `gpg` and `pg_restore` (same or newer major version) locally.
    `--clean --if-exists` drops and replaces existing objects.
-   `--no-acl` skips GRANTs: a Neon dump grants to Neon-only roles
-   (`neon_superuser`) that don't exist elsewhere, and the app connects
-   as the database owner anyway.
+   `--no-acl` skips GRANTs (old hosted dumps granted to roles that
+   don't exist elsewhere); the app connects as the database owner.
 
 Onto the VPS (Postgres isn't reachable from outside): decrypt locally,
 then stream the plain dump into the db container. Stop the backend
 first so nothing writes during the restore:
 
-    gpg --decrypt gymbuddy-<ts>.dump.gpg > gymbuddy.dump
+    gpg --decrypt gymbuddy-vps-<ts>.dump.gpg > gymbuddy.dump
     ssh deploy@<host> 'cd /opt/gymbuddy && docker compose stop backend'
     ssh deploy@<host> 'cd /opt/gymbuddy && docker compose exec -T db \
       pg_restore --clean --if-exists --no-owner --no-acl --exit-on-error \
@@ -192,8 +159,8 @@ first so nothing writes during the restore:
 The target server must run the same Postgres major version as the
 source, or newer. A pg_dump 17 dump fails on a 16 server
 (`unrecognized configuration parameter "transaction_timeout"`), and
-local compose runs `postgres:16`. Bump the compose image to Neon's
-version before restoring a hosted dump into it.
+local compose runs `postgres:16`. Bump the compose image to the
+server's version before restoring a hosted dump into it.
 
 To run it from a container instead of installing tools (match the tag
 to the target server):

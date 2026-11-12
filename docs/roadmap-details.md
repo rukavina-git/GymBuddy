@@ -14,7 +14,7 @@ iOS is out of scope until Android v1 is live.
 | 0 Monorepo | Done |
 | 1 Schema hardening | Done. Group K favourites and rest timer are v2 (§14.2, Q-07) |
 | 2 OpenAPI contract | Done. All 8 endpoints in the spec |
-| 3 Backend | Done, deployed on Render + Neon at api.rukavina.app |
+| 3 Backend | Done, on the netcup VPS at api.rukavina.app (2026-11-12) |
 | 4 Android sync | Done (Plan 1). Device checks passed 2026-10-31 |
 | Data safety | Done (Plan 2): migrations, Crashlytics, JSON logs |
 | Redesign in Figma | Done (Plan 3): Soft Dark, every screen locked, DESIGN.md |
