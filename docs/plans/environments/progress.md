@@ -6,7 +6,7 @@
 - [x] 04 CI: image to GHCR, SSH deploy, backups (d66f4a4)
 - [x] 05 (me) Buy VPS, cut over from Render + Neon (e693e39, b6ac3fb)
 - [x] 06 Test stack (spec change; Render removed in 05) (5e67a4f)
-- [ ] 07 Android qa / prod flavors
+- [x] 07 Android qa / prod flavors (b009b36)
 - [ ] 08 (me) Test Firebase, DNS, secrets, CI green, PR develop → main
 
 ## Deviations
