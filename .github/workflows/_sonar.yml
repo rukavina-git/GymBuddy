@@ -55,7 +55,7 @@ on:
         type: string
         default: ''
       wait-for-gate:
-        description: "Wait for the SonarCloud quality gate and fail this job when it is red (Plan 8.1, ADR 0013 update). Per-build callers pass true; sonar-full.yml leaves it false (report only)."
+        description: "Wait for the SonarCloud quality gate and fail this job when it is red (Plan 8.1, ADR 0013 update). Only true on pushes to main: the free plan cannot read the gate of any other branch and errors out."
         required: false
         type: boolean
         default: false

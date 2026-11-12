@@ -32,6 +32,15 @@
   line "CI doesn't run lint" updated. Owner checklist (SonarCloud gate
   + new-code definition, Sonar green on develop, `Lint` required on
   main) not done yet.
+- 01 follow-up: the blocking gate broke develop CI: "Organization is
+  not allowed to access data from non main branches" (free plan). The
+  gate now waits only on pushes to `main`. SonarCloud was also wrong:
+  backend's main branch was an empty `master`, real `main` a short
+  branch. Owner deleted all 3 projects and recreated
+  `GymBuddy-backend`, `-android`, `-ios` (reserved) by hand, public,
+  unbound. `sonar-full.yml` deleted. Owner still has to rename each
+  main branch to `main` after the first develop scan (Branches page
+  appears only then), set new code = 30 days, gate = Sonar way.
 
 ## Gotchas
 
@@ -51,3 +60,8 @@
   Sonar gate now fails the job; if develop goes red on untouched code,
   that's the gate, not this step. Reviewer NITs left: ADR count, the
   gate only blocks main after the owner adds required checks.
+- 01: no Sonar gate before merge on the free plan; the gate shows red
+  on `main` after merging. Rename the SonarCloud main branch to `main`
+  before the first push to `main` (PR at 8.6), or `main` lands as a
+  short branch again. coverage-exclusions still emits `*-root`
+  outputs that only sonar-full.yml used (dead, harmless).

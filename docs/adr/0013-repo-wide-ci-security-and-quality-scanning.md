@@ -83,11 +83,19 @@ revisited before any app-store submission.
 
 ## Update — 2026-11-12 (Plan 8.1)
 
-- **Sonar gate is blocking.** `_sonar.yml` has a `wait-for-gate` input;
-  `backend-build.yml` and `android-build.yml` pass `true`, so a red
-  quality gate (default "Sonar way": new-code coverage, no new
-  bugs/vulnerabilities) fails the Sonar job. `sonar-full.yml` stays
-  report-only. Supersedes "Sonar never fails a build" above.
+- **Sonar gate blocks on `main` only.** `_sonar.yml` has a
+  `wait-for-gate` input; `backend-build.yml` and `android-build.yml`
+  set it on pushes to `main`, so a red quality gate ("Sonar way")
+  fails the Sonar job there. The free SonarCloud plan cannot read the
+  gate of any other branch (the scanner errors out), so develop and
+  PRs only report. Supersedes "Sonar never fails a build" above.
+- **Clean-slate projects.** The old whole-repo project
+  `rukavina-git_GymBuddy` and `sonar-full.yml` are gone. One public
+  project per app: `rukavina-git_GymBuddy-backend`, `-android`, and
+  `-ios` (reserved, empty until iOS starts). Created by hand, not
+  bound to GitHub (no PR decoration, no Automatic Analysis). Main
+  branch must be named `main`; new code = last 30 days until `v*`
+  tags exist (Plan 8.2), then "previous version".
 - **Android Lint in CI.** `android-build.yml` job `Lint` runs
   `lintQaDebug` with `app/lint-baseline.xml` (42 errors, 62 warnings
   at the time). Only issues not in the baseline fail. Regenerate the

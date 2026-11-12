@@ -19,7 +19,8 @@ Q-E "revisit in 8.1"). Before signed releases (02) and auto-deploy
 - `_sonar.yml`: new input `wait-for-gate` (bool, default false). When
   true, add `-Dsonar.qualitygate.wait=true` so a red gate fails the
   job. Both callers (`android-build.yml`, `backend-build.yml`) pass
-  `true`. `sonar-full.yml` stays report-only.
+  it on pushes to `main` only (free plan, see Deviations).
+  `sonar-full.yml` and the old whole-repo project are removed.
 - ADR 0013: "Update 2026-11-12": Sonar gate blocking, Android Lint
   in CI with a baseline. Q-E answered in `roadmap-details.md`.
 
