@@ -41,6 +41,10 @@
   unbound. `sonar-full.yml` deleted. Owner still has to rename each
   main branch to `main` after the first develop scan (Branches page
   appears only then), set new code = 30 days, gate = Sonar way.
+  Done 2026-11-13: main branches renamed, `Lint` added to the
+  "Main protect rule" ruleset (verified via API). Sonar keeps running
+  on develop/PRs although the free plan discards those scans: the
+  ruleset requires the Sonar checks on PRs into main.
 
 ## Gotchas
 
