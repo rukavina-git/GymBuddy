@@ -359,7 +359,7 @@ Check both free tiers at setup time, since they change. Test (Plan
 | Q-B | Hosting (old Q-02) | **Render + Neon until Plan 5,** then netcup VPS (owner 2026-11-11) |
 | Q-C | Firebase Analytics in v1? | **No.** Crashlytics only, so no consent gate |
 | Q-D | Client version headers (§8.3) | Yes, done in 2.4 |
-| Q-E | SonarQube new-code gate | **Blocking** since 8.1 (backend + Android per-build scans); full scan report-only. ADR 0013 update |
+| Q-E | SonarQube new-code gate | **Blocking on `main` only** since 8.1 (free plan reads no other branch's gate); one project per app. ADR 0013 update |
 | Q-F | Can a cloud session run the tests? | Open. Needs JDK 17, Android SDK, a Firebase config stand-in, Docker. Check on first remote step |
 | Q-G | Own domain for the API | **api.rukavina.app** (live). Test: api-test.rukavina.app (Plan 5) |
 | Q-H | Can the Figma MCP draw frames? | **Yes.** Figma Console MCP since 2026-10-31 (Desktop + Bridge plugin). Starter plan: 3 pages, 1 variable mode |

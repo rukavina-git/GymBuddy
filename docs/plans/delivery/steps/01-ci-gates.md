@@ -25,9 +25,10 @@ Q-E "revisit in 8.1"). Before signed releases (02) and auto-deploy
   in CI with a baseline. Q-E answered in `roadmap-details.md`.
 
 ## Checklist (owner)
-1. SonarCloud, both projects: quality gate "Sonar way" (80 % new-code
-   coverage, no new bugs/vulns), new-code definition = previous
-   version or reference branch `main`. Say which.
+1. SonarCloud: delete the old projects, create `GymBuddy-backend`,
+   `-android`, `-ios` by hand (public, unbound). Gate "Sonar way",
+   new code = 30 days. After the first develop scan, rename each
+   main branch to `main` (Project → Branches).
 2. After the push: the Sonar jobs on develop are green. If a gate is
    red on code not touched by this step, tell Claude before going on.
 3. Branch ruleset on `main`: add the new `Lint` check as required.
