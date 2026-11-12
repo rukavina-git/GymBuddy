@@ -113,6 +113,7 @@ roadmap-details.md §3.
 
 ## Plan 8: delivery (CI/CD + fastlane)
 
+- [ ] 8.0 Deploy secrets into GitHub environments, prod gated (do first)
 - [ ] 8.1 CI gates: Android Lint, SonarQube (Q-E). OWASP is 10.0
 - [ ] 8.2 Signed release AAB on a `v*` tag, versionCode from the tag
 - [ ] 8.3 fastlane: test build to testers, prod AAB to the Play

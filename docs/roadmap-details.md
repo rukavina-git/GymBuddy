@@ -261,6 +261,9 @@ owner's company uses it. Plan: `docs/plans/environments`.
 
 ### Plan 8: delivery (CI/CD + fastlane)
 
+8.0 **Deploy secrets.** Move `DEPLOY_*` from repo secrets into the
+    `test`, `prod` and `backup` environments; `prod` gets a reviewer
+    and only `main` + `v*` tags. Before 8.4 can auto-deploy.
 8.1 **CI gates.** OWASP moved to 10.0.
     Android Lint in CI (baseline the current warnings, fail on new
     errors). Revisit the SonarQube gate (Q-E).
