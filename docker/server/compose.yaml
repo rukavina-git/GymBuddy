@@ -1,0 +1,94 @@
+# Server stack (prod). Lives in /opt/gymbuddy on the VPS next to an
+# env file (see .env.example and docker/README.md "Server stack").
+# Only nginx publishes ports: Docker's iptables rules bypass ufw, so
+# db and backend stay on the internal network (ADR 0016). nginx also
+# joins gymbuddy-edge, where the test stack (test/compose.yaml)
+# attaches its backend; test's db never joins it.
+name: gymbuddy
+
+services:
+  db:
+    # Keep in step with the postgres tag in .github/workflows/db-backup.yml.
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gymbuddy
+      POSTGRES_USER: gymbuddy
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?must be set}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U gymbuddy -d gymbuddy" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    # GHCR tag on the server (Plan 5 step 04); any local tag for tests.
+    image: ${BACKEND_IMAGE:?must be set}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/gymbuddy?user=gymbuddy
+      DB_PASSWORD: ${DB_PASSWORD:?must be set}
+      FIREBASE_CREDENTIALS_B64: ${FIREBASE_CREDENTIALS_B64:?must be set}
+      JAVA_TOOL_OPTIONS: -Xmx300m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+    expose:
+      - "8080"
+    networks:
+      default:
+        # nginx proxies to this alias, never to "backend": test's
+        # backend is also called "backend" and nginx sits on both
+        # networks, so that name would resolve to either stack.
+        aliases:
+          - backend-prod
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.30-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      API_HOST: ${API_HOST:?must be set}
+      TEST_API_HOST: ${TEST_API_HOST:?must be set}
+    networks:
+      - default
+      - edge
+    volumes:
+      # The image's envsubst step renders this to conf.d/default.conf,
+      # replacing the stock default server.
+      - ./nginx/api.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - letsencrypt:/etc/letsencrypt:ro
+      - certbot-www:/var/www/certbot:ro
+    # Reload every 6 h so a cert renewed by certbot is picked up
+    # without giving any container the Docker socket.
+    command: >-
+      /bin/sh -c 'while :; do sleep 6h; nginx -s reload; done &
+      exec /docker-entrypoint.sh nginx -g "daemon off;"'
+    depends_on:
+      - backend
+
+  certbot:
+    image: certbot/certbot:v5.10.0
+    restart: unless-stopped
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    # First cert: init-cert.sh. After that, renew via nginx's webroot.
+    entrypoint: >-
+      /bin/sh -c 'trap exit TERM; while :; do
+      certbot renew --webroot -w /var/www/certbot --quiet;
+      sleep 12h & wait $${!}; done'
+
+networks:
+  edge:
+    name: gymbuddy-edge
+
+volumes:
+  db-data:
+  letsencrypt:
+  certbot-www:

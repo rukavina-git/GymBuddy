@@ -23,7 +23,7 @@ Project status (phases, open items) lives in docs/status.md, not here.
 
 ## Verification
 - After each UI or bug step, install on the connected phone
-  (./gradlew installDebug) and check the fix with adb: screenshots,
+  (./gradlew installQaDebug: test backend, never prod) and check the fix with adb: screenshots,
   taps, logcat. Compose UI tests are fine too.
 - Keep device checks cheap: only the changed screens, a few
   screenshots (crop them), no long tap loops.

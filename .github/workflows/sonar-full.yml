@@ -30,10 +30,10 @@ jobs:
             21
             17
 
-      - name: Create android/app/src/google-services.json
+      - name: Create android/app/src/qa/google-services.json
         env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/src/google-services.json
+          GOOGLE_SERVICES_JSON_QA: ${{ secrets.GOOGLE_SERVICES_JSON_QA }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON_QA" > android/app/src/qa/google-services.json
 
       - name: Backend tests + coverage
         working-directory: backend
@@ -41,7 +41,7 @@ jobs:
 
       - name: Android tests + coverage
         working-directory: android
-        run: ./gradlew testDebugUnitTest jacocoTestReport --stacktrace
+        run: ./gradlew testQaDebugUnitTest jacocoTestReport --stacktrace
 
       - name: Resolve coverage exclusions
         id: exclusions

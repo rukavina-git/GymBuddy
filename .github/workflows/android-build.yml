@@ -37,11 +37,12 @@ jobs:
       java-version: '17'
       # No plain `test` task on an Android application module - only
       # variant-specific ones.
-      gradle-task: testDebugUnitTest jacocoTestReport
+      # qa only: both flavors run the same code.
+      gradle-task: testQaDebugUnitTest jacocoTestReport
       coverage-report-dir: android/app/build/reports/jacoco/test
-      secret-file-path: app/src/google-services.json
+      secret-file-path: app/src/qa/google-services.json
     secrets:
-      secret-file-content: ${{ secrets.GOOGLE_SERVICES_JSON }}
+      secret-file-content: ${{ secrets.GOOGLE_SERVICES_JSON_QA }}
 
   sonar:
     name: Sonar
@@ -87,19 +88,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-android-
 
-      - name: Create google-services.json
+      - name: Create google-services.json (qa + prod)
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: printf '%s' "$GOOGLE_SERVICES_JSON" > app/src/google-services.json
+          GOOGLE_SERVICES_JSON_QA: ${{ secrets.GOOGLE_SERVICES_JSON_QA }}
+        run: |
+          mkdir -p app/src/prod
+          printf '%s' "$GOOGLE_SERVICES_JSON_QA" > app/src/qa/google-services.json
+          printf '%s' "$GOOGLE_SERVICES_JSON" > app/src/prod/google-services.json
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Build debug APKs
+        run: ./gradlew assembleQaDebug assembleProdDebug --stacktrace
 
-      - name: Upload APK
+      - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            android/app/build/outputs/apk/qa/debug/app-qa-debug.apk
+            android/app/build/outputs/apk/prod/debug/app-prod-debug.apk
           retention-days: 7
 
       - name: Build Summary

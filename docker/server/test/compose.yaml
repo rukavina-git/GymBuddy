@@ -1,0 +1,53 @@
+# Test stack (Plan 5 step 06). Lives in /opt/gymbuddy-test on the
+# VPS next to its own env file (see the example next to this file) and
+# deploy.sh. The prod stack's nginx serves it as TEST_API_HOST over
+# the shared gymbuddy-edge network, so start prod first (it creates the
+# network). Service names match prod's, so deploy.sh works here unchanged.
+name: gymbuddy-test
+
+services:
+  db:
+    # Same major version as prod.
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gymbuddy
+      POSTGRES_USER: gymbuddy
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?must be set}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U gymbuddy -d gymbuddy" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: ${BACKEND_IMAGE:?must be set}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/gymbuddy?user=gymbuddy
+      DB_PASSWORD: ${DB_PASSWORD:?must be set}
+      FIREBASE_CREDENTIALS_B64: ${FIREBASE_CREDENTIALS_B64:?must be set}
+      # Smaller heap than prod: little traffic, and both share 2 GB.
+      JAVA_TOOL_OPTIONS: -Xmx192m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+    expose:
+      - "8080"
+    # nginx reaches it only as backend-test (prod's is backend-prod).
+    networks:
+      default:
+      edge:
+        aliases:
+          - backend-test
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  edge:
+    name: gymbuddy-edge
+    external: true
+
+volumes:
+  db-data:

@@ -1,0 +1,103 @@
+# ${API_HOST} and ${TEST_API_HOST} are filled in by the nginx
+# image's envsubst step. nginx's own variables ($host, $remote_addr,
+# ...) have no braces here, so envsubst leaves them alone.
+#
+# Prod and test share one cert (lineage named after API_HOST, both
+# names on it), so the test block can never point at a missing
+# cert and take prod down with it.
+
+server_tokens off;
+
+ssl_certificate     /etc/letsencrypt/live/${API_HOST}/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/${API_HOST}/privkey.pem;
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_prefer_server_ciphers off;
+ssl_session_cache shared:SSL:5m;
+ssl_session_timeout 1d;
+
+# Docker's embedded DNS. With a variable in proxy_pass nginx looks a
+# backend up per request (cached 10 s) instead of once at startup, so
+# a deploy that replaces a backend container (new IP) doesn't leave
+# nginx proxying to a dead address, and nginx starts even while the
+# test stack is down (that host gets 502).
+resolver 127.0.0.11 valid=10s ipv6=off;
+
+# Port 80, any Host: answer ACME challenges, so certbot --webroot can
+# add a name through the running nginx. Everything else: drop.
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 444;
+    }
+}
+
+# Unknown SNI on 443: refuse the TLS handshake.
+server {
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    ssl_reject_handshake on;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${API_HOST} ${TEST_API_HOST};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# Prod.
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${API_HOST};
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    client_max_body_size 1m;
+
+    # Never plain "backend": see the alias note in compose.yaml.
+    set $backend_upstream http://backend-prod:8080;
+
+    location / {
+        proxy_pass $backend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Test: the gymbuddy-test compose project, reached over the
+# shared gymbuddy-edge network.
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${TEST_API_HOST};
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    client_max_body_size 1m;
+
+    set $backend_upstream http://backend-test:8080;
+
+    location / {
+        proxy_pass $backend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

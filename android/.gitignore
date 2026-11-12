@@ -30,8 +30,9 @@ render.experimental.xml
 # Release builds
 app/release/
 
-# Google Services (e.g. APIs or Firebase)
+# Google Services (e.g. APIs or Firebase), one per flavor: src/qa, src/prod
 app/src/google-services.json
+app/src/*/google-services.json
 
 # Android Profiling
 *.hprof

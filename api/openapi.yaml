@@ -51,6 +51,8 @@ info:
 servers:
   - url: https://api.rukavina.app
     description: Production
+  - url: https://api-test.rukavina.app
+    description: Test
   - url: http://localhost:8080
     description: Local development
 

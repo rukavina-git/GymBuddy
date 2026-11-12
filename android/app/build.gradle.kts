@@ -60,17 +60,31 @@ android {
         }
     }
 
+    // One flavor per backend environment (ADR 0016). Each has its own
+    // Firebase project: src/<flavor>/google-services.json (gitignored).
+    // "qa", not "test": AGP rejects flavor names starting with "test".
+    // For a local backend on the emulator, either flavor:
+    // -Pgymbuddy.apiBaseUrl=http://10.0.2.2:8080/
+    flavorDimensions += "env"
+    productFlavors {
+        create("qa") {
+            dimension = "env"
+            // Installs next to the prod app. Name: src/qa/res/values.
+            applicationIdSuffix = ".qa"
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api-test.rukavina.app/")}\"")
+        }
+        create("prod") {
+            dimension = "env"
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.rukavina.app/")}\"")
+        }
+    }
+
     buildTypes {
         debug {
             manifestPlaceholders["crashlyticsEnabled"] = "false"
-            // The hosted backend, as in release (there's only one server).
-            // For a local backend on the emulator:
-            // -Pgymbuddy.apiBaseUrl=http://10.0.2.2:8080/
-            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.rukavina.app/")}\"")
         }
         release {
             signingConfig = signingConfigs.getByName("release")
-            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl("https://api.rukavina.app/")}\"")
             ndk {
                 debugSymbolLevel = "FULL"
             }
@@ -294,9 +308,9 @@ dependencyCheck {
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
+    dependsOn("testQaDebugUnitTest")
     group = "verification"
-    description = "Generates JaCoCo XML (SonarQube) and HTML coverage reports from testDebugUnitTest."
+    description = "Generates JaCoCo XML (SonarQube) and HTML coverage reports from testQaDebugUnitTest."
 
     reports {
         xml.required.set(true)
@@ -307,10 +321,10 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     }
 
     classDirectories.setFrom(
-        fileTree(layout.buildDirectory.dir("intermediates/javac/debug/compileDebugJavaWithJavac/classes")) {
+        fileTree(layout.buildDirectory.dir("intermediates/javac/qaDebug/compileQaDebugJavaWithJavac/classes")) {
             exclude(jacocoExcludes)
         },
-        fileTree(layout.buildDirectory.dir("intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes")) {
+        fileTree(layout.buildDirectory.dir("intermediates/built_in_kotlinc/qaDebug/compileQaDebugKotlin/classes")) {
             exclude(jacocoExcludes)
         }
     )
@@ -319,7 +333,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 
     executionData.setFrom(
         fileTree(layout.buildDirectory.get()) {
-            include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec", "jacoco/testDebugUnitTest.exec")
+            include("outputs/unit_test_code_coverage/qaDebugUnitTest/testQaDebugUnitTest.exec", "jacoco/testQaDebugUnitTest.exec")
         }
     )
 }
