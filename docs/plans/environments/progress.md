@@ -5,7 +5,7 @@
 - [x] 03 Server stack: compose, nginx, certbot (2be942d)
 - [x] 04 CI: image to GHCR, SSH deploy, backups (d66f4a4)
 - [x] 05 (me) Buy VPS, cut over from Render + Neon (e693e39, b6ac3fb)
-- [x] 06 Staging stack (spec change; Render removed in 05) (HASH)
+- [x] 06 Staging stack (spec change; Render removed in 05) (5e67a4f)
 - [ ] 07 Android staging / prod flavors
 - [ ] 08 (me) Staging Firebase, DNS, secrets, CI green, PR develop → main
 
