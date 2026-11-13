@@ -6,6 +6,8 @@ plugins {
     kotlin("plugin.jpa") version "2.1.21"
     jacoco
     id("org.owasp.dependencycheck") version "13.0.0"
+    // Licence report + gate (Apache 2.0), Plan 9 step 01, ADR 0018.
+    id("com.github.jk1.dependency-license-report") version "3.1.4"
 }
 
 group = "com.rukavina"
@@ -136,4 +138,20 @@ tasks.test {
 // src/test/kotlin/e2e/gymbuddy/E2eBackendApplication.kt.
 tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootTestRun") {
     mainClass.set("e2e.gymbuddy.E2eBackendApplicationKt")
+}
+
+// Plan 9 step 01 (ADR 0018): runtime libraries and their licences.
+// `check` fails on a licence not in config/allowed-licenses.json. The
+// few weak-copyleft libraries Spring Boot needs (Hibernate, Logback,
+// Jakarta APIs...) are allowed by exact module name only: the backend
+// runs on our server and is never distributed. AGPL never.
+licenseReport {
+    configurations = arrayOf("runtimeClasspath")
+    filters = arrayOf(com.github.jk1.license.filter.LicenseBundleNormalizer())
+    renderers = arrayOf(com.github.jk1.license.render.JsonReportRenderer("licences.json"))
+    allowedLicensesFile = file("config/allowed-licenses.json")
+}
+
+tasks.check {
+    dependsOn(tasks.named("checkLicense"))
 }

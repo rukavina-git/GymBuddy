@@ -39,8 +39,19 @@ for their text to reach users.
   Today: Calendar (kizitonwose), DataStore's repackaged Protocol
   Buffers, Fluent Emoji, Figtree. A new MIT/BSD/OFL dependency needs
   the same; Apache 2.0 needs nothing extra.
-- **Backend:** same allow-list, checked in its build (step 01, second
-  part).
+- **Backend:** `com.github.jk1.dependency-license-report` 3.1.4
+  (Apache 2.0). `./gradlew check` runs `checkLicense` against
+  `backend/config/allowed-licenses.json`: the same open-source list,
+  plus ten weak-copyleft modules Spring Boot needs, by exact module
+  name only (Hibernate, Logback: LGPL 2.1; AspectJ, Tomcat: EPL 2.0;
+  four Jakarta APIs: GPL 2.0 + Classpath Exception; javax.annotation:
+  CDDL). Their duties apply only when the library is distributed; the
+  backend runs on our server, unmodified, and is never shipped, so
+  they don't limit selling the app (owner agreed 2026-11-13). AGPL,
+  which applies to server-only use, is never allowed. Backend
+  libraries are not listed in the app: users never receive them.
+  Hibernate 7 (Spring Boot 4) is Apache 2.0, which drops the largest
+  one.
 
 ## Consequences
 

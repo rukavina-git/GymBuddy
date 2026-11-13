@@ -14,3 +14,7 @@
 - qa key fingerprints added to Firebase (gymbuddy-test-31dc1) by the
   owner: Google sign-in works in the App Distribution build. Same
   needed for Play's app-signing key on the prod app at first upload.
+- 01 backend gate done: 206 modules, `check` runs `checkLicense`;
+  10 weak-copyleft Spring Boot modules allowed by exact name (ADR
+  0018). Negative check: Hibernate removed from the list → build
+  fails. Not shown in the app (never shipped). Open in 01: 01b photos.
