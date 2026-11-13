@@ -71,7 +71,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 
 <script>
 const STYLE = `3D render for a workout app. One square 1:1 image split into a 2×2 grid of four equal square tiles, separated by thin gaps of the same background colour (no lines, no borders, no frames). Each tile shows the same mannequin doing a different exercise: the figure centred in its tile, full body and all equipment inside the tile with margin, nothing crossing into another tile.
-The mannequin, identical in every tile: smooth light-grey figure with athletic proportions, no face details, no hair, plain matte black shorts, barefoot.
+The mannequin, identical in every tile: {{BODY}}
 Light: soft studio light from the upper left, subtle rim light.
 Working muscles: tinted a soft matte warm orange (#FF8A5B), like painted on the surface, as one smooth, even colour with no stripes or bands, no glow, no light effects. Everything else stays grey.
 View: exact side profile facing right, not turned towards the camera, unless a tile says otherwise.
@@ -174,8 +174,11 @@ const GRIDS = [
 ];
 const POS = ["Top left", "Top right", "Bottom left", "Bottom right"];
 const pad = n => String(n).padStart(2, "0");
-function promptFor(tiles) {
-  return STYLE + "\n\nTiles:\n" + tiles.map(([, name, desc], i) => `${POS[i]}: ${name}: ${desc}`).join("\n");
+const MALE = "smooth light-grey male figure with an athletic build, no face details, no hair, plain matte black shorts, barefoot.";
+const FEMALE = "smooth light-grey female figure with an athletic build: toned legs and glutes, a natural average bust, no face details, no hair, plain matte black sports top and shorts, barefoot. Neutral, non-sexualised pose.";
+// Alternate by grid: odd grids male, even grids female, so each image has one consistent body.
+function promptFor(tiles, n) {
+  return STYLE.replace("{{BODY}}", n % 2 ? MALE : FEMALE) + "\n\nTiles:\n" + tiles.map(([, name, desc], i) => `${POS[i]}: ${name}: ${desc}`).join("\n");
 }
 
 const store = {
@@ -192,9 +195,9 @@ GRIDS.forEach(([title, tiles], gi) => {
   const n = gi + 1;
   const card = document.createElement("article");
   card.className = "card" + (done.has(n) ? " done" : "");
-  const text = promptFor(tiles);
+  const text = promptFor(tiles, n);
   card.innerHTML = `
-    <div class="head"><h2>Grid ${pad(n)} · ${title}</h2><span class="file">grid-${pad(n)}</span></div>
+    <div class="head"><h2>Grid ${pad(n)} · ${title}</h2><span class="file">${n % 2 ? "Male" : "Female"} · grid-${pad(n)}</span></div>
     <ul class="tiles">${tiles.map(([num, name], i) => `<li><span class="pos">${POS[i]}</span><span class="num">#${pad(num)}</span> ${name}</li>`).join("")}</ul>
     <details><summary>Show prompt</summary><pre></pre></details>
     <div class="actions">
