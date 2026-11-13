@@ -15,10 +15,14 @@ must be live first.
 ## Scope
 1. Licence audit: every library and asset with source and licence,
    enforced in CI; in-app open-source licences page from About.
-2. Privacy policy + terms at a public URL, linked in-app.
+2. Privacy policy + terms at a public URL, linked in-app. Terms include
+   the training disclaimer: not medical advice, consult a doctor and a
+   qualified trainer, train at your own risk. Liability limited, not
+   excluded (EU rules on injury); lawyer glance before release.
 3. Web account deletion page.
 4. Compliance pass: health-data consent, 16+, Crashlytics payloads,
-   timer/notification rules.
+   timer/notification rules. In-app disclaimer line on the exercise
+   page (under How-to), short and quiet.
 5. (me) Play Console: Data safety, content rating, audience, listing.
 6. (me) CI green, PR develop → main.
 

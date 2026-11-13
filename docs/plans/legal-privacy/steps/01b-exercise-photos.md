@@ -43,3 +43,13 @@ credit.
 - New images: drawn by us (Claude), not photographed by the owner.
   Start with a few exercises to test the style, owner reviews, then
   the rest.
+- Images come from an AI image model (ChatGPT/Gemini); both allow
+  commercial use. Keep the chats as the record of where and when each
+  image was made. Every image is checked for correct technique.
+- Tried (2026-11-13): flat cartoon and 3D mannequin, single image,
+  3-frame strip and start/end pairs. Owner's choice: **one image per
+  exercise, 3D mannequin, working position, working muscles tinted
+  (matte warm orange, no glow)**. Frames dropped: more images, more
+  chances to show something wrong.
+- Next: lock the prompt on 2-3 exercises, then the full set of 60.
+  Images bundled in the app (WebP), no hotlinking.
