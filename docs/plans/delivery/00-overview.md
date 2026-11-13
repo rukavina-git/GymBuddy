@@ -19,6 +19,7 @@ Auto-deploy on top of that would make prod one push away.
 0. Deploy secrets into GitHub environments, prod gated.
 1. CI gates: Android Lint, SonarQube (Q-E).
 2. Signed release AAB on a `v*` tag, versionCode from the tag.
+2a. Clean Sonar issues and Dependabot alerts before any `v*` tag.
 3. fastlane: test build to testers, prod AAB to the Play internal
    track, store listing in the repo.
 4. Backend CD: develop → test, `v*` tag → prod.
