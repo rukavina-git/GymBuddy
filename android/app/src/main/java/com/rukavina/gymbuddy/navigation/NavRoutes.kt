@@ -30,8 +30,6 @@ object NavRoutes {
     const val Profile = "profile"
     const val About = "about"
     const val Licences = "licences"
-    /** One licence; id is URL-encoded (library ids contain ":"). */
-    const val LicenceDetail = "licence/{id}"
     const val DeleteAccount = "delete_account"
     const val ActiveWorkout = "active_workout"
     const val WorkoutSummary = "workout_summary"

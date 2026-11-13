@@ -1,6 +1,5 @@
 package com.rukavina.gymbuddy.ui
 
-import android.net.Uri
 import com.rukavina.gymbuddy.ui.template.relativeDay
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.Lifecycle
@@ -93,7 +92,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import com.rukavina.gymbuddy.ui.guest.GuestMergeViewModel
 import com.rukavina.gymbuddy.ui.you.AboutScreen
-import com.rukavina.gymbuddy.ui.you.licences.LicenceDetailScreen
 import com.rukavina.gymbuddy.ui.you.licences.LicencesScreen
 import com.rukavina.gymbuddy.ui.you.DeleteAccountScreen
 import com.rukavina.gymbuddy.ui.you.HiddenExercisesScreen
@@ -472,16 +470,7 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                 )
             }
             composable(NavRoutes.Licences) {
-                LicencesScreen(
-                    onBack = { bottomNavController.popBackStack() },
-                    onOpen = { id -> bottomNavController.navigate("licence/" + Uri.encode(id)) },
-                )
-            }
-            composable(NavRoutes.LicenceDetail) { entry ->
-                LicenceDetailScreen(
-                    id = entry.arguments?.getString("id").orEmpty(),
-                    onBack = { bottomNavController.popBackStack() },
-                )
+                LicencesScreen(onBack = { bottomNavController.popBackStack() })
             }
             composable(NavRoutes.Profile) {
                 ProfileScreen(

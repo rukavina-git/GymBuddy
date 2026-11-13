@@ -26,7 +26,7 @@ for their text to reach users.
   JSON entry in `android/config/aboutlibraries/libraries/` after a
   manual check, never a blanket allow. Bundled assets (icons, font,
   avatars) are listed there too, so they show in the app.
-- **In-app page:** About → Open-source licences, built from the report
+- **In-app page:** About → Open-source licences: a table of every library and asset with its licence, then each licence text once (tap a licence to jump to it). Built from the report
   the plugin bundles (`res/raw/aboutlibraries.json`), parsed with the
   app's Moshi. No AboutLibraries runtime library: its 15.x core targets
   Java 21, and the page uses the app's own components.

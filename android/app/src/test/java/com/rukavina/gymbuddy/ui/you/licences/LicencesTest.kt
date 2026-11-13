@@ -1,7 +1,6 @@
 package com.rukavina.gymbuddy.ui.you.licences
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 
 class LicencesTest {
@@ -9,37 +8,42 @@ class LicencesTest {
     private val json = """
         {
           "libraries": [
-            {"uniqueId": "asset:figtree", "artifactVersion": "032dfa7", "name": "Figtree",
-             "website": "https://github.com/erikdkennedy/figtree", "licenses": ["OFL-1.1"]},
-            {"uniqueId": "a:core", "artifactVersion": "", "name": "android core", "licenses": ["Apache-2.0"]}
+            {"uniqueId": "asset:figtree", "name": "Figtree", "licenses": ["OFL-1.1"]},
+            {"uniqueId": "a:core", "name": "core", "licenses": ["Apache-2.0"]},
+            {"uniqueId": "a:activity", "name": "Activity", "licenses": ["Apache-2.0"]},
+            {"uniqueId": "a:activity-ktx", "name": "Activity", "licenses": ["Apache-2.0"]},
+            {"uniqueId": "g:auth", "name": "Firebase Auth", "licenses": ["ASDKL"]},
+            {"uniqueId": "x:unknown", "name": "Mystery", "licenses": ["NOPE"]}
           ],
           "licenses": {
             "OFL-1.1": {"name": "SIL Open Font License 1.1", "url": "https://spdx.org/licenses/OFL-1.1.html",
-                        "content": "SIL OPEN FONT LICENSE", "spdxId": "OFL-1.1", "hash": "OFL-1.1"},
+                        "content": "SIL OPEN FONT LICENSE", "spdxId": "OFL-1.1"},
             "Apache-2.0": {"name": "Apache License 2.0", "url": "https://spdx.org/licenses/Apache-2.0.html",
-                           "spdxId": "Apache-2.0", "hash": "Apache-2.0"}
+                           "spdxId": "Apache-2.0"},
+            "ASDKL": {"name": "Android Software Development Kit License", "url": "https://developer.android.com/studio/terms.html",
+                      "spdxId": "ASDKL"}
           }
         }
     """.trimIndent()
 
     @Test
-    fun sortedByNameIgnoringCase() {
-        assertEquals(listOf("android core", "Figtree"), parseLicences(json).map { it.name })
+    fun rowsSortedByNameEachOnceAndOnlyKnownLicences() {
+        val rows = parseLicences(json).rows
+        assertEquals(listOf("Activity", "core", "Figtree", "Firebase Auth"), rows.map { it.name })
+        assertEquals(listOf("Apache-2.0"), rows.first().licenceIds)
     }
 
     @Test
-    fun carriesLicenceNameAndText() {
-        val figtree = parseLicences(json).single { it.id == "asset:figtree" }
-        assertEquals("032dfa7", figtree.version)
-        assertEquals(listOf("SIL Open Font License 1.1"), figtree.licenceNames)
-        assertEquals(listOf("SIL OPEN FONT LICENSE"), figtree.texts)
-        assertEquals("https://github.com/erikdkennedy/figtree", figtree.website)
+    fun eachLicenceOnceMostUsedFirst() {
+        assertEquals(listOf("Apache-2.0", "ASDKL", "OFL-1.1"), parseLicences(json).licences.map { it.id })
     }
 
     @Test
-    fun missingTextFallsBackToTheLicenceUrlAndBlankVersionIsNull() {
-        val core = parseLicences(json).single { it.id == "a:core" }
-        assertNull(core.version)
-        assertEquals(listOf("https://spdx.org/licenses/Apache-2.0.html"), core.texts)
+    fun labelIsAShortSpdxIdOrShortenedNameAndTextFallsBackToTheUrl() {
+        val licences = parseLicences(json).licences.associateBy { it.id }
+        assertEquals("OFL-1.1", licences.getValue("OFL-1.1").label)
+        assertEquals("Android SDK License", licences.getValue("ASDKL").label)
+        assertEquals("SIL OPEN FONT LICENSE", licences.getValue("OFL-1.1").text)
+        assertEquals("https://spdx.org/licenses/Apache-2.0.html", licences.getValue("Apache-2.0").text)
     }
 }
