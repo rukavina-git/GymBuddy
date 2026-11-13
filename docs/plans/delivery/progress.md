@@ -2,7 +2,7 @@
 
 - [x] 00 Deploy secrets into environments, prod gated (0aa3afe, PR #9)
 - [x] 01 CI gates: Android Lint, SonarQube (Q-E) (b36a470)
-- [ ] 02 Signed release AAB on a `v*` tag
+- [x] 02 Signed release AAB on a `v*` tag (HASH)
 - [ ] 03 fastlane: testers, Play internal, store listing
 - [ ] 04 Backend CD: develop → test, `v*` → prod
 - [ ] 05 (me) Play Console, upload key, service account, secrets
@@ -45,6 +45,11 @@
   "Main protect rule" ruleset (verified via API). Sonar keeps running
   on develop/PRs although the free plan discards those scans: the
   ruleset requires the Sonar checks on PRs into main.
+- 02: the properties file with the signing passwords is written to
+  `android/` (Gradle reads it from rootProject), not `$RUNNER_TEMP`;
+  only the key itself sits in temp. Both are removed in an `always()`
+  step. Mapping upload assumed to need only `google-services.json`;
+  owner checks Crashlytics on the first tag run.
 
 ## Gotchas
 
@@ -69,3 +74,11 @@
   before the first push to `main` (PR at 8.6), or `main` lands as a
   short branch again. coverage-exclusions still emits `*-root`
   outputs that only sonar-full.yml used (dead, harmless).
+- 02: owner checklist open (upload key, `release` environment with
+  tag rule `v*`, 4 `ANDROID_UPLOAD_*` secrets, tag `v0.1.0`). The
+  workflow fails red if any secret is missing. Reviewer NITs left:
+  regex allows leading zeros (`v1.02.3` and `v1.2.3` share a
+  versionCode) and `v0.0.0` (versionCode 0, Play rejects); the
+  `major > 2000` check is dead (regex caps at 999); a backslash in an
+  upload password breaks the Java properties parse (avoid it). 03
+  uploads `app/build/outputs/bundle/prodRelease/app-prod-release.aab`.

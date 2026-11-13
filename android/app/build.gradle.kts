@@ -36,6 +36,19 @@ val keystoreProperties = Properties().apply {
     if (file.exists()) file.inputStream().use { load(it) }
 }
 
+// Release version from the git tag (Plan 8.2): -Pgymbuddy.releaseTag=vX.Y.Z
+// gives versionName X.Y.Z and versionCode X*1_000_000 + Y*1_000 + Z.
+// Without it, local builds keep the defaults below.
+data class ReleaseVersion(val name: String, val code: Int)
+
+val releaseVersion: ReleaseVersion? = findProperty("gymbuddy.releaseTag")?.toString()?.let { tag ->
+    val match = Regex("""v(\d{1,3})\.(\d{1,3})\.(\d{1,3})""").matchEntire(tag)
+        ?: throw GradleException("gymbuddy.releaseTag must look like v1.2.3, got '$tag'")
+    val (major, minor, patch) = match.destructured.toList().map { it.toInt() }
+    if (major > 2000) throw GradleException("major version $major too large for versionCode")
+    ReleaseVersion("$major.$minor.$patch", major * 1_000_000 + minor * 1_000 + patch)
+}
+
 android {
     namespace = "com.rukavina.gymbuddy"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -44,8 +57,8 @@ android {
         applicationId = "com.rukavina.gymbuddy"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 5
-        versionName = "0.0.2-SNAPSHOT"
+        versionCode = releaseVersion?.code ?: 5
+        versionName = releaseVersion?.name ?: "0.0.2-SNAPSHOT"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Crash reporting, read by the manifest. Off in debug builds.
         manifestPlaceholders["crashlyticsEnabled"] = "true"
@@ -151,6 +164,13 @@ android {
             assets.directories.add("$projectDir/schemas")
         }
     }
+}
+
+// Checks the tag → version mapping without building or signing.
+tasks.register("printReleaseVersion") {
+    val name = android.defaultConfig.versionName
+    val code = android.defaultConfig.versionCode
+    doLast { println("$name $code") }
 }
 
 fun apiBaseUrl(default: String): String = findProperty("gymbuddy.apiBaseUrl")?.toString() ?: default

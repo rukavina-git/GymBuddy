@@ -24,6 +24,41 @@ points either flavor at a local backend (emulator).
 
 Coverage report lands at `app/build/reports/jacoco/test/html/index.html`.
 
+## Release
+
+Pushing a `vX.Y.Z` tag runs `.github/workflows/android-release.yml`:
+a signed, minified prod AAB with the Crashlytics mapping uploaded,
+kept as a 30-day artifact. versionName is `X.Y.Z`, versionCode
+`X*1_000_000 + Y*1_000 + Z` (Y, Z up to 999).
+
+    git tag v0.1.0 && git push origin v0.1.0
+    ./gradlew :app:printReleaseVersion -Pgymbuddy.releaseTag=v0.1.0   # check
+
+Without the property, builds use the defaults in `app/build.gradle.kts`.
+Local release builds read `android/keystore.properties` (gitignored:
+`storeFile`, `storePassword`, `keyAlias`, `keyPassword`).
+
+Upload key (also the Play upload key, 8.5), made once:
+
+    keytool -genkeypair -v -keystore upload.jks -alias upload \
+      -keyalg RSA -keysize 4096 -validity 10000
+    base64 -i upload.jks | pbcopy    # → ANDROID_UPLOAD_KEYSTORE_B64
+
+### Secrets
+
+| Secret | Where | What |
+|---|---|---|
+| `GOOGLE_SERVICES_JSON` | repo | prod `google-services.json` |
+| `GOOGLE_SERVICES_JSON_QA` | repo | qa `google-services.json` |
+| `ANDROID_UPLOAD_KEYSTORE_B64` | env `release` | upload keystore, base64 |
+| `ANDROID_UPLOAD_STORE_PASSWORD` | env `release` | keystore password |
+| `ANDROID_UPLOAD_KEY_ALIAS` | env `release` | key alias (`upload`) |
+| `ANDROID_UPLOAD_KEY_PASSWORD` | env `release` | key password |
+
+The `release` environment allows only `v*` tags. Keep the keystore
+and both passwords in Bitwarden: a lost upload key needs a Play
+support reset.
+
 ## Architecture
 
 MVVM with a clean-architecture layering. The UI reads from Room and
