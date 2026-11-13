@@ -73,11 +73,11 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 const STYLE = `3D render for a workout app. One square 1:1 image split into a 2×2 grid of four equal square tiles, separated by thin gaps of the same background colour (no lines, no borders, no frames). Each tile shows the same mannequin doing a different exercise: the figure centred in its tile, full body and all equipment inside the tile with margin, nothing crossing into another tile.
 The mannequin, identical in every tile: smooth light-grey figure with athletic proportions, no face details, no hair, plain matte black shorts, barefoot.
 Light: soft studio light from the upper left, subtle rim light.
-Working muscles: tinted a soft matte warm orange (#FF8A5B), like painted on the surface, no glow, no light effects. Everything else stays grey.
+Working muscles: tinted a soft matte warm orange (#FF8A5B), like painted on the surface, as one smooth, even colour with no stripes or bands, no glow, no light effects. Everything else stays grey.
 View: exact side profile facing right, not turned towards the camera, unless a tile says otherwise.
 Background: plain dark charcoal (#121418) with a slightly lighter floor, the same in every tile.
 Equipment: plain dark grey, no logos. Full-length Olympic barbells with round plates, plain dumbbells, a plain flat bench, simple gym machines.
-Rules: correct, safe technique exactly as described; anatomically correct hands and feet; only the equipment named for that tile, nothing extra in the hands; no text, numbers, arrows, labels, watermark or logo.`;
+Rules: correct, safe technique exactly as described; equipment obeys gravity (a barbell on the floor has both plates touching the floor, nothing floats); anatomically correct hands and feet; only the equipment named for that tile, nothing extra in the hands; no text, numbers, arrows, labels, watermark or logo.`;
 
 // [number, name, tile description]. Positions are the ones image models get right.
 const GRIDS = [
