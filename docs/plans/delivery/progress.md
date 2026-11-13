@@ -179,4 +179,9 @@
   env (tag `v*`) + 5 secrets, Play service account
   `play-publisher@rukavina-gym-buddy` (testing tracks only), Bitwarden
   (restore checked), tag ruleset "Release tags" (`v*`, admin bypass
-  only). Open: testers env + qa key + App Distribution.
+  only). Also done: `testers` env (develop only) + 5 secrets, qa key
+  `gymbuddy-qa` in `~/Keys/gymbuddy/qa.jks`, App Distribution in
+  Firebase "GymBuddy TEST" (`gymbuddy-test-31dc1`), group `testers`, SA
+  `app-distribution` (App Distribution Admin only), Bitwarden. Open:
+  the AAB upload after the key reset. First Android Testers run after
+  8.6: workflow_dispatch needs the file on main.
