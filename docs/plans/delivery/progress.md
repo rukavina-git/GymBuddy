@@ -190,3 +190,7 @@
   on android and backend. deploy.yml callers got `secrets: inherit`:
   environment secrets were empty, so test deploys failed. First green
   test deploy at b5d6265. Dependabot #39 (minimatch) closes with 8.6.
+- First qa build to App Distribution (2026-11-13, run 43470936616):
+  release 0.1.0 (1000) to group `testers`. Fixes on the way: plugin
+  takes the qa app id (read from the qa Firebase config), and
+  google-apis-core held < 1 (1.x raw uploads have no Content-Length).
