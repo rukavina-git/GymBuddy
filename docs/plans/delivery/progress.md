@@ -171,3 +171,11 @@
   sync-e2e.yml has an older SC2034 warning (unused `i`).
 - 04 owner check: first develop push touching `backend/` should show
   "Deploy test" green in Backend Build; first `v*` tag after 8.6.
+- 8.5 in progress (2026-11-13): Play already had an upload key
+  (SHA1 62:8A:B0…) from an old key in `~/keystores/` whose password is
+  lost. Upload key reset requested with the new key in `~/Keys/gymbuddy/`
+  (SHA1 13:1D:F3…); wait for Google's email, then upload the already
+  built 0.1.0 (1000) AAB to internal by hand. Done: `release` env (tag
+  `v*`) + 5 secrets, Play service account
+  `play-publisher@rukavina-gym-buddy` (testing tracks only), Bitwarden.
+  Open: tag ruleset, testers env + qa key + App Distribution.
