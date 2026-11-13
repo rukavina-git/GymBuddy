@@ -59,3 +59,21 @@ credit.
   Claude reviews every tile, writes retries for failed tiles, crops,
   sizes and bundles them. Exercises without a good image ship with the
   stand-in.
+
+## Daily process (owner on free Gemini, a few grids a day, no rush)
+1. Owner generates the next grid(s) from the tracker artifact (same as
+   `design/exercise-images/prompts.html`; odd grids male, even female)
+   and sends the images to Claude, saying which tiles are good.
+2. Claude saves the original to `design/exercise-images/raw/grid-NN.jpg`,
+   cuts the good tiles (506 px squares, offsets 1/517), saves them as
+   `android/app/src/main/res/drawable-nodpi/ex_<name>.jpg` (JPEG 85),
+   adds the id → drawable line in `ExerciseImages.kt`, runs
+   `ExerciseImagesTest`, commits.
+3. Failed tiles: Claude writes a single-image retry prompt.
+Layout (owner, 2026-11-13): centred square at 60% width, rounded
+corners (16:9 crop cut heads and feet). Exercise list stays text-only
+until most exercises have images.
+
+## Status
+Done: #2 Back Squat, #56 Front Squat, #3 Conventional Deadlift,
+#59 Sumo Deadlift (grid 01). Next: grid 02.

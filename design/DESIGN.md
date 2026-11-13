@@ -248,6 +248,7 @@ assets below, in You › About › Open-source licences.
 | Mark, wordmark, app icon, gym glyphs, tab icons, notification ring | Own drawing | Ours | Wordmark is Figtree Bold outlined (OFL) |
 
 | Built-in exercise photos (exercise page, 7.7) | Were hotlinked from github.com/yuhonas/free-exercise-db | Repo Unlicense, photos' origin unknown | **Removed 2026-11-13** (owner): backend V8, exercise library v10; the page shows its stand-in. Own photos planned (Plan 9 step 01b) |
+| Exercise images (exercise page) | Made by the owner with Google Gemini (free tier) from `design/exercise-images/prompts.html`, from 2026-11-13; originals in `design/exercise-images/raw/` | AI-generated; Google's terms let the user use generated content (check the current Gemini terms before release); not copyrightable, so others could copy them | Bundled in `res/drawable-nodpi/ex_*.jpg` (506 px, JPEG 85), mapped by exercise id in `ExerciseImages.kt`; shown as a centred square at 60% width |
 
 Still open: the licence of the stock reference exercise photos in
 PRODUCT.md "Evidence on Hand" (the design references, not the app's photos).
