@@ -60,6 +60,11 @@ jobs:
       # is develop (ADR 0013, 8.2a). Develop pushes wait for the gate and
       # warn if red; main and PRs scan report-only (required checks).
       wait-for-gate: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+      # Test builders take many defaulted params by design (S107).
+      extra-args: >-
+        -Dsonar.issue.ignore.multicriteria=t1
+        -Dsonar.issue.ignore.multicriteria.t1.ruleKey=kotlin:S107
+        -Dsonar.issue.ignore.multicriteria.t1.resourceKey=app/src/test/**
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 

@@ -14,6 +14,9 @@ import org.slf4j.Logger
  */
 object SyncAudit {
 
+    // One flat call per audit line keeps the 10 call sites readable;
+    // a wrapper object would only move the same 9 values around.
+    @Suppress("kotlin:S107")
     fun log(
         logger: Logger,
         traceId: String,

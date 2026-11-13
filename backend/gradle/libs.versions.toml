@@ -1,0 +1,8 @@
+# Versions not managed by the Spring Boot BOM (Sonar kotlin:S6624).
+[versions]
+springdoc = "2.8.17"
+firebase-admin = "9.12.0"
+
+[libraries]
+springdoc-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebase-admin" }

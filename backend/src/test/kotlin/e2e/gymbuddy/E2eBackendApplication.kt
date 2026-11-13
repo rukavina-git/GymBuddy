@@ -56,9 +56,7 @@ class E2eConfig {
     fun tokenVerifier(): TokenVerifier = LocalJwtTokenVerifier()
 
     @Bean
-    fun firebaseUserDeleter(): FirebaseUserDeleter = object : FirebaseUserDeleter {
-        override fun deleteUser(uid: String) = Unit
-    }
+    fun firebaseUserDeleter() = FirebaseUserDeleter { }
 
     @Bean
     fun e2eController(retention: TombstoneRetentionService) = E2eController(retention)

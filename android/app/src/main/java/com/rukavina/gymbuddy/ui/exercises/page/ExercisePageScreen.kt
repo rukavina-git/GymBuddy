@@ -255,16 +255,7 @@ internal fun ExercisePageContent(
                     }
                 }
                 if (exercise.instructions.isNotEmpty() || state.own) {
-                    item(key = "howto") {
-                        Section(stringResource(R.string.exercise_how_to)) {
-                            if (exercise.instructions.isEmpty()) {
-                                AppLinkButton("+ " + stringResource(R.string.exercise_add_steps), { onEdit(exercise.id) })
-                            }
-                            exercise.instructions.forEachIndexed { i, step ->
-                                BodyLine(stringResource(R.string.exercise_step, i + 1, step))
-                            }
-                        }
-                    }
+                    item(key = "howto") { HowTo(exercise.instructions) { onEdit(exercise.id) } }
                 }
                 if (exercise.tips.isNotEmpty()) {
                     item(key = "tips") {
@@ -277,6 +268,19 @@ internal fun ExercisePageContent(
                     item(key = "muscles") { MusclesBlock(exercise) }
                 }
             }
+        }
+    }
+}
+
+/** How-to steps. Own exercise without steps → an add link instead. */
+@Composable
+private fun HowTo(instructions: List<String>, onAdd: () -> Unit) {
+    Section(stringResource(R.string.exercise_how_to)) {
+        if (instructions.isEmpty()) {
+            AppLinkButton("+ " + stringResource(R.string.exercise_add_steps), onAdd)
+        }
+        instructions.forEachIndexed { i, step ->
+            BodyLine(stringResource(R.string.exercise_step, i + 1, step))
         }
     }
 }

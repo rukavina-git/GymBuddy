@@ -51,10 +51,14 @@ jobs:
       cpd-exclusions: src/main/resources/db/migration/**
       # Seed SQL repeats literals ('DEFAULT', ids) by design, and applied
       # migrations can't change (Flyway checksums): skip S1192 there.
+      # tools/ is a local one-shot generator: its paths are constants, so
+      # S2083 (path from file content) is a false positive there.
       extra-args: >-
-        -Dsonar.issue.ignore.multicriteria=e1
+        -Dsonar.issue.ignore.multicriteria=e1,e2
         -Dsonar.issue.ignore.multicriteria.e1.ruleKey=plsql:S1192
         -Dsonar.issue.ignore.multicriteria.e1.resourceKey=src/main/resources/db/migration/**
+        -Dsonar.issue.ignore.multicriteria.e2.ruleKey=pythonsecurity:S2083
+        -Dsonar.issue.ignore.multicriteria.e2.resourceKey=tools/**
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 

@@ -28,9 +28,6 @@ class TestSecurityConfig {
     fun tokenVerifier(): TokenVerifier = LocalJwtTokenVerifier()
 
     @Bean
-    fun firebaseUserDeleter(): FirebaseUserDeleter = object : FirebaseUserDeleter {
-        override fun deleteUser(uid: String) {
-            // No-op by default. Tests that care replace this bean via @MockitoBean.
-        }
-    }
+    // No-op by default. Tests that care replace this bean via @MockitoBean.
+    fun firebaseUserDeleter() = FirebaseUserDeleter { }
 }
