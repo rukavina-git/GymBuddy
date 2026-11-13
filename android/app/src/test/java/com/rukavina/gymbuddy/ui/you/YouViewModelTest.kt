@@ -153,10 +153,12 @@ class YouViewModelTest {
     @Test
     fun `units and rest buzz are saved`() = runBlocking {
         val vm = buildViewModel()
+        // One write at a time, generous timeout: DataStore writes on its own
+        // IO scope, and this timed out at 5 s on PR runners (PR #10).
         vm.setUnits(PreferredUnits.IMPERIAL)
+        withTimeout(15_000) { prefs.preferredUnits.first { it == PreferredUnits.IMPERIAL } }
         vm.setRestBuzz(true)
-        withTimeout(5_000) { prefs.preferredUnits.first { it == PreferredUnits.IMPERIAL } }
-        withTimeout(5_000) { prefs.restBuzz.first { it } }
+        withTimeout(15_000) { prefs.restBuzz.first { it } }
         Unit
     }
 
