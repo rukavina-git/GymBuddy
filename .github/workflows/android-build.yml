@@ -56,9 +56,10 @@ jobs:
       coverage-report-dir: android/app/build/reports/jacoco/test
       java-binaries-path: app/build/intermediates/built_in_kotlinc
       coverage-exclusions: ${{ needs.exclusions.outputs.android }}
-      # Free SonarCloud plan: the gate is readable on the main branch
-      # only, so it blocks pushes to main; develop and PRs just report.
-      wait-for-gate: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      # Free SonarCloud plan: only its main branch is readable, and that
+      # is develop (ADR 0013, 8.2a). Develop pushes wait for the gate and
+      # warn if red; main and PRs scan report-only (required checks).
+      wait-for-gate: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 

@@ -43,9 +43,10 @@ jobs:
       sonar-project-key: rukavina-git_GymBuddy-backend
       coverage-report-dir: backend/build/reports/jacoco/test
       coverage-exclusions: ${{ needs.exclusions.outputs.backend }}
-      # Free SonarCloud plan: the gate is readable on the main branch
-      # only, so it blocks pushes to main; develop and PRs just report.
-      wait-for-gate: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      # Free SonarCloud plan: only its main branch is readable, and that
+      # is develop (ADR 0013, 8.2a). Develop pushes wait for the gate and
+      # warn if red; main and PRs scan report-only (required checks).
+      wait-for-gate: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
       # Seed migrations repeat INSERT shapes by design (generated data).
       cpd-exclusions: src/main/resources/db/migration/**
       # Seed SQL repeats literals ('DEFAULT', ids) by design, and applied

@@ -4,6 +4,7 @@
 - [x] 01 CI gates: Android Lint, SonarQube (Q-E) (b36a470)
 - [x] 02 Signed release AAB on a `v*` tag (322cf68)
 - [ ] 02a Clean Sonar issues and Dependabot alerts (before any `v*` tag)
+      (part A CI + docs + minimatch done; part B Sonar fixes open)
 - [ ] 03 fastlane: testers, Play internal, store listing
 - [ ] 04 Backend CD: develop → test, `v*` → prod
 - [ ] 05 (me) Play Console, upload key, service account, secrets
@@ -52,6 +53,13 @@
   step. Mapping upload assumed to need only `google-services.json`;
   owner checks Crashlytics on the first tag run.
 
+- 02a: owner decision mid-step: SonarCloud's main branch is
+  `develop` (not `main`), gate warns on develop, release rule is the
+  block. Step split into part A (CI, docs, Dependabot) and part B
+  (Sonar fixes after the rename + one develop scan). Reviewer
+  SHOULD-FIXes (stale Q-E row, 01 gotcha) fixed in part A since they
+  contradicted the new docs.
+
 ## Gotchas
 
 - 00 for the owner run: with empty `DEPLOY_*` the backup job exits 0
@@ -71,9 +79,8 @@
   that's the gate, not this step. Reviewer NITs left: ADR count, the
   gate only blocks main after the owner adds required checks.
 - 01: no Sonar gate before merge on the free plan; the gate shows red
-  on `main` after merging. Rename the SonarCloud main branch to `main`
-  before the first push to `main` (PR at 8.6), or `main` lands as a
-  short branch again. coverage-exclusions still emits `*-root`
+  on `main` after merging. [Superseded by 02a: SonarCloud's main
+  branch becomes `develop`, gate warns there.] coverage-exclusions still emits `*-root`
   outputs that only sonar-full.yml used (dead, harmless).
 - 02: owner checklist open (upload key, `release` environment with
   tag rule `v*`, 4 `ANDROID_UPLOAD_*` secrets, tag `v0.1.0`). The
@@ -83,3 +90,9 @@
   `major > 2000` check is dead (regex caps at 999); a backslash in an
   upload password breaks the Java properties parse (avoid it). 03
   uploads `app/build/outputs/bundle/prodRelease/app-prod-release.aab`.
+- 02a part A: until the owner renames the SonarCloud branches, develop
+  Sonar jobs show the yellow warning (gate read fails), not red.
+  `continue-on-error` also hides real scan failures on develop (token,
+  missing JaCoCo) as that warning; read the summary. PRs into main
+  still scan report-only so the required checks report. Reviewer NIT
+  left: "main was never scanned" wording (main got no push since 8.1).
