@@ -6,7 +6,7 @@
 - [x] 02a Clean Sonar issues and Dependabot alerts (before any `v*` tag)
       (part A d1e3fc5, part B 926a4a5)
 - [x] 03 fastlane: testers, Play internal, store listing (dc4ff6c)
-- [x] 04 Backend CD: develop → test, `v*` → prod (HASH)
+- [x] 04 Backend CD: develop → test, `v*` → prod (6411c56)
 - [ ] 05 (me) Play Console, upload key, service account, secrets
 - [ ] 06 (me) CI green, PR develop → main
 
