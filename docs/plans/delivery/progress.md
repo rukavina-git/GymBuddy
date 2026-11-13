@@ -185,3 +185,8 @@
   `app-distribution` (App Distribution Admin only), Bitwarden. Open:
   the AAB upload after the key reset. First Android Testers run after
   8.6: workflow_dispatch needs the file on main.
+- Pre-8.6 cleanup (2026-11-13): Spring Boot 3.5.16, springdoc 2.8.17,
+  firebase-admin 9.12.0 (old OWASP CVEs; rescan in 10.0). Sonar 0 open
+  on android and backend. deploy.yml callers got `secrets: inherit`:
+  environment secrets were empty, so test deploys failed. First green
+  test deploy at b5d6265. Dependabot #39 (minimatch) closes with 8.6.
