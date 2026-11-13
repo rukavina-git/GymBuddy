@@ -41,3 +41,9 @@
 # format. R8 must not rename or strip them.
 -keep class com.rukavina.gymbuddy.domain.export.** { *; }
 -keep enum com.rukavina.gymbuddy.domain.model.** { *; }
+
+# Open-source licences page (Plan 9 step 01): the build-time report is
+# read with Moshi's reflective KotlinJsonAdapterFactory.
+-keep class com.rukavina.gymbuddy.ui.you.licences.Report { *; }
+-keep class com.rukavina.gymbuddy.ui.you.licences.ReportLibrary { *; }
+-keep class com.rukavina.gymbuddy.ui.you.licences.ReportLicence { *; }

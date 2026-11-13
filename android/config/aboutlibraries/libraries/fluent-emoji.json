@@ -1,0 +1,8 @@
+{
+  "uniqueId": "asset:fluent-emoji",
+  "artifactVersion": "1ffb34c",
+  "name": "Fluent Emoji",
+  "description": "Profile animal avatars.",
+  "website": "https://github.com/microsoft/fluentui-emoji",
+  "licenses": ["MIT"]
+}

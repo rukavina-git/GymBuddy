@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.openapi.generator)
+    alias(libs.plugins.aboutlibraries.android)
     jacoco
     id("org.owasp.dependencycheck") version "13.0.0"
 }
@@ -374,4 +375,37 @@ tasks.register<JacocoReport>("jacocoTestReport") {
             include("outputs/unit_test_code_coverage/qaDebugUnitTest/testQaDebugUnitTest.exec", "jacoco/testQaDebugUnitTest.exec")
         }
     )
+}
+
+// Plan 9 step 01 (ADR 0018): every runtime library with its licence,
+// shown on the in-app licences page. The build fails on any licence
+// outside the owner's list (CLAUDE.md); Google's SDK terms are allowed
+// only for Google's own SDKs.
+aboutLibraries {
+    license {
+        strictMode = com.mikepenz.aboutlibraries.plugin.StrictMode.FAIL
+        allowedLicenses.addAll(
+            "Apache-2.0", "MIT", "BSD-2-Clause", "BSD-3-Clause", "ISC",
+            "OFL-1.1", "CC0-1.0", "CC-BY-4.0", "Unlicense",
+        )
+        val googleSdks = listOf(
+            "com.google.android.gms",
+            "com.google.android.libraries.identity.googleid",
+            "com.google.android.recaptcha",
+            "com.google.android.play",
+            "com.google.firebase",
+        )
+        allowedLicensesMap = mapOf(
+            "ASDKL" to googleSdks, // Android SDK License
+            "PCSDKToS" to googleSdks, // Play Core SDK Terms
+            "7546fd760989f8b6ad8de53f6c981adb" to googleSdks, // Play Integrity API Terms
+        )
+    }
+    collect {
+        configPath = file("$rootDir/config/aboutlibraries")
+    }
+    export {
+        prettyPrint = true
+        excludeFields.addAll("developers", "funding")
+    }
 }

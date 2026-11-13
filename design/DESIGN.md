@@ -235,6 +235,10 @@ replaces v1 Sessions + Statistics.
 Owner rule: only MIT, Apache 2.0, BSD, OFL, CC0 or CC BY (with credit).
 Never NC, ND, SA or GPL/AGPL. Record every third-party asset here.
 
+Libraries are not listed here: the build collects them and fails on a
+licence outside the allow-list (ADR 0018). Users see them, and the
+assets below, in You › About › Open-source licences.
+
 | Asset | Source | Licence | Note |
 |---|---|---|---|
 | UI icons | Material Symbols Rounded, weight 400, `@material-symbols/svg-400` 0.27.0 | Apache 2.0 | List in the app's open-source licences screen. Android drawables converted 2026-11-03 with `svg2vectordrawable` 2.9.1 (MIT, run once via npx, not a build dependency) |

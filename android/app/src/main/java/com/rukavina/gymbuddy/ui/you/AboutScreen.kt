@@ -24,9 +24,9 @@ import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 
 private const val FEEDBACK_EMAIL = "ivankarlo.rukavina@gmail.com"
 
-/** You › About: version, feedback, and Sync debug on debug builds. */
+/** You › About: version, feedback, open-source licences, and Sync debug on debug builds. */
 @Composable
-fun AboutScreen(onBack: () -> Unit, onSyncDebug: () -> Unit) {
+fun AboutScreen(onBack: () -> Unit, onLicences: () -> Unit, onSyncDebug: () -> Unit) {
     val d = GymBuddyTheme.dimens
     val context = LocalContext.current
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -51,6 +51,11 @@ fun AboutScreen(onBack: () -> Unit, onSyncDebug: () -> Unit) {
                             .putExtra(Intent.EXTRA_SUBJECT, "GymBuddy feedback")
                         runCatching { context.startActivity(intent) }
                     },
+                )
+                ListRow(
+                    title = stringResource(R.string.you_licences),
+                    subtitle = stringResource(R.string.you_licences_sub),
+                    onClick = onLicences,
                 )
                 if (BuildConfig.DEBUG) {
                     ListRow(title = stringResource(R.string.you_sync_debug), onClick = onSyncDebug)
