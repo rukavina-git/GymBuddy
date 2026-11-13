@@ -279,9 +279,9 @@ class YouViewModel @Inject constructor(
 
     /** Set up a password on a Google-only account. */
     fun setupPassword(password: String, onResult: (Boolean, String?) -> Unit) {
-        val user = FirebaseAuth.getInstance().currentUser ?: return onResult(false, "Not signed in")
+        val user = FirebaseAuth.getInstance().currentUser ?: return onResult(false, NOT_SIGNED_IN)
         val email = user.email
-        if (email.isNullOrEmpty()) return onResult(false, "No email on this account")
+        if (email.isNullOrEmpty()) return onResult(false, NO_EMAIL)
         user.linkWithCredential(EmailAuthProvider.getCredential(email, password))
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -295,9 +295,9 @@ class YouViewModel @Inject constructor(
 
     /** Change the password of an email/password account. */
     fun changePassword(currentPassword: String, newPassword: String, onResult: (Boolean, String?) -> Unit) {
-        val user = FirebaseAuth.getInstance().currentUser ?: return onResult(false, "Not signed in")
+        val user = FirebaseAuth.getInstance().currentUser ?: return onResult(false, NOT_SIGNED_IN)
         val email = user.email
-        if (email.isNullOrEmpty()) return onResult(false, "No email on this account")
+        if (email.isNullOrEmpty()) return onResult(false, NO_EMAIL)
         user.reauthenticate(EmailAuthProvider.getCredential(email, currentPassword))
             .addOnCompleteListener { authTask ->
                 if (authTask.isSuccessful) {
@@ -372,9 +372,9 @@ class YouViewModel @Inject constructor(
 
     /** Re-auth with the password, then delete. */
     fun deleteAccountWithPassword(password: String, onResult: (Boolean, String?) -> Unit) {
-        val user = FirebaseAuth.getInstance().currentUser ?: return onResult(false, "Not signed in")
+        val user = FirebaseAuth.getInstance().currentUser ?: return onResult(false, NOT_SIGNED_IN)
         val email = user.email
-        if (email.isNullOrEmpty()) return onResult(false, "No email on this account")
+        if (email.isNullOrEmpty()) return onResult(false, NO_EMAIL)
         user.reauthenticate(EmailAuthProvider.getCredential(email, password))
             .addOnCompleteListener { authTask ->
                 if (authTask.isSuccessful) {
@@ -393,7 +393,7 @@ class YouViewModel @Inject constructor(
                 val idToken = getGoogleIdToken(context, webClientId)
                     ?: return@launch onResult(false, "Couldn't get your Google sign-in")
                 val user = FirebaseAuth.getInstance().currentUser
-                    ?: return@launch onResult(false, "Not signed in")
+                    ?: return@launch onResult(false, NOT_SIGNED_IN)
                 user.reauthenticate(GoogleAuthProvider.getCredential(idToken, null))
                     .addOnCompleteListener { authTask ->
                         if (authTask.isSuccessful) {
@@ -425,6 +425,8 @@ class YouViewModel @Inject constructor(
 
     private companion object {
         const val TAG = "YouViewModel"
+        const val NOT_SIGNED_IN = "Not signed in"
+        const val NO_EMAIL = "No email on this account"
         const val LOGOUT_FAILED_MESSAGE = "Couldn't sign out. Try again."
         const val DELETE_OFFLINE_MESSAGE = "Couldn't reach the server. Nothing was deleted. Check your connection and try again."
         const val DELETE_REAUTH_MESSAGE = "Your sign-in has expired. Close this and confirm it's you again."

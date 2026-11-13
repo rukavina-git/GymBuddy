@@ -197,25 +197,18 @@ internal fun ExercisePageContent(
             progressIndex(state)?.let { listState.scrollToItem(it) }
         }
     }
-    var menuOpen by remember { mutableStateOf(false) }
     val exercise = state.exercise
     Surface(Modifier.fillMaxSize(), color = cs.background) {
         Column(Modifier.fillMaxSize()) {
             BackTopBar(onBack = onBack) {
                 if (exercise != null) {
-                    Box {
-                        AppIconButton(AppIcons.Ui.More, stringResource(R.string.cd_more), { menuOpen = true })
-                        AppMenu(expanded = menuOpen, onDismiss = { menuOpen = false }) {
-                            if (state.own) {
-                                AppMenuItem(stringResource(R.string.exercise_menu_edit), { menuOpen = false; onEdit(exercise.id) }, AppIcons.Ui.Edit)
-                            }
-                            AppMenuItem(stringResource(R.string.exercise_menu_add_to_template), { menuOpen = false; onAddToTemplate() }, AppIcons.Ui.Add)
-                            AppMenuItem(stringResource(R.string.exercise_menu_hide), { menuOpen = false; onHide() }, AppIcons.Ui.Hide)
-                            if (state.own) {
-                                AppMenuItem(stringResource(R.string.exercise_menu_delete), { menuOpen = false; onDelete() }, AppIcons.Ui.Delete, danger = true)
-                            }
-                        }
-                    }
+                    ExerciseMenu(
+                        own = state.own,
+                        onEdit = { onEdit(exercise.id) },
+                        onAddToTemplate = onAddToTemplate,
+                        onHide = onHide,
+                        onDelete = onDelete,
+                    )
                 }
             }
             if (exercise == null) return@Column
@@ -572,3 +565,28 @@ internal fun WorkoutSet.toUiSet(units: PreferredUnits) = UiSet(
     duration = durationSeconds?.toString().orEmpty(),
     distance = distanceMeters?.let(SetFields::format).orEmpty(),
 )
+
+/** ⋯ menu on the top bar; Edit and Delete only for the user's own exercises. */
+@Composable
+private fun ExerciseMenu(
+    own: Boolean,
+    onEdit: () -> Unit,
+    onAddToTemplate: () -> Unit,
+    onHide: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+    Box {
+        AppIconButton(AppIcons.Ui.More, stringResource(R.string.cd_more), { menuOpen = true })
+        AppMenu(expanded = menuOpen, onDismiss = { menuOpen = false }) {
+            if (own) {
+                AppMenuItem(stringResource(R.string.exercise_menu_edit), { menuOpen = false; onEdit() }, AppIcons.Ui.Edit)
+            }
+            AppMenuItem(stringResource(R.string.exercise_menu_add_to_template), { menuOpen = false; onAddToTemplate() }, AppIcons.Ui.Add)
+            AppMenuItem(stringResource(R.string.exercise_menu_hide), { menuOpen = false; onHide() }, AppIcons.Ui.Hide)
+            if (own) {
+                AppMenuItem(stringResource(R.string.exercise_menu_delete), { menuOpen = false; onDelete() }, AppIcons.Ui.Delete, danger = true)
+            }
+        }
+    }
+}

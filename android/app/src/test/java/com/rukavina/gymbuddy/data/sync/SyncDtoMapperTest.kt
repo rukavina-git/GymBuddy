@@ -71,7 +71,7 @@ class SyncDtoMapperTest {
         name = "Custom Curl",
         primaryMuscles = listOf(MuscleGroup.ARMS),
         secondaryMuscles = if (full) listOf(MuscleGroup.SHOULDERS) else emptyList(),
-        description = if (full) "desc" else null,
+        description = "desc".takeIf { full },
         instructions = if (full) listOf("step 1", "step 2") else emptyList(),
         tips = if (full) listOf("tip") else emptyList(),
         difficulty = DifficultyLevel.INTERMEDIATE,
@@ -79,14 +79,14 @@ class SyncDtoMapperTest {
         category = ExerciseCategory.STRENGTH,
         exerciseType = ExerciseType.ISOLATION,
         trackingType = ExerciseTrackingType.WEIGHT_DURATION,
-        videoUrl = if (full) "https://example.com/v.mp4" else null,
-        thumbnailUrl = if (full) "https://example.com/t.png" else null,
+        videoUrl = "https://example.com/v.mp4".takeIf { full },
+        thumbnailUrl = "https://example.com/t.png".takeIf { full },
         source = EntitySource.CUSTOM,
-        ownerId = if (full) "uid-1" else null,
-        derivedFromId = if (full) id() else null,
+        ownerId = "uid-1".takeIf { full },
+        derivedFromId = id().takeIf { full },
         deprecated = full,
         updatedAt = 123L,
-        deletedAt = if (full) 456L else null,
+        deletedAt = 456L.takeIf { full },
         revision = 7,
         syncState = SyncState.SYNCED
     )
@@ -119,7 +119,7 @@ class SyncDtoMapperTest {
                 exerciseCategory = ExerciseCategory.CARDIO,
                 exerciseTrackingType = ExerciseTrackingType.DISTANCE_DURATION,
                 exercisePrimaryMuscles = listOf(MuscleGroup.LEGS, MuscleGroup.CORE),
-                supersetGroup = if (full) 1 else null
+                supersetGroup = 1.takeIf { full }
             )
         }
         val sets = performed.flatMap { pe ->
@@ -127,13 +127,13 @@ class SyncDtoMapperTest {
                 WorkoutSetEntity(
                     id = id(),
                     performedExerciseId = pe.id,
-                    weightKg = if (full) 42.5f else null,
-                    reps = if (full) 10 else null,
-                    durationSeconds = if (full) 300 else null,
-                    distanceMeters = if (full) 1000.5f else null,
+                    weightKg = 42.5f.takeIf { full },
+                    reps = 10.takeIf { full },
+                    durationSeconds = 300.takeIf { full },
+                    distanceMeters = 1000.5f.takeIf { full },
                     setType = if (i == 0) SetType.WARMUP else SetType.WORKING,
                     isCompleted = full,
-                    restTakenSeconds = if (full) 60 else null,
+                    restTakenSeconds = 60.takeIf { full },
                     orderIndex = i
                 )
             }
@@ -141,14 +141,14 @@ class SyncDtoMapperTest {
         val session = WorkoutSessionEntity(
             id = sessionId,
             startedAt = 1_000L,
-            endedAt = if (full) 2_000L else null,
+            endedAt = 2_000L.takeIf { full },
             durationSeconds = 1,
             title = "Session",
-            notes = if (full) "notes" else null,
-            templateId = if (full) id() else null,
-            templateTitle = if (full) "Template" else null,
+            notes = "notes".takeIf { full },
+            templateId = id().takeIf { full },
+            templateTitle = "Template".takeIf { full },
             updatedAt = 99L,
-            deletedAt = if (full) 3_000L else null,
+            deletedAt = 3_000L.takeIf { full },
             revision = 3,
             syncState = SyncState.SYNCED
         )
@@ -184,11 +184,11 @@ class SyncDtoMapperTest {
                 id = templateId,
                 title = "Template",
                 source = EntitySource.CUSTOM,
-                ownerId = if (full) "uid-1" else null,
-                derivedFromId = if (full) id() else null,
+                ownerId = "uid-1".takeIf { full },
+                derivedFromId = id().takeIf { full },
                 deprecated = full,
                 updatedAt = 5L,
-                deletedAt = if (full) 6L else null,
+                deletedAt = 6L.takeIf { full },
                 revision = 2,
                 syncState = SyncState.SYNCED
             ),
@@ -200,13 +200,13 @@ class SyncDtoMapperTest {
                     exerciseName = "Exercise $i",
                     exerciseTrackingType = ExerciseTrackingType.WEIGHT_DISTANCE,
                     plannedSets = 3,
-                    plannedReps = if (full) 8 else null,
+                    plannedReps = 8.takeIf { full },
                     orderIndex = i,
-                    restSeconds = if (full) 90 else null,
-                    plannedDurationSeconds = if (full) 60 else null,
-                    plannedDistanceMeters = if (full) 500f else null,
-                    plannedWeightKg = if (full) 20f else null,
-                    notes = if (full) "note" else null
+                    restSeconds = 90.takeIf { full },
+                    plannedDurationSeconds = 60.takeIf { full },
+                    plannedDistanceMeters = 500f.takeIf { full },
+                    plannedWeightKg = 20f.takeIf { full },
+                    notes = "note".takeIf { full }
                 )
             }
         )
@@ -231,8 +231,8 @@ class SyncDtoMapperTest {
                 exerciseId = id(),
                 isHidden = full,
                 isFavorite = !full,
-                note = if (full) "note" else null,
-                defaultRestSeconds = if (full) 120 else null,
+                note = "note".takeIf { full },
+                defaultRestSeconds = 120.takeIf { full },
                 updatedAt = 1L,
                 revision = 4,
                 syncState = SyncState.SYNCED
@@ -265,18 +265,18 @@ class SyncDtoMapperTest {
                 uid = "firebase-uid-not-a-uuid",
                 name = "Name",
                 email = "a@b.c",
-                profileImageUrl = if (full) "https://example.com/p.jpg" else null,
-                birthDate = if (full) 10L else null,
-                weight = if (full) 80f else null,
-                height = if (full) 180f else null,
-                gender = if (full) Gender.FEMALE else null,
-                fitnessGoal = if (full) FitnessGoal.BUILD_MUSCLE else null,
-                activityLevel = if (full) ActivityLevel.VERY_ACTIVE else null,
-                targetWeight = if (full) 75f else null,
+                profileImageUrl = "https://example.com/p.jpg".takeIf { full },
+                birthDate = 10L.takeIf { full },
+                weight = 80f.takeIf { full },
+                height = 180f.takeIf { full },
+                gender = Gender.FEMALE.takeIf { full },
+                fitnessGoal = FitnessGoal.BUILD_MUSCLE.takeIf { full },
+                activityLevel = ActivityLevel.VERY_ACTIVE.takeIf { full },
+                targetWeight = 75f.takeIf { full },
                 joinedDate = 1L,
-                bio = if (full) "bio" else null,
+                bio = "bio".takeIf { full },
                 updatedAt = 2L,
-                deletedAt = if (full) 3L else null,
+                deletedAt = 3L.takeIf { full },
                 revision = 1,
                 syncState = SyncState.SYNCED
             )

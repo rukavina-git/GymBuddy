@@ -8,7 +8,7 @@ package com.rukavina.gymbuddy.auth
  * FirebaseAdminConfig), and account-deletion tests need to assert this
  * was called with the right uid without touching real Firebase.
  */
-interface FirebaseUserDeleter {
+fun interface FirebaseUserDeleter {
     /** @throws FirebaseUserDeletionException if the Admin SDK rejects the call. */
     fun deleteUser(uid: String)
 }

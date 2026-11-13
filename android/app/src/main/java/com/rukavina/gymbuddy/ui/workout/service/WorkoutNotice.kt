@@ -33,7 +33,7 @@ data class WorkoutNotice(
 )
 
 /** Starts, updates and stops the workout foreground service. */
-interface WorkoutServiceStarter {
+fun interface WorkoutServiceStarter {
     /** Null stops the service (no workout runs). */
     fun update(notice: WorkoutNotice?)
 }

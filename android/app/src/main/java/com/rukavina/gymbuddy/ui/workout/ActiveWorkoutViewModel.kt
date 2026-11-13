@@ -339,22 +339,24 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** One sequential writer, so writes land in the order they were made. */
     private fun startDraftWriter() {
         viewModelScope.launch {
-            draftWrites.collect { write ->
-                try {
-                    when (write) {
-                        is DraftWrite.Save -> draftRepository.save(write.draft)
-                        DraftWrite.Clear -> draftRepository.clear()
-                    }
-                    if (_uiState.value.unsaved != null) _uiState.update { it.copy(unsaved = null) }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    // Disk full or broken: keep the numbers on screen, say so (R17-B1).
-                    if (write is DraftWrite.Save) {
-                        _uiState.update { it.copy(unsaved = UnsavedSet(lastDoneSetNumber)) }
-                        _events.trySend(WorkoutEvent.DraftSaveFailed)
-                    }
-                }
+            draftWrites.collect { write -> applyDraftWrite(write) }
+        }
+    }
+
+    private suspend fun applyDraftWrite(write: DraftWrite) {
+        try {
+            when (write) {
+                is DraftWrite.Save -> draftRepository.save(write.draft)
+                DraftWrite.Clear -> draftRepository.clear()
+            }
+            if (_uiState.value.unsaved != null) _uiState.update { it.copy(unsaved = null) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Disk full or broken: keep the numbers on screen, say so (R17-B1).
+            if (write is DraftWrite.Save) {
+                _uiState.update { it.copy(unsaved = UnsavedSet(lastDoneSetNumber)) }
+                _events.trySend(WorkoutEvent.DraftSaveFailed)
             }
         }
     }
@@ -534,20 +536,8 @@ class ActiveWorkoutViewModel @Inject constructor(
                         templateExercise.plannedSets,
                     )
                     val sets = (1..templateExercise.plannedSets).mapIndexed { setIndex, setNumber ->
-                        WorkoutSet(
-                            id = "${workoutId}_ex${exerciseIndex}_set${setIndex}",
-                            setNumber = setNumber,
-                            reps = if (SetField.Reps in fields) templateExercise.plannedReps?.toString().orEmpty() else "",
-                            weight = if (SetField.Weight in fields) {
-                                templateExercise.plannedWeightKg?.let { displayWeight(it, units) }.orEmpty()
-                            } else "",
-                            duration = if (SetField.Duration in fields) {
-                                templateExercise.plannedDurationSeconds?.toString().orEmpty()
-                            } else "",
-                            distance = if (SetField.Distance in fields) {
-                                templateExercise.plannedDistanceMeters?.let(SetFields::format).orEmpty()
-                            } else "",
-                        ).prefilledFrom(last[setIndex], fields, units)
+                        plannedSet(templateExercise, fields, units, id = "${workoutId}_ex${exerciseIndex}_set${setIndex}", setNumber = setNumber)
+                            .prefilledFrom(last[setIndex], fields, units)
                     }
 
                     ActiveExercise(
@@ -566,6 +556,28 @@ class ActiveWorkoutViewModel @Inject constructor(
             begin(template.title, activeExercises, template.id)
         }
     }
+
+    /** A set holding the template's targets, blank for fields this tracking type doesn't use. */
+    private fun plannedSet(
+        templateExercise: TemplateExercise,
+        fields: List<SetField>,
+        units: PreferredUnits,
+        id: String,
+        setNumber: Int,
+    ) = WorkoutSet(
+        id = id,
+        setNumber = setNumber,
+        reps = if (SetField.Reps in fields) templateExercise.plannedReps?.toString().orEmpty() else "",
+        weight = if (SetField.Weight in fields) {
+            templateExercise.plannedWeightKg?.let { displayWeight(it, units) }.orEmpty()
+        } else "",
+        duration = if (SetField.Duration in fields) {
+            templateExercise.plannedDurationSeconds?.toString().orEmpty()
+        } else "",
+        distance = if (SetField.Distance in fields) {
+            templateExercise.plannedDistanceMeters?.let(SetFields::format).orEmpty()
+        } else "",
+    )
 
     /** "+ Empty workout" on the Start sheet: no exercises, add them from ⋯. */
     fun startEmptyWorkout(title: String) = begin(title, emptyList(), null)
@@ -1003,6 +1015,54 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /**
+     * Exercises with their done, savable sets; ones with none are dropped
+     * so the kept exercises stay contiguously ordered.
+     */
+    private fun keptExercises(exercises: List<ActiveExercise>): List<Pair<ActiveExercise, List<WorkoutSet>>> =
+        exercises.mapNotNull { activeExercise ->
+            val done = activeExercise.sets.filter {
+                it.isCompleted && SetFields.savable(activeExercise.exerciseTrackingType, it)
+            }
+            if (done.isEmpty()) null else activeExercise to done
+        }
+
+    /**
+     * exerciseName/exerciseCategory/exercisePrimaryMuscles are placeholders
+     * here - ValidateWorkoutSessionSetsUseCase resolves the real Exercise
+     * and stamps the actual snapshot before this is persisted.
+     */
+    private fun performedExercise(
+        activeExercise: ActiveExercise,
+        done: List<WorkoutSet>,
+        index: Int,
+        units: PreferredUnits,
+    ): PerformedExercise {
+        val fields = SetFields.of(activeExercise.exerciseTrackingType)
+        return PerformedExercise(
+            id = idGenerator.newId(),
+            exerciseId = activeExercise.exerciseId,
+            orderIndex = index,
+            exerciseName = "",
+            exerciseCategory = ExerciseCategory.STRENGTH,
+            exerciseTrackingType = activeExercise.exerciseTrackingType,
+            exercisePrimaryMuscles = emptyList(),
+            sets = done.mapIndexed { setIndex, uiSet -> savedSet(uiSet, fields, units, setIndex) },
+        )
+    }
+
+    private fun savedSet(uiSet: WorkoutSet, fields: List<SetField>, units: PreferredUnits, setIndex: Int) =
+        com.rukavina.gymbuddy.domain.model.WorkoutSet(
+            id = idGenerator.newId(),
+            // Convert weight from display units to metric (kg) for storage
+            weightKg = if (SetField.Weight in fields) UnitConverter.weightToMetric(uiSet.weight, units) else null,
+            reps = if (SetField.Reps in fields) uiSet.reps.toIntOrNull() else null,
+            durationSeconds = if (SetField.Duration in fields) uiSet.duration.toIntOrNull() else null,
+            distanceMeters = if (SetField.Distance in fields) uiSet.distance.toFloatOrNull() else null,
+            isCompleted = true,
+            orderIndex = setIndex,
+        )
+
+    /**
      * Save the workout's done sets and stop the timer. Undone sets are
      * dropped (decision 6). On success the summary is ready; with [auto]
      * (F25 auto-finish) there is no summary, [ActiveWorkoutUiState.autoFinished] instead.
@@ -1018,41 +1078,9 @@ class ActiveWorkoutViewModel @Inject constructor(
 
             // Exercises with no done sets are dropped before assigning
             // orderIndex, so the kept exercises stay contiguously ordered.
-            val kept = state.exercises.mapNotNull { activeExercise ->
-                val done = activeExercise.sets.filter {
-                    it.isCompleted && SetFields.savable(activeExercise.exerciseTrackingType, it)
-                }
-                if (done.isEmpty()) null else activeExercise to done
-            }
+            val kept = keptExercises(state.exercises)
             val performedExercises = kept.mapIndexed { index, (activeExercise, done) ->
-                val fields = SetFields.of(activeExercise.exerciseTrackingType)
-                // exerciseName/exerciseCategory/exercisePrimaryMuscles are
-                // placeholders here - ValidateWorkoutSessionSetsUseCase
-                // resolves the real Exercise and stamps the actual snapshot
-                // before this is persisted.
-                PerformedExercise(
-                    id = idGenerator.newId(),
-                    exerciseId = activeExercise.exerciseId,
-                    orderIndex = index,
-                    exerciseName = "",
-                    exerciseCategory = ExerciseCategory.STRENGTH,
-                    exerciseTrackingType = activeExercise.exerciseTrackingType,
-                    exercisePrimaryMuscles = emptyList(),
-                    sets = done.mapIndexed { setIndex, uiSet ->
-                        com.rukavina.gymbuddy.domain.model.WorkoutSet(
-                            id = idGenerator.newId(),
-                            // Convert weight from display units to metric (kg) for storage
-                            weightKg = if (SetField.Weight in fields) {
-                                UnitConverter.weightToMetric(uiSet.weight, state.preferredUnits)
-                            } else null,
-                            reps = if (SetField.Reps in fields) uiSet.reps.toIntOrNull() else null,
-                            durationSeconds = if (SetField.Duration in fields) uiSet.duration.toIntOrNull() else null,
-                            distanceMeters = if (SetField.Distance in fields) uiSet.distance.toFloatOrNull() else null,
-                            isCompleted = true,
-                            orderIndex = setIndex
-                        )
-                    }
-                )
+                performedExercise(activeExercise, done, index, state.preferredUnits)
             }
 
             // Nothing logged: a rejected finish, not a discard. Resume the

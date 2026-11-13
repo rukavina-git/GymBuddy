@@ -3,8 +3,8 @@
 - [x] 00 Deploy secrets into environments, prod gated (0aa3afe, PR #9)
 - [x] 01 CI gates: Android Lint, SonarQube (Q-E) (b36a470)
 - [x] 02 Signed release AAB on a `v*` tag (322cf68)
-- [ ] 02a Clean Sonar issues and Dependabot alerts (before any `v*` tag)
-      (part A CI + docs + minimatch done; part B Sonar fixes open)
+- [x] 02a Clean Sonar issues and Dependabot alerts (before any `v*` tag)
+      (part A d1e3fc5, part B HASH)
 - [ ] 03 fastlane: testers, Play internal, store listing
 - [ ] 04 Backend CD: develop → test, `v*` → prod
 - [ ] 05 (me) Play Console, upload key, service account, secrets
@@ -59,6 +59,22 @@
   (Sonar fixes after the rename + one develop scan). Reviewer
   SHOULD-FIXes (stale Q-E row, 01 gotcha) fixed in part A since they
   contradicted the new docs.
+- 02a part B: first develop scan listed 47 issues (backend 16, android
+  31), 0 hotspots; gate status NONE (no new-code baseline yet). Owner
+  chose "go, all": the 12 S3776 complexity refactors were done here,
+  not split out. Done by extracting helpers, behaviour-neutral. SyncEngine
+  touched (`prepareBatch`, `applyResult`: line-for-line moves, same
+  transactions). Seed scripts: banner helper `section()`; generated SQL
+  verified byte-identical to V2/V7 (migrations not regenerated, the
+  scripts' version guards refuse). Not fixed, for owner to mark in
+  SonarCloud: S107 ×5 (SyncAudit + 4 test builders, accepted),
+  S6624 ×2 (backend build.gradle.kts versions, accepted), S2083
+  path traversal in generate_reference_seed.py (false positive: fixed
+  output path), S5332 + S6358 in src/debug/AndroidManifest.xml
+  (debug-only, accepted), S6619 elvis in TemplateEditorViewModel:212
+  (false positive: all operands nullable). Backend tests need Docker
+  Desktop running (Testcontainers); first local run failed with 91
+  context errors until it was started.
 
 ## Gotchas
 
@@ -98,3 +114,9 @@
   left: "main was never scanned" wording (main got no push since 8.1).
 - 02a: Dependabot alerts track `main` only; #39 stays open until the
   8.6 merge although develop is fixed.
+- 02a part B: develop gate is verified only after this push's scan and
+  the owner's Sonar marks above. Reviewer NITs left: 3 blank lines
+  before `def section` in generate_reference_seed.py (PEP 8 wants 2),
+  no blank line before `mainEnter` in MainScreen.kt. 03 can start; the
+  release rule (gate green, #39 closed at 8.6) still blocks the first
+  `v*` tag.

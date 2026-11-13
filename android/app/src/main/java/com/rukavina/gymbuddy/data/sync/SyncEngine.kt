@@ -158,19 +158,7 @@ class SyncEngine(
             val batch = selectBatch(store.outbox())
             if (batch.isEmpty()) return summary
 
-            val prepared = mutableListOf<PreparedMutation>()
-            var unsendable = 0
-            for (entry in batch) {
-                when (val outcome = store.prepare(entry)) {
-                    is PrepareOutcome.Ready -> prepared += outcome.mutation
-                    PrepareOutcome.Missing -> store.dropEntry(entry)
-                    is PrepareOutcome.Unsendable -> {
-                        Log.w(TAG, "dropping unsendable ${entry.entityType} ${entry.entityId}: ${outcome.reason}")
-                        store.transaction { store.markRejected(entry.entityType, entry.entityId, SyncLogOutcome.UNSENDABLE, outcome.reason) }
-                        unsendable++
-                    }
-                }
-            }
+            val (prepared, unsendable) = prepareBatch(batch)
             if (prepared.isEmpty()) {
                 summary += PushSummary(unsendable = unsendable)
                 return@repeat
@@ -184,20 +172,7 @@ class SyncEngine(
                     val entry = mutation.entry
                     val result = results[entry.entityType.name to entry.entityId.lowercase()] ?: continue
                     outcomes[result.status] = (outcomes[result.status] ?: 0) + 1
-                    when (result.status) {
-                        MutationResult.Status.APPLIED ->
-                            store.markApplied(entry, result.revision ?: 0, result.updatedAt ?: 0L)
-                        MutationResult.Status.CONFLICT -> {
-                            store.markRejected(entry.entityType, entry.entityId, SyncLogOutcome.CONFLICT, result.reason)
-                            conflicted += entry.entityType to entry.entityId
-                        }
-                        MutationResult.Status.INVALID ->
-                            store.markRejected(entry.entityType, entry.entityId, SyncLogOutcome.INVALID, result.reason)
-                        MutationResult.Status.FORBIDDEN ->
-                            store.markRejected(entry.entityType, entry.entityId, SyncLogOutcome.FORBIDDEN, result.reason)
-                        // Transient server failure: keep the entry and retry on a later push.
-                        MutationResult.Status.ERROR -> Unit
-                    }
+                    applyResult(entry, result, conflicted)
                 }
             }
             summary += PushSummary(requests = 1, outcomes = outcomes, unsendable = unsendable)
@@ -205,6 +180,45 @@ class SyncEngine(
             if (outcomes.keys == setOf(MutationResult.Status.ERROR)) return summary
         }
         return summary
+    }
+
+    /** Prepared mutations for [batch], plus how many entries were unsendable (dropped and logged). */
+    private suspend fun prepareBatch(batch: List<OutboxEntryEntity>): Pair<List<PreparedMutation>, Int> {
+        val prepared = mutableListOf<PreparedMutation>()
+        var unsendable = 0
+        for (entry in batch) {
+            when (val outcome = store.prepare(entry)) {
+                is PrepareOutcome.Ready -> prepared += outcome.mutation
+                PrepareOutcome.Missing -> store.dropEntry(entry)
+                is PrepareOutcome.Unsendable -> {
+                    Log.w(TAG, "dropping unsendable ${entry.entityType} ${entry.entityId}: ${outcome.reason}")
+                    store.transaction { store.markRejected(entry.entityType, entry.entityId, SyncLogOutcome.UNSENDABLE, outcome.reason) }
+                    unsendable++
+                }
+            }
+        }
+        return prepared to unsendable
+    }
+
+    private suspend fun applyResult(
+        entry: OutboxEntryEntity,
+        result: MutationResult,
+        conflicted: MutableSet<Pair<SyncEntityType, String>>,
+    ) {
+        when (result.status) {
+            MutationResult.Status.APPLIED ->
+                store.markApplied(entry, result.revision ?: 0, result.updatedAt ?: 0L)
+            MutationResult.Status.CONFLICT -> {
+                store.markRejected(entry.entityType, entry.entityId, SyncLogOutcome.CONFLICT, result.reason)
+                conflicted += entry.entityType to entry.entityId
+            }
+            MutationResult.Status.INVALID ->
+                store.markRejected(entry.entityType, entry.entityId, SyncLogOutcome.INVALID, result.reason)
+            MutationResult.Status.FORBIDDEN ->
+                store.markRejected(entry.entityType, entry.entityId, SyncLogOutcome.FORBIDDEN, result.reason)
+            // Transient server failure: keep the entry and retry on a later push.
+            MutationResult.Status.ERROR -> Unit
+        }
     }
 
     /**

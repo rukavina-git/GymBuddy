@@ -17,6 +17,7 @@ import com.rukavina.gymbuddy.testutil.testPreferencesDataStore
 import com.rukavina.gymbuddy.data.repository.BodyWeightRepositoryImpl
 import com.rukavina.gymbuddy.ui.you.profile.ProfileViewModel
 import com.rukavina.gymbuddy.ui.you.profile.SignInInfo
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -148,7 +149,7 @@ class ProfileFieldsTest {
     private suspend fun waitFor(condition: suspend () -> Boolean) {
         repeat(200) {
             if (condition()) return
-            Thread.sleep(10)
+            delay(10)
         }
         throw AssertionError("condition not met")
     }

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 class AccountController(private val accountDeletionService: AccountDeletionService) {
 
     @DeleteMapping("/v1/account")
-    fun deleteAccount(): ResponseEntity<Void> {
+    fun deleteAccount(): ResponseEntity<Unit> {
         accountDeletionService.deleteAccount(currentUid())
         return ResponseEntity.noContent().build()
     }

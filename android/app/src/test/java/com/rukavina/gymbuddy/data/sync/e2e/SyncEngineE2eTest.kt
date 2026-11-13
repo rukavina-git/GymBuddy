@@ -214,7 +214,7 @@ class SyncEngineE2eTest {
         val committedCursors = mutableListOf<String>()
         var sessionsAfterPage0 = -1
         val crashing = phoneB.engine(pageSize = 2, observer = PullPageObserver { pageIndex, nextCursor ->
-            if (pageIndex == 1) throw IllegalStateException("simulated process death during page 2")
+            check(pageIndex != 1) { "simulated process death during page 2" }
             committedCursors += nextCursor
             sessionsAfterPage0 = phoneB.sessions.getAllWorkoutSessions().first().size
         })

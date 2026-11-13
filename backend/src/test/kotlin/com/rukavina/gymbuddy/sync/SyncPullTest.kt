@@ -245,7 +245,7 @@ class SyncPullTest : AbstractPostgresIntegrationTest() {
                 }
             }
 
-            ready.await(10, TimeUnit.SECONDS)
+            assertTrue(ready.await(10, TimeUnit.SECONDS), "workers should be ready within 10s")
             start.countDown()
             assertTrue(done.await(20, TimeUnit.SECONDS), "both the pagination walk and the concurrent push should finish within 20s")
         } finally {

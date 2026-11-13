@@ -11,10 +11,10 @@ import dagger.hilt.components.SingletonComponent
 /** The workout foreground service and rest buzz (Plan 7 06c). */
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class WorkoutServiceModule {
+interface WorkoutServiceModule {
     @Binds
-    abstract fun bindStarter(controller: WorkoutServiceController): WorkoutServiceStarter
+    fun bindStarter(controller: WorkoutServiceController): WorkoutServiceStarter
 
     @Binds
-    abstract fun bindRestBuzz(controller: WorkoutServiceController): RestBuzzScheduler
+    fun bindRestBuzz(controller: WorkoutServiceController): RestBuzzScheduler
 }

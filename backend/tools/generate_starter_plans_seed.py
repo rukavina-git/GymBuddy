@@ -18,7 +18,7 @@ import json
 from pathlib import Path
 
 from generate_reference_seed import (
-    REPO_ROOT, SEED_UPDATED_AT, TEMPLATES_JSON, sql_bool, sql_str, sql_str_or_null,
+    REPO_ROOT, SEED_UPDATED_AT, TEMPLATES_JSON, section, sql_bool, sql_str, sql_str_or_null,
     template_exercise_insert, template_insert,
 )
 
@@ -75,19 +75,13 @@ def main() -> None:
         f"-- {len(new)} new templates, {len(plans)} plans). Plan 6 step 06.",
         "",
         SCHEMA,
-        "-- ============================================================",
-        "-- deprecate the version 5 templates",
-        "-- ============================================================",
-        "",
+        *section("deprecate the version 5 templates"),
         "UPDATE workout_templates SET deprecated = TRUE",
         "WHERE source = 'DEFAULT' AND id IN (",
         ",\n".join("    " + sql_str(t["id"]) for t in old),
         ");",
         "",
-        "-- ============================================================",
-        "-- new templates",
-        "-- ============================================================",
-        "",
+        *section("new templates"),
     ]
     for t in new:
         lines += [template_insert(t), ""]
@@ -96,10 +90,7 @@ def main() -> None:
             lines += [template_exercise_insert(t["id"], te), ""]
 
     lines += [
-        "-- ============================================================",
-        "-- starter plans",
-        "-- ============================================================",
-        "",
+        *section("starter plans"),
     ]
     for i, p in enumerate(plans):
         lines.append(
@@ -116,10 +107,7 @@ def main() -> None:
             lines.append("")
 
     lines += [
-        "-- ============================================================",
-        "-- reference_version",
-        "-- ============================================================",
-        "",
+        *section("reference_version"),
         f"UPDATE reference_version SET template_library_version = {data['version']}, updated_at = {SEED_UPDATED_AT} WHERE id = 1;",
         "",
     ]

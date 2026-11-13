@@ -168,6 +168,8 @@ android {
 
 // Checks the tag → version mapping without building or signing.
 tasks.register("printReleaseVersion") {
+    group = "release"
+    description = "Prints versionName and versionCode as derived from the release tag."
     val name = android.defaultConfig.versionName
     val code = android.defaultConfig.versionCode
     doLast { println("$name $code") }

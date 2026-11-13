@@ -28,12 +28,18 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 EXERCISES_JSON = REPO_ROOT / "android/app/src/main/assets/default_exercises.json"
 TEMPLATES_JSON = REPO_ROOT / "android/app/src/main/assets/default_workout_templates.json"
 OUTPUT_SQL = REPO_ROOT / "backend/src/main/resources/db/migration/V2__seed_reference_data.sql"
+SECTION_RULE = "-- " + "=" * 60
 
 # Deliberately the Unix epoch, not "now" - a sentinel, not a real event
 # time. Keeps the migration deterministic so its Flyway checksum only
 # ever changes when the seeded data actually changes.
 SEED_UPDATED_AT = 0
 
+
+
+def section(title: str) -> list[str]:
+    """SQL section banner: rule, title, rule, blank line."""
+    return [SECTION_RULE, f"-- {title}", SECTION_RULE, ""]
 
 def sql_str(value: str) -> str:
     """Single-quoted SQL string literal, with '' escaping."""
@@ -171,37 +177,25 @@ def main() -> None:
         "-- hand: the client's bundle and the server's reference library must",
         "-- agree on ids exactly, or a synced client silently double-seeds.",
         "",
-        "-- ============================================================",
-        "-- exercises",
-        "-- ============================================================",
-        "",
+        *section("exercises"),
     ]
 
     for e in exercises:
         lines.append(exercise_insert(e))
         lines.append("")
 
-    lines.append("-- ============================================================")
-    lines.append("-- workout_templates")
-    lines.append("-- ============================================================")
-    lines.append("")
+    lines += section("workout_templates")
     for t in templates:
         lines.append(template_insert(t))
         lines.append("")
 
-    lines.append("-- ============================================================")
-    lines.append("-- template_exercises")
-    lines.append("-- ============================================================")
-    lines.append("")
+    lines += section("template_exercises")
     for t in templates:
         for te in t["exercises"]:
             lines.append(template_exercise_insert(t["id"], te))
             lines.append("")
 
-    lines.append("-- ============================================================")
-    lines.append("-- reference_version")
-    lines.append("-- ============================================================")
-    lines.append("")
+    lines += section("reference_version")
     lines.append(reference_version_insert(exercises_data["version"], templates_data["version"]))
     lines.append("")
 

@@ -58,7 +58,7 @@ class UserProfileRepositoryConcurrencyTest : AbstractPostgresIntegrationTest() {
                 }
             }
 
-            readyLatch.await(10, TimeUnit.SECONDS)
+            assertEquals(true, readyLatch.await(10, TimeUnit.SECONDS), "racers should be ready within 10s")
             startLatch.countDown()
             assertEquals(true, doneLatch.await(10, TimeUnit.SECONDS), "all racers should finish within 10s")
         } finally {
