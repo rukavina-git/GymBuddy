@@ -4,7 +4,7 @@
 - [x] 01 CI gates: Android Lint, SonarQube (Q-E) (b36a470)
 - [x] 02 Signed release AAB on a `v*` tag (322cf68)
 - [x] 02a Clean Sonar issues and Dependabot alerts (before any `v*` tag)
-      (part A d1e3fc5, part B HASH)
+      (part A d1e3fc5, part B 926a4a5)
 - [ ] 03 fastlane: testers, Play internal, store listing
 - [ ] 04 Backend CD: develop → test, `v*` → prod
 - [ ] 05 (me) Play Console, upload key, service account, secrets
