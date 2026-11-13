@@ -118,3 +118,5 @@ jobs:
     with:
       target: test
       image_tag: ${{ needs.image.outputs.tag }}
+    # Environment secrets (DEPLOY_*) reach a reusable workflow only with inherit.
+    secrets: inherit
