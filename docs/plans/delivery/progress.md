@@ -6,7 +6,7 @@
 - [x] 02a Clean Sonar issues and Dependabot alerts (before any `v*` tag)
       (part A d1e3fc5, part B 926a4a5)
 - [x] 03 fastlane: testers, Play internal, store listing (dc4ff6c)
-- [ ] 04 Backend CD: develop → test, `v*` → prod
+- [x] 04 Backend CD: develop → test, `v*` → prod (HASH)
 - [ ] 05 (me) Play Console, upload key, service account, secrets
 - [ ] 06 (me) CI green, PR develop → main
 
@@ -84,6 +84,13 @@
   `promote` is a `workflow_dispatch` job in android-release.yml.
   Gemfile.lock not committed and `fastlane lanes` not run: the guard
   hook blocks fastlane/docker commands. Local Ruby is 2.6 (too old).
+- 04: prod doesn't require the exact `sha-<7>` of the tagged commit
+  (Backend Build has a `backend/**` paths filter, so a tag on a
+  docs-only merge has no image). backend-release.yml takes the newest
+  of up to 20 recent commits whose `backend/` tree equals the tag's and
+  that has a GHCR image (image context is only `backend/`). Step file
+  was written this session; owner confirmed tag = prod trigger, prod
+  approval kept.
 
 ## Gotchas
 
@@ -144,4 +151,16 @@
   fails while the Play app is unpublished (must be `draft`); 8.5's
   first upload is by hand in Play Console anyway. NITs: pass the
   Firebase `app:` id explicitly; check allows any older main commit.
-- 04: prod deploy should use the same rule (v* tag on main).
+- 04: prod deploy should use the same rule (v* tag on main). [Done.]
+- 04 reviewer SHOULD-FIX left: Backend Build has no concurrency group,
+  so two quick develop pushes can finish out of order and the older
+  image lands on test last. Fix: `concurrency: backend-build-${{
+  github.ref }}` (cancel on develop) or skip deploy-test if not develop
+  head. NITs: retry loop (50×30 s + up to 20 manifest calls/round) can
+  hit `timeout-minutes: 30` before the clear error; manifest errors
+  (login) are hidden as "not yet"; the main-only check lives in the
+  tagged commit's workflow, so prod approval is the real gate until
+  8.5's tag ruleset. actionlint: the 3 touched workflows clean;
+  sync-e2e.yml has an older SC2034 warning (unused `i`).
+- 04 owner check: first develop push touching `backend/` should show
+  "Deploy test" green in Backend Build; first `v*` tag after 8.6.

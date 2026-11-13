@@ -1,0 +1,86 @@
+name: Backend Release
+
+# Plan 8.4, ADR 0017: a v* tag on a main commit deploys that commit's
+# backend to prod. No rebuild: it deploys the sha-<7> image Backend
+# Build pushed for a commit with the same backend/ tree. A tag not on
+# main fails. The prod environment asks the owner to approve before
+# deploy.yml runs.
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check tag and image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      tag: ${{ steps.image.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Environments can't restrict a tag to a branch, so check it here.
+      - name: Tag must be on main
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$GITHUB_REF_NAME is not on main. Prod releases are tagged on main only."
+            exit 1
+          fi
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Backend Build pushes sha-<7> only for pushes that touch backend/,
+      # so the tagged commit may have no image. Any recent commit with
+      # the same backend/ tree runs the same code: take the newest one
+      # that has an image. The tag usually follows the merge right away,
+      # so the main build may still be running: retry up to 25 min.
+      - name: Find image
+        id: image
+        run: |
+          image=ghcr.io/rukavina-git/gymbuddy-backend
+          candidates=()
+          while read -r c; do
+            if git diff --quiet "$c" "$GITHUB_SHA" -- backend; then
+              candidates+=("$c")
+            fi
+          done < <(git rev-list -n 200 "$GITHUB_SHA")
+          candidates=("${candidates[@]:0:20}")
+          for _ in $(seq 1 50); do
+            for c in "${candidates[@]}"; do
+              tag="sha-${c::7}"
+              if docker manifest inspect "$image:$tag" > /dev/null 2>&1; then
+                echo "Deploying $image:$tag (backend/ same as $GITHUB_REF_NAME)"
+                echo "tag=$tag" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            done
+            echo "No image yet for ${#candidates[@]} candidate commits, waiting ..."
+            sleep 30
+          done
+          echo "::error::No GHCR image with this backend/ tree. Did Backend Build pass on main? Fallback: Deploy backend by hand."
+          exit 1
+
+  deploy:
+    name: Deploy prod
+    needs: check
+    uses: ./.github/workflows/deploy.yml
+    with:
+      target: prod
+      image_tag: ${{ needs.check.outputs.tag }}

@@ -20,7 +20,9 @@ what runs where: one branch is always test, one is always prod.
 - **Enforced in CI.** GitHub environment `release` (v* tags only)
   holds the Play upload key and the Play service account. Environments
   can't tie a tag to a branch, so the release workflow fails if the tag
-  isn't on main. Environment `testers` (develop only) holds a separate
+  isn't on main. The backend does the same in `backend-release.yml`:
+  the tag deploys an already-built image (same `backend/` tree) to
+  prod, after the `prod` environment's approval. Environment `testers` (develop only) holds a separate
   qa signing key and the Firebase App Distribution account. develop
   can't read anything that reaches Play.
 - **fastlane** (MIT) with `fastlane-plugin-firebase_app_distribution`

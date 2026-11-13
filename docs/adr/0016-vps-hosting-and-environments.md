@@ -43,7 +43,9 @@ come to about 1.3–1.4 GB.
 
 - **Images on GHCR.** CI builds and pushes the backend image. A manual
   GitHub Actions workflow deploys a chosen tag over SSH as the deploy
-  user. Auto-deploy waits for Plan 8.4.
+  user. Update (8.4): develop pushes deploy test automatically, a
+  `v*` tag on main deploys prod after approval (ADR 0017); the manual
+  workflow stays for fallback and rollback.
 - **Backups off the box.** The nightly workflow keeps its form (`pg_dump
   -Fc`, gpg AES256, encrypted artifact only) but reaches the database
   over SSH instead of a public connection string, one dump per

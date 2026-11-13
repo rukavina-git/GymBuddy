@@ -123,7 +123,19 @@ visibility.
 
 ### Deploying to the VPS
 
-Manual: Actions → Deploy backend → Run workflow → `target`
+Automatic (Plan 8.4, ADR 0017):
+
+- **test**: every push to `develop` that runs Backend Build deploys
+  its new image (job "Deploy test", calls deploy.yml).
+- **prod**: a `v*` tag on `main` runs Backend Release. It fails if the
+  tag isn't on main, then picks the newest `sha-` image whose commit
+  has the same `backend/` tree as the tag (no rebuild; waits up to
+  25 min for the main build), and calls deploy.yml with target prod.
+  The `prod` environment waits for the owner's approval.
+
+Pushes to `main` build an image but deploy nothing.
+
+Manual (fallback and rollback): Actions → Deploy backend → Run workflow → `target`
 (`test`, the default, or `prod`) and `image_tag`, e.g.
 `sha-abc1234` (from the build run or the package page). The job SSHes
 in as `deploy` and runs `deploy.sh <image>` in `/opt/gymbuddy` (prod)
@@ -139,7 +151,7 @@ nginx is not reloaded: it re-resolves the backend by itself. The same
 script works by hand on the server. The workflow uses the GitHub
 environment named like the target (`prod`, `test`); see the
 environments table under Secrets.
-Auto-deploy on push waits for Plan 8.4.
+Rollback: run Deploy backend with an older `sha-` tag.
 
 ### Secrets
 
@@ -164,8 +176,8 @@ environment can reach the box.
 
 | Environment | Branches / tags | Reviewer | Used by |
 |---|---|---|---|
-| `prod` | `main`, tags `v*` | owner | deploy.yml, target prod |
-| `test` | `develop`, `main` | none | deploy.yml, target test |
+| `prod` | `main`, tags `v*` | owner | deploy.yml, target prod (Backend Release on `v*`, or by hand) |
+| `test` | `develop`, `main` | none | deploy.yml, target test (Backend Build on develop, or by hand) |
 | `backup` | `main` | none (nightly can't wait) | db-backup.yml |
 
 Option, not built: one SSH key per environment, or a forced-command
