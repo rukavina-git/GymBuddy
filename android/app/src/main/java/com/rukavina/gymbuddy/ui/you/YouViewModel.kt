@@ -12,6 +12,7 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.rukavina.gymbuddy.data.export.DataExporter
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
@@ -277,11 +278,19 @@ class YouViewModel @Inject constructor(
 
     // ---- password ----
 
+    /** Runs [block] with the signed-in user and their email, or reports why it can't. */
+    private fun withEmailUser(onResult: (Boolean, String?) -> Unit, block: (FirebaseUser, String) -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        val email = user?.email
+        when {
+            user == null -> onResult(false, NOT_SIGNED_IN)
+            email.isNullOrEmpty() -> onResult(false, NO_EMAIL)
+            else -> block(user, email)
+        }
+    }
+
     /** Set up a password on a Google-only account. */
-    fun setupPassword(password: String, onResult: (Boolean, String?) -> Unit) {
-        val user = FirebaseAuth.getInstance().currentUser ?: return onResult(false, "Not signed in")
-        val email = user.email
-        if (email.isNullOrEmpty()) return onResult(false, "No email on this account")
+    fun setupPassword(password: String, onResult: (Boolean, String?) -> Unit) = withEmailUser(onResult) { user, email ->
         user.linkWithCredential(EmailAuthProvider.getCredential(email, password))
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -294,10 +303,7 @@ class YouViewModel @Inject constructor(
     }
 
     /** Change the password of an email/password account. */
-    fun changePassword(currentPassword: String, newPassword: String, onResult: (Boolean, String?) -> Unit) {
-        val user = FirebaseAuth.getInstance().currentUser ?: return onResult(false, "Not signed in")
-        val email = user.email
-        if (email.isNullOrEmpty()) return onResult(false, "No email on this account")
+    fun changePassword(currentPassword: String, newPassword: String, onResult: (Boolean, String?) -> Unit) = withEmailUser(onResult) { user, email ->
         user.reauthenticate(EmailAuthProvider.getCredential(email, currentPassword))
             .addOnCompleteListener { authTask ->
                 if (authTask.isSuccessful) {
@@ -371,10 +377,7 @@ class YouViewModel @Inject constructor(
     }
 
     /** Re-auth with the password, then delete. */
-    fun deleteAccountWithPassword(password: String, onResult: (Boolean, String?) -> Unit) {
-        val user = FirebaseAuth.getInstance().currentUser ?: return onResult(false, "Not signed in")
-        val email = user.email
-        if (email.isNullOrEmpty()) return onResult(false, "No email on this account")
+    fun deleteAccountWithPassword(password: String, onResult: (Boolean, String?) -> Unit) = withEmailUser(onResult) { user, email ->
         user.reauthenticate(EmailAuthProvider.getCredential(email, password))
             .addOnCompleteListener { authTask ->
                 if (authTask.isSuccessful) {
@@ -393,7 +396,7 @@ class YouViewModel @Inject constructor(
                 val idToken = getGoogleIdToken(context, webClientId)
                     ?: return@launch onResult(false, "Couldn't get your Google sign-in")
                 val user = FirebaseAuth.getInstance().currentUser
-                    ?: return@launch onResult(false, "Not signed in")
+                    ?: return@launch onResult(false, NOT_SIGNED_IN)
                 user.reauthenticate(GoogleAuthProvider.getCredential(idToken, null))
                     .addOnCompleteListener { authTask ->
                         if (authTask.isSuccessful) {
@@ -425,6 +428,8 @@ class YouViewModel @Inject constructor(
 
     private companion object {
         const val TAG = "YouViewModel"
+        const val NOT_SIGNED_IN = "Not signed in"
+        const val NO_EMAIL = "No email on this account"
         const val LOGOUT_FAILED_MESSAGE = "Couldn't sign out. Try again."
         const val DELETE_OFFLINE_MESSAGE = "Couldn't reach the server. Nothing was deleted. Check your connection and try again."
         const val DELETE_REAUTH_MESSAGE = "Your sign-in has expired. Close this and confirm it's you again."

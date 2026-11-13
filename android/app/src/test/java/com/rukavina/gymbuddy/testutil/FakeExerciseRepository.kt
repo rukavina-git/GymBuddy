@@ -25,8 +25,8 @@ class FakeExerciseRepository(
 
     val all: Map<String, Exercise> get() = exercises.value
 
-    private fun check() {
-        if (failWrites) throw IllegalStateException("write failed")
+    private fun failIfBroken() {
+        check(!failWrites) { "write failed" }
     }
 
     private fun put(e: Exercise) {
@@ -52,27 +52,24 @@ class FakeExerciseRepository(
     override suspend fun getExerciseById(id: String): Exercise? = exercises.value[id]?.takeIf { it.deletedAt == null }
 
     override suspend fun createExercise(exercise: Exercise) {
-        check()
+        failIfBroken()
         put(exercise)
     }
 
-    override suspend fun updateExercise(exercise: Exercise) {
-        check()
-        put(exercise)
-    }
+    override suspend fun updateExercise(exercise: Exercise) = createExercise(exercise)
 
     override suspend fun deleteExercise(id: String) {
-        check()
+        failIfBroken()
         exercises.value[id]?.let { put(it.copy(deletedAt = clock++)) }
     }
 
     override suspend fun hideExercise(id: String) {
-        check()
+        failIfBroken()
         state(id) { it.copy(hidden = true) }
     }
 
     override suspend fun unhideExercise(id: String) {
-        check()
+        failIfBroken()
         state(id) { it.copy(hidden = false) }
     }
 
@@ -87,7 +84,7 @@ class FakeExerciseRepository(
     override suspend fun getExerciseNote(exerciseId: String): String? = states.value[exerciseId]?.note
 
     override suspend fun updateExerciseNote(exerciseId: String, note: String?) {
-        check()
+        failIfBroken()
         state(exerciseId) { it.copy(note = note) }
     }
 
@@ -102,7 +99,7 @@ class FakeExerciseRepository(
     override suspend fun getExercisesAnyState(ids: List<String>): List<Exercise> = ids.distinct().mapNotNull { exercises.value[it] }
 
     override suspend fun restoreExercise(id: String) {
-        check()
+        failIfBroken()
         exercises.value[id]?.let { put(it.copy(deletedAt = null)) }
     }
 
@@ -112,7 +109,7 @@ class FakeExerciseRepository(
     override fun observeUserStates(): Flow<Map<String, ExerciseUserState>> = states
 
     override suspend fun setExerciseRest(exerciseId: String, seconds: Int?) {
-        check()
+        failIfBroken()
         state(exerciseId) { it.copy(restSeconds = seconds) }
     }
 }

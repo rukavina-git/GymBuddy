@@ -43,19 +43,32 @@ jobs:
       sonar-project-key: rukavina-git_GymBuddy-backend
       coverage-report-dir: backend/build/reports/jacoco/test
       coverage-exclusions: ${{ needs.exclusions.outputs.backend }}
+      # Free SonarCloud plan: only its main branch is readable, and that
+      # is develop (ADR 0013, 8.2a). Develop pushes wait for the gate and
+      # warn if red; main and PRs scan report-only (required checks).
+      wait-for-gate: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
       # Seed migrations repeat INSERT shapes by design (generated data).
       cpd-exclusions: src/main/resources/db/migration/**
       # Seed SQL repeats literals ('DEFAULT', ids) by design, and applied
       # migrations can't change (Flyway checksums): skip S1192 there.
+      # tools/ is a local one-shot generator: its paths are constants, so
+      # S2083 (path from file content) is a false positive there.
+      # SyncAudit.log takes one flat set of audit fields on purpose (S107);
+      # an annotation there counts as an uncovered line in Sonar.
       extra-args: >-
-        -Dsonar.issue.ignore.multicriteria=e1
+        -Dsonar.issue.ignore.multicriteria=e1,e2,e3
         -Dsonar.issue.ignore.multicriteria.e1.ruleKey=plsql:S1192
         -Dsonar.issue.ignore.multicriteria.e1.resourceKey=src/main/resources/db/migration/**
+        -Dsonar.issue.ignore.multicriteria.e2.ruleKey=pythonsecurity:S2083
+        -Dsonar.issue.ignore.multicriteria.e2.resourceKey=tools/**
+        -Dsonar.issue.ignore.multicriteria.e3.ruleKey=kotlin:S107
+        -Dsonar.issue.ignore.multicriteria.e3.resourceKey=src/main/kotlin/**/sync/SyncAudit.kt
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  # Pushes the image the VPS runs (ADR 0016). Deploying it is manual:
-  # deploy.yml with one of these tags.
+  # Pushes the image the VPS runs (ADR 0016). develop pushes deploy it
+  # to test (deploy-test below); prod deploys only from a v* tag on main
+  # (backend-release.yml, ADR 0017). deploy.yml stays the manual path.
   image:
     name: Image to GHCR
     needs: test
@@ -65,6 +78,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.sha_tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -72,6 +87,7 @@ jobs:
         id: meta
         run: |
           image=ghcr.io/rukavina-git/gymbuddy-backend
+          echo "sha_tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           {
             echo "tags<<EOF"
             echo "$image:sha-${GITHUB_SHA::7}"
@@ -95,3 +111,16 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Plan 8.4: every develop push that builds an image deploys it to test.
+  # Runs in environment test (develop allowed); main pushes don't deploy.
+  deploy-test:
+    name: Deploy test
+    needs: image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      target: test
+      image_tag: ${{ needs.image.outputs.tag }}
+    # Environment secrets (DEPLOY_*) reach a reusable workflow only with inherit.
+    secrets: inherit

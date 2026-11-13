@@ -38,12 +38,10 @@ class FirebaseAdminConfig {
 
     @Bean
     fun firebaseApp(@Value("\${FIREBASE_CREDENTIALS_B64:}") credentialsB64: String): FirebaseApp {
-        if (credentialsB64.isBlank()) {
-            throw IllegalStateException(
-                "FIREBASE_CREDENTIALS_B64 is not set. Provide the base64-encoded Firebase " +
-                    "service account JSON via that environment variable - see backend/README.md " +
-                    "for how to supply it locally (macOS Keychain) and in production."
-            )
+        check(credentialsB64.isNotBlank()) {
+            "FIREBASE_CREDENTIALS_B64 is not set. Provide the base64-encoded Firebase " +
+                "service account JSON via that environment variable - see backend/README.md " +
+                "for how to supply it locally (macOS Keychain) and in production."
         }
 
         val decoded = try {

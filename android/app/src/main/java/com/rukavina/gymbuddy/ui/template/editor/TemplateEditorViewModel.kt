@@ -195,7 +195,7 @@ class TemplateEditorViewModel @Inject constructor(
     private fun swap(key: Long, exerciseId: String) {
         viewModelScope.launch {
             val e = exercises.getExerciseById(exerciseId) ?: return@launch
-            val rest = exercises.observeUserStates().first()[e.id]?.restSeconds
+            val rest = exercises.observeUserStates().first()[e.id]?.restSeconds ?: DEFAULT_REST_SECONDS
             editExercise(key) { old ->
                 val sameType = old.trackingType == e.trackingType
                 EditorExercise(
@@ -209,7 +209,7 @@ class TemplateEditorViewModel @Inject constructor(
                     durationSeconds = if (sameType) old.durationSeconds else null,
                     distanceMeters = if (sameType) old.distanceMeters else null,
                     weightKg = if (sameType) old.weightKg else null,
-                    restSeconds = old.restSeconds ?: rest ?: DEFAULT_REST_SECONDS,
+                    restSeconds = old.restSeconds ?: rest,
                     notes = old.notes,
                 )
             }

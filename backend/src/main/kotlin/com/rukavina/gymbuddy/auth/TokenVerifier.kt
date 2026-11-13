@@ -20,6 +20,6 @@ class TokenVerificationException(message: String, cause: Throwable? = null) : Ru
  * implementation behind this same interface so the rest of the
  * authentication filter chain runs unmodified.
  */
-interface TokenVerifier {
+fun interface TokenVerifier {
     fun verify(idToken: String): VerifiedIdentity
 }

@@ -571,7 +571,7 @@ class SyncPushTest : AbstractPostgresIntegrationTest() {
                     }
                 }
             }
-            ready.await(10, TimeUnit.SECONDS)
+            assertTrue(ready.await(10, TimeUnit.SECONDS), "workers should be ready within 10s")
             start.countDown()
             assertTrue(done.await(20, TimeUnit.SECONDS), "all pushes should finish within 20s")
         } finally {

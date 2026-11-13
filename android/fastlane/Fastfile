@@ -1,0 +1,59 @@
+# Plan 8.3, ADR 0017. Lanes only upload what Gradle already built.
+# Branch rule: develop → test stage (App Distribution, qa app),
+# v* tags on main → prod (Play). CI enforces it through the GitHub
+# environments `testers` and `release`; by hand, follow the same rule.
+# Action paths are relative to android/.
+
+default_platform(:android)
+
+PLAY_SKIP_LISTING = {
+  skip_upload_metadata: true,
+  skip_upload_images: true,
+  skip_upload_screenshots: true
+}.freeze
+
+platform :android do
+  desc "qaRelease APK to Firebase App Distribution, group testers"
+  desc "Env: FIREBASE_APP_DISTRIBUTION_SA_PATH; optional QA_APK_PATH"
+  lane :test do
+    firebase_app_distribution(
+      android_artifact_type: "APK",
+      android_artifact_path: ENV.fetch("QA_APK_PATH", "app/build/outputs/apk/qa/release/app-qa-release.apk"),
+      googleservice_file_path: "app/src/qa/google-services.json",
+      service_credentials_file: ENV.fetch("FIREBASE_APP_DISTRIBUTION_SA_PATH"),
+      groups: "testers",
+      release_notes: changelog_from_git_commits(
+        commits_count: 10,
+        pretty: "- %s",
+        merge_commit_filtering: "exclude_merges"
+      )
+    )
+  end
+
+  desc "Prod AAB to the Play internal track"
+  desc "Env: PLAY_JSON_KEY_PATH; optional PROD_AAB_PATH"
+  lane :internal do
+    upload_to_play_store(
+      track: "internal",
+      aab: ENV.fetch("PROD_AAB_PATH", "app/build/outputs/bundle/prodRelease/app-prod-release.aab"),
+      json_key: ENV.fetch("PLAY_JSON_KEY_PATH"),
+      release_status: "completed",
+      skip_upload_apk: true,
+      **PLAY_SKIP_LISTING
+    )
+  end
+
+  desc "Latest internal release to the closed track (alpha), no rebuild"
+  desc "Env: PLAY_JSON_KEY_PATH"
+  lane :promote do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "alpha",
+      json_key: ENV.fetch("PLAY_JSON_KEY_PATH"),
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_changelogs: true,
+      **PLAY_SKIP_LISTING
+    )
+  end
+end

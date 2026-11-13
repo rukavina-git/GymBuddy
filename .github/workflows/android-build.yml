@@ -56,8 +56,64 @@ jobs:
       coverage-report-dir: android/app/build/reports/jacoco/test
       java-binaries-path: app/build/intermediates/built_in_kotlinc
       coverage-exclusions: ${{ needs.exclusions.outputs.android }}
+      # Free SonarCloud plan: only its main branch is readable, and that
+      # is develop (ADR 0013, 8.2a). Develop pushes wait for the gate and
+      # warn if red; main and PRs scan report-only (required checks).
+      wait-for-gate: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+      # Test builders take many defaulted params by design (S107).
+      extra-args: >-
+        -Dsonar.issue.ignore.multicriteria=t1
+        -Dsonar.issue.ignore.multicriteria.t1.ruleKey=kotlin:S107
+        -Dsonar.issue.ignore.multicriteria.t1.resourceKey=app/src/test/**
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: android
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-android-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties', 'android/gradle/libs.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-android-
+
+      - name: Create google-services.json (qa)
+        env:
+          GOOGLE_SERVICES_JSON_QA: ${{ secrets.GOOGLE_SERVICES_JSON_QA }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON_QA" > app/src/qa/google-services.json
+
+      # Fails only on issues not in app/lint-baseline.xml (Plan 8.1).
+      - name: Android Lint (qa debug)
+        run: ./gradlew lintQaDebug --stacktrace
+
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: |
+            android/app/build/reports/lint-results-qaDebug.html
+            android/app/build/reports/lint-results-qaDebug.sarif
+          retention-days: 7
 
   build-apk:
     name: Build debug APK
@@ -111,9 +167,14 @@ jobs:
 
       - name: Build Summary
         if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          echo "### Build completed! :rocket:" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "### Build completed! :rocket:"
+            echo ""
+            echo "- **Status**: $JOB_STATUS"
+            echo "- **Branch**: $REF_NAME"
+            echo "- **Commit**: $GITHUB_SHA"
+          } >> "$GITHUB_STEP_SUMMARY"

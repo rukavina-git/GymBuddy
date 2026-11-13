@@ -6,6 +6,6 @@ package com.rukavina.gymbuddy.domain.id
  * Injected rather than called statically so use cases remain
  * deterministic under test.
  */
-interface IdGenerator {
+fun interface IdGenerator {
     fun newId(): String
 }

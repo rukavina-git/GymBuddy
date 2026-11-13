@@ -73,7 +73,22 @@ scan=$(perl -0777 -pe '
   s/(<<-?[ \t]*([\x27"]?)(\w+)\2)([^\n]*)\n.*?\n[ \t]*\3(?=\n|$)/$1$4/gs;
   s/(-m|--message|--body|--title|--notes|echo|printf)([ \t]+|=)("(?:\\.|[^"\\])*"|\x27[^\x27]*\x27)/$1 MSG/gs;
 ' <<<"$cmd")
-grep -Eiq -- '(^|[^[:alnum:]_-])(fastlane|deploy)([[:space:]]|$)|docker[[:space:]]+push|gh[[:space:]]+release|gradlew[^|;&]*[[:space:]]publish|--prod([[:space:]]|=|$)|[[:space:]]prod(uction)?([[:space:]]|$)' <<<"$scan" \
+# fastlane: only read-only subcommands pass (lanes, list, env, help,
+# version). Lanes upload to testers/Play, so `fastlane test`, a bare
+# `fastlane` and anything else stay blocked. Only fastlane in command
+# position counts (segment start, after a quote, `bundle exec`, `exec`,
+# `env`/VAR=x prefixes), so paths, `which fastlane` and grep patterns pass.
+perl -e '
+  $_ = join "", <STDIN>;
+  my $pre = qr/(?:^|[;&|(\x27"`\n])[ \t]*(?:(?:env|exec|time|bundle[ \t]+exec|\w+=\S*)[ \t]+)*/m;
+  while (/${pre}fastlane(?:[ \t]+(\S+))?(?=[\s;&|\x27")`]|$)/gi) {
+    my $sub = defined $1 ? $1 : "";
+    $sub =~ s/["\x27)]+$//;
+    exit 1 unless $sub =~ /^(?:lanes|list|env|help|--help|-h|--version|-v|action|actions|search_plugins)$/;
+  }
+  exit 0;
+' <<<"$scan" || block "fastlane lane (uploads); read-only subcommands are allowed"
+grep -Eiq -- '(^|[^[:alnum:]_-])deploy([[:space:]]|$)|docker[[:space:]]+push|gh[[:space:]]+release|gradlew[^|;&]*[[:space:]]publish|--prod([[:space:]]|=|$)|[[:space:]]prod(uction)?([[:space:]]|$)' <<<"$scan" \
   && block "deploy/prod command"
 
 # Merged feature-branch deletion: always the user's call via the prompt.

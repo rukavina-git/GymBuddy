@@ -1,8 +1,10 @@
 name: Deploy backend
 
-# Manual deploy of a GHCR image tag to the VPS (ADR 0016). Runs
+# Deploys a GHCR image tag to the VPS (ADR 0016). Runs
 # docker/server/deploy.sh over SSH as the deploy user; that script
-# checks health and rolls back on failure. Auto-deploy: Plan 8.4.
+# checks health and rolls back on failure. Called by backend-build.yml
+# (develop push → test) and backend-release.yml (v* tag on main →
+# prod, Plan 8.4); "Run workflow" stays the manual path and rollback.
 # target picks the stack: prod in /opt/gymbuddy, test in
 # /opt/gymbuddy-test (same box, same deploy key). DEPLOY_* are
 # environment secrets: prod needs the owner's approval and runs only
@@ -19,6 +21,16 @@ on:
           - test
           - prod
         default: test
+      image_tag:
+        description: "Image tag from the backend build, e.g. sha-abc1234"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      target:
+        description: "test or prod"
+        required: true
+        type: string
       image_tag:
         description: "Image tag from the backend build, e.g. sha-abc1234"
         required: true

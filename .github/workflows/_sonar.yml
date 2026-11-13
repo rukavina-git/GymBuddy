@@ -54,6 +54,11 @@ on:
         required: false
         type: string
         default: ''
+      wait-for-gate:
+        description: "Wait for the SonarCloud quality gate and post a warning when it is red; the job stays green (Plan 8.2a, ADR 0013 update). Only true on pushes to develop: develop is SonarCloud's main branch, and the free plan cannot read the gate of any other branch."
+        required: false
+        type: boolean
+        default: false
     secrets:
       SONAR_TOKEN:
         required: true
@@ -84,7 +89,12 @@ jobs:
         run: echo "relative-dir=${COVERAGE_REPORT_DIR#"$MODULE_PATH"/}" >> "$GITHUB_OUTPUT"
 
       - name: SonarCloud scan
+        id: scan
         uses: SonarSource/sonarqube-scan-action@v6
+        # Gate is a warning, not a block (ADR 0013, 8.2a): a red gate
+        # must not stop develop. The release check reads the gate
+        # before any v* tag or main PR.
+        continue-on-error: ${{ inputs.wait-for-gate }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
@@ -99,9 +109,20 @@ jobs:
             -Dsonar.coverage.exclusions=${{ inputs.coverage-exclusions }}
             -Dsonar.cpd.exclusions=${{ inputs.cpd-exclusions }}
             ${{ inputs.extra-args }}
+            -Dsonar.qualitygate.wait=${{ inputs.wait-for-gate }}
             -Dsonar.projectBaseDir=${{ inputs.module-path }}
-          # No -Dsonar.qualitygate.wait, deliberately: a failing gate
-          # must show on the dashboard and any PR check annotation
-          # without failing this job. Coverage below target is a
-          # warning surfaced there, not something that blocks a merge
-          # from this workflow.
+          # qualitygate.wait=true fails the scan step on a red gate;
+          # continue-on-error above turns that into the warning below.
+
+      - name: Warn on red quality gate
+        if: inputs.wait-for-gate && steps.scan.outcome == 'failure'
+        env:
+          PROJECT_KEY: ${{ inputs.sonar-project-key }}
+        run: |
+          msg="Sonar quality gate is red (or the scan failed) for ${PROJECT_KEY}. Not blocking develop; must be green before any v* tag or main PR."
+          echo "::warning title=Sonar quality gate::${msg}"
+          {
+            echo "### :warning: Sonar quality gate red"
+            echo "${msg}"
+            echo "https://sonarcloud.io/summary/new_code?id=${PROJECT_KEY}"
+          } >> "$GITHUB_STEP_SUMMARY"

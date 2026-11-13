@@ -23,7 +23,8 @@ Kotlin backend, sharing nothing but the OpenAPI contract.
 - Root settings.gradle.kts is an IDE-only composite build (includes
   backend and android). Don't add build logic there; keep both
   wrappers on the same Gradle version as the root one.
-- No ktlint/detekt. Android Lint (./gradlew lint) exists but CI doesn't run it.
+- No ktlint/detekt. Android Lint runs in CI (lintQaDebug, baseline
+  app/lint-baseline.xml); only new issues fail.
 
 ## API contract
 - api/openapi.yaml is the source of truth. It is hand-written, not

@@ -80,3 +80,56 @@ itself is unchanged and still runs and reports to the Security tab, it just
 no longer blocks merges. Cause: a classloader incompatibility between
 Gradle 9 and the `org.owasp:dependency-check-gradle` plugin. To be
 revisited before any app-store submission.
+
+## Update — 2026-11-12 (Plan 8.1)
+
+- **Sonar gate blocks on `main` only.** `_sonar.yml` has a
+  `wait-for-gate` input; `backend-build.yml` and `android-build.yml`
+  set it on pushes to `main`, so a red quality gate ("Sonar way")
+  fails the Sonar job there. The free SonarCloud plan cannot read the
+  gate of any other branch (the scanner errors out), so develop and
+  PRs only report. Supersedes "Sonar never fails a build" above.
+- **Clean-slate projects.** The old whole-repo project
+  `rukavina-git_GymBuddy` and `sonar-full.yml` are gone. One public
+  project per app: `rukavina-git_GymBuddy-backend`, `-android`, and
+  `-ios` (reserved, empty until iOS starts). Created by hand, not
+  bound to GitHub (no PR decoration, no Automatic Analysis). Main
+  branch must be named `main`; new code = last 30 days until `v*`
+  tags exist (Plan 8.2), then "previous version".
+- **Android Lint in CI.** `android-build.yml` job `Lint` runs
+  `lintQaDebug` with `app/lint-baseline.xml` (42 errors, 62 warnings
+  at the time). Only issues not in the baseline fail. Regenerate the
+  baseline with `./gradlew updateLintBaseline` only on purpose, never
+  to silence a new error. Release-variant lint is left to the release
+  workflow (Plan 8.2).
+
+## Update — 2026-11-13 (Plan 8.2a)
+
+Supersedes "Sonar gate blocks on `main` only" and "Main branch must be
+named `main`" from the 8.1 update.
+
+- **Context.** The free plan shows analysis results for SonarCloud's
+  main branch only; the API refuses others ("Organization is not
+  allowed to access data from non main branches"). With `main` as that
+  branch, `main` was never scanned, so there was no issue list at all,
+  and the gate would only have spoken after code was already released.
+- **Decision: `develop` is SonarCloud's main branch** in both
+  projects. Earlier feedback beats a report on shipped code, and all
+  code reaches `main` through `develop`.
+- **Gate warns, doesn't block.** On pushes to `develop`, `_sonar.yml`
+  waits for the gate (`wait-for-gate`). A red gate leaves the job green
+  (`continue-on-error`) and posts a warning annotation plus a run
+  summary line with the SonarCloud link.
+- **The block is the release.** Before any `v*` tag or the
+  `develop` → `main` PR, the gate on `develop` must be green and
+  Dependabot alerts closed. This is a process rule (owner, checked by
+  Claude before suggesting a tag), not a CI check.
+- **PRs into `main` and pushes to `main` still scan**, report-only:
+  the `main` ruleset requires the `Sonar / Sonar (backend|android)`
+  checks, and a skipped job would leave them missing. Their results
+  are not kept on the free plan.
+- **New code** stays "last 30 days" until `v*` tags exist, then
+  "previous version".
+- **Trade-off.** A red gate on `develop` can be ignored for a while;
+  the release rule catches it. If that proves too loose, set
+  `continue-on-error` back to false for `develop`.

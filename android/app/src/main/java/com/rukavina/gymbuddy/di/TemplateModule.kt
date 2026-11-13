@@ -12,10 +12,10 @@ import dagger.hilt.components.SingletonComponent
 /** Home / Workouts / template page reads (Plan 7 step 05a). */
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class TemplateModule {
+interface TemplateModule {
     @Binds
-    abstract fun bindTemplateSources(impl: RoomTemplateSources): TemplateSources
+    fun bindTemplateSources(impl: RoomTemplateSources): TemplateSources
 
     @Binds
-    abstract fun bindHomeSyncSignals(impl: RoomHomeSyncSignals): HomeSyncSignals
+    fun bindHomeSyncSignals(impl: RoomHomeSyncSignals): HomeSyncSignals
 }

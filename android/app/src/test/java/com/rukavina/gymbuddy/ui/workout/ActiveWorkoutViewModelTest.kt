@@ -625,7 +625,7 @@ class ActiveWorkoutViewModelTest {
         override suspend fun createWorkoutSession(workoutSession: WorkoutSession) {
             createCalls++
             gate?.await()
-            if (failing) throw IllegalStateException("disk full")
+            check(!failing) { "disk full" }
             created.add(workoutSession)
         }
         override suspend fun updateWorkoutSession(workoutSession: WorkoutSession) = Unit

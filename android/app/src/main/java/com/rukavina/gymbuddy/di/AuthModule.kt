@@ -12,10 +12,10 @@ import dagger.hilt.components.SingletonComponent
 /** Sign-in screens' Firebase and on-phone data access (Plan 7 step 04). */
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AuthModule {
+interface AuthModule {
     @Binds
-    abstract fun bindAuthClient(impl: FirebaseAuthClient): AuthClient
+    fun bindAuthClient(impl: FirebaseAuthClient): AuthClient
 
     @Binds
-    abstract fun bindSignInSupport(impl: DefaultSignInSupport): SignInSupport
+    fun bindSignInSupport(impl: DefaultSignInSupport): SignInSupport
 }

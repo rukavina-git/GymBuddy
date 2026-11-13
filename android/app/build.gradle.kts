@@ -36,6 +36,25 @@ val keystoreProperties = Properties().apply {
     if (file.exists()) file.inputStream().use { load(it) }
 }
 
+// App version: bump appVersion before each release. versionCode is derived
+// (X*1_000_000 + Y*1_000 + Z), never typed; Play needs it higher on every
+// upload. CI passes -Pgymbuddy.releaseTag=vX.Y.Z, which must equal
+// "v$appVersion" or the build fails (the tag only checks, never sets).
+val appVersion = "0.1.0"
+
+val appVersionCode: Int = run {
+    val match = Regex("""(\d{1,3})\.(\d{1,3})\.(\d{1,3})""").matchEntire(appVersion)
+        ?: throw GradleException("appVersion must look like 1.2.3, got '$appVersion'")
+    val (major, minor, patch) = match.destructured.toList().map { it.toInt() }
+    major * 1_000_000 + minor * 1_000 + patch
+}
+
+findProperty("gymbuddy.releaseTag")?.toString()?.let { tag ->
+    if (tag != "v$appVersion") {
+        throw GradleException("Tag $tag doesn't match appVersion $appVersion in app/build.gradle.kts")
+    }
+}
+
 android {
     namespace = "com.rukavina.gymbuddy"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -44,8 +63,8 @@ android {
         applicationId = "com.rukavina.gymbuddy"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 5
-        versionName = "0.0.2-SNAPSHOT"
+        versionCode = appVersionCode
+        versionName = appVersion
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Crash reporting, read by the manifest. Off in debug builds.
         manifestPlaceholders["crashlyticsEnabled"] = "true"
@@ -109,6 +128,14 @@ android {
         buildConfig = true
     }
 
+    // CI gate (Plan 8.1): existing issues live in the baseline, only
+    // new errors fail. Regenerate with ./gradlew updateLintBaseline.
+    lint {
+        baseline = file("lint-baseline.xml")
+        abortOnError = true
+        checkReleaseBuilds = false
+    }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
@@ -143,6 +170,16 @@ android {
             assets.directories.add("$projectDir/schemas")
         }
     }
+}
+
+// Prints the version without building or signing; with -Pgymbuddy.releaseTag
+// it also checks the tag matches.
+tasks.register("printReleaseVersion") {
+    group = "release"
+    description = "Prints versionName and versionCode (from appVersion)."
+    val name = android.defaultConfig.versionName
+    val code = android.defaultConfig.versionCode
+    doLast { println("$name $code") }
 }
 
 fun apiBaseUrl(default: String): String = findProperty("gymbuddy.apiBaseUrl")?.toString() ?: default
@@ -243,6 +280,7 @@ dependencies {
     testImplementation(libs.ui.test.junit)
     androidTestImplementation(libs.testExtJunit)
     androidTestImplementation(libs.espressoCore)
+    androidTestImplementation(platform(libs.androidxComposeBom))
     androidTestImplementation(libs.ui.test.junit)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)

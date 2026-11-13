@@ -48,6 +48,8 @@ runs:
           '**/api/dto/ProfileDtos.kt'
           '**/api/dto/PullDtos.kt'
           '**/api/dto/ReferenceDtos.kt'
+          # Local one-shot seed generator (Python), not part of the app.
+          'tools/**'
         )
 
         # Mirrors the *intent* of android/app/build.gradle.kts's

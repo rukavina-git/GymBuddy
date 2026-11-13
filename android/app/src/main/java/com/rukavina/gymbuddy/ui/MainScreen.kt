@@ -189,19 +189,12 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
     val context = LocalContext.current
     val offerUndoDelete: (String, String) -> Unit = { id, title ->
         scope.launch {
-            var settled = false
-            try {
-                val result = snackbar.showSnackbar(
-                    message = context.getString(R.string.template_deleted, title),
-                    actionLabel = context.getString(R.string.undo),
-                    duration = SnackbarDuration.Indefinite,
-                )
-                settled = true
-                if (result == SnackbarResult.ActionPerformed) templateDeletes.undo(id) else templateDeletes.commit(id)
-            } finally {
-                // Main left mid-snackbar (sign-out, owner switch): keep the template.
-                if (!settled) templateDeletes.undo(id)
-            }
+            snackbar.offerUndoTemplateDelete(
+                message = context.getString(R.string.template_deleted, title),
+                undoLabel = context.getString(R.string.undo),
+                onUndo = { templateDeletes.undo(id) },
+                onCommit = { templateDeletes.commit(id) },
+            )
         }
     }
     // Session Delete (Undo, R14-5): tombstoned at once, Undo restores it (step 09 decision 2).
@@ -263,10 +256,10 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
             navController = bottomNavController,
             startDestination = NavRoutes.Home,
             modifier = Modifier.padding(paddingValues),
-            enterTransition = { if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward = true) },
-            exitTransition = { if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward = true) },
-            popEnterTransition = { if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward = false) },
-            popExitTransition = { if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward = false) },
+            enterTransition = { mainEnter(forward = true) },
+            exitTransition = { mainExit(forward = true) },
+            popEnterTransition = { mainEnter(forward = false) },
+            popExitTransition = { mainExit(forward = false) },
         ) {
             composable(NavRoutes.Home) {
                 HomeScreen(
@@ -535,6 +528,32 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
         }
     }
 }
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.mainEnter(forward: Boolean) =
+    if (isTabSwitch()) fadeThroughIn else sharedAxisIn(forward)
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.mainExit(forward: Boolean) =
+    if (isTabSwitch()) fadeThroughOut else sharedAxisOut(forward)
+
+/**
+ * Template Delete (Undo): the tombstone is written only when the snackbar
+ * goes without Undo. Main left mid-snackbar (sign-out, owner switch): keep the template.
+ */
+private suspend fun SnackbarHostState.offerUndoTemplateDelete(
+    message: String,
+    undoLabel: String,
+    onUndo: () -> Unit,
+    onCommit: () -> Unit,
+) {
+    var settled = false
+    try {
+        val result = showSnackbar(message = message, actionLabel = undoLabel, duration = SnackbarDuration.Indefinite)
+        settled = true
+        if (result == SnackbarResult.ActionPerformed) onUndo() else onCommit()
+    } finally {
+        if (!settled) onUndo()
+    }
+}
+
 /** Both ends are tab roots: fade-through, no slide (tabs have no order). */
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch() =
     NavTab.entries.any { it.route == initialState.destination.route } &&

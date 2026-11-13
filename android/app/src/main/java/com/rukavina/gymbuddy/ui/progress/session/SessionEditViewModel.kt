@@ -230,27 +230,26 @@ class SessionEditViewModel @Inject constructor(
         val keypad = _uiState.value.keypad ?: return
         when (input) {
             KeypadInput.Cancel -> _uiState.update { it.copy(keypad = null) }
-            KeypadInput.Next -> {
-                if (keypad.rule != null) return
-                if (!keypad.fresh) {
-                    val stored = when (keypad.field.kind) {
-                        KeypadValue.Kind.Clock -> KeypadValue.parseClock(keypad.text)?.toString().orEmpty()
-                        KeypadValue.Kind.Whole -> KeypadValue.parseWhole(keypad.text)?.toString().orEmpty()
-                        KeypadValue.Kind.Decimal -> KeypadValue.parse(keypad.text)?.let(SetFields::format).orEmpty()
-                    }
-                    editSets(keypad.exerciseId) { sets ->
-                        sets.map { if (it.id == keypad.setId) SetFields.with(it, keypad.field, stored) else it }
-                    }
-                }
-                val next = nextTarget(keypad)
-                if (next == null) _uiState.update { it.copy(keypad = null) }
-                else openKeypad(keypad.exerciseId, next.first, next.second)
-            }
+            KeypadInput.Next -> keypadNext(keypad)
             else -> _uiState.update {
                 val base = if (keypad.fresh) "" else keypad.text
                 it.copy(keypad = keypad.copy(text = KeypadValue.apply(base, input, keypad.field.kind, separator), fresh = false))
             }
         }
+    }
+
+    /** Next: store the typed value (if any), then move to the next field or close. */
+    private fun keypadNext(keypad: EditKeypad) {
+        if (keypad.rule != null) return
+        if (!keypad.fresh) {
+            val stored = SetFields.stored(keypad.field.kind, keypad.text)
+            editSets(keypad.exerciseId) { sets ->
+                sets.map { if (it.id == keypad.setId) SetFields.with(it, keypad.field, stored) else it }
+            }
+        }
+        val next = nextTarget(keypad)
+        if (next == null) _uiState.update { it.copy(keypad = null) }
+        else openKeypad(keypad.exerciseId, next.first, next.second)
     }
 
     private fun setOf(exerciseId: String, setId: String): WorkoutSet? =
@@ -305,29 +304,10 @@ class SessionEditViewModel @Inject constructor(
     private fun build(base: WorkoutSession, s: SessionEditUiState): WorkoutSession {
         val performed = s.exercises.filter { it.sets.isNotEmpty() }.mapIndexed { index, e ->
             val stored = e.performed.sets.associateBy { it.id }
-            val type = e.performed.exerciseTrackingType
-            val fields = SetFields.of(type)
+            val fields = SetFields.of(e.performed.exerciseTrackingType)
             e.performed.copy(
                 orderIndex = index,
-                sets = e.sets.mapIndexed { i, set ->
-                    val old = stored[set.id]
-                    // Unchanged: keep the stored set (no lb → kg rounding drift).
-                    if (old != null && old.toUiSet(s.units).copy(setNumber = set.setNumber) == set) {
-                        old.copy(orderIndex = i)
-                    } else {
-                        StoredSet(
-                            id = set.id,
-                            weightKg = if (SetField.Weight in fields) UnitConverter.weightToMetric(set.weight, s.units) else null,
-                            reps = if (SetField.Reps in fields) set.reps.toIntOrNull() else null,
-                            durationSeconds = if (SetField.Duration in fields) set.duration.toIntOrNull() else null,
-                            distanceMeters = if (SetField.Distance in fields) set.distance.toFloatOrNull() else null,
-                            setType = old?.setType ?: SetType.WORKING,
-                            isCompleted = true,
-                            restTakenSeconds = old?.restTakenSeconds,
-                            orderIndex = i,
-                        )
-                    }
-                },
+                sets = e.sets.mapIndexed { i, set -> storedSet(set, stored[set.id], fields, s.units, i) },
             )
         }
         return base.copy(
@@ -337,6 +317,22 @@ class SessionEditViewModel @Inject constructor(
             durationSeconds = s.durationSeconds,
             notes = s.note.trim().takeIf { it.isNotEmpty() },
             performedExercises = performed,
+        )
+    }
+
+    private fun storedSet(set: WorkoutSet, old: StoredSet?, fields: List<SetField>, units: PreferredUnits, i: Int): StoredSet {
+        // Unchanged: keep the stored set (no lb → kg rounding drift).
+        if (old != null && old.toUiSet(units).copy(setNumber = set.setNumber) == set) return old.copy(orderIndex = i)
+        return StoredSet(
+            id = set.id,
+            weightKg = if (SetField.Weight in fields) UnitConverter.weightToMetric(set.weight, units) else null,
+            reps = if (SetField.Reps in fields) set.reps.toIntOrNull() else null,
+            durationSeconds = if (SetField.Duration in fields) set.duration.toIntOrNull() else null,
+            distanceMeters = if (SetField.Distance in fields) set.distance.toFloatOrNull() else null,
+            setType = old?.setType ?: SetType.WORKING,
+            isCompleted = true,
+            restTakenSeconds = old?.restTakenSeconds,
+            orderIndex = i,
         )
     }
 

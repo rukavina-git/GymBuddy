@@ -268,6 +268,23 @@ flowchart LR
 - Other checks: Android build and unit tests, end-to-end sync tests,
   CodeQL, Sonar, OWASP dependency check, API lint and docs.
 
+### Code quality gate (Sonar)
+
+SonarCloud's free plan shows results for one branch only. We picked
+`develop`, not `main`: a report on code that is already live is too
+late, and every change reaches `main` through `develop` anyway.
+
+| Where | Sonar does | Blocks? |
+|---|---|---|
+| push to `develop` | scans, waits for the quality gate ("Sonar way") | No. A red gate is a warning in the run summary |
+| PR into `main`, push to `main` | scans (required check), result not kept | No |
+| before a `v*` tag or the `develop` → `main` PR | gate on `develop` must be green, Dependabot alerts closed | Yes, by rule |
+
+Why a warning and not a block: day-to-day work on `develop` shouldn't
+stop on a quality finding. The hard stop is the release. Nothing is
+tagged or merged to `main` while Sonar issues or Dependabot alerts
+are open. Details: ADR 0013.
+
 ## 9. Backups
 
 ```mermaid

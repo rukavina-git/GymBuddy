@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
@@ -225,12 +226,7 @@ internal fun TemplateEditorContent(
     // finger on the card by shifting the offset by the card it passed.
     val onDrag: (Long, Float) -> Unit = drag@{ key, dy ->
         dragOffset += dy
-        val visible = listState.layoutInfo.visibleItemsInfo
-        val current = visible.firstOrNull { it.key == key } ?: return@drag
-        val centre = current.offset + dragOffset + current.size / 2f
-        val target = visible.firstOrNull { info ->
-            info.key is Long && info.key != key && centre >= info.offset && centre <= info.offset + info.size
-        } ?: return@drag
+        val (current, target) = dragTarget(listState.layoutInfo.visibleItemsInfo, key, dragOffset) ?: return@drag
         val toIndex = exercises.indexOfFirst { it.key == target.key }
         if (toIndex < 0) return@drag
         val down = target.index > current.index
@@ -294,10 +290,7 @@ internal fun TemplateEditorContent(
                             onDragStart = { haptics(Haptic.DragStart); dragKey = exercise.key; dragOffset = 0f },
                             onDrag = { dy -> onDrag(exercise.key, dy) },
                             onDragEnd = { dragKey = null; dragOffset = 0f },
-                            modifier = Modifier
-                                .then(if (dragging) Modifier else Modifier.animateItem())
-                                .zIndex(if (dragging) 1f else 0f)
-                                .graphicsLayer { translationY = if (dragging) dragOffset else 0f },
+                            modifier = if (dragging) Modifier.dragged { dragOffset } else Modifier.animateItem(),
                         )
                     }
                     item(key = "add") {
@@ -317,6 +310,19 @@ internal fun TemplateEditorContent(
         }
     }
 }
+
+/** The dragged card's own item and the card under its centre, or null if none. */
+private fun dragTarget(visible: List<LazyListItemInfo>, key: Long, offset: Float): Pair<LazyListItemInfo, LazyListItemInfo>? {
+    val current = visible.firstOrNull { it.key == key } ?: return null
+    val centre = current.offset + offset + current.size / 2f
+    val target = visible.firstOrNull { info ->
+        info.key is Long && info.key != key && centre >= info.offset && centre <= info.offset + info.size
+    } ?: return null
+    return current to target
+}
+
+/** A card being dragged: above the others, following the finger, no item animation. */
+private fun Modifier.dragged(offset: () -> Float) = zIndex(1f).graphicsLayer { translationY = offset() }
 
 /** Label, big name text, underline (Editor A). Error: red line + "Give it a name". */
 @Composable
