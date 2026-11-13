@@ -12,6 +12,19 @@ PLAY_SKIP_LISTING = {
   skip_upload_screenshots: true
 }.freeze
 
+QA_PACKAGE = "com.rukavina.gymbuddy.qa"
+
+# Firebase app id of the qa app, read from the google-services.json CI
+# writes (the plugin takes an app id, not the file).
+def qa_firebase_app_id
+  path = File.expand_path("../app/src/qa/google-services.json", __dir__)
+  client = JSON.parse(File.read(path))["client"].find do |c|
+    c.dig("client_info", "android_client_info", "package_name") == QA_PACKAGE
+  end
+  UI.user_error!("#{QA_PACKAGE} not in #{path}") unless client
+  client.dig("client_info", "mobilesdk_app_id")
+end
+
 platform :android do
   desc "qaRelease APK to Firebase App Distribution, group testers"
   desc "Env: FIREBASE_APP_DISTRIBUTION_SA_PATH; optional QA_APK_PATH"
@@ -19,7 +32,7 @@ platform :android do
     firebase_app_distribution(
       android_artifact_type: "APK",
       android_artifact_path: ENV.fetch("QA_APK_PATH", "app/build/outputs/apk/qa/release/app-qa-release.apk"),
-      googleservice_file_path: "app/src/qa/google-services.json",
+      app: qa_firebase_app_id,
       service_credentials_file: ENV.fetch("FIREBASE_APP_DISTRIBUTION_SA_PATH"),
       groups: "testers",
       release_notes: changelog_from_git_commits(
