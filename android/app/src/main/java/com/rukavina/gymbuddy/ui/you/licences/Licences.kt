@@ -26,6 +26,15 @@ private val shortIds = setOf(
 private fun label(l: ReportLicence): String =
     l.spdxId?.takeIf { it in shortIds } ?: l.name.replace("Software Development Kit", "SDK")
 
+/**
+ * Licence files wrap at ~80 columns; on a phone that leaves ragged
+ * lines. Joins the lines of each paragraph (blank-line separated) so
+ * the text wraps to the screen.
+ */
+internal fun reflow(text: String): String =
+    text.trim().split(Regex("\\n\\s*\\n"))
+        .joinToString("\n\n") { para -> para.lines().joinToString(" ") { it.trim() }.trim() }
+
 private val adapter = Moshi.Builder().add(KotlinJsonAdapterFactory()).build().adapter(Report::class.java)
 
 /**
@@ -44,7 +53,7 @@ fun parseLicences(json: String): LicencePage {
     val licences = uses.keys
         .map { id ->
             val l = report.licenses.getValue(id)
-            LicenceText(id, label(l), l.name, l.content?.takeIf(String::isNotBlank) ?: l.url)
+            LicenceText(id, label(l), l.name, l.content?.takeIf(String::isNotBlank)?.let(::reflow) ?: l.url)
         }
         .sortedWith(compareByDescending<LicenceText> { uses.getValue(it.id) }.thenBy { it.name })
     return LicencePage(rows, licences)

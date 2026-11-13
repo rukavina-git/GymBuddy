@@ -1,0 +1,10 @@
+{
+  "uniqueId": "override:androidx.datastore:datastore-preferences-external-protobuf",
+  "artifactVersion": "1.2.1",
+  "name": "DataStore Preferences External Protobuf",
+  "description": "Protocol Buffers, repackaged by AndroidX DataStore.",
+  "website": "https://developer.android.com/jetpack/androidx/releases/datastore",
+  "licenses": [
+    "BSD-3-Clause-protobuf"
+  ]
+}

@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.util.regex.Pattern
 
 plugins {
     alias(libs.plugins.android.application)
@@ -387,6 +388,10 @@ aboutLibraries {
         allowedLicenses.addAll(
             "Apache-2.0", "MIT", "BSD-2-Clause", "BSD-3-Clause", "ISC",
             "OFL-1.1", "CC0-1.0", "CC-BY-4.0", "Unlicense",
+            // The same licences with the project's own copyright line
+            // (config/aboutlibraries/licenses), since MIT, BSD and OFL
+            // must ship with it and the SPDX texts are blank templates.
+            "MIT-calendar", "MIT-fluent-emoji", "BSD-3-Clause-protobuf", "OFL-1.1-figtree",
         )
         val googleSdks = listOf(
             "com.google.android.gms",
@@ -403,6 +408,15 @@ aboutLibraries {
     }
     collect {
         configPath = file("$rootDir/config/aboutlibraries")
+    }
+    library {
+        // Shown instead through config/aboutlibraries/libraries entries
+        // that carry the project's own licence text (copyright line).
+        // Exact artifact names only, so nothing else can drop out.
+        exclusionPatterns.addAll(
+            Pattern.compile("com\\.kizitonwose\\.calendar:(compose|core|data)"),
+            Pattern.compile("androidx\\.datastore:datastore-preferences-external-protobuf"),
+        )
     }
     export {
         prettyPrint = true

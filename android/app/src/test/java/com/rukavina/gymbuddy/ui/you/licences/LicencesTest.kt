@@ -46,4 +46,10 @@ class LicencesTest {
         assertEquals("SIL OPEN FONT LICENSE", licences.getValue("OFL-1.1").text)
         assertEquals("https://spdx.org/licenses/Apache-2.0.html", licences.getValue("Apache-2.0").text)
     }
+
+    @Test
+    fun reflowJoinsWrappedLinesButKeepsParagraphs() {
+        val text = "MIT License\n\nCopyright (c) Someone.\n\nPermission is hereby granted,\n  free of charge.\n"
+        assertEquals("MIT License\n\nCopyright (c) Someone.\n\nPermission is hereby granted, free of charge.", reflow(text))
+    }
 }

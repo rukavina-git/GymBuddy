@@ -4,5 +4,7 @@
   "name": "Fluent Emoji",
   "description": "Profile animal avatars.",
   "website": "https://github.com/microsoft/fluentui-emoji",
-  "licenses": ["MIT"]
+  "licenses": [
+    "MIT-fluent-emoji"
+  ]
 }

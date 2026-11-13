@@ -30,6 +30,8 @@ object NavRoutes {
     const val Profile = "profile"
     const val About = "about"
     const val Licences = "licences"
+    /** One licence text; id is URL-encoded (Uri.encode). */
+    const val LicenceText = "licence/{id}"
     const val DeleteAccount = "delete_account"
     const val ActiveWorkout = "active_workout"
     const val WorkoutSummary = "workout_summary"

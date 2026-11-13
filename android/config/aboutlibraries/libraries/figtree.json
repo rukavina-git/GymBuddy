@@ -4,5 +4,7 @@
   "name": "Figtree",
   "description": "App font.",
   "website": "https://github.com/erikdkennedy/figtree",
-  "licenses": ["OFL-1.1"]
+  "licenses": [
+    "OFL-1.1-figtree"
+  ]
 }

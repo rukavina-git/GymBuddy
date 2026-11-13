@@ -9,9 +9,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,40 +29,33 @@ import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.design.BackTopBar
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private fun load(context: Context): LicencePage =
     context.resources.openRawResource(R.raw.aboutlibraries).bufferedReader().use { parseLicences(it.readText()) }
 
-/**
- * You › About › Open-source licences. A table of every library and
- * bundled asset with its licence; tapping a licence jumps to its text,
- * which appears once below the table.
- */
 @Composable
-fun LicencesScreen(onBack: () -> Unit) {
-    val d = GymBuddyTheme.dimens
-    val cs = MaterialTheme.colorScheme
+private fun rememberPage(): LicencePage? {
     val context = LocalContext.current
     val page by produceState<LicencePage?>(null) { value = withContext(Dispatchers.IO) { load(context) } }
-    val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
+    return page
+}
+
+/**
+ * You › About › Open-source licences: every library and bundled asset
+ * with its licence. Tapping a licence opens its text ([LicenceTextScreen]).
+ */
+@Composable
+fun LicencesScreen(onBack: () -> Unit, onOpenLicence: (String) -> Unit) {
+    val d = GymBuddyTheme.dimens
+    val cs = MaterialTheme.colorScheme
+    val page = rememberPage()
     Surface(Modifier.fillMaxSize(), color = cs.background) {
         Column(Modifier.fillMaxSize()) {
             BackTopBar(onBack = onBack, title = stringResource(R.string.you_licences))
             val p = page ?: return@Column
             val labels = p.licences.associate { it.id to it.label }
-            // Row 0 is the table title, then the rows, then the licences title.
-            val firstLicenceIndex = 1 + p.rows.size + 1
-            fun jumpTo(id: String) {
-                val i = p.licences.indexOfFirst { it.id == id }
-                if (i >= 0) scope.launch { listState.animateScrollToItem(firstLicenceIndex + i) }
-            }
-            LazyColumn(
-                state = listState,
-                contentPadding = PaddingValues(start = d.insetScreen, end = d.insetScreen, bottom = d.group),
-            ) {
+            LazyColumn(contentPadding = PaddingValues(start = d.insetScreen, end = d.insetScreen, bottom = d.group)) {
                 item(key = "t-title") { SectionTitle(stringResource(R.string.you_licences_table)) }
                 items(p.rows, key = { "r-" + it.name + it.licenceIds }) { row ->
                     TableRow(row.name) {
@@ -72,19 +65,33 @@ fun LicencesScreen(onBack: () -> Unit) {
                                 style = MaterialTheme.typography.bodySmall,
                                 color = cs.primary,
                                 textAlign = TextAlign.End,
-                                modifier = Modifier.clickable { jumpTo(id) }.padding(vertical = d.stackTight / 2),
+                                modifier = Modifier.clickable { onOpenLicence(id) }.padding(vertical = d.stackTight / 2),
                             )
                         }
                     }
                 }
-                item(key = "l-title") { SectionTitle(stringResource(R.string.you_licences_texts)) }
-                items(p.licences, key = { "l-" + it.id }) { licence ->
-                    Column(Modifier.padding(bottom = d.group), verticalArrangement = Arrangement.spacedBy(d.stackTight)) {
-                        Text(licence.name, style = MaterialTheme.typography.titleSmall)
-                        licence.text?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant) }
-                    }
-                }
             }
+        }
+    }
+}
+
+/** One licence's full text, or its link when the report has no text (Google's SDK terms). */
+@Composable
+fun LicenceTextScreen(id: String, onBack: () -> Unit) {
+    val d = GymBuddyTheme.dimens
+    val cs = MaterialTheme.colorScheme
+    val licence = rememberPage()?.licences?.firstOrNull { it.id == id }
+    Surface(Modifier.fillMaxSize(), color = cs.background) {
+        Column(Modifier.fillMaxSize()) {
+            BackTopBar(onBack = onBack, title = licence?.name)
+            val text = licence?.text ?: return@Column
+            Text(
+                text,
+                style = MaterialTheme.typography.bodySmall,
+                color = cs.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+                    .padding(start = d.insetScreen, end = d.insetScreen, bottom = d.group),
+            )
         }
     }
 }
