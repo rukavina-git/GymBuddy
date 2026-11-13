@@ -41,7 +41,8 @@ Part B (after owner checklist and one develop scan):
    then rename main branch `main` → `develop`.
 2. Re-run the latest Backend Build and Android Build on develop (or
    push). The Sonar job reads the gate without an error.
-3. Dependabot alert #39 closes after the push.
+3. Dependabot alert #39 closes only when the fix reaches `main` (8.6):
+   Dependabot reads the default branch. Until then check `npm ls`.
 
 ## Out of scope
 Dependabot version-update PRs. Gate/rule changes. Refactors beyond
@@ -49,7 +50,7 @@ what an issue needs. A CI check for the release rule.
 
 ## Done when
 A: `npm ls minimatch` has nothing in `>=7 <11.0.1`; `npm run lint`,
-`generate:kotlin` pass; `actionlint` clean; alert #39 closed.
+`generate:kotlin` pass; `actionlint` clean (#39 closes at 8.6).
 B: develop gate green, no open BUG/VULNERABILITY/CRITICAL;
 backend `./gradlew test`, android `testQaDebugUnitTest` +
 `lintQaDebug` pass. Progress and roadmap ticked.

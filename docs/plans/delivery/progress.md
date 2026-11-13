@@ -96,3 +96,5 @@
   missing JaCoCo) as that warning; read the summary. PRs into main
   still scan report-only so the required checks report. Reviewer NIT
   left: "main was never scanned" wording (main got no push since 8.1).
+- 02a: Dependabot alerts track `main` only; #39 stays open until the
+  8.6 merge although develop is fixed.
