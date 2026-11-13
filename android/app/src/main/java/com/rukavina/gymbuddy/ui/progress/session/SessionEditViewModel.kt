@@ -242,7 +242,7 @@ class SessionEditViewModel @Inject constructor(
     private fun keypadNext(keypad: EditKeypad) {
         if (keypad.rule != null) return
         if (!keypad.fresh) {
-            val stored = storedText(keypad.field.kind, keypad.text)
+            val stored = SetFields.stored(keypad.field.kind, keypad.text)
             editSets(keypad.exerciseId) { sets ->
                 sets.map { if (it.id == keypad.setId) SetFields.with(it, keypad.field, stored) else it }
             }
@@ -250,12 +250,6 @@ class SessionEditViewModel @Inject constructor(
         val next = nextTarget(keypad)
         if (next == null) _uiState.update { it.copy(keypad = null) }
         else openKeypad(keypad.exerciseId, next.first, next.second)
-    }
-
-    private fun storedText(kind: KeypadValue.Kind, text: String): String = when (kind) {
-        KeypadValue.Kind.Clock -> KeypadValue.parseClock(text)?.toString().orEmpty()
-        KeypadValue.Kind.Whole -> KeypadValue.parseWhole(text)?.toString().orEmpty()
-        KeypadValue.Kind.Decimal -> KeypadValue.parse(text)?.let(SetFields::format).orEmpty()
     }
 
     private fun setOf(exerciseId: String, setId: String): WorkoutSet? =

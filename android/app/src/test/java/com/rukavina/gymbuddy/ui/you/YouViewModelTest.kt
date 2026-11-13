@@ -352,4 +352,16 @@ class YouViewModelTest {
 
         assertEquals(ExportUiState.Failed, withTimeout(5_000) { vm.exportState.first { it != ExportUiState.Saving } })
     }
+
+    @Test
+    fun `password actions report not signed in without a Firebase user`() {
+        val vm = buildViewModel()
+        val results = mutableListOf<Pair<Boolean, String?>>()
+
+        vm.setupPassword("secret123") { ok, msg -> results += ok to msg }
+        vm.changePassword("old", "new12345") { ok, msg -> results += ok to msg }
+        vm.deleteAccountWithPassword("secret123") { ok, msg -> results += ok to msg }
+
+        assertEquals(List(3) { false to "Not signed in" }, results)
+    }
 }

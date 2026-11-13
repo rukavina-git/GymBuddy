@@ -714,11 +714,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                     _events.trySend(WorkoutEvent.Rejected)
                     return
                 }
-                val stored = when (keypad.field.kind) {
-                    KeypadValue.Kind.Clock -> KeypadValue.parseClock(keypad.text)?.toString().orEmpty()
-                    KeypadValue.Kind.Whole -> KeypadValue.parseWhole(keypad.text)?.toString().orEmpty()
-                    KeypadValue.Kind.Decimal -> KeypadValue.parse(keypad.text)?.let(SetFields::format).orEmpty()
-                }
+                val stored = SetFields.stored(keypad.field.kind, keypad.text)
                 updateSet(keypad.exerciseId, keypad.setId) { SetFields.with(it, keypad.field, stored) }
                 val next = nextField(keypad)
                 val set = _uiState.value.exercises.firstOrNull { it.id == keypad.exerciseId }

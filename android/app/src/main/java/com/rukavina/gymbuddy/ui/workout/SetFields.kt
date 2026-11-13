@@ -116,6 +116,13 @@ object SetFields {
     fun savable(type: ExerciseTrackingType, set: WorkoutSet): Boolean =
         rule(type, set, weightRequired = false) == null
 
+    /** Keypad text → stored form: clock digits to seconds, "," to ".", "" when empty. */
+    fun stored(kind: KeypadValue.Kind, text: String): String = when (kind) {
+        KeypadValue.Kind.Clock -> KeypadValue.parseClock(text)?.toString().orEmpty()
+        KeypadValue.Kind.Whole -> KeypadValue.parseWhole(text)?.toString().orEmpty()
+        KeypadValue.Kind.Decimal -> KeypadValue.parse(text)?.let(::format).orEmpty()
+    }
+
     /** 82.5 → "82.5", 80.0 → "80", 1.25 → "1.25". Always "." (the stored form). */
     fun format(value: Float): String =
         BigDecimal(value.toString()).stripTrailingZeros().toPlainString()

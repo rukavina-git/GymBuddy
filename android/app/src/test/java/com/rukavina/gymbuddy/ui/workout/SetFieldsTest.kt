@@ -2,6 +2,7 @@ package com.rukavina.gymbuddy.ui.workout
 
 import com.rukavina.gymbuddy.domain.model.ExerciseTrackingType
 import com.rukavina.gymbuddy.domain.model.PreferredUnits
+import com.rukavina.gymbuddy.ui.design.KeypadValue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -72,5 +73,15 @@ class SetFieldsTest {
         assertEquals("82.5", SetFields.format(82.5f))
         assertEquals("1.25", SetFields.format(1.25f))
         assertEquals("0", SetFields.format(0f))
+    }
+
+    @Test
+    fun storedFormPerKind() {
+        assertEquals("90", SetFields.stored(KeypadValue.Kind.Clock, "130"))
+        assertEquals("", SetFields.stored(KeypadValue.Kind.Clock, ""))
+        assertEquals("12", SetFields.stored(KeypadValue.Kind.Whole, "12"))
+        assertEquals("", SetFields.stored(KeypadValue.Kind.Whole, ""))
+        assertEquals("82.5", SetFields.stored(KeypadValue.Kind.Decimal, "82,5"))
+        assertEquals("", SetFields.stored(KeypadValue.Kind.Decimal, ""))
     }
 }
