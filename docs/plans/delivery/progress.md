@@ -129,10 +129,13 @@
   no blank line before `mainEnter` in MainScreen.kt. 03 can start; the
   release rule (gate green, #39 closed at 8.6) still blocks the first
   `v*` tag.
-- 03 owner: generate and commit `android/Gemfile.lock` (Ruby 3.x,
-  `bundle lock --add-platform x86_64-linux`) and run
-  `bundle exec fastlane lanes` before the first run with Play secrets
-  (without a lock, setup-ruby resolves gems inside the secret job).
+- 03 follow-up: guard hook fixed (it blocked the bare word
+  `fastlane` anywhere: `which`, grep patterns, `fastlane lanes`). Now
+  only fastlane in command position with an uploading lane is
+  blocked. `Gemfile.lock` generated in a `ruby:3.3` container
+  (platforms x86_64-linux, aarch64-linux, arm64-darwin) and committed;
+  `fastlane lanes` lists test, internal, promote. App Distribution
+  plugin 1.0.0 exists (locked 0.10.1 via `~> 0.10`); bump later.
 - 03 reviewer SHOULD-FIX left: (a) the main-only check lives in the
   tagged commit's workflow, so a tag on an old commit skips it; add a
   tag ruleset (only owner creates `v*`) in 8.5 and say so in ADR 0017.
