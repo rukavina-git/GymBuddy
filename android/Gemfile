@@ -6,8 +6,7 @@ gem "fastlane", "~> 2.228"
 plugins_path = File.join(File.dirname(__FILE__), "fastlane", "Pluginfile")
 eval_gemfile(plugins_path) if File.exist?(plugins_path)
 
-# The App Distribution upload failed with net-http 0.10.0 /
-# faraday-net_http 3.5.0 ("Content-Length not given"); held back until
-# a newer release is checked.
-gem "net-http", "< 0.10"
-gem "faraday-net_http", "< 3.5"
+# google-apis-core 1.x sends raw uploads (the App Distribution APK) as a
+# stream without Content-Length, which net-http rejects. 0.18 is the
+# last 0.x and works; every gem that needs it allows < 1.
+gem "google-apis-core", "< 1"
