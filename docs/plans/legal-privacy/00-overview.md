@@ -18,11 +18,13 @@ must be live first.
 2. Privacy policy + terms at a public URL, linked in-app. Terms include
    the training disclaimer: not medical advice, consult a doctor and a
    qualified trainer, train at your own risk. Liability limited, not
-   excluded (EU rules on injury); lawyer glance before release.
+   excluded (EU rules on injury); lawyer glance before release. The
+   disclaimer lives only in the terms (owner: no line on exercise
+   pages). Guests skip account creation, so Welcome gets "By continuing
+   you agree to the Terms and Privacy policy" too.
 3. Web account deletion page.
 4. Compliance pass: health-data consent, 16+, Crashlytics payloads,
-   timer/notification rules. In-app disclaimer line on the exercise
-   page (under How-to), short and quiet.
+   timer/notification rules.
 5. (me) Play Console: Data safety, content rating, audience, listing.
 6. (me) CI green, PR develop → main.
 
