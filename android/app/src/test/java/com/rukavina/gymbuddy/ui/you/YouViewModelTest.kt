@@ -29,8 +29,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -87,6 +89,7 @@ class YouViewModelTest {
     private var online = true
     private var syncCycles = 0
     private lateinit var prefs: AppPreferencesRepository
+    private var prefsFile = java.io.File("unset")
 
     private fun buildViewModel(
         coordinator: LogoutCoordinator = LogoutCoordinator(store, { true }, auth, direct),
@@ -101,7 +104,7 @@ class YouViewModelTest {
             appContext = org.robolectric.RuntimeEnvironment.getApplication(),
             guestMerge = GuestMerge(holder),
             preferences = AppPreferencesRepository(
-                PreferenceDataStoreFactory.create(produceFile = { java.io.File.createTempFile("prefs", ".preferences_pb").also { it.delete() } })
+                PreferenceDataStoreFactory.create(produceFile = { java.io.File.createTempFile("prefs", ".preferences_pb").also { it.delete(); prefsFile = it } })
             ).also { prefs = it },
             dataExporter = DataExporter(holder, "test", clock),
             exercises = ExerciseRepositoryImpl(holder, recorder, clock),
@@ -156,9 +159,11 @@ class YouViewModelTest {
         // One write at a time, generous timeout: DataStore writes on its own
         // IO scope, and this timed out at 5 s on PR runners (PR #10).
         vm.setUnits(PreferredUnits.IMPERIAL)
-        withTimeout(15_000) { prefs.preferredUnits.first { it == PreferredUnits.IMPERIAL } }
+        withTimeoutOrNull(15_000) { prefs.preferredUnits.first { it == PreferredUnits.IMPERIAL } }
+            ?: fail("units never saved; now ${prefs.preferredUnits.first()}, file ${prefsFile.exists()}")
         vm.setRestBuzz(true)
-        withTimeout(15_000) { prefs.restBuzz.first { it } }
+        withTimeoutOrNull(15_000) { prefs.restBuzz.first { it } }
+            ?: fail("rest buzz never saved; now ${prefs.restBuzz.first()}, units ${prefs.preferredUnits.first()}")
         Unit
     }
 
