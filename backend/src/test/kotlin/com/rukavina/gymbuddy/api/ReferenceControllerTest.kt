@@ -36,7 +36,7 @@ class ReferenceControllerTest : AbstractPostgresIntegrationTest() {
     fun `getReferenceVersion matches the seeded library versions`() {
         mockMvc.perform(get("/v1/reference/version").header("Authorization", "Bearer ${bearerToken()}"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.exerciseLibraryVersion").value(9))
+            .andExpect(jsonPath("$.exerciseLibraryVersion").value(10))
             .andExpect(jsonPath("$.templateLibraryVersion").value(6))
     }
 
@@ -44,7 +44,7 @@ class ReferenceControllerTest : AbstractPostgresIntegrationTest() {
     fun `getReferenceExercises returns the full default library including deprecated entries`() {
         mockMvc.perform(get("/v1/reference/exercises").header("Authorization", "Bearer ${bearerToken()}"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.version").value(9))
+            .andExpect(jsonPath("$.version").value(10))
             .andExpect(jsonPath("$.exercises").isArray)
             .andExpect(jsonPath("$.exercises.length()").value(60))
             .andExpect(jsonPath("$.exercises[0].id").exists())

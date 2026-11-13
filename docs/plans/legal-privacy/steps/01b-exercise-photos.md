@@ -36,5 +36,10 @@ hosted by us (no hotlinking), recorded in DESIGN.md §10 with the
 licence or invoice, listed on the licences page if the licence needs
 credit.
 
-## Owner decision
-Pending.
+## Owner decisions (2026-11-13)
+- No paid images. Current photos dropped: backend V8 clears the
+  hotlinked URLs and bumps the exercise library to v10; the bundled
+  asset drops them too. Exercise pages show the stand-in.
+- New images: drawn by us (Claude), not photographed by the owner.
+  Start with a few exercises to test the style, owner reviews, then
+  the rest.
