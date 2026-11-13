@@ -5,7 +5,7 @@
 - [x] 02 Signed release AAB on a `v*` tag (322cf68)
 - [x] 02a Clean Sonar issues and Dependabot alerts (before any `v*` tag)
       (part A d1e3fc5, part B 926a4a5)
-- [ ] 03 fastlane: testers, Play internal, store listing
+- [x] 03 fastlane: testers, Play internal, store listing (HASH)
 - [ ] 04 Backend CD: develop → test, `v*` → prod
 - [ ] 05 (me) Play Console, upload key, service account, secrets
 - [ ] 06 (me) CI green, PR develop → main
@@ -76,6 +76,15 @@
   Desktop running (Testcontainers); first local run failed with 91
   context errors until it was started.
 
+- 03: owner decision mid-step: develop is always test, main is
+  always prod (ADR 0017). Prod = `v*` tag on main right after each
+  merge; release workflow fails on a tag not on main. Test builds use
+  a separate qa key in a new `testers` environment (develop only), not
+  the upload key. 02's checklist now tags `v0.1.0` on main after 8.6.
+  `promote` is a `workflow_dispatch` job in android-release.yml.
+  Gemfile.lock not committed and `fastlane lanes` not run: the guard
+  hook blocks fastlane/docker commands. Local Ruby is 2.6 (too old).
+
 ## Gotchas
 
 - 00 for the owner run: with empty `DEPLOY_*` the backup job exits 0
@@ -120,3 +129,16 @@
   no blank line before `mainEnter` in MainScreen.kt. 03 can start; the
   release rule (gate green, #39 closed at 8.6) still blocks the first
   `v*` tag.
+- 03 owner: generate and commit `android/Gemfile.lock` (Ruby 3.x,
+  `bundle lock --add-platform x86_64-linux`) and run
+  `bundle exec fastlane lanes` before the first run with Play secrets
+  (without a lock, setup-ruby resolves gems inside the secret job).
+- 03 reviewer SHOULD-FIX left: (a) the main-only check lives in the
+  tagged commit's workflow, so a tag on an old commit skips it; add a
+  tag ruleset (only owner creates `v*`) in 8.5 and say so in ADR 0017.
+  (b) `promote` promotes the latest internal release, not the tag's;
+  pass `version_code` from the tag. (c) `release_status: completed`
+  fails while the Play app is unpublished (must be `draft`); 8.5's
+  first upload is by hand in Play Console anyway. NITs: pass the
+  Firebase `app:` id explicitly; check allows any older main commit.
+- 04: prod deploy should use the same rule (v* tag on main).

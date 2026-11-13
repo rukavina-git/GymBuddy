@@ -48,3 +48,11 @@ local_assets
 # openapi-generator output (api/package.json generate:kotlin); CI-only, never committed
 /generated-client/
 /keystore.properties
+
+# fastlane (Plan 8.3): run output and generated docs; service-account
+# keys live only in CI temp files and Bitwarden
+/fastlane/report.xml
+/fastlane/README.md
+/fastlane/*.json
+/vendor/bundle/
+/.bundle/

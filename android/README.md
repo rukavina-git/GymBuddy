@@ -26,12 +26,25 @@ Coverage report lands at `app/build/reports/jacoco/test/html/index.html`.
 
 ## Release
 
-Pushing a `vX.Y.Z` tag runs `.github/workflows/android-release.yml`:
-a signed, minified prod AAB with the Crashlytics mapping uploaded,
-kept as a 30-day artifact. versionName is `X.Y.Z`, versionCode
-`X*1_000_000 + Y*1_000 + Z` (Y, Z up to 999).
+Branches (ADR 0017): **develop is test, main is prod.** Nothing from
+develop reaches Play or the prod backend.
 
-    git tag v0.1.0 && git push origin v0.1.0
+| Stage | From | Workflow | Goes to |
+|---|---|---|---|
+| test | develop, "Run workflow" | `android-testers.yml` | qa APK → Firebase App Distribution, group `testers` |
+| prod | `vX.Y.Z` tag on main | `android-release.yml` | prod AAB → Play internal track |
+| closed | "Run workflow" on that tag | `android-release.yml` (promote) | internal → closed (`alpha`) |
+
+Tag right after each merge to main, so main always equals prod. A tag
+not on main fails the release run.
+
+The tag run builds a signed, minified prod AAB with the Crashlytics
+mapping uploaded, kept as a 30-day artifact, then fastlane uploads it
+(skipped with a notice until `PLAY_SERVICE_ACCOUNT_JSON` exists).
+versionName is `X.Y.Z`, versionCode `X*1_000_000 + Y*1_000 + Z`
+(Y, Z up to 999).
+
+    git switch main && git pull && git tag v0.1.0 && git push origin v0.1.0
     ./gradlew :app:printReleaseVersion -Pgymbuddy.releaseTag=v0.1.0   # check
 
 Without the property, builds use the defaults in `app/build.gradle.kts`.
@@ -54,10 +67,34 @@ Upload key (also the Play upload key, 8.5), made once:
 | `ANDROID_UPLOAD_STORE_PASSWORD` | env `release` | keystore password |
 | `ANDROID_UPLOAD_KEY_ALIAS` | env `release` | key alias (`upload`) |
 | `ANDROID_UPLOAD_KEY_PASSWORD` | env `release` | key password |
+| `PLAY_SERVICE_ACCOUNT_JSON` | env `release` | Play API service account (8.5) |
+| `ANDROID_QA_KEYSTORE_B64` | env `testers` | qa signing keystore, base64 |
+| `ANDROID_QA_STORE_PASSWORD` | env `testers` | qa keystore password |
+| `ANDROID_QA_KEY_ALIAS` | env `testers` | qa key alias (`qa`) |
+| `ANDROID_QA_KEY_PASSWORD` | env `testers` | qa key password |
+| `FIREBASE_APP_DISTRIBUTION_SA_JSON` | env `testers` | gymbuddy-test service account, role Firebase App Distribution Admin |
 
-The `release` environment allows only `v*` tags. Keep the keystore
-and both passwords in Bitwarden: a lost upload key needs a Play
-support reset.
+The `release` environment allows only `v*` tags; `testers` only the
+`develop` branch. Keep every keystore, password and service-account
+JSON in Bitwarden: a lost upload key needs a Play support reset. The
+qa key is separate on purpose; losing it only means testers reinstall.
+
+qa key, made once like the upload key:
+
+    keytool -genkeypair -v -keystore qa.jks -alias qa \
+      -keyalg RSA -keysize 4096 -validity 10000
+
+### fastlane
+
+fastlane (MIT) only uploads; Gradle builds. Lanes in
+`fastlane/Fastfile`: `test`, `internal`, `promote`. Store listing text
+lives in `fastlane/metadata/android/en-US/` (placeholder until Plan 9/10).
+CI runs the lanes; by hand only as a fallback, same branch rule:
+
+    bundle install                       # Ruby 3.x, not macOS's 2.6
+    bundle exec fastlane lanes
+    FIREBASE_APP_DISTRIBUTION_SA_PATH=… bundle exec fastlane test
+    PLAY_JSON_KEY_PATH=… bundle exec fastlane internal
 
 ## Architecture
 

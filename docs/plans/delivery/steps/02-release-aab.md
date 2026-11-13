@@ -33,7 +33,7 @@ fastlane (03) needs a signed prod AAB from CI to upload.
    its passwords in Bitwarden. It is the Play upload key for 8.5 too.
 2. GitHub environment `release`: deployment tags `v*` only; add the
    4 secrets above.
-3. Push tag `v0.1.0` from develop. Run is green, artifact has the AAB,
+3. Push tag `v0.1.0` on main, after 8.6 (main = prod since 03). Run is green, artifact has the AAB,
    Crashlytics shows the mapping for 0.1.0 (1000000).
 
 ## Out of scope

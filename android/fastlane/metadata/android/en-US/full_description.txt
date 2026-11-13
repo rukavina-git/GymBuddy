@@ -1,0 +1,5 @@
+Placeholder listing (Plan 8.3). Final copy and screenshots come with Plan 9/10.
+
+Gym Buddy is a calm workout tracker. Build templates, start a workout,
+and log sets, reps and weight in a few taps. Everything works offline;
+with an account your workouts sync across devices.

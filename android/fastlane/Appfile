@@ -1,0 +1,3 @@
+# Prod package. The service-account key comes per lane from an env var
+# (CI writes it to the runner's temp dir); never commit it.
+package_name("com.rukavina.gymbuddy")
