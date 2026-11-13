@@ -1,0 +1,221 @@
+<title>Exercise Image Prompts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one column of grid cards, read and copied on a phone; app's Soft Dark palette. */
+:root {
+  color-scheme: dark;
+  --ground: #121418;
+  --surface: #1C1F26;
+  --raised: #262A33;
+  --text: #F3F4F6;
+  --soft: #C9CDD4;
+  --muted: #9AA1AD;
+  --lime: #D4FF24;
+  --on-lime: #121418;
+  --cobalt: #4D86F0;
+  --font: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+body { background: var(--ground); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.45; }
+.page { max-width: 760px; margin: 0 auto; padding-block: 24px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px; }
+h1 { font-size: 26px; margin: 0; text-wrap: balance; }
+.lead { color: var(--soft); margin: 6px 0 0; }
+.steps { background: var(--surface); border-radius: 16px; padding: 16px; color: var(--soft); }
+.steps ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.steps b { color: var(--text); }
+.progress { display: flex; align-items: center; gap: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.track { flex: 1; height: 6px; background: var(--raised); border-radius: 99px; overflow: hidden; }
+.fill { height: 100%; width: 0; background: var(--cobalt); transition: width .2s; }
+.card { background: var(--surface); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card.done { opacity: .6; }
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.head h2 { font-size: 18px; margin: 0; }
+.file { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.tiles li { background: var(--raised); border-radius: 10px; padding: 8px 10px; font-size: 14px; min-width: 0; }
+.tiles .pos { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.tiles .num { color: var(--muted); font-variant-numeric: tabular-nums; }
+details summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+pre { white-space: pre-wrap; word-break: break-word; font-family: var(--mono); font-size: 12.5px; color: var(--soft); background: var(--ground); border-radius: 10px; padding: 12px; margin: 8px 0 0; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.copy { font: inherit; font-weight: 600; background: var(--lime); color: var(--on-lime); border: 0; border-radius: 999px; padding: 10px 18px; cursor: pointer; }
+.copy:active { background: #B8DE1F; }
+label.chk { display: inline-flex; align-items: center; gap: 8px; color: var(--soft); font-size: 14px; cursor: pointer; padding: 8px 4px; }
+label.chk input { width: 20px; height: 20px; accent-color: var(--cobalt); }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+</style>
+
+<div class="page">
+  <header>
+    <h1>Exercise images</h1>
+    <p class="lead">60 exercises in 15 prompts. Each prompt makes one image with 4 exercises in a 2×2 grid. Numbers match the app's exercise list.</p>
+  </header>
+
+  <section class="steps">
+    <ol>
+      <li>Open <b>Gemini</b>, start one new chat, and pick the largest image size it offers.</li>
+      <li>Tap <b>Copy prompt</b>, paste it, send. Do the next grid in the same chat.</li>
+      <li>Send each image to Claude as it is. Tick it here.</li>
+      <li>Don't judge them yourself. Claude checks every tile and gives you retries only for the bad ones.</li>
+      <li>If Gemini starts ignoring rules (text in images, wrong layout), start a fresh chat.</li>
+    </ol>
+  </section>
+
+  <div class="progress"><span id="count">0 of 15 sent</span><div class="track"><div class="fill" id="fill"></div></div></div>
+
+  <div id="list" style="display:flex;flex-direction:column;gap:12px"></div>
+</div>
+
+<script>
+const STYLE = `3D render for a workout app. One square 1:1 image split into a 2×2 grid of four equal square tiles, separated by thin gaps of the same background colour (no lines, no borders, no frames). Each tile shows the same mannequin doing a different exercise: the figure centred in its tile, full body and all equipment inside the tile with margin, nothing crossing into another tile.
+The mannequin, identical in every tile: smooth light-grey figure with athletic proportions, no face details, no hair, plain matte black shorts, barefoot.
+Light: soft studio light from the upper left, subtle rim light.
+Working muscles: tinted a soft matte warm orange (#FF8A5B), like painted on the surface, no glow, no light effects. Everything else stays grey.
+View: exact side profile facing right, not turned towards the camera, unless a tile says otherwise.
+Background: plain dark charcoal (#121418) with a slightly lighter floor, the same in every tile.
+Equipment: plain dark grey, no logos. Full-length Olympic barbells with round plates, plain dumbbells, a plain flat bench, simple gym machines.
+Rules: correct, safe technique exactly as described; anatomically correct hands and feet; only the equipment named for that tile, nothing extra in the hands; no text, numbers, arrows, labels, watermark or logo.`;
+
+// [number, name, tile description]. Positions are the ones image models get right.
+const GRIDS = [
+  ["Barbell squats and deadlifts", [
+    [2, "Barbell Back Squat", "deep squat at the bottom: thighs past parallel, hips lower than the knees, bar resting on the upper back, both hands gripping the bar just outside the shoulders, heels flat, chest up. Tint quads and glutes."],
+    [56, "Front Squat", "bottom of a front squat: bar resting on the front of the shoulders, elbows high and pointing forward, torso upright, hips lower than the knees, heels flat. Tint quads and glutes."],
+    [3, "Conventional Deadlift", "start position: barbell on the floor over the middle of the feet, hands gripping it just outside the knees, flat back, hips higher than the knees, shoulders over the bar. Tint hamstrings, glutes and lower back."],
+    [59, "Sumo Deadlift", "start position, seen from a front three-quarter angle so the wide stance shows: very wide stance, toes pointing out, hands gripping the bar between the knees, bar on the floor, chest up, flat back. Tint glutes, inner thighs and quads."],
+  ]],
+  ["Barbell hinges and rows", [
+    [41, "Romanian Deadlift", "bottom of the movement: hips pushed far back, knees slightly bent, flat back, barbell held at mid-shin close to the legs, arms straight. Tint hamstrings and glutes."],
+    [17, "Barbell Bent-Over Row", "torso bent forward about 45 degrees, flat back, knees slightly bent, barbell pulled up to the lower ribs, elbows driven back. Tint upper back, lats and rear shoulders."],
+    [21, "T-Bar Row", "one end of a barbell anchored on the floor, plates on the other end; standing over the bar, torso bent about 45 degrees, flat back, both hands on a V-handle under the plates, pulled up to the chest. Tint upper back and lats."],
+    [27, "Barbell Shrug", "standing tall, arms straight, barbell hanging at the thighs, shoulders shrugged up towards the ears. Tint the upper trapezius."],
+  ]],
+  ["Standing presses and curls", [
+    [22, "Barbell Overhead Press", "standing, barbell locked out directly overhead with straight arms, bar above the middle of the feet, head slightly forward under the bar, tight core. Tint shoulders and triceps."],
+    [55, "Upright Row", "standing, close grip, barbell pulled up to chest height, elbows high above the wrists. Tint side shoulders and upper trapezius."],
+    [33, "Barbell Curl", "standing tall, elbows at the sides, palms up, barbell curled up to upper-chest height. Only one barbell. Tint biceps."],
+    [23, "Dumbbell Shoulder Press", "standing, one dumbbell in each hand pressed overhead, arms almost straight. Tint shoulders and triceps."],
+  ]],
+  ["Barbell on the bench", [
+    [1, "Barbell Bench Press", "top position: lying on a flat bench, arms straight, bar directly above the shoulders, knees bent about 90 degrees, both feet flat on the floor in front of the bench, the near plate covering the far one. Tint chest, front shoulders and triceps."],
+    [11, "Incline Barbell Bench Press", "bench back inclined about 30 degrees, lying on it, arms straight, bar directly above the upper chest, feet flat on the floor. Tint upper chest and front shoulders."],
+    [31, "Close-Grip Bench Press", "top position on a flat bench: hands shoulder-width apart (narrower than a normal bench press), arms straight, bar above the chest, elbows close to the body, feet flat on the floor. Tint triceps and chest."],
+    [44, "Hip Thrust", "upper back resting across the long side of a flat bench, barbell across the hips, hips lifted so the torso and thighs form one straight line, knees bent 90 degrees, feet flat on the floor. Tint glutes and hamstrings."],
+  ]],
+  ["Dumbbells on the bench", [
+    [53, "Dumbbell Bench Press", "lying on a flat bench, one dumbbell in each hand pressed up above the chest, arms straight, feet flat on the floor. Tint chest, front shoulders and triceps."],
+    [12, "Incline Dumbbell Press", "bench back inclined about 30 degrees, one dumbbell in each hand pressed up above the upper chest, feet flat on the floor. Tint upper chest and front shoulders."],
+    [13, "Dumbbell Chest Fly", "seen from slightly above and to the side so the open arms show: lying on a flat bench, arms opened wide to the sides with a slight bend in the elbows, dumbbells level with the chest. Tint chest."],
+    [18, "Dumbbell Row", "one knee and the same-side hand on a flat bench, back flat and parallel to the floor, the other hand rowing one dumbbell up to the hip, elbow pointing up. Tint lats and upper back."],
+  ]],
+  ["Dumbbell shoulders", [
+    [8, "Dumbbell Lateral Raise", "seen from the front, not the side, so both arms show: standing, arms raised out to the sides to shoulder height with a slight elbow bend, one dumbbell in each hand. Tint side shoulders."],
+    [24, "Dumbbell Front Raise", "standing, arms raised straight in front to shoulder height, one dumbbell in each hand. Tint front shoulders."],
+    [25, "Rear Delt Fly", "seen from the front so both arms show: bent forward at the hips until the torso is almost parallel to the floor, flat back, arms raised out to the sides, one dumbbell in each hand. Tint rear shoulders and upper back."],
+    [26, "Arnold Press", "seen from a front three-quarter angle: standing, dumbbells in front of the shoulders, palms facing the body, elbows in front, about to press up. Tint shoulders."],
+  ]],
+  ["Dumbbell arms", [
+    [7, "Dumbbell Bicep Curl", "standing, only ONE dumbbell, in the near hand, curled up to shoulder height, elbow at the side, palm up; the far arm hangs relaxed with an empty hand. Tint biceps."],
+    [34, "Hammer Curl", "standing, only ONE dumbbell, in the near hand, thumb pointing up, curled up to shoulder height, elbow at the side; the far arm hangs relaxed with an empty hand. Tint biceps and forearm."],
+    [37, "Concentration Curl", "seated on the end of a flat bench, leaning forward, elbow braced on the inner thigh, one dumbbell curled up towards the shoulder. Tint biceps."],
+    [29, "Overhead Tricep Extension", "standing, one dumbbell held with both hands behind the head, upper arms pointing straight up beside the ears, elbows bent so the dumbbell is lowered behind the head. Tint triceps."],
+  ]],
+  ["EZ bar and dips", [
+    [30, "Skull Crusher", "lying on a flat bench, a short EZ curl bar (zig-zag shaped bar) held above the forehead, upper arms vertical, elbows bent 90 degrees, feet flat on the floor. Tint triceps."],
+    [35, "Preacher Curl", "seated at a preacher curl bench, upper arms resting on the angled pad, a short EZ curl bar curled halfway up. Tint biceps."],
+    [32, "Tricep Dip", "hands on the edge of a flat bench behind the hips, legs straight out in front with heels on the floor, elbows bent 90 degrees pointing back, body lowered beside the bench. Tint triceps."],
+    [15, "Chest Dip", "on parallel dip bars, torso leaning forward, elbows bent 90 degrees, knees bent with the feet crossed behind. Tint chest and triceps."],
+  ]],
+  ["Dumbbell legs", [
+    [9, "Goblet Squat", "one dumbbell held vertically against the chest with both hands, deep squat, torso upright, elbows inside the knees, heels flat. Tint quads and glutes."],
+    [10, "Walking Dumbbell Lunge", "long step forward, both knees bent 90 degrees, back knee just above the floor, front knee over the ankle, torso upright, one dumbbell hanging in each hand. Tint quads and glutes."],
+    [45, "Bulgarian Split Squat", "rear foot resting laces-down on a flat bench behind, front foot well forward, lowered until the front thigh is parallel to the floor, torso upright, one dumbbell hanging in each hand. Tint quads and glutes."],
+    [58, "Reverse Lunge", "no equipment, hands on the hips, one leg stepped back, both knees bent 90 degrees, back knee just above the floor, torso upright. Tint quads and glutes."],
+  ]],
+  ["Cables: chest and back", [
+    [14, "Cable Crossover", "seen from the front so both arms show: standing between two tall cable towers, a handle in each hand, arms pulled together in front of the hips, slight forward lean. Tint chest."],
+    [16, "Lat Pulldown", "seated at a lat pulldown machine, thighs under the pads, wide bar pulled down to the upper chest, chest up, slight lean back. Tint lats and biceps."],
+    [19, "Seated Cable Row", "seated on a low cable row bench, feet on the foot platform, knees slightly bent, torso upright, V-handle pulled to the stomach, elbows back. Tint lats and upper back."],
+    [20, "Face Pull", "standing facing a cable tower, rope attachment at face height pulled towards the forehead, elbows high and wide, hands beside the ears. Tint rear shoulders and upper back."],
+  ]],
+  ["Bar and pushdown", [
+    [4, "Pull-Up", "hanging from a pull-up bar, overhand grip a little wider than the shoulders, pulled up so the chin is above the bar, legs straight down. Tint lats and biceps."],
+    [54, "Chin-Up", "hanging from a pull-up bar, underhand grip shoulder-width, pulled up so the chin is above the bar, legs straight down. Tint lats and biceps."],
+    [47, "Hanging Leg Raise", "hanging from a pull-up bar with straight arms, straight legs raised to horizontal so the body forms an L. Tint abs and hip flexors."],
+    [28, "Tricep Pushdown", "standing facing a cable tower, high pulley, short straight bar pushed down until the arms are straight, elbows pinned at the sides. Tint triceps."],
+  ]],
+  ["Cable arms, core and floor", [
+    [36, "Cable Curl", "standing facing a cable tower, low pulley, short straight bar curled up to chest height, elbows at the sides. Tint biceps."],
+    [51, "Cable Crunch", "kneeling facing a cable tower, rope from the high pulley held beside the head, crunched down so the elbows reach the thighs, back rounded. Tint abs."],
+    [5, "Push-Up", "top position: arms straight, hands under the shoulders, body in one straight line from head to heels, on the toes. Tint chest, triceps and front shoulders."],
+    [6, "Plank", "forearms on the floor, elbows under the shoulders, body in one straight line from head to heels, on the toes. Tint abs."],
+  ]],
+  ["Leg machines", [
+    [38, "Leg Press", "seated in a 45-degree leg press machine, back flat against the pad, feet on the sled platform, knees bent about 90 degrees. Tint quads and glutes."],
+    [39, "Leg Extension", "seated in a leg extension machine, shin pad in front of the ankles, legs extended straight. Tint quads."],
+    [40, "Lying Leg Curl", "lying face down on a leg curl machine, pad behind the ankles, knees bent about 90 degrees, heels towards the glutes. Tint hamstrings."],
+    [60, "Hack Squat", "in a hack squat machine, back against the angled back pad, shoulders under the shoulder pads, feet on the platform, knees bent about 90 degrees. Tint quads and glutes."],
+  ]],
+  ["Calves and floor abs", [
+    [42, "Standing Calf Raise", "in a standing calf raise machine, shoulders under the pads, balls of the feet on the edge of a block, heels raised high. Tint calves."],
+    [43, "Seated Calf Raise", "seated in a seated calf raise machine, pad on top of the knees, balls of the feet on the platform, heels raised high. Tint calves."],
+    [46, "Crunch", "lying on the back on the floor, knees bent, feet flat, fingertips lightly behind the head, shoulders lifted off the floor. Tint abs."],
+    [57, "Leg Raise", "lying on the back on the floor, hands flat at the sides, straight legs raised to vertical, lower back on the floor. Tint lower abs and hip flexors."],
+  ]],
+  ["Floor core", [
+    [48, "Russian Twist", "seen from the front: seated on the floor, leaning back about 45 degrees, knees bent, feet lifted off the floor, hands clasped, torso rotated to one side. Tint obliques and abs."],
+    [49, "Dead Bug", "lying on the back, one arm pointing straight up, knees bent 90 degrees above the hips, the other arm reaching back overhead and the opposite leg extended straight just above the floor. Tint abs."],
+    [50, "Mountain Climber", "high plank on straight arms, one knee driven towards the chest, the other leg straight back on the toes. Tint abs, shoulders and hip flexors."],
+    [52, "Bicycle Crunch", "lying on the back, shoulders lifted, fingertips behind the head, one knee pulled in while the opposite elbow turns towards it, the other leg extended low above the floor. Tint abs and obliques."],
+  ]],
+];
+const POS = ["Top left", "Top right", "Bottom left", "Bottom right"];
+const pad = n => String(n).padStart(2, "0");
+function promptFor(tiles) {
+  return STYLE + "\n\nTiles:\n" + tiles.map(([, name, desc], i) => `${POS[i]}: ${name}: ${desc}`).join("\n");
+}
+
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem("grids-done") || "[]"); } catch { return []; } },
+  set(v) { try { localStorage.setItem("grids-done", JSON.stringify(v)); } catch {} },
+};
+let done = new Set(store.get());
+const list = document.getElementById("list");
+function progress() {
+  document.getElementById("count").textContent = `${done.size} of ${GRIDS.length} sent`;
+  document.getElementById("fill").style.width = (done.size / GRIDS.length * 100) + "%";
+}
+GRIDS.forEach(([title, tiles], gi) => {
+  const n = gi + 1;
+  const card = document.createElement("article");
+  card.className = "card" + (done.has(n) ? " done" : "");
+  const text = promptFor(tiles);
+  card.innerHTML = `
+    <div class="head"><h2>Grid ${pad(n)} · ${title}</h2><span class="file">grid-${pad(n)}</span></div>
+    <ul class="tiles">${tiles.map(([num, name], i) => `<li><span class="pos">${POS[i]}</span><span class="num">#${pad(num)}</span> ${name}</li>`).join("")}</ul>
+    <details><summary>Show prompt</summary><pre></pre></details>
+    <div class="actions">
+      <button type="button" class="copy">Copy prompt</button>
+      <label class="chk"><input type="checkbox" id="g${n}"> Sent to Claude</label>
+    </div>`;
+  card.querySelector("pre").textContent = text;
+  const btn = card.querySelector(".copy");
+  btn.addEventListener("click", () => {
+    const ok = () => { btn.textContent = "Copied"; setTimeout(() => btn.textContent = "Copy prompt", 1500); };
+    const fallback = () => { const d = card.querySelector("details"); d.open = true; const r = document.createRange(); r.selectNodeContents(card.querySelector("pre")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Selected, copy it"; };
+    try { navigator.clipboard.writeText(text).then(ok, fallback); } catch { fallback(); }
+  });
+  const box = card.querySelector("input");
+  box.checked = done.has(n);
+  box.addEventListener("change", () => {
+    box.checked ? done.add(n) : done.delete(n);
+    card.classList.toggle("done", box.checked);
+    store.set([...done]); progress();
+  });
+  list.appendChild(card);
+});
+progress();
+</script>

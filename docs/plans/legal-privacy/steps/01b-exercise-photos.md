@@ -53,3 +53,9 @@ credit.
   chances to show something wrong.
 - Next: lock the prompt on 2-3 exercises, then the full set of 60.
   Images bundled in the app (WebP), no hotlinking.
+- Workflow (2026-11-13): Gemini, 15 prompts × 2×2 grids = 60 images,
+  grouped by equipment. Prompts: `design/exercise-images/prompts.html`
+  (also the owner's tracker artifact). Owner only pastes and sends;
+  Claude reviews every tile, writes retries for failed tiles, crops,
+  sizes and bundles them. Exercises without a good image ship with the
+  stand-in.
