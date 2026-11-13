@@ -41,13 +41,18 @@ not on main fails the release run.
 The tag run builds a signed, minified prod AAB with the Crashlytics
 mapping uploaded, kept as a 30-day artifact, then fastlane uploads it
 (skipped with a notice until `PLAY_SERVICE_ACCOUNT_JSON` exists).
-versionName is `X.Y.Z`, versionCode `X*1_000_000 + Y*1_000 + Z`
-(Y, Z up to 999).
+The version lives in code: `appVersion` in `app/build.gradle.kts`
+(versionName `X.Y.Z`). versionCode is derived, `X*1_000_000 + Y*1_000 +
+Z` (Y, Z up to 999), never typed. Play rejects an upload whose
+versionCode isn't higher than the last, so bump `appVersion` on develop
+before each merge to main. The tag must equal `v` + `appVersion`, or the
+release build fails; it checks, it doesn't set.
 
-    git switch main && git pull && git tag v0.1.0 && git push origin v0.1.0
     ./gradlew :app:printReleaseVersion -Pgymbuddy.releaseTag=v0.1.0   # check
+    git switch main && git pull && git tag v0.1.0 && git push origin v0.1.0
 
-Without the property, builds use the defaults in `app/build.gradle.kts`.
+0.1.0 (1000) was uploaded by hand on 2026-11-13 (Play needs the first
+AAB by hand), so the first tag from CI is v0.1.1 or higher.
 Local release builds read `android/keystore.properties` (gitignored:
 `storeFile`, `storePassword`, `keyAlias`, `keyPassword`).
 

@@ -15,8 +15,9 @@ what runs where: one branch is always test, one is always prod.
 - **Branches.** develop is the test stage: test backend, qa app
   (`.qa` id) to testers. main is prod: it changes only through a PR
   from develop, and each merge is tagged `vX.Y.Z` right away. The tag
-  releases (Play, and the prod backend in 8.4). The tag gives the
-  versionCode and makes a prod release a deliberate act.
+  releases (Play, and the prod backend in 8.4) and makes a prod release
+  a deliberate act. The version lives in code (`appVersion`, versionCode
+  derived); the tag must match it (changed 2026-11-13, owner).
 - **Enforced in CI.** GitHub environment `release` (v* tags only)
   holds the Play upload key and the Play service account. Environments
   can't tie a tag to a branch, so the release workflow fails if the tag

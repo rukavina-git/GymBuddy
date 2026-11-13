@@ -2,7 +2,7 @@ name: Android Release
 
 # Plan 8.2 + 8.3. Branch rule: main is prod, develop is test (ADR 0017).
 # A v* tag on a main commit builds the signed, minified prod AAB
-# (versionName/versionCode from the tag, app/build.gradle.kts) and
+# (version from appVersion in app/build.gradle.kts; the tag must match) and
 # fastlane uploads it to the Play internal track. A tag not on main
 # fails. "Run workflow" on a tag promotes internal → closed (alpha).
 on:

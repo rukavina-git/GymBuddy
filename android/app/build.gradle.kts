@@ -36,17 +36,23 @@ val keystoreProperties = Properties().apply {
     if (file.exists()) file.inputStream().use { load(it) }
 }
 
-// Release version from the git tag (Plan 8.2): -Pgymbuddy.releaseTag=vX.Y.Z
-// gives versionName X.Y.Z and versionCode X*1_000_000 + Y*1_000 + Z.
-// Without it, local builds keep the defaults below.
-data class ReleaseVersion(val name: String, val code: Int)
+// App version: bump appVersion before each release. versionCode is derived
+// (X*1_000_000 + Y*1_000 + Z), never typed; Play needs it higher on every
+// upload. CI passes -Pgymbuddy.releaseTag=vX.Y.Z, which must equal
+// "v$appVersion" or the build fails (the tag only checks, never sets).
+val appVersion = "0.1.0"
 
-val releaseVersion: ReleaseVersion? = findProperty("gymbuddy.releaseTag")?.toString()?.let { tag ->
-    val match = Regex("""v(\d{1,3})\.(\d{1,3})\.(\d{1,3})""").matchEntire(tag)
-        ?: throw GradleException("gymbuddy.releaseTag must look like v1.2.3, got '$tag'")
+val appVersionCode: Int = run {
+    val match = Regex("""(\d{1,3})\.(\d{1,3})\.(\d{1,3})""").matchEntire(appVersion)
+        ?: throw GradleException("appVersion must look like 1.2.3, got '$appVersion'")
     val (major, minor, patch) = match.destructured.toList().map { it.toInt() }
-    if (major > 2000) throw GradleException("major version $major too large for versionCode")
-    ReleaseVersion("$major.$minor.$patch", major * 1_000_000 + minor * 1_000 + patch)
+    major * 1_000_000 + minor * 1_000 + patch
+}
+
+findProperty("gymbuddy.releaseTag")?.toString()?.let { tag ->
+    if (tag != "v$appVersion") {
+        throw GradleException("Tag $tag doesn't match appVersion $appVersion in app/build.gradle.kts")
+    }
 }
 
 android {
@@ -57,8 +63,8 @@ android {
         applicationId = "com.rukavina.gymbuddy"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = releaseVersion?.code ?: 5
-        versionName = releaseVersion?.name ?: "0.0.2-SNAPSHOT"
+        versionCode = appVersionCode
+        versionName = appVersion
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Crash reporting, read by the manifest. Off in debug builds.
         manifestPlaceholders["crashlyticsEnabled"] = "true"
@@ -166,10 +172,11 @@ android {
     }
 }
 
-// Checks the tag → version mapping without building or signing.
+// Prints the version without building or signing; with -Pgymbuddy.releaseTag
+// it also checks the tag matches.
 tasks.register("printReleaseVersion") {
     group = "release"
-    description = "Prints versionName and versionCode as derived from the release tag."
+    description = "Prints versionName and versionCode (from appVersion)."
     val name = android.defaultConfig.versionName
     val code = android.defaultConfig.versionCode
     doLast { println("$name $code") }

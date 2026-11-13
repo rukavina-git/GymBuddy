@@ -92,6 +92,13 @@
   was written this session; owner confirmed tag = prod trigger, prod
   approval kept.
 
+- 02 follow-up (2026-11-13, owner): version lives in code, not the
+  tag. `appVersion = "0.1.0"` in app/build.gradle.kts, versionCode
+  derived (1000); `-Pgymbuddy.releaseTag` only checks it equals
+  `v$appVersion`. Old defaults 5 / `0.0.2-SNAPSHOT` gone. 0.1.0 (1000)
+  is the first AAB, uploaded by hand to Play internal in 8.5, so the
+  first CI tag is v0.1.1+ (bump appVersion before the 8.6 merge).
+
 ## Gotchas
 
 - 00 for the owner run: with empty `DEPLOY_*` the backup job exits 0
