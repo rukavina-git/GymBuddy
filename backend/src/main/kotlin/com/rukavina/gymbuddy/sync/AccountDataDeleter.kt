@@ -23,16 +23,19 @@ import org.springframework.stereotype.Component
 @Component
 class AccountDataDeleter(private val jdbcTemplate: NamedParameterJdbcTemplate) {
 
-    fun deleteAllDataFor(uid: String) {
+    /** Returns the number of top-level rows deleted (cascaded children not counted). */
+    fun deleteAllDataFor(uid: String): Int {
         val params = MapSqlParameterSource("uid", uid)
-        jdbcTemplate.update("DELETE FROM workout_sessions WHERE owner_id = :uid", params)
-        jdbcTemplate.update("DELETE FROM exercises WHERE owner_id = :uid", params)
-        jdbcTemplate.update("DELETE FROM workout_templates WHERE owner_id = :uid", params)
-        jdbcTemplate.update("DELETE FROM user_exercise_state WHERE owner_id = :uid", params)
-        jdbcTemplate.update("DELETE FROM user_template_state WHERE owner_id = :uid", params)
-        jdbcTemplate.update("DELETE FROM user_profile WHERE uid = :uid", params)
-        jdbcTemplate.update("DELETE FROM body_weight_entries WHERE owner_id = :uid", params)
-        jdbcTemplate.update("DELETE FROM change_log WHERE user_id = :uid", params)
-        jdbcTemplate.update("DELETE FROM sync_retention_watermark WHERE user_id = :uid", params)
+        return listOf(
+            "DELETE FROM workout_sessions WHERE owner_id = :uid",
+            "DELETE FROM exercises WHERE owner_id = :uid",
+            "DELETE FROM workout_templates WHERE owner_id = :uid",
+            "DELETE FROM user_exercise_state WHERE owner_id = :uid",
+            "DELETE FROM user_template_state WHERE owner_id = :uid",
+            "DELETE FROM user_profile WHERE uid = :uid",
+            "DELETE FROM body_weight_entries WHERE owner_id = :uid",
+            "DELETE FROM change_log WHERE user_id = :uid",
+            "DELETE FROM sync_retention_watermark WHERE user_id = :uid",
+        ).sumOf { jdbcTemplate.update(it, params) }
     }
 }

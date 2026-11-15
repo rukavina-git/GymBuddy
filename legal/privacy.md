@@ -84,7 +84,7 @@ You can:
 - **Correct it:** edit it in the app.
 - **Delete it:** delete your account in the app (You → Delete
   account). This removes your account and all synced data at once.
-  Without the app, ask at [privacy@rukavina.app](mailto:privacy@rukavina.app).
+  Without the app, follow [these steps]({base}/delete-account).
 - **Withdraw consent:** deleting the account withdraws it. Data on
   your phone stays there until you erase it or uninstall the app.
 - **Object, restrict, or ask about anything else:** email us.

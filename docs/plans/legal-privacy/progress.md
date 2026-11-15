@@ -93,3 +93,27 @@
   rukavina.app (Vercel) untouched. Terms and Privacy links tapped on
   the phone open the pages. 02 + 02a done; carried to 9.6: lawyer
   glance at the terms.
+- [ ] 03 web account deletion: code done (commit below), live after
+  the next main release; owner test of delete-account.sh on the test
+  stack open. Page gymtracker.rukavina.app/delete-account (in-app
+  steps, email from the account's address, deleted vs kept), linked
+  from the privacy policy. `delete-account.sh <uid>` runs the backend
+  image once under the `account-delete` profile (AccountDeleteRunner
+  → AccountDeletionService, no web server, main exits). Runbook in
+  docker/README.md. Tests: runner deletes one user only, rejects bad
+  uids, fails loudly on Firebase failure; profile starts no web
+  server.
+  - Deviations: reviewer SHOULD fixed (page said "nothing else is
+    kept", but server logs are, per the privacy policy). build.py
+    gained "1." ordered lists. SecurityConfig is now
+    @ConditionalOnWebApplication (the non-web profile can't build
+    HttpSecurity; the web app is unchanged). AccountDeletionService
+    returns rows + firebaseUserDeleted (the endpoint ignores it).
+  - Gotchas: the test stack only gets the runner once develop deploys
+    (already true after this push); prod needs a main release first.
+    Not fixed, follow-up for 9.4: FirebaseTokenVerifier doesn't use
+    checkRevoked, so a still-signed-in device can push for up to ~1 h
+    after deletion and recreate rows under the deleted uid. NITs left:
+    mailto subject hardcodes "Gym Tracker" (not {app}); the script's
+    output is ECS JSON (could pass LOGGING_STRUCTURED_FORMAT_CONSOLE=);
+    "Google sign-in link" wording.

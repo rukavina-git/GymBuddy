@@ -4,8 +4,8 @@
     python3 -I legal/build.py            # writes legal/site/
     python3 -I legal/build.py --check    # only validates, writes nothing
 
-No dependencies: a small Markdown subset (headings, paragraphs, "- "
-lists, pipe tables, **bold**, [links](url)). Each page must start with
+No dependencies: a small Markdown subset (headings, paragraphs, "- " and
+"1." lists, pipe tables, **bold**, [links](url)). Each page must start with
 "Last updated: YYYY-MM-DD"; the build fails otherwise. Output paths
 are extensionless directories (privacy/index.html) so the URLs are
 https://gymtracker.rukavina.app/privacy and /terms (SITE_HOST is a
@@ -22,8 +22,9 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent
 APP_NAME = "Gym Tracker"
 BASE = ""
-PAGES = ["privacy", "terms"]
+PAGES = ["privacy", "terms", "delete-account"]
 OUT = ROOT / "site"
+ORDERED = re.compile(r"^\d+\. ")
 DATE_LINE = re.compile(r"^Last updated: (\d{4}-\d{2}-\d{2})$")
 
 CSS = """
@@ -53,13 +54,14 @@ def inline(text: str) -> str:
 
 def render(lines: list[str]) -> str:
     out, para, items, rows = [], [], [], []
+    kind = ["ul"]  # list tag of the open list: "- " -> ul, "1. " -> ol
 
     def flush():
         if para:
             out.append(f"<p>{inline(' '.join(para))}</p>")
             para.clear()
         if items:
-            out.append("<ul>" + "".join(f"<li>{inline(i)}</li>" for i in items) + "</ul>")
+            out.append(f"<{kind[0]}>" + "".join(f"<li>{inline(i)}</li>" for i in items) + f"</{kind[0]}>")
             items.clear()
         if rows:
             head, body = rows[0], rows[2:]
@@ -82,10 +84,12 @@ def render(lines: list[str]) -> str:
             if para or items:
                 flush()
             rows.append([c.strip() for c in line.strip("|").split("|")])
-        elif line.startswith("- "):
-            if para:
+        elif line.startswith("- ") or ORDERED.match(line):
+            tag = "ul" if line.startswith("- ") else "ol"
+            if para or (items and kind[0] != tag):
                 flush()
-            items.append(line[2:])
+            kind[0] = tag
+            items.append(line[2:] if tag == "ul" else ORDERED.sub("", line, count=1))
         elif line.startswith("  ") and items:
             items[-1] += " " + line.strip()
         else:

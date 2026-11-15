@@ -29,14 +29,15 @@ class AccountDeletionService(
 ) {
     private val log = LoggerFactory.getLogger(AccountDeletionService::class.java)
 
-    fun deleteAccount(uid: String) {
-        transactionTemplate.execute {
+    fun deleteAccount(uid: String): AccountDeletionResult {
+        val rows = transactionTemplate.execute {
             advisoryLock.acquireForUser(uid)
             accountDataDeleter.deleteAllDataFor(uid)
-        }
+        } ?: 0
 
-        try {
+        val firebaseUserDeleted = try {
             firebaseUserDeleter.deleteUser(uid)
+            true
         } catch (e: Exception) {
             log.error(
                 "ACCOUNT_DELETE_FIREBASE_FAILED uid={} - all synced data for this account has already " +
@@ -45,6 +46,11 @@ class AccountDeletionService(
                 uid,
                 e,
             )
+            false
         }
+        return AccountDeletionResult(rows, firebaseUserDeleted)
     }
 }
+
+/** [rows]: top-level database rows deleted (0 means no synced data). */
+data class AccountDeletionResult(val rows: Int, val firebaseUserDeleted: Boolean)

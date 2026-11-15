@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.auth
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
@@ -17,6 +18,8 @@ import org.springframework.security.web.SecurityFilterChain
  * authentication so it can key its token bucket on the uid.
  */
 @Configuration
+// Not in the account-delete one-off job (no web server, no HttpSecurity).
+@ConditionalOnWebApplication
 class SecurityConfig(
     private val firebaseAuthenticationFilter: FirebaseAuthenticationFilter,
     private val rateLimitFilter: RateLimitFilter,

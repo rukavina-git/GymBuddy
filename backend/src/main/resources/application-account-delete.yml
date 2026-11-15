@@ -1,0 +1,8 @@
+# One-off account deletion (sync/AccountDeleteRunner, Plan 9 step 03):
+# no web server, the uid comes from the environment, main() exits after.
+spring:
+  main:
+    web-application-type: none
+gymbuddy:
+  account-delete:
+    uid: ${ACCOUNT_DELETE_UID:}

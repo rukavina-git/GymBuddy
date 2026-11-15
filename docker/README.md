@@ -54,7 +54,7 @@ publishes 5432/8080 and builds the image.
 As `deploy`, once:
 
     mkdir -p /opt/gymbuddy        # as root: then chown deploy:deploy
-    scp -r docker/server/{compose.yaml,init-cert.sh,deploy.sh,nginx} deploy@<host>:/opt/gymbuddy/
+    scp -r docker/server/{compose.yaml,init-cert.sh,deploy.sh,delete-account.sh,nginx} deploy@<host>:/opt/gymbuddy/
     mkdir /opt/gymbuddy/site      # as deploy, before nginx first starts
     # on the server: copy .env.example to /opt/gymbuddy/.env, fill it,
     # chmod 600 it
@@ -206,6 +206,29 @@ and fails (red) when its `DEPLOY_*` secrets are empty.
 It encrypts with `gpg --symmetric` (AES256) and upload only the
 `.gpg` file (`gymbuddy-vps-<ts>.dump.gpg`) as an artifact kept
 30 days. The repo is public, so the dump is never stored unencrypted.
+
+### Account deletion requests
+
+For people without the app (gymtracker.rukavina.app/delete-account):
+they email privacy@ from their account's address. Plan 9 step 03.
+
+1. Only act if the request came from the account's own email address.
+2. Firebase console (prod project) → Authentication → Users: search
+   the email, copy the **User UID**.
+3. On the server, as `deploy`:
+
+       cd /opt/gymbuddy && ./delete-account.sh <uid>
+
+   It asks for the uid again, then runs the backend image once under
+   the `account-delete` profile: the same deletion as in the app
+   (all synced data, then the Firebase login), no web server. Exit 0
+   means both are gone. If it says the Firebase user was not deleted,
+   the data already is: delete the user in the console.
+4. Reply that the account is deleted (within 30 days of the request;
+   backups age out 30 days later).
+
+The same script works in `/opt/gymbuddy-test` against the test stack
+(copy it there too), which is the place to try it first.
 
 ### Restore
 
