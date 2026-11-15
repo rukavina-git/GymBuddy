@@ -79,6 +79,12 @@ jobs:
           } > keystore.properties
           printf '%s' "$FIREBASE_SA_JSON" > "$RUNNER_TEMP/firebase-sa.json"
 
+      - name: Install the NDK from app/build.gradle.kts
+        run: |
+          ndk=$(sed -n 's/^ *ndkVersion = "\(.*\)".*/\1/p' app/build.gradle.kts)
+          [ -n "$ndk" ] || { echo "::error::ndkVersion not found"; exit 1; }
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$ndk" > /dev/null
+
       - name: Build qa release APK
         run: ./gradlew assembleQaRelease --stacktrace
 

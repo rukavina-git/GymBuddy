@@ -88,6 +88,12 @@ jobs:
             echo "keyPassword=$KEY_PASSWORD"
           } > keystore.properties
 
+      - name: Install the NDK from app/build.gradle.kts
+        run: |
+          ndk=$(sed -n 's/^ *ndkVersion = "\(.*\)".*/\1/p' app/build.gradle.kts)
+          [ -n "$ndk" ] || { echo "::error::ndkVersion not found"; exit 1; }
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$ndk" > /dev/null
+
       - name: Build signed prod AAB
         env:
           RELEASE_TAG: ${{ github.ref_name }}

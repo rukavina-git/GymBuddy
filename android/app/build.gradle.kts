@@ -60,6 +60,10 @@ findProperty("gymbuddy.releaseTag")?.toString()?.let { tag ->
 android {
     namespace = "com.rukavina.gymbuddy"
     compileSdk = libs.versions.compileSdk.get().toInt()
+    // Needed to pull symbol tables out of the AndroidX .so files for
+    // Play (otherwise AGP skips it with only a log line and Play warns
+    // "no debug symbols"). CI installs this exact version.
+    ndkVersion = "30.0.16248370"
 
     defaultConfig {
         applicationId = "com.rukavina.gymbuddy"
@@ -107,7 +111,7 @@ android {
         release {
             signingConfig = signingConfigs.getByName("release")
             ndk {
-                debugSymbolLevel = "FULL"
+                debugSymbolLevel = "SYMBOL_TABLE"
             }
             // Mapping upload needs Firebase credentials; local and CI
             // builds skip it. Pass -Pgymbuddy.uploadMapping=true to upload.

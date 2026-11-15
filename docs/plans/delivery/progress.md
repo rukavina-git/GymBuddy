@@ -203,3 +203,11 @@
   stripped, nothing to upload. With a live internal release,
   `fastlane internal` (release_status completed) should now work;
   first run with the next v* tag after 8.6.
+- Native symbols (2026-11-15, after 8.5): Play's "no debug symbols"
+  warning came from AGP skipping extraction without an NDK. Now
+  `ndkVersion = "30.0.16248370"` (CI installs it in release + testers
+  workflows), `debugSymbolLevel = SYMBOL_TABLE`. The AAB now carries
+  BUNDLE-METADATA/...debugsymbols for libdatastore_shared_counter.
+  libandroidx.graphics.path ships fully stripped from AndroidX ("native
+  debug metadata has already been stripped"), so it gets none. Check
+  at the next Play upload whether the warning is gone.
