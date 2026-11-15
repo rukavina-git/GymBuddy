@@ -79,3 +79,11 @@
   released build had the old URLs (AAB 0.1.0 predates the links).
   - Gotchas: DNS is a new A record for gymtracker only; never touch
     the apex. HSTS on SITE_HOST has no includeSubDomains, keep it so.
+- 02 device check (2026-11-15, S731B over adb): qa launcher "Gym
+  Tracker Test", Welcome + Home wordmark "gym tracker.", legal line
+  with both links. At 200% font on a 1080x1920 screen the line was
+  cut off ("policy." missing), so Welcome now scrolls when it can't
+  fit (BoxWithConstraints + heightIn(min = viewport) keeps the
+  weighted spacers). Rechecked: full line reachable; normal size
+  unchanged. Open in 02: VPS rollout (gymtracker.rukavina.app),
+  lawyer glance before 9.6. privacy@ forwarding tested by the owner.

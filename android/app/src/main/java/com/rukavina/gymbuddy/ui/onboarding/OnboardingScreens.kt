@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -76,11 +77,16 @@ private val QUESTIONS = SetupStep.entries.filter { it != SetupStep.READY }
 fun WelcomeScreen(onCreateAccount: () -> Unit, onHaveAccount: () -> Unit, onContinueWithout: () -> Unit) {
     val d = GymBuddyTheme.dimens
     Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+        BoxWithConstraints(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+        // Scrolls only when it can't fit (small screen at 200% font cut
+        // off the legal line). min = viewport keeps the weighted spacers
+        // working whenever it does fit.
+        val viewport = maxHeight
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding()
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = viewport)
                 // Figma: actions sit clear of the system bar, not on it.
                 .padding(start = d.insetScreen, end = d.insetScreen, top = d.insetScreen, bottom = d.insetScreen + d.section),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -111,6 +117,7 @@ fun WelcomeScreen(onCreateAccount: () -> Unit, onHaveAccount: () -> Unit, onCont
             // Guests never see Create account, so they agree here (R20 W1).
             Spacer(Modifier.height(d.stackTight))
             LegalLine(R.string.welcome_terms, Modifier.padding(horizontal = d.group))
+        }
         }
     }
 }
