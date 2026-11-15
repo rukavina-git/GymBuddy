@@ -93,7 +93,7 @@
   rukavina.app (Vercel) untouched. Terms and Privacy links tapped on
   the phone open the pages. 02 + 02a done; carried to 9.6: lawyer
   glance at the terms.
-- [ ] 03 web account deletion: code done (commit below), live after
+- [ ] 03 web account deletion: code done (abcc483), live after
   the next main release; owner test of delete-account.sh on the test
   stack open. Page gymtracker.rukavina.app/delete-account (in-app
   steps, email from the account's address, deleted vs kept), linked
