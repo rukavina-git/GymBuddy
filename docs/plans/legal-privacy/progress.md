@@ -60,7 +60,7 @@
   SITE_HOST, the site folder and the rollout order. Figma board R20
   (02 Rounds, node 255-5853): Welcome terms line W1–W6 and consent
   link style C1–C4, owner picks before the 9.2 Android links.
-- 02 Android links (COMMIT): Welcome line (R20 W1), consent (C1),
+- 02 Android links (a554cdb): Welcome line (R20 W1), consent (C1),
   About rows "Privacy policy" / "Terms of use". `ui/legal/LegalLinks.kt`
   holds the URLs and the link builder (LegalLinksTest). Also fixes CI:
   6943160 broke Android Lint (context.getString in onClick, now
