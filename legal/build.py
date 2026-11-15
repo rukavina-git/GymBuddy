@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """Builds the public legal pages from legal/*.md (Plan 9 step 02).
 
-    python3 -I legal/build.py            # writes legal/site/gymbuddy/
+    python3 -I legal/build.py            # writes legal/site/gym-tracker/
     python3 -I legal/build.py --check    # only validates, writes nothing
 
 No dependencies: a small Markdown subset (headings, paragraphs, "- "
 lists, pipe tables, **bold**, [links](url)). Each page must start with
 "Last updated: YYYY-MM-DD"; the build fails otherwise. Output paths
 are extensionless directories (privacy/index.html) so the URLs are
-https://rukavina.app/gymbuddy/privacy and /terms.
+https://rukavina.app/gym-tracker/privacy and /terms. The app name
+lives in APP_NAME only: the texts say {app} (and {base} for the URL
+path), so a rename is one line here plus brand_name in the app.
 """
 import html
 import pathlib
@@ -16,8 +18,11 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
+APP_NAME = "Gym Tracker"
+SLUG = "gym-tracker"
+BASE = f"/{SLUG}"
 PAGES = ["privacy", "terms"]
-OUT = ROOT / "site" / "gymbuddy"
+OUT = ROOT / "site" / SLUG
 DATE_LINE = re.compile(r"^Last updated: (\d{4}-\d{2}-\d{2})$")
 
 CSS = """
@@ -89,7 +94,10 @@ def render(lines: list[str]) -> str:
 
 
 def build(name: str) -> str:
-    src = (ROOT / f"{name}.md").read_text(encoding="utf-8").splitlines()
+    text = (ROOT / f"{name}.md").read_text(encoding="utf-8")
+    if "GymBuddy" in text or "Gym Buddy" in text:
+        sys.exit(f"error: legal/{name}.md names the old app; write {{app}}")
+    src = text.replace("{app}", APP_NAME).replace("{base}", BASE).splitlines()
     m = DATE_LINE.match(src[0]) if src else None
     if not m:
         sys.exit(f"error: legal/{name}.md must start with 'Last updated: YYYY-MM-DD'")
@@ -104,7 +112,7 @@ def build(name: str) -> str:
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
-<link rel="stylesheet" href="/gymbuddy/legal.css">
+<link rel="stylesheet" href="{BASE}/legal.css">
 </head>
 <body>
 <main>

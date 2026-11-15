@@ -40,7 +40,7 @@ internal fun ExportSheet(counts: LocalDataCounts?, saving: Boolean, onSave: () -
         Column {
             Text(stringResource(R.string.you_export_file), style = MaterialTheme.typography.titleSmall)
             Text(
-                stringResource(R.string.you_export_file_sub),
+                stringResource(R.string.you_export_file_sub, stringResource(R.string.brand_name)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

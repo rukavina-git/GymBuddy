@@ -114,7 +114,7 @@ internal fun OfflineBox(onRetry: () -> Unit) {
     val d = GymBuddyTheme.dimens
     Surface(shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surfaceContainer) {
         Row(Modifier.padding(start = d.group, end = d.hairline, top = d.stack, bottom = d.stack), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.signin_offline), style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.signin_offline, stringResource(R.string.brand_name)), style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
             AppTextButton(stringResource(R.string.signin_retry), onRetry)
         }
     }

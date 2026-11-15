@@ -32,7 +32,7 @@ they never see either. The health-data consent (`CONSENT_VERSION`
 2. **Publish**: a small script turns both into static HTML (one
    shared CSS, Soft Dark colours, no tracking, no cookies). Hosted
    where the owner picks (open question 1). Stable URLs, e.g.
-   `https://rukavina.app/gymbuddy/privacy` and `/terms`.
+   `https://rukavina.app/gym-tracker/privacy` and `/terms` (renamed in 02a).
 3. **Android**: URLs in one place (`LegalLinks.kt`, same for both
    flavors). "Terms" and "Privacy policy" become tappable links on
    Create account, Sign in, and You → About. Welcome gets the guest

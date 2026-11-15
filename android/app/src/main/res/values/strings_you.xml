@@ -94,7 +94,8 @@
 
     <!-- Export sheet (R15-11, JSON only) -->
     <string name="you_export_file">Backup file (JSON)</string>
-    <string name="you_export_file_sub">Can be imported back into GymBuddy, now and in future versions.</string>
+    <string name="you_feedback_subject">%1$s feedback</string>
+    <string name="you_export_file_sub">Can be imported back into %1$s, now and in future versions.</string>
     <string name="you_export_save">Save file</string>
     <string name="you_export_done">Export saved</string>
     <string name="you_export_failed">Couldn\'t save the export. Try again.</string>

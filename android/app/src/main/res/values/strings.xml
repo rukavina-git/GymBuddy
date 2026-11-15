@@ -1,5 +1,8 @@
 <resources>
-    <string name="app_name">GymBuddy</string>
+    <!-- The public name lives here only (02a). Strings that say it take
+         it as a format arg; qa overrides app_name, never brand_name. -->
+    <string name="brand_name">Gym Tracker</string>
+    <string name="app_name">@string/brand_name</string>
 
     <!-- Design library (ui/design) -->
     <string name="cd_back">Back</string>

@@ -36,7 +36,7 @@ class WorkoutServiceController @Inject constructor(
     private var buzzJob: Job? = null
     private val wakeLock by lazy {
         context.getSystemService(PowerManager::class.java)
-            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "GymBuddy:restBuzz")
+            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "GymTracker:restBuzz")
             .apply { setReferenceCounted(false) }
     }
 

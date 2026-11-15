@@ -1,8 +1,8 @@
 Last updated: 2026-11-15
 
-# GymBuddy privacy policy
+# {app} privacy policy
 
-GymBuddy is a workout log for Android. This policy says what data the
+{app} is a workout log for Android. This policy says what data the
 app and its servers handle, why, and what you can do about it.
 
 ## Who is responsible
@@ -12,7 +12,7 @@ Privacy questions and requests: [privacy@rukavina.app](mailto:privacy@rukavina.a
 
 ## Without an account
 
-You can use GymBuddy without an account. Your workouts, plans, body
+You can use {app} without an account. Your workouts, plans, body
 weight and profile then stay on your phone. Nothing of it is sent to
 us. Crash reports are still sent (see below).
 
@@ -94,7 +94,7 @@ AZOP ([azop.hr](https://azop.hr)), or the authority where you live.
 
 ## Age
 
-GymBuddy is for people aged 16 and over.
+{app} is for people aged 16 and over.
 
 ## Changes
 

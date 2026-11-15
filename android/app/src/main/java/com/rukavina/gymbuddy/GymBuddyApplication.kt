@@ -62,7 +62,7 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
 
     override fun onCreate() {
         super.onCreate()
-        Log.d("AppInfo", "GymBuddy Application starting...")
+        Log.d("AppInfo", "Gym Tracker starting...")
 
         SyncTriggers.observeForeground(ProcessLifecycleOwner.get().lifecycle, syncScheduler)
         SyncTriggers.observeNetwork(this, syncScheduler)

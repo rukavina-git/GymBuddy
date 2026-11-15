@@ -23,7 +23,7 @@
   until it's done. Next step: 02 privacy policy + terms.
 - [ ] 02 privacy policy + terms: web half done (097fad1). Texts in
   legal/, `legal/build.py` builds them, nginx serves SITE_HOST
-  (rukavina.app) /gymbuddy/privacy and /terms on the API cert,
+  (rukavina.app) /gym-tracker/privacy (renamed in 02a; was /gymbuddy/) and /terms on the API cert,
   `legal-site.yml` publishes from main (prod approval). Contacts:
   privacy@rukavina.app (Cloudflare route, made by owner 2026-11-15),
   info@rukavina.app. Open: owner rollout on the VPS, then the Android
@@ -41,3 +41,17 @@
     `up -d nginx` (new env + volume), not a reload. Publish only adds
     files, never deletes. Not fixed (NITs): double-escaped & in link
     URLs, docker/README.md lacks SITE_HOST + site folder.
+- [ ] 02a rename to "Gym Tracker": code + Figma done (b6ee38b), device
+  check open (no phone attached). Name in `brand_name` only; qa
+  overrides `app_name` ("Gym Tracker Test"). Wordmark "gym tracker."
+  (Figma R19 option A, component 151:106 updated in all locked
+  frames). Legal URLs /gym-tracker/, export file
+  gym-tracker-export-<date>.json. BrandNameTest guards strings and
+  Kotlin literals (negative check: fails on "GymBuddy feedback").
+  - Deviations: feedback subject uses `brand_name`, not `app_name`
+    (qa mail would say "Gym Tracker Test feedback"). Package, class
+    names, theme, repo, /opt/gymbuddy on the VPS unchanged (owner).
+  - Gotchas: VPS rollout copies legal/site/gym-tracker (not
+    gymbuddy). NIT left: HomeScreen wordmark contentDescription uses
+    `app_name` (qa TalkBack says "Gym Tracker Test"); use
+    `cd_app_name`. "by ikr" byline parked for v3/v4 (option D).

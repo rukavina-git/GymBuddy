@@ -48,7 +48,7 @@ fun AboutScreen(onBack: () -> Unit, onLicences: () -> Unit, onSyncDebug: () -> U
                     subtitle = stringResource(R.string.you_feedback_sub),
                     onClick = {
                         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$FEEDBACK_EMAIL"))
-                            .putExtra(Intent.EXTRA_SUBJECT, "GymBuddy feedback")
+                            .putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.you_feedback_subject, context.getString(R.string.brand_name)))
                         runCatching { context.startActivity(intent) }
                     },
                 )

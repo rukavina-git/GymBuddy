@@ -185,8 +185,8 @@ class DataExporter(
             .serializeNulls()
             .indent("  ")
 
-        /** `gymbuddy-export-2026-11-03.json`, in the device's zone. */
+        /** `gym-tracker-export-2026-11-03.json`, in the device's zone. */
         fun fileName(clock: Clock): String =
-            "gymbuddy-export-${java.time.LocalDate.now(clock)}.json"
+            "gym-tracker-export-${java.time.LocalDate.now(clock)}.json"
     }
 }

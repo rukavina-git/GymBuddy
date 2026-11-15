@@ -1,16 +1,16 @@
 Last updated: 2026-11-15
 
-# GymBuddy terms of use
+# {app} terms of use
 
-These terms apply when you use the GymBuddy app, with or without an
+These terms apply when you use the {app} app, with or without an
 account. By using the app you agree to them. Questions:
 [info@rukavina.app](mailto:info@rukavina.app).
 
-GymBuddy is made by Ivan Karlo Rukavina, Croatia ("we").
+{app} is made by Ivan Karlo Rukavina, Croatia ("we").
 
 ## Training at your own risk
 
-GymBuddy is a log. It is not medical advice and not a substitute for
+{app} is a log. It is not medical advice and not a substitute for
 a doctor or a qualified trainer.
 
 - Talk to a doctor before you start training, especially if you have
@@ -31,7 +31,7 @@ abuse the service.
 ## Your data
 
 Your data is yours. How we handle it is in the
-[privacy policy](/gymbuddy/privacy).
+[privacy policy]({base}/privacy).
 
 ## The app
 

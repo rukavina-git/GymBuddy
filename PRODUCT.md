@@ -50,7 +50,7 @@ progressing. Beginners need guidance as much as tracking.
 - Dark only in v1 (see Brand Commitments); light theme is v2.
 
 ## Brand Commitments
-- Name: GymBuddy.
+- Name: Gym Tracker (renamed from GymBuddy 2026-11-15, EU GYMBUDDY mark; docs/council/2026-11-15-app-name.md). Package, code names and repo stay GymBuddy.
 - Direction: Soft Dark (locked 2026-10-31). Dark is the only mode in
   v1; light theme is v2.
 - Brand colours: lime #D4FF24 = "you can press this" (only on
