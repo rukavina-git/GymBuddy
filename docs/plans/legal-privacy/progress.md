@@ -21,7 +21,7 @@
 - 01b deferred (2026-11-14, owner): runs alongside, images land
   whenever the owner sends a grid (next: grid 02). 9.1 stays open
   until it's done. Next step: 02 privacy policy + terms.
-- [ ] 02 privacy policy + terms: web half done (097fad1). Texts in
+- [x] 02 privacy policy + terms: web half done (097fad1). Texts in
   legal/, `legal/build.py` builds them, nginx serves SITE_HOST
   (rukavina.app) /gym-tracker/privacy (renamed in 02a; was /gymbuddy/) and /terms on the API cert,
   `legal-site.yml` publishes from main (prod approval). Contacts:
@@ -41,7 +41,7 @@
     `up -d nginx` (new env + volume), not a reload. Publish only adds
     files, never deletes. Not fixed (NITs): double-escaped & in link
     URLs, docker/README.md lacks SITE_HOST + site folder.
-- [ ] 02a rename to "Gym Tracker": code + Figma done (6943160), device
+- [x] 02a rename to "Gym Tracker": code + Figma done (6943160), device
   check open (no phone attached). Name in `brand_name` only; qa
   overrides `app_name` ("Gym Tracker Test"). Wordmark "gym tracker."
   (Figma R19 option A, component 151:106 updated in all locked
@@ -87,3 +87,9 @@
   weighted spacers). Rechecked: full line reachable; normal size
   unchanged. Open in 02: VPS rollout (gymtracker.rukavina.app),
   lawyer glance before 9.6. privacy@ forwarding tested by the owner.
+- 02 live (2026-11-15): owner did the VPS rollout. gymtracker.rukavina.app
+  /privacy, /terms, /legal.css return 200 with a valid cert, http
+  redirects to https, / is 404 (free for a landing page later),
+  rukavina.app (Vercel) untouched. Terms and Privacy links tapped on
+  the phone open the pages. 02 + 02a done; carried to 9.6: lawyer
+  glance at the terms.

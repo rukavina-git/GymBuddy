@@ -127,7 +127,7 @@ roadmap-details.md §3.
 
 - [ ] 9.1 Third-party licence audit (incl. stock exercise photos) +
       in-app open-source licences screen
-- [ ] 9.2 Privacy policy + terms at a public URL, linked in-app
+- [x] 9.2 Privacy policy + terms at a public URL, linked in-app
 - [ ] 9.3 Web account deletion page (Play requires one)
 - [ ] 9.4 Compliance pass: health-data consent, 16+ audience,
       Crashlytics payloads, timer/notification rules
