@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Gym Buddy</string>
+    <string name="app_name">GymBuddy</string>
 
     <!-- Design library (ui/design) -->
     <string name="cd_back">Back</string>
