@@ -32,6 +32,9 @@ jobs:
     with:
       module-path: backend
       java-version: '21'
+      # checkLicense: the licence gate (ADR 0018) only hangs off `check`,
+      # which CI never ran; run it explicitly so a disallowed licence fails CI.
+      gradle-task: checkLicense test jacocoTestReport
       coverage-report-dir: backend/build/reports/jacoco/test
 
   sonar:

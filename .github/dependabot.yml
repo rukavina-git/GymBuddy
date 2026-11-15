@@ -1,0 +1,40 @@
+# Version updates (security alerts are on separately in repo settings).
+# Weekly, PRs into develop, minor + patch grouped per ecosystem so a week
+# is one PR to review. Majors come one PR each: they need a look.
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /android
+    target-branch: develop
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    groups:
+      android-minor:
+        update-types: [minor, patch]
+
+  - package-ecosystem: gradle
+    directory: /backend
+    target-branch: develop
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    groups:
+      backend-minor:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /api
+    target-branch: develop
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 3
+    groups:
+      api-minor:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 3
+    groups:
+      actions:
+        update-types: [minor, patch, major]
