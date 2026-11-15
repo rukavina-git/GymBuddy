@@ -60,3 +60,15 @@
   SITE_HOST, the site folder and the rollout order. Figma board R20
   (02 Rounds, node 255-5853): Welcome terms line W1–W6 and consent
   link style C1–C4, owner picks before the 9.2 Android links.
+- 02 Android links (COMMIT): Welcome line (R20 W1), consent (C1),
+  About rows "Privacy policy" / "Terms of use". `ui/legal/LegalLinks.kt`
+  holds the URLs and the link builder (LegalLinksTest). Also fixes CI:
+  6943160 broke Android Lint (context.getString in onClick, now
+  stringResource). 02 stays open: device check, VPS rollout (pages
+  live), lawyer glance at the terms before 9.6.
+  - Deviations: no link on Sign in; LinkAnnotation.Url instead of
+    ACTION_VIEW (see step file notes).
+  - Gotchas: Welcome Column doesn't scroll; on a small screen at 200%
+    font the new legal line could be clipped. Check on the device; if
+    it clips, make the Column scroll. Inline links are under 48dp
+    (About rows are the full-size way in).

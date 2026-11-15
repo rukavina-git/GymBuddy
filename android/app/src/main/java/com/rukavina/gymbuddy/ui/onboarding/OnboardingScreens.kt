@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rukavina.gymbuddy.R
+import com.rukavina.gymbuddy.ui.legal.LegalLine
 import com.rukavina.gymbuddy.domain.model.ExperienceLevel
 import com.rukavina.gymbuddy.domain.model.FitnessGoal
 import com.rukavina.gymbuddy.domain.model.StarterPlan
@@ -107,6 +108,9 @@ fun WelcomeScreen(onCreateAccount: () -> Unit, onHaveAccount: () -> Unit, onCont
             OutlineButton(stringResource(R.string.welcome_have_account), onHaveAccount, Modifier.fillMaxWidth())
             Spacer(Modifier.height(d.hairline))
             QuietLink(stringResource(R.string.welcome_without), onContinueWithout)
+            // Guests never see Create account, so they agree here (R20 W1).
+            Spacer(Modifier.height(d.stackTight))
+            LegalLine(R.string.welcome_terms, Modifier.padding(horizontal = d.group))
         }
     }
 }

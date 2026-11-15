@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rukavina.gymbuddy.R
+import com.rukavina.gymbuddy.ui.legal.LegalLine
 import com.rukavina.gymbuddy.ui.design.AppIconButton
 import com.rukavina.gymbuddy.ui.design.ButtonSize
 import com.rukavina.gymbuddy.ui.design.OutlineButton
@@ -229,14 +230,7 @@ private fun ColumnScope.ConsentStep(
     Spacer(Modifier.weight(1f))
     if (state.offline) OfflineBox(onRetry)
     state.error?.let { ErrorLine(formErrorText(it)) }
-    // Plain text until the policy pages exist (roadmap 9.2 makes them links).
-    Text(
-        stringResource(R.string.create_terms),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth(),
-    )
+    LegalLine(R.string.create_terms)
     PrimaryButton(
         stringResource(R.string.consent_agree),
         onAgree,

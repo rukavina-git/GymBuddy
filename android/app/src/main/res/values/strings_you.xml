@@ -111,6 +111,10 @@
     <string name="you_feedback">Send feedback</string>
     <string name="you_feedback_sub">Questions or ideas? Email the developer.</string>
     <string name="you_sync_debug">Sync debug</string>
+    <string name="you_privacy">Privacy policy</string>
+    <string name="you_privacy_sub">What we store and why</string>
+    <string name="you_terms">Terms of use</string>
+    <string name="you_terms_sub">Training disclaimer and your rights</string>
     <string name="you_licences">Open-source licences</string>
     <string name="you_licences_sub">Libraries and assets this app uses</string>
     <string name="you_licences_table">Libraries and assets</string>

@@ -15,20 +15,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.R
 import com.rukavina.gymbuddy.ui.design.BackTopBar
 import com.rukavina.gymbuddy.ui.design.ListRow
+import com.rukavina.gymbuddy.ui.legal.LegalLinks
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 
 private const val FEEDBACK_EMAIL = "ivankarlo.rukavina@gmail.com"
 
-/** You › About: version, feedback, open-source licences, and Sync debug on debug builds. */
+/** You › About: version, feedback, privacy policy, terms, open-source licences, and Sync debug on debug builds. */
 @Composable
 fun AboutScreen(onBack: () -> Unit, onLicences: () -> Unit, onSyncDebug: () -> Unit) {
     val d = GymBuddyTheme.dimens
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
+    val feedbackSubject = stringResource(R.string.you_feedback_subject, stringResource(R.string.brand_name))
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize()) {
             BackTopBar(onBack = onBack, title = stringResource(R.string.you_about))
@@ -48,9 +52,21 @@ fun AboutScreen(onBack: () -> Unit, onLicences: () -> Unit, onSyncDebug: () -> U
                     subtitle = stringResource(R.string.you_feedback_sub),
                     onClick = {
                         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$FEEDBACK_EMAIL"))
-                            .putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.you_feedback_subject, context.getString(R.string.brand_name)))
+                            .putExtra(Intent.EXTRA_SUBJECT, feedbackSubject)
                         runCatching { context.startActivity(intent) }
                     },
+                )
+                ListRow(
+                    title = stringResource(R.string.you_privacy),
+                    subtitle = stringResource(R.string.you_privacy_sub),
+                    // No browser (kiosk, work profile) throws; stay put.
+                    onClick = { runCatching { uriHandler.openUri(LegalLinks.PRIVACY_URL) } },
+                )
+                ListRow(
+                    title = stringResource(R.string.you_terms),
+                    subtitle = stringResource(R.string.you_terms_sub),
+                    // No browser (kiosk, work profile) throws; stay put.
+                    onClick = { runCatching { uriHandler.openUri(LegalLinks.TERMS_URL) } },
                 )
                 ListRow(
                     title = stringResource(R.string.you_licences),

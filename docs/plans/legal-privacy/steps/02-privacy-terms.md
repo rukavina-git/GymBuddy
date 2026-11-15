@@ -68,3 +68,13 @@ No openapi change. No Room schema change. No new data collected.
 Both pages are live at their URLs, every in-app link opens them on
 the phone, consent wording matches the policy, and the terms are
 flagged for a lawyer glance before 9.6.
+
+## Implementation notes (2026-11-15)
+- Figma R20 (02 Rounds, node 255-5853): owner picked W1 (Welcome line
+  under "Continue without account") and C1 (consent), links underlined
+  in the muted text colour.
+- Deviation: no link on Sign in (no frame shows terms there; existing
+  users agreed at creation). Links use Compose `LinkAnnotation.Url`
+  (opens the browser through LocalUriHandler) instead of ACTION_VIEW;
+  About rows call `openUri` inside runCatching.
+
