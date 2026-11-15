@@ -1,9 +1,9 @@
 plugins {
     id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("jvm") version "2.3.21"
-    kotlin("plugin.spring") version "2.3.21"
-    kotlin("plugin.jpa") version "2.3.21"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.spring") version "2.4.21"
+    kotlin("plugin.jpa") version "2.4.21"
     jacoco
     id("org.owasp.dependencycheck") version "13.0.0"
     // Licence report + gate (Apache 2.0), Plan 9 step 01, ADR 0018.
@@ -32,6 +32,9 @@ repositories {
 // owner (firebase-admin pulls both) ships the fixed version itself.
 // GHSA-ccrj-gw8r-854m: OpenTelemetry API <= 1.66.0 (Boot 4.1.2 pins 1.62.0).
 extra["opentelemetry.version"] = "1.68.0"
+// Boot 4.1 BOM pins Kotlin 2.3.x; 2.4.20+ fixes CVE-2026-53914 (build
+// cache deserialization). The kotlin plugins above set the same version.
+extra["kotlin.version"] = "2.4.21"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -64,6 +67,9 @@ dependencies {
     constraints {
         implementation("com.google.guava:guava:33.8.0-jre") {
             because("GHSA-xxph-c9ww-hj94: Guava <= 33.7.1 (via firebase-admin)")
+        }
+        implementation("org.webjars:swagger-ui:5.35.0") {
+            because("springdoc 3.2.0 ships 5.34.0, whose DOMPurify has CVE-2026-116802..4")
         }
     }
 }
@@ -104,6 +110,8 @@ val jacocoExcludes = listOf(
     "com/rukavina/gymbuddy/GymBuddyApplication.class",
 )
 
+val NVD_MIRROR = "https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz"
+
 // OWASP dependency-check - see android/app/build.gradle.kts for the full
 // rationale (same setup, mirrored here). Run via
 // `./gradlew dependencyCheckAnalyze` (this module has no subprojects, so
@@ -111,22 +119,26 @@ val jacocoExcludes = listOf(
 dependencyCheck {
     formats = listOf("HTML", "SARIF")
     data.directory = "$rootDir/dependency-check-data"
-    // Only assign when a real key exists: nvd.apiKey defaults to an empty
-    // string, not null, so assigning `null` here wouldn't clear it back
-    // to "no key" - it would leave the empty-string default in place.
-    // That distinction turns out not to matter in practice, though:
-    // verified locally (no key vs. a well-formed-but-fake key) that
-    // dependency-check-gradle 13.0.0 does NOT fall back to unauthenticated
-    // NVD access when no key is configured - it fails immediately with
-    // "Invalid API Key, length of 0", vs. a real rejection message
-    // ("Invalid API Key: 0000-****-0000") once a key is actually present.
-    // An upstream issue independently confirms the unauthenticated path is
-    // effectively non-functional at this version too - it doesn't fail
-    // fast, it grinds through NIST's rate limit until the download breaks
-    // partway through (github.com/dependency-check/DependencyCheck#8298).
-    // Bottom line: NVD_API_KEY is not an optional speed optimization for
-    // this workflow, it is required for it to complete at all.
-    System.getenv("NVD_API_KEY")?.takeIf { it.isNotBlank() }?.let { nvd.apiKey = it }
+    // CVE data comes from the dependency-check project's own NVD mirror
+    // (rebuilt daily on GitHub Pages), not the NVD API: the API returned
+    // 503 on every run on 2026-11-15, and a cold sync through it needs an
+    // API key and many minutes. With datafeedUrl set, no key is needed.
+    nvd.datafeedUrl = NVD_MIRROR
+    // Only what ships in the jar: skip the Kotlin compiler/tooling
+    // classpaths (test ones are skipped by default). Build tooling is
+    // covered by the dependency graph (dependency-graph.yml).
+    // scanConfigurations = runtimeClasspath scanned 0 deps here.
+    skipConfigurations = listOf(
+        "kotlinCompilerClasspath",
+        "kotlinBuildToolsApiClasspath",
+        "kotlinAbiValidationCompatClasspath",
+        "kotlinCompilerPluginClasspath",
+        "kotlinNativeCompilerPluginClasspath",
+        "kotlinKlibCommonizerClasspath",
+        "developmentOnly",
+        "testAndDevelopmentOnly",
+    )
+    suppressionFile = "$rootDir/config/dependency-check-suppressions.xml"
 }
 
 tasks.jacocoTestReport {

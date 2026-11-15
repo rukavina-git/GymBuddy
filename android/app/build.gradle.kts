@@ -341,7 +341,13 @@ val jacocoExcludes = listOf(
 dependencyCheck {
     formats = listOf("HTML", "SARIF")
     data.directory = "$rootDir/dependency-check-data"
-    System.getenv("NVD_API_KEY")?.takeIf { it.isNotBlank() }?.let { nvd.apiKey = it }
+    // Only what ships in the store build. Build tooling (Kotlin compiler,
+    // KSP, lint) is covered by the dependency graph (dependency-graph.yml).
+    scanConfigurations = listOf("prodReleaseRuntimeClasspath")
+    suppressionFile = "$rootDir/config/dependency-check-suppressions.xml"
+    // NVD mirror run by the dependency-check project (daily rebuild).
+    // The NVD API itself kept returning 503; see backend/build.gradle.kts.
+    nvd.datafeedUrl = "https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz"
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {

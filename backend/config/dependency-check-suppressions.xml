@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWASP dependency-check false positives (triaged 2026-11-15, ADR 0013).
+  Each entry names exact CVEs; a new CVE on the same jar still shows up.
+  Remove an entry once dependency-check stops matching it.
+-->
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <suppress>
+    <notes>OpenTelemetry Go (CVE-2026-24051, -29181, -39882, -39883, -41178) and
+      JS (CVE-2026-54285) CVEs, CPE-matched to the Java SDK/instrumentation
+      jars pulled in by firebase-admin / google-cloud-storage.</notes>
+    <packageUrl regex="true">^pkg:maven/io\.(opentelemetry|grpc)(\..*)?/.*$</packageUrl>
+    <cve>CVE-2026-24051</cve>
+    <cve>CVE-2026-29181</cve>
+    <cve>CVE-2026-39882</cve>
+    <cve>CVE-2026-39883</cve>
+    <cve>CVE-2026-41178</cve>
+    <cve>CVE-2026-54285</cve>
+  </suppress>
+  <suppress>
+    <notes>dev.cel:protobuf is Google's CEL library, not protobuf-java; the
+      protobuf-java CVEs below are a name match only.</notes>
+    <packageUrl regex="true">^pkg:maven/dev\.cel/protobuf@.*$</packageUrl>
+    <cve>CVE-2021-22569</cve>
+    <cve>CVE-2022-3171</cve>
+    <cve>CVE-2024-7254</cve>
+  </suppress>
+</suppressions>
