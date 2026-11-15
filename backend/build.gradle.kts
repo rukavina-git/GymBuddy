@@ -70,6 +70,7 @@ dependencies {
         }
         implementation("org.webjars:swagger-ui:5.35.0") {
             because("springdoc 3.2.0 ships 5.34.0, whose DOMPurify has CVE-2026-116802..4")
+            // Keep springdoc.swagger-ui.version in application.yml equal (SwaggerUiTest).
         }
     }
 }

@@ -33,6 +33,10 @@ spring:
 springdoc:
   api-docs:
     path: /v3/api-docs
+  # Must match the swagger-ui webjar pinned in build.gradle.kts; springdoc
+  # otherwise serves its own built-in version's path and the page 500s.
+  swagger-ui:
+    version: 5.35.0
 
 # FIREBASE_CREDENTIALS_B64 (base64-encoded service account JSON) is read
 # directly via @Value in auth/FirebaseAdminConfig.kt, not through this
