@@ -2,7 +2,7 @@ name: Legal pages
 
 # Builds legal/*.md into static pages (Plan 9 step 02) and, on main,
 # copies them to /opt/gymbuddy/site on the VPS, where nginx serves
-# them as SITE_HOST/gym-tracker/privacy and /terms. Uses the prod
+# them as SITE_HOST/privacy and /terms (gymtracker.rukavina.app). Uses the prod
 # environment's deploy secrets (owner approval, main only).
 # Files are extracted in place: nginx bind-mounts the directory, so
 # replacing it would leave nginx on the old one.

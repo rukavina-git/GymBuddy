@@ -72,3 +72,10 @@
     font the new legal line could be clipped. Check on the device; if
     it clips, make the Column scroll. Inline links are under 48dp
     (About rows are the full-size way in).
+- 02 URL move (2026-11-15): rukavina.app is the owner's freelance site
+  on Vercel, so SITE_HOST is now gymtracker.rukavina.app (owner pick)
+  and the pages live at its root: /privacy, /terms, /legal.css
+  (`BASE = ""` in legal/build.py). LegalLinks + test updated. No
+  released build had the old URLs (AAB 0.1.0 predates the links).
+  - Gotchas: DNS is a new A record for gymtracker only; never touch
+    the apex. HSTS on SITE_HOST has no includeSubDomains, keep it so.

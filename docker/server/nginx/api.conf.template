@@ -104,7 +104,8 @@ server {
 
 # Site: static legal pages (Plan 9 step 02), built by legal/build.py
 # and copied to /opt/gymbuddy/site by legal-site.yml. Extensionless
-# URLs: /gym-tracker/privacy serves gym-tracker/privacy/index.html.
+# URLs: /privacy serves privacy/index.html. SITE_HOST is
+# gymtracker.rukavina.app: the apex rukavina.app is a Vercel site.
 server {
     listen 443 ssl;
     listen [::]:443 ssl;

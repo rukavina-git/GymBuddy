@@ -21,8 +21,8 @@ import com.rukavina.gymbuddy.R
  * rukavina.app. Same for both flavors: there is one policy.
  */
 object LegalLinks {
-    const val PRIVACY_URL = "https://rukavina.app/gym-tracker/privacy"
-    const val TERMS_URL = "https://rukavina.app/gym-tracker/terms"
+    const val PRIVACY_URL = "https://gymtracker.rukavina.app/privacy"
+    const val TERMS_URL = "https://gymtracker.rukavina.app/terms"
 }
 
 /**

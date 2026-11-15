@@ -9,8 +9,8 @@ class LegalLinksTest {
 
     @Test
     fun urlsAreHttpsOnTheGymTrackerPath() {
-        assertEquals("https://rukavina.app/gym-tracker/privacy", LegalLinks.PRIVACY_URL)
-        assertEquals("https://rukavina.app/gym-tracker/terms", LegalLinks.TERMS_URL)
+        assertEquals("https://gymtracker.rukavina.app/privacy", LegalLinks.PRIVACY_URL)
+        assertEquals("https://gymtracker.rukavina.app/terms", LegalLinks.TERMS_URL)
     }
 
     @Test

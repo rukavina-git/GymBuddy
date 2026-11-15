@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Builds the public legal pages from legal/*.md (Plan 9 step 02).
 
-    python3 -I legal/build.py            # writes legal/site/gym-tracker/
+    python3 -I legal/build.py            # writes legal/site/
     python3 -I legal/build.py --check    # only validates, writes nothing
 
 No dependencies: a small Markdown subset (headings, paragraphs, "- "
 lists, pipe tables, **bold**, [links](url)). Each page must start with
 "Last updated: YYYY-MM-DD"; the build fails otherwise. Output paths
 are extensionless directories (privacy/index.html) so the URLs are
-https://rukavina.app/gym-tracker/privacy and /terms. The app name
-lives in APP_NAME only: the texts say {app} (and {base} for the URL
-path), so a rename is one line here plus brand_name in the app.
+https://gymtracker.rukavina.app/privacy and /terms (SITE_HOST is a
+subdomain of its own: rukavina.app itself is the owner's site on
+Vercel). The app name lives in APP_NAME only: the texts say {app}
+(and {base} for the URL path prefix, empty on its own subdomain), so
+a rename is one line here plus brand_name in the app.
 """
 import html
 import pathlib
@@ -19,10 +21,9 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
 APP_NAME = "Gym Tracker"
-SLUG = "gym-tracker"
-BASE = f"/{SLUG}"
+BASE = ""
 PAGES = ["privacy", "terms"]
-OUT = ROOT / "site" / SLUG
+OUT = ROOT / "site"
 DATE_LINE = re.compile(r"^Last updated: (\d{4}-\d{2}-\d{2})$")
 
 CSS = """

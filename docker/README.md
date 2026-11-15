@@ -72,11 +72,12 @@ As `deploy`, once:
   `docker compose exec nginx nginx -s reload`.
 - After that the `certbot` service tries `certbot renew --webroot`
   every 12 h, and nginx reloads every 6 h to pick up a new cert.
-- `SITE_HOST` (e.g. rukavina.app) serves the static legal pages from
-  `/opt/gymbuddy/site`, at `/gym-tracker/privacy` and `/terms`
+- `SITE_HOST` (gymtracker.rukavina.app; not the apex, which is a
+  Vercel site) serves the static legal pages from
+  `/opt/gymbuddy/site`, at `/privacy` and `/terms`
   (Plan 9 step 02). `legal-site.yml` copies them there from main; by
   hand: `python3 -I legal/build.py`, then
-  `scp -r legal/site/gym-tracker deploy@<host>:/opt/gymbuddy/site/`.
+  `scp -r legal/site/. deploy@<host>:/opt/gymbuddy/site/`.
   Create `site` as `deploy` before nginx starts, or Docker makes it
   root-owned and the copy fails. Adding SITE_HOST to an existing box:
   put it in the env file first, then copy the new compose.yaml (it
