@@ -133,3 +133,25 @@ named `main`" from the 8.1 update.
 - **Trade-off.** A red gate on `develop` can be ignored for a while;
   the release rule catches it. If that proves too loose, set
   `continue-on-error` back to false for `develop`.
+
+## Amendment 2026-11-15: GitHub dependency graph is the primary scanner
+
+OWASP's classloader clash was fixed (commons-lang3 forced in the android
+root build), but NVD's API answered 503 on every run, so the scan never
+produced a result. Per-push coverage now comes from
+`.github/workflows/dependency-graph.yml`: it submits the full resolved
+Gradle tree of android and backend, and Dependabot alerts (GitHub
+Advisory Database) cover transitive libraries. OWASP stays weekly +
+manual, non-blocking.
+
+First triage (develop vs main, 2026-11-15):
+- Backend runtime: Guava <= 33.7.1 (GHSA-xxph-c9ww-hj94) pinned to
+  33.8.0-jre; OpenTelemetry API <= 1.66.0 (GHSA-ccrj-gw8r-854m) pinned
+  to 1.68.0 via `opentelemetry.version`. Jackson 2 (2.21.7) and Jackson
+  3 (3.1.7) already at fixed versions.
+- Android app: no flagged library is in `prodReleaseRuntimeClasspath`.
+- Build tooling only (AGP, OpenAPI Generator, Kotlin Gradle plugin):
+  Bouncy Castle 1.80.2, jackson 2.22.1, guava, jsoup, jdom2,
+  handlebars, jose4j, httpclient, org.json, commons-lang3 3.16. Runs on
+  CI and the dev machine only, never shipped. Accepted; they clear as
+  those plugins update (Dependabot opens the PRs).

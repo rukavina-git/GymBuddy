@@ -27,6 +27,12 @@ repositories {
     mavenCentral()
 }
 
+// Security pins on top of the Spring Boot BOM (dependency graph,
+// GitHub Advisory DB, 2026-11-15). Drop each once the BOM or its
+// owner (firebase-admin pulls both) ships the fixed version itself.
+// GHSA-ccrj-gw8r-854m: OpenTelemetry API <= 1.66.0 (Boot 4.1.2 pins 1.62.0).
+extra["opentelemetry.version"] = "1.68.0"
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -54,6 +60,12 @@ dependencies {
     // same as jackson-module-kotlin above - no need to pin one here.
     testImplementation("tools.jackson.dataformat:jackson-dataformat-yaml")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    constraints {
+        implementation("com.google.guava:guava:33.8.0-jre") {
+            because("GHSA-xxph-c9ww-hj94: Guava <= 33.7.1 (via firebase-admin)")
+        }
+    }
 }
 
 tasks.withType<Test> {

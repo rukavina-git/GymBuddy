@@ -138,7 +138,7 @@ roadmap-details.md §3.
 
 ## Plan 10: release
 
-- [ ] 10.0 OWASP triage + triggers back on (fix parked on
+- [x] 10.0 OWASP triage + triggers back on (fix parked on
       `feature/owasp-triage`)
 - [ ] 10.1 (me) Release build manual pass on test, then prod: R8,
       sign-in, guest, sync, logout, account deletion
