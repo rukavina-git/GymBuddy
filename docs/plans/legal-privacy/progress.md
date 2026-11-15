@@ -21,7 +21,7 @@
 - 01b deferred (2026-11-14, owner): runs alongside, images land
   whenever the owner sends a grid (next: grid 02). 9.1 stays open
   until it's done. Next step: 02 privacy policy + terms.
-- [ ] 02 privacy policy + terms: web half done (bec2466). Texts in
+- [ ] 02 privacy policy + terms: web half done (097fad1). Texts in
   legal/, `legal/build.py` builds them, nginx serves SITE_HOST
   (rukavina.app) /gymbuddy/privacy and /terms on the API cert,
   `legal-site.yml` publishes from main (prod approval). Contacts:

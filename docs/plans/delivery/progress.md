@@ -194,3 +194,12 @@
   release 0.1.0 (1000) to group `testers`. Fixes on the way: plugin
   takes the qa app id (read from the qa Firebase config), and
   google-apis-core held < 1 (1.x raw uploads have no Content-Length).
+- 8.5 done (2026-11-15): upload key reset live; 0.1.0 (1000) AAB
+  (upload key SHA1 13:1D:F3…) uploaded by hand to internal and
+  published. Play app signing key: SHA1 F2:67:B9:C3…, SHA-256
+  08:E6:B5:24… (owner adds both + upload SHA1 to the prod Firebase
+  app for Google sign-in). Play warned "no native debug symbols":
+  only AndroidX prebuilt .so files (graphics.path, datastore), shipped
+  stripped, nothing to upload. With a live internal release,
+  `fastlane internal` (release_status completed) should now work;
+  first run with the next v* tag after 8.6.

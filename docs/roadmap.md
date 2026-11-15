@@ -120,7 +120,7 @@ roadmap-details.md §3.
 - [x] 8.3 fastlane: test build to testers, prod AAB to the Play
       internal track, store listing kept in the repo
 - [x] 8.4 Backend CD: develop → test, `v*` tag → prod
-- [ ] 8.5 (me) Play Console app, upload key, service account, secrets
+- [x] 8.5 (me) Play Console app, upload key, service account, secrets
 - [ ] 8.6 (me) CI green, PR develop → main
 
 ## Plan 9: legal + privacy
