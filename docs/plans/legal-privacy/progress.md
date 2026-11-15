@@ -41,7 +41,7 @@
     `up -d nginx` (new env + volume), not a reload. Publish only adds
     files, never deletes. Not fixed (NITs): double-escaped & in link
     URLs, docker/README.md lacks SITE_HOST + site folder.
-- [ ] 02a rename to "Gym Tracker": code + Figma done (b6ee38b), device
+- [ ] 02a rename to "Gym Tracker": code + Figma done (6943160), device
   check open (no phone attached). Name in `brand_name` only; qa
   overrides `app_name` ("Gym Tracker Test"). Wordmark "gym tracker."
   (Figma R19 option A, component 151:106 updated in all locked
@@ -55,3 +55,8 @@
     gymbuddy). NIT left: HomeScreen wordmark contentDescription uses
     `app_name` (qa TalkBack says "Gym Tracker Test"); use
     `cd_app_name`. "by ikr" byline parked for v3/v4 (option D).
+- 02a follow-ups (2026-11-15): Home wordmark contentDescription now
+  `cd_app_name` (brand name, also on qa); docker/README.md documents
+  SITE_HOST, the site folder and the rollout order. Figma board R20
+  (02 Rounds, node 255-5853): Welcome terms line W1–W6 and consent
+  link style C1–C4, owner picks before the 9.2 Android links.

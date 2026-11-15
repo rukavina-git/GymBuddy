@@ -171,7 +171,7 @@ internal fun HomeContent(
             Box(Modifier.fillMaxWidth().heightIn(min = TopBarHeight).padding(start = d.hairline), contentAlignment = Alignment.CenterStart) {
                 Image(
                     painterResource(AppIcons.Brand.Wordmark),
-                    contentDescription = stringResource(R.string.app_name),
+                    contentDescription = stringResource(R.string.cd_app_name),
                     modifier = Modifier.height(WordmarkHome).semantics { heading() },
                 )
             }

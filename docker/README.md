@@ -55,6 +55,7 @@ As `deploy`, once:
 
     mkdir -p /opt/gymbuddy        # as root: then chown deploy:deploy
     scp -r docker/server/{compose.yaml,init-cert.sh,deploy.sh,nginx} deploy@<host>:/opt/gymbuddy/
+    mkdir /opt/gymbuddy/site      # as deploy, before nginx first starts
     # on the server: copy .env.example to /opt/gymbuddy/.env, fill it,
     # chmod 600 it
     cd /opt/gymbuddy
@@ -62,8 +63,8 @@ As `deploy`, once:
     docker compose up -d
     curl https://<API_HOST>/v1/health
 
-- `init-cert.sh` gets one cert for `API_HOST` and `TEST_API_HOST`
-  (lineage named after `API_HOST`), so the test block can never
+- `init-cert.sh` gets one cert for `API_HOST`, `TEST_API_HOST` and
+  `SITE_HOST` (lineage named after `API_HOST`), so no block can ever
   point at a missing cert. On a fresh box it runs certbot standalone
   on port 80, so nginx must be stopped (nginx can't start without a
   cert). With nginx running, `WEBROOT=1` goes through nginx instead
@@ -71,6 +72,16 @@ As `deploy`, once:
   `docker compose exec nginx nginx -s reload`.
 - After that the `certbot` service tries `certbot renew --webroot`
   every 12 h, and nginx reloads every 6 h to pick up a new cert.
+- `SITE_HOST` (e.g. rukavina.app) serves the static legal pages from
+  `/opt/gymbuddy/site`, at `/gym-tracker/privacy` and `/terms`
+  (Plan 9 step 02). `legal-site.yml` copies them there from main; by
+  hand: `python3 -I legal/build.py`, then
+  `scp -r legal/site/gym-tracker deploy@<host>:/opt/gymbuddy/site/`.
+  Create `site` as `deploy` before nginx starts, or Docker makes it
+  root-owned and the copy fails. Adding SITE_HOST to an existing box:
+  put it in the env file first, then copy the new compose.yaml (it
+  requires the variable), then `WEBROOT=1 ./init-cert.sh` and
+  `docker compose up -d nginx` (new env + volume need a recreate).
 - Unknown `Host` gets no response (444 on 80, TLS handshake refused on
   443), so scanners hitting the IP see nothing.
 - The env file is owned by `deploy`, mode 0600: compose runs as
