@@ -1,0 +1,63 @@
+name: Dependency graph
+
+# Uploads the full resolved Gradle dependency tree (direct and
+# transitive) of android and backend to GitHub, so Dependabot alerts
+# and the Security tab cover every library, from the GitHub Advisory
+# Database. Replaces OWASP on every push: NVD's API kept returning 503
+# (2026-11-15), so OWASP is now weekly + manual only.
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'android/**/*.gradle.kts'
+      - 'android/gradle/**'
+      - 'backend/**/*.gradle.kts'
+      - 'backend/gradle/**'
+      - '.github/workflows/dependency-graph.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dependency-graph-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  submit:
+    name: Submit ${{ matrix.module }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - module: android
+            java: '17'
+          - module: backend
+            java: '21'
+    defaults:
+      run:
+        working-directory: ${{ matrix.module }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      # The google-services plugin needs a config file to configure the
+      # app; the qa one is enough to resolve dependencies.
+      - name: Create google-services.json (qa)
+        if: matrix.module == 'android'
+        env:
+          GOOGLE_SERVICES_JSON_QA: ${{ secrets.GOOGLE_SERVICES_JSON_QA }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON_QA" > app/src/qa/google-services.json
+
+      - name: Submit dependency graph
+        uses: gradle/actions/dependency-submission@v4
+        with:
+          build-root-directory: ${{ matrix.module }}
+          dependency-graph-continue-on-failure: false

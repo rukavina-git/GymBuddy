@@ -4,27 +4,10 @@ name: OWASP Dependency Check
 # is attributable to backend or android at a glance rather than
 # one combined report.
 
-# Non-blocking (ADR 0013). Runs when dependencies change, and weekly so
-# new CVEs in unchanged dependencies still show up.
+# Non-blocking (ADR 0013). Weekly + manual only: NVD's API returned
+# 503 on every run (2026-11-15), so per-push vulnerability coverage
+# comes from dependency-graph.yml (GitHub Advisory Database) instead.
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'backend/**/*.gradle.kts'
-      - 'backend/gradle/**'
-      - 'android/**/*.gradle.kts'
-      - 'android/gradle/**'
-      - '.github/workflows/owasp.yml'
-      - '.github/workflows/_owasp.yml'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'backend/**/*.gradle.kts'
-      - 'backend/gradle/**'
-      - 'android/**/*.gradle.kts'
-      - 'android/gradle/**'
-      - '.github/workflows/owasp.yml'
-      - '.github/workflows/_owasp.yml'
   schedule:
     - cron: '0 4 * * 1'
   workflow_dispatch: {}
