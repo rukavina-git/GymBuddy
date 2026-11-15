@@ -14,3 +14,6 @@
 
 # Impeccable design-tool scratch (critiques, question seeds)
 /.impeccable/
+
+# Built legal pages (python3 -I legal/build.py)
+/legal/site/

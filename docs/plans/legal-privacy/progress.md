@@ -18,3 +18,26 @@
   10 weak-copyleft Spring Boot modules allowed by exact name (ADR
   0018). Negative check: Hibernate removed from the list → build
   fails. Not shown in the app (never shipped). Open in 01: 01b photos.
+- 01b deferred (2026-11-14, owner): runs alongside, images land
+  whenever the owner sends a grid (next: grid 02). 9.1 stays open
+  until it's done. Next step: 02 privacy policy + terms.
+- [ ] 02 privacy policy + terms: web half done (bec2466). Texts in
+  legal/, `legal/build.py` builds them, nginx serves SITE_HOST
+  (rukavina.app) /gymbuddy/privacy and /terms on the API cert,
+  `legal-site.yml` publishes from main (prod approval). Contacts:
+  privacy@rukavina.app (Cloudflare route, made by owner 2026-11-15),
+  info@rukavina.app. Open: owner rollout on the VPS, then the Android
+  links (need a Figma frame for the Welcome line). Terms need a
+  lawyer glance before 9.6.
+  - Deviations: texts built by a stdlib Python script (no Markdown
+    library to licence or update). Reviewer factual fixes applied:
+    Google picture link listed, units dropped (never sent), bio,
+    notes/favourites and active plan listed.
+  - Gotchas: VPS rollout order matters. compose.yaml now requires
+    SITE_HOST, so add it to the server env file BEFORE copying the
+    new compose.yaml (else deploy.sh and the nightly backup fail).
+    Create /opt/gymbuddy/site as deploy before recreating nginx (else
+    Docker makes it root-owned and the publish fails). nginx needs
+    `up -d nginx` (new env + volume), not a reload. Publish only adds
+    files, never deletes. Not fixed (NITs): double-escaped & in link
+    URLs, docker/README.md lacks SITE_HOST + site folder.
