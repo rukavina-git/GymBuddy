@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.sync
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.rukavina.gymbuddy.api.dto.PushRequestDto
 import com.rukavina.gymbuddy.api.dto.PushResponseDto
 import com.rukavina.gymbuddy.auth.FirebaseUserDeleter
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.willThrow
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType

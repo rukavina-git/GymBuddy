@@ -1,13 +1,13 @@
 plugins {
-    id("org.springframework.boot") version "3.5.16"
+    id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("jvm") version "2.1.21"
-    kotlin("plugin.spring") version "2.1.21"
-    kotlin("plugin.jpa") version "2.1.21"
+    kotlin("jvm") version "2.3.21"
+    kotlin("plugin.spring") version "2.3.21"
+    kotlin("plugin.jpa") version "2.3.21"
     jacoco
     id("org.owasp.dependencycheck") version "13.0.0"
     // Licence report + gate (Apache 2.0), Plan 9 step 01, ADR 0018.
-    id("com.github.jk1.dependency-license-report") version "3.1.4"
+    id("com.github.jk1.dependency-license-report") version "3.1.5"
 }
 
 group = "com.rukavina"
@@ -28,35 +28,37 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.flywaydb:flyway-core")
+    // Boot 4 moved Flyway auto-config into its own module.
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation(libs.springdoc.webmvc.ui)
     implementation(libs.firebase.admin)
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     // Parses the committed api/openapi.yaml for OpenApiSpecDriftTest.
     // Version comes from the Spring Boot BOM (io.spring.dependency-management),
     // same as jackson-module-kotlin above - no need to pin one here.
-    testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
+    testImplementation("tools.jackson.dataformat:jackson-dataformat-yaml")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
-    // Testcontainers 1.21.2 (pinned by the Spring Boot BOM) ships a docker-java
+    // Kept from Testcontainers 1.21 (Boot 3), harmless on 2.x: 1.21 shipped a docker-java
     // client that defaults to API 1.32, which Docker Engine 29+ rejects outright
     // (empty 400 stub from /info) instead of negotiating down; its floor is 1.40.
     // docker-java's shaded DefaultDockerClientConfig only honors the literal env
@@ -70,7 +72,7 @@ tasks.withType<Test> {
 // setup: XML at the path SonarQube expects, plus HTML, no CSV.
 //
 // toolVersion is left unset deliberately, same reasoning as android/app:
-// Gradle 9.7's bundled default already supports this module's JDK 21
+// Gradle 9.9's bundled default already supports this module's JDK 21
 // class files (jvmToolchain(21) above), and pinning a guessed version
 // risks a dependency that doesn't resolve. Bump explicitly if a
 // specific version is ever needed.

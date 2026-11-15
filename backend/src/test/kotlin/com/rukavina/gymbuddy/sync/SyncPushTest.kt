@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.sync
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.rukavina.gymbuddy.api.dto.MutationResultDto
 import com.rukavina.gymbuddy.api.dto.PushRequestDto
 import com.rukavina.gymbuddy.api.dto.PushResponseDto
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
@@ -82,7 +82,7 @@ class SyncPushTest : AbstractPostgresIntegrationTest() {
             "SELECT operation FROM change_log WHERE user_id = :userId AND entity_id = :entityId ORDER BY seq",
             mapOf("userId" to userId, "entityId" to entityId),
             String::class.java,
-        )
+        ).filterNotNull()
 
     // 1. two mutations to the same entity in one batch
 
@@ -379,7 +379,7 @@ class SyncPushTest : AbstractPostgresIntegrationTest() {
             "SELECT id::text FROM template_exercises WHERE template_id = :id::uuid",
             mapOf("id" to template.id),
             String::class.java,
-        )
+        ).filterNotNull()
         assertEquals(listOf(ownersChild.id), childIds)
         assertEquals(1, changeLogCount(owner, template.id))
         assertEquals(0, changeLogCount(intruder, template.id))
@@ -488,7 +488,7 @@ class SyncPushTest : AbstractPostgresIntegrationTest() {
             "SELECT id FROM performed_exercises WHERE workout_session_id = :id::uuid",
             mapOf("id" to session.id),
             String::class.java,
-        )
+        ).filterNotNull()
         assertEquals(listOf(keep.id), remainingIds, "the dropped performed exercise - and its sets, via cascade - must be gone entirely")
 
         val setsForDropped = jdbcTemplate.queryForObject(
@@ -522,7 +522,7 @@ class SyncPushTest : AbstractPostgresIntegrationTest() {
             "SELECT id FROM template_exercises WHERE template_id = :id::uuid",
             mapOf("id" to template.id),
             String::class.java,
-        )
+        ).filterNotNull()
         assertEquals(listOf(keep.id), remainingIds, "the dropped template exercise must be gone entirely")
     }
 

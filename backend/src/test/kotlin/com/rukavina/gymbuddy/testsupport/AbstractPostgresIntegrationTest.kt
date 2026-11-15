@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Tag
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 
 /**
  * Shared Postgres Testcontainers wiring for @SpringBootTest classes.
@@ -21,7 +21,7 @@ import org.testcontainers.containers.PostgreSQLContainer
  * surfacing as a flaky "connection refused". The singleton-object
  * pattern sidesteps that: nothing but JVM exit stops this container.
  */
-private object SharedPostgres : PostgreSQLContainer<Nothing>("postgres:16-alpine") {
+private object SharedPostgres : PostgreSQLContainer("postgres:16-alpine") {
     init {
         start()
     }

@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.sync
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Component
 import java.util.Base64
 

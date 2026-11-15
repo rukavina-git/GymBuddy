@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.auth.testsupport
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import java.security.PrivateKey
 import java.security.Signature
 import java.time.Instant
