@@ -93,9 +93,10 @@
   rukavina.app (Vercel) untouched. Terms and Privacy links tapped on
   the phone open the pages. 02 + 02a done; carried to 9.6: lawyer
   glance at the terms.
-- [ ] 03 web account deletion: code done (abcc483), live after
-  the next main release; owner test of delete-account.sh on the test
-  stack open. Page gymtracker.rukavina.app/delete-account (in-app
+- [x] 03 web account deletion: code done (abcc483), live after
+  the next main release (carried to 9.6). Owner test 2026-11-16 on
+  the test stack: delete-account.sh deleted a throwaway account
+  (rows=4, firebaseUserDeleted=true), the app was signed out. Page gymtracker.rukavina.app/delete-account (in-app
   steps, email from the account's address, deleted vs kept), linked
   from the privacy policy. `delete-account.sh <uid>` runs the backend
   image once under the `account-delete` profile (AccountDeleteRunner
@@ -156,3 +157,12 @@
     A Bearer token on a public endpoint (/v1/health) during a Firebase
     outage now gets 500. Reviewer NIT: any no-auth-code Firebase error
     (e.g. bad service account) is a 500, not a 401, on purpose.
+- 03 device check (2026-11-16) found two problems: the deleted account
+  showed the quiet "Backup paused" banner instead of the deleted dialog
+  (race: Firebase's own sign-out reaches AuthGate before probe records
+  DELETED; logcat 20:22:32.539 vs .541), and the You card still said
+  "Backed up · just now". Council 2026-11-16 (signed-out dialog) +
+  owner decision: new step 04a, before 05. Owner also wants a full test
+  + refinement pass before the real release (roadmap 10.1a).
+- [ ] 04a signed-out dialog + markers + race fix (step file next; Figma
+  board first).

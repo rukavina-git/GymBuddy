@@ -128,10 +128,12 @@ roadmap-details.md §3.
 - [ ] 9.1 Third-party licence audit (incl. stock exercise photos) +
       in-app open-source licences screen
 - [x] 9.2 Privacy policy + terms at a public URL, linked in-app
-- [ ] 9.3 Web account deletion page (Play requires one)
+- [x] 9.3 Web account deletion page (Play requires one)
 - [x] 9.4 Compliance pass: health-data consent, 16+ audience,
       Crashlytics payloads, timer/notification rules
       (list: docs/council/2026-11-02-onboarding.md)
+- [ ] 9.4a Signed-out dialog + markers, deleted-account race fix
+      (docs/council/2026-11-16-signed-out-dialog.md)
 - [ ] 9.5 (me) Play Console: Data safety, content rating, audience,
       store listing
 - [ ] 9.6 (me) CI green, PR develop → main
@@ -142,6 +144,8 @@ roadmap-details.md §3.
       `feature/owasp-triage`)
 - [ ] 10.1 (me) Release build manual pass on test, then prod: R8,
       sign-in, guest, sync, logout, account deletion
+- [ ] 10.1a Full test + refinement pass before real release (owner's
+      list, one step per batch)
 - [ ] 10.2 (me) Internal testing track via fastlane
 - [ ] 10.3 (me) Closed testing (check the current tester rule)
 - [ ] 10.4 Fix tester findings (one step per batch)
