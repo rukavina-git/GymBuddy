@@ -5,6 +5,10 @@ phone."; button "Sign in" (not "Sign in again"). Dialog at most once every 2 day
 at most 3 times in total (no spamming users); the marker stays. Counter is local
 on the phone and resets on reinstall: keep it in its own prefs file, excluded from
 Auto Backup (allowBackup is on, so normal prefs would come back after a reinstall).
+Owner override (2026-11-16, after Figma R21): Q2 = a. The dialog (R21-D1, stacked full
+width) shows at once over everything, including a running workout, and blocks the app
+(no tap-outside, no Back dismiss) until Sign in or Continue without account. The
+council's Q2 b (wait until Finish) is rejected.
 
 ```
 COUNCIL BRIEF: Signed-out dialog (Gym Tracker, native Android, offline-first workout log)
