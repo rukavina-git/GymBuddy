@@ -17,7 +17,7 @@ class FirebaseCrashReporter(
 
     override fun recordNonFatal(error: Throwable, keys: Map<String, String>) {
         val custom = CustomKeysAndValues.Builder()
-        keys.forEach { (key, value) -> custom.putString(key, value) }
+        allowedCrashKeys(keys).forEach { (key, value) -> custom.putString(key, value) }
         crashlytics.recordException(error, custom.build())
     }
 

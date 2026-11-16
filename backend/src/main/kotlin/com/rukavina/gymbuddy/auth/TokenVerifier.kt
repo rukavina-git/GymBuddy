@@ -11,6 +11,9 @@ data class VerifiedIdentity(
 /** Thrown for any rejected token - missing, malformed, expired, wrong issuer/audience, bad signature. */
 class TokenVerificationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
 
+/** The token couldn't be checked at all (Firebase unreachable): a 500, never a 401. */
+class TokenVerifierUnavailableException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+
 /**
  * Verifies a bearer token and extracts the caller's identity. The
  * production implementation (FirebaseTokenVerifier) delegates entirely

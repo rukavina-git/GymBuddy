@@ -3,6 +3,7 @@ package com.rukavina.gymbuddy.auth
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import com.rukavina.gymbuddy.api.ErrorResponseWriter
 import com.rukavina.gymbuddy.api.RequestContext
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -29,11 +30,17 @@ private const val BEARER_PREFIX = "Bearer "
  * - not into a request attribute or header - so it is available
  * anywhere the SecurityContext is (controllers, later filters like rate
  * limiting) via the standard Spring Security API.
+ *
+ * One exception: if the token couldn't be checked at all (Firebase
+ * unreachable, TokenVerifierUnavailableException) the request ends here
+ * with 500 INTERNAL, so the app retries later instead of treating it
+ * as an expired session.
  */
 @Component
 class FirebaseAuthenticationFilter(
     private val tokenVerifier: TokenVerifier,
     private val userProvisioningService: UserProvisioningService,
+    private val errorResponseWriter: ErrorResponseWriter,
 ) : OncePerRequestFilter() {
 
     private val log = LoggerFactory.getLogger(FirebaseAuthenticationFilter::class.java)
@@ -52,6 +59,12 @@ class FirebaseAuthenticationFilter(
                 MDC.put(RequestContext.USER_ID, identity.uid)
             } catch (e: TokenVerificationException) {
                 log.debug("Rejected bearer token on {} {}: {}", request.method, request.requestURI, e.message)
+            } catch (e: TokenVerifierUnavailableException) {
+                val traceId = errorResponseWriter.write(
+                    response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "INTERNAL", "An unexpected error occurred.",
+                )
+                log.error("500 INTERNAL [traceId={}] {} {}: {}", traceId, request.method, request.requestURI, e.message, e)
+                return
             }
         }
 

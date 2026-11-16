@@ -129,7 +129,7 @@ roadmap-details.md §3.
       in-app open-source licences screen
 - [x] 9.2 Privacy policy + terms at a public URL, linked in-app
 - [ ] 9.3 Web account deletion page (Play requires one)
-- [ ] 9.4 Compliance pass: health-data consent, 16+ audience,
+- [x] 9.4 Compliance pass: health-data consent, 16+ audience,
       Crashlytics payloads, timer/notification rules
       (list: docs/council/2026-11-02-onboarding.md)
 - [ ] 9.5 (me) Play Console: Data safety, content rating, audience,

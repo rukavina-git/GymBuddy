@@ -122,3 +122,37 @@
     restore UI and sync rules cost more than they save; the confirm
     dialog covers accidents). Optional for 9.4: stronger confirm
     (type DELETE or re-auth). Backups are never a restore path.
+- [x] 04 compliance pass (HASH). Owner picks: checkRevoked on every
+  request (1a), no age gate (2a). Verdicts:
+  - Consent: OK, no change. Separate "Keep a copy on our servers?"
+    screen with "Agree and create account" before anything uploads;
+    the Sign in path with a new Google account goes NoAccount →
+    Create account → consent (the probe user is deleted). Version +
+    time stored (V6). Withdrawal = delete account, in the policy.
+  - 16+: no gate; terms + policy say 16+; Play audience 16–17 and 18+
+    (data-safety.md).
+  - Crashlytics: OK. Keys are reason/traceId/httpStatus/discarded_<type>
+    (random row ids); IOExceptions aren't reported; Moshi errors carry
+    JSON paths, not values. Added an allow-list (allowedCrashKeys) +
+    CrashKeysTest so a new key can't slip in.
+  - Notifications: OK, no change. POST_NOTIFICATIONS at the first
+    workout start; the service starts only while the app updates the
+    notice (background start caught). Lock screen shows exercise, set
+    and kg × reps (VISIBILITY_PUBLIC): training numbers, not body data;
+    kept on purpose (glanceable, calm-workout rule).
+  - Revoked tokens: fixed. FirebaseTokenVerifier uses
+    verifyIdToken(token, true): deleted/disabled/revoked → 401 at once.
+    No auth code or CERTIFICATE_FETCH_FAILED → 500 INTERNAL from the
+    filter (the app retries on 500, logs out only on 401).
+  - data-safety.md: Data safety rows, specialUse justification text,
+    audience answers for 9.5.
+  - Deviations: no end-to-end "delete then push gets 401" test:
+    FirebaseTokenVerifier is off under the test profile and needs real
+    Firebase; FirebaseTokenVerifierTest covers the mapping with the SDK
+    mocked plus the filter's 500 path. No device check: no app UI or
+    notification code changed.
+  - Gotchas: one extra Firebase lookup per request (latency ~50–150 ms
+    from the VPS); if it shows in p95, cache "uid alive" for a minute.
+    A Bearer token on a public endpoint (/v1/health) during a Firebase
+    outage now gets 500. Reviewer NIT: any no-auth-code Firebase error
+    (e.g. bad service account) is a 500, not a 401, on purpose.
