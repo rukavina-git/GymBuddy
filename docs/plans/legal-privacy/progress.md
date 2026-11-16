@@ -122,7 +122,7 @@
     restore UI and sync rules cost more than they save; the confirm
     dialog covers accidents). Optional for 9.4: stronger confirm
     (type DELETE or re-auth). Backups are never a restore path.
-- [x] 04 compliance pass (HASH). Owner picks: checkRevoked on every
+- [x] 04 compliance pass (51dd02f). Owner picks: checkRevoked on every
   request (1a), no age gate (2a). Verdicts:
   - Consent: OK, no change. Separate "Keep a copy on our servers?"
     screen with "Agree and create account" before anything uploads;
