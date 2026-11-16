@@ -117,3 +117,8 @@
     mailto subject hardcodes "Gym Tracker" (not {app}); the script's
     output is ECS JSON (could pass LOGGING_STRUCTURED_FORMAT_CONSOLE=);
     "Google sign-in link" wording.
+  - Decision (2026-11-16, owner): no 24/48 h grace period to undo a
+    deletion. Deletion stays immediate (pending state, delayed job,
+    restore UI and sync rules cost more than they save; the confirm
+    dialog covers accidents). Optional for 9.4: stronger confirm
+    (type DELETE or re-auth). Backups are never a restore path.
