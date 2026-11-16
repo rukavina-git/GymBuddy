@@ -164,7 +164,7 @@
   "Backed up · just now". Council 2026-11-16 (signed-out dialog) +
   owner decision: new step 04a, before 05. Owner also wants a full test
   + refinement pass before the real release (roadmap 10.1a).
-- [x] 04a signed-out dialog + markers + race fix (HASH). Figma
+- [x] 04a signed-out dialog + markers + race fix (511c7b7). Figma
   "Signed out · locked 2026-11-16" (271-7257). Blocking dialog in
   MainScreen over every tab, the workout and the summary; Back/outside
   do nothing; 500 ms tap guard. SignedOutPrompt: auto-show first time,
