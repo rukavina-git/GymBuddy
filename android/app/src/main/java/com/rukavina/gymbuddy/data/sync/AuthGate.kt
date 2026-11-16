@@ -6,7 +6,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+
+/** How long a dead session waits for its reason (AuthGate). */
+const val FAILURE_WAIT_MS = 2_000L
 
 sealed interface AuthGateState {
     data object Guest : AuthGateState
@@ -31,7 +37,10 @@ sealed interface AuthGateState {
  * - Firebase drops the user without a release: the session died. The
  *   owner's file stays open, logging goes on, the outbox waits (the
  *   engine only syncs when Firebase's uid owns the open file).
- *   [lastFailure] tells expired from deleted.
+ *   [failure] tells expired from deleted. Firebase may sign out before
+ *   the failed refresh is recorded, so the gate waits up to
+ *   [failureWaitMs] for it; a DELETED that arrives later still turns
+ *   SessionExpired into AccountDeleted ([observeFailures]).
  * - A sync 401 ([onUnauthorized]): [probe] forces a token refresh. Offline
  *   or fine: nothing. Expired or deleted: Firebase is signed out (without
  *   a release), which lands in the case above.
@@ -44,14 +53,17 @@ class AuthGate(
     private val merge: GuestMerge,
     private val firebaseUid: () -> String?,
     private val probe: suspend () -> AuthProbe,
-    private val lastFailure: () -> AuthProbe?,
+    /** The last expired/deleted token failure (FirebaseAuthSession.failure). */
+    private val failure: StateFlow<AuthProbe?>,
     private val clearFailure: () -> Unit,
     private val firebaseEmail: () -> String?,
     /** Firebase's own sign-out, without releasing the owner. */
     private val dropDeadSession: () -> Unit,
     private val afterSignIn: suspend (uid: String) -> Unit,
     private val setGuest: suspend (Boolean) -> Unit,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    /** How long a dead session waits for the failure that explains it (Firebase's sign-out can come first). */
+    private val failureWaitMs: Long = FAILURE_WAIT_MS
 ) {
     private val _state = MutableStateFlow(
         owners.owner?.let { AuthGateState.SignedIn(it) } ?: AuthGateState.Guest
@@ -77,7 +89,8 @@ class AuthGate(
         }
         // Nobody chose to leave: the account's data stays open.
         holder.switchTo(owner)
-        _state.value = if (lastFailure() == AuthProbe.DELETED) {
+        val reason = failure.value ?: withTimeoutOrNull(failureWaitMs) { failure.filterNotNull().first() }
+        _state.value = if (reason == AuthProbe.DELETED) {
             AuthGateState.AccountDeleted(owner, owners.email)
         } else {
             AuthGateState.SessionExpired(owner, owners.email)
@@ -95,6 +108,22 @@ class AuthGate(
         scope.launch {
             owners.ownerFlow.collect { owner ->
                 if (owner == null && firebaseUid() == null && holder.owner != null) onFirebaseUid(null)
+            }
+        }
+    }
+
+    /**
+     * A deleted account can first look expired (the failure came after
+     * Firebase's sign-out). One way only: expired never replaces deleted.
+     * Call once at startup.
+     */
+    fun observeFailures() {
+        scope.launch {
+            failure.collect { probe ->
+                val expired = _state.value as? AuthGateState.SessionExpired ?: return@collect
+                if (probe == AuthProbe.DELETED) {
+                    _state.compareAndSet(expired, AuthGateState.AccountDeleted(expired.owner, expired.email))
+                }
             }
         }
     }

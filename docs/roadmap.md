@@ -132,7 +132,7 @@ roadmap-details.md §3.
 - [x] 9.4 Compliance pass: health-data consent, 16+ audience,
       Crashlytics payloads, timer/notification rules
       (list: docs/council/2026-11-02-onboarding.md)
-- [ ] 9.4a Signed-out dialog + markers, deleted-account race fix
+- [x] 9.4a Signed-out dialog + markers, deleted-account race fix
       (docs/council/2026-11-16-signed-out-dialog.md)
 - [ ] 9.5 (me) Play Console: Data safety, content rating, audience,
       store listing

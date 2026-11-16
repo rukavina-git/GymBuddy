@@ -164,5 +164,27 @@
   "Backed up · just now". Council 2026-11-16 (signed-out dialog) +
   owner decision: new step 04a, before 05. Owner also wants a full test
   + refinement pass before the real release (roadmap 10.1a).
-- [ ] 04a signed-out dialog + markers + race fix (step file next; Figma
-  board first).
+- [x] 04a signed-out dialog + markers + race fix (HASH). Figma
+  "Signed out · locked 2026-11-16" (271-7257). Blocking dialog in
+  MainScreen over every tab, the workout and the summary; Back/outside
+  do nothing; 500 ms tap guard. SignedOutPrompt: auto-show first time,
+  then ≥ 48 h after Continue, max 3 (prefs `signed_out_prompt`, out of
+  Auto Backup). Home chip, You card with lime Sign in, no Sign out row.
+  Race: AuthGate waits ≤ 2 s for the failure + one-way expired → deleted.
+  Device (S731B): dialog on launch, Back keeps it, Continue counts,
+  restart < 48 h no dialog, chip opens it, Sign in → back brings it back,
+  You card as R22-5.
+  - Deviations: counter reset is in SyncModule afterSignIn, not the VM
+    (at startup the gate briefly says SignedIn from the stored owner;
+    found on the device, the count was reset on every launch). No
+    Compose test for Back / over-workout (checked on the device; the
+    dialog's onDismissRequest is a no-op). Not checked on the device:
+    deleted-account case (needs a fresh Google account; unit-tested)
+    and 200% font.
+  - Gotchas: cold start with a stored owner and no Firebase user waits
+    the full 2 s before SessionExpired (gate says SignedIn meanwhile).
+    Reviewer, not fixed: no AuthGateViewModel tests (rule vs chip
+    counting, sign-in back path); DELETED landing between the 2 s
+    timeout and the state write stays expired (re-read failure after
+    setting the state); onContinue writes prefs in two edits. Worth
+    covering in 10.1a.

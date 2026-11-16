@@ -16,6 +16,9 @@ import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.ui.guest.startsInMain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -64,7 +67,7 @@ class AuthGateTest {
     // Firebase, faked
     private var firebaseUid: String? = "uid-a"
     private var probeResult = AuthProbe.VALID
-    private var lastFailure: AuthProbe? = null
+    private val failure = MutableStateFlow<AuthProbe?>(null)
     private var drops = 0
     private val events = mutableListOf<String>()
 
@@ -89,16 +92,18 @@ class AuthGateTest {
             owners,
             merge,
             firebaseUid = { firebaseUid },
-            probe = { probeResult.also { if (it == AuthProbe.EXPIRED || it == AuthProbe.DELETED) lastFailure = it } },
-            lastFailure = { lastFailure },
-            clearFailure = { lastFailure = null },
+            probe = { probeResult.also { if (it == AuthProbe.EXPIRED || it == AuthProbe.DELETED) failure.value = it } },
+            failure = failure,
+            clearFailure = { failure.value = null },
             firebaseEmail = { "karlo@example.com" },
             dropDeadSession = { drops++ },
             afterSignIn = { events += "afterSignIn($it)" },
             setGuest = { events += "setGuest($it)" },
-            scope = CoroutineScope(Dispatchers.Unconfined)
+            scope = CoroutineScope(Dispatchers.Unconfined),
+            failureWaitMs = 200
         )
         gate.observeReleases()
+        gate.observeFailures()
     }
 
     @After
@@ -221,6 +226,30 @@ class AuthGateTest {
 
         assertEquals(AuthGateState.AccountDeleted("uid-a", "karlo@example.com"), gate.state.value)
         assertEquals("uid-a", holder.owner)
+    }
+
+    @Test
+    fun `Firebase signing out before the deleted failure is recorded still shows the deleted dialog`() = runBlocking {
+        // Device 2026-11-16: the SDK's own sign-out reached the gate ~2 ms before the probe's failure.
+        launch(Dispatchers.Default) {
+            delay(20)
+            failure.value = AuthProbe.DELETED
+        }
+        firebase(null)
+
+        assertEquals(AuthGateState.AccountDeleted("uid-a", "karlo@example.com"), gate.state.value)
+    }
+
+    @Test
+    fun `a deleted failure after the wait turns expired into deleted, never back`() = runBlocking {
+        firebase(null) // no reason within the wait
+        assertEquals(AuthGateState.SessionExpired("uid-a", "karlo@example.com"), gate.state.value)
+
+        failure.value = AuthProbe.DELETED
+        assertEquals(AuthGateState.AccountDeleted("uid-a", "karlo@example.com"), gate.state.value)
+
+        failure.value = AuthProbe.EXPIRED
+        assertEquals(AuthGateState.AccountDeleted("uid-a", "karlo@example.com"), gate.state.value)
     }
 
     @Test

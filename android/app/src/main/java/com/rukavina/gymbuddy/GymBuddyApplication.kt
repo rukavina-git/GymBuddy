@@ -76,6 +76,7 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
         // startup); false only where Firebase isn't configured, e.g.
         // Robolectric tests booting this Application.
         authGate.observeReleases()
+        authGate.observeFailures()
         if (FirebaseApp.getApps(this).isNotEmpty()) authSession.observeSignIn(
             crashReporter,
             onUid = { authGate.onFirebaseUid(it) },

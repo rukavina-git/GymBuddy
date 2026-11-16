@@ -47,7 +47,7 @@ import com.rukavina.gymbuddy.ui.theme.FullShape
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 import com.rukavina.gymbuddy.ui.theme.SheetShape
 
-private val DialogWidth = 356.dp
+internal val DialogWidth = 356.dp
 private val HandleWidth = 32.dp
 private val HandleHeight = 4.dp
 private val MenuWidth = 220.dp

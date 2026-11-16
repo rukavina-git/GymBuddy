@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
    Auto Backup on Android 11 and lower (data_extraction_rules.xml covers 12+).
-   No rules means everything is backed up, including every owner's Room
-   file (gym_buddy_*.db, ADR 0014), so a guest's data survives a phone
-   change. Exclude nothing for now.
+   Everything is backed up, including every owner's Room file
+   (gym_buddy_*.db, ADR 0014), so a guest's data survives a phone change.
+   Left out: the signed-out dialog counter, so a reinstall starts over
+   (Plan 9 step 04a).
 -->
-<full-backup-content />
+<full-backup-content>
+    <exclude domain="sharedpref" path="signed_out_prompt.xml" />
+</full-backup-content>

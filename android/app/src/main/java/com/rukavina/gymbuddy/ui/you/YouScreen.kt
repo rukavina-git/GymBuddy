@@ -60,6 +60,7 @@ import com.rukavina.gymbuddy.ui.design.AppSnackbar
 import com.rukavina.gymbuddy.ui.design.AppSwitch
 import com.rukavina.gymbuddy.ui.design.AppTextButton
 import com.rukavina.gymbuddy.ui.design.LargeTitleTopBar
+import com.rukavina.gymbuddy.ui.design.ButtonSize
 import com.rukavina.gymbuddy.ui.design.PrimaryButton
 import com.rukavina.gymbuddy.ui.design.focusRing
 import com.rukavina.gymbuddy.ui.design.rememberLargeTitleState
@@ -90,7 +91,7 @@ data class YouNav(
 
 /** You tab (7.10a): one page, R15-1 guest, R15-2 signed in. */
 @Composable
-fun YouScreen(nav: YouNav, viewModel: YouViewModel = hiltViewModel()) {
+fun YouScreen(nav: YouNav, signedOut: Boolean = false, viewModel: YouViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
@@ -140,7 +141,7 @@ fun YouScreen(nav: YouNav, viewModel: YouViewModel = hiltViewModel()) {
     )
 
     Box(Modifier.fillMaxSize()) {
-        YouContent(state, actions, Clock.systemDefaultZone())
+        YouContent(state.copy(signedOut = signedOut), actions, Clock.systemDefaultZone())
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter)) { AppSnackbar(it) }
     }
 
@@ -251,8 +252,11 @@ internal fun YouContent(state: YouUiState, actions: YouActions, clock: Clock) {
                             null,
                             actions.onPassword,
                         )
-                        RowDivider()
-                        ValueRow(stringResource(R.string.you_sign_out), null, actions.onSignOut)
+                        // Already signed out: no Sign out row (R22-5).
+                        if (!state.signedOut) {
+                            RowDivider()
+                            ValueRow(stringResource(R.string.you_sign_out), null, actions.onSignOut)
+                        }
                         RowDivider()
                         ValueRow(stringResource(R.string.you_delete_account), null, actions.onDelete, danger = true)
                     }
@@ -299,10 +303,31 @@ private fun AccountCard(state: YouUiState, clock: Clock, actions: YouActions) {
                     Text(state.userEmail, style = MaterialTheme.typography.bodyMedium, color = cs.onSurfaceVariant)
                 }
             }
-            BackupRow(state.backup, clock, actions.onRetryBackup)
+            if (state.signedOut) SignedOutRows(actions.nav.onSignIn) else BackupRow(state.backup, clock, actions.onRetryBackup)
             RowDivider()
             ValueRow(stringResource(R.string.you_profile), null, actions.nav.onProfile)
         }
+    }
+}
+
+/** R22-5: never "Backed up" while signed out; the lime button is the way back. */
+@Composable
+private fun SignedOutRows(onSignIn: () -> Unit) {
+    val d = GymBuddyTheme.dimens
+    val cs = MaterialTheme.colorScheme
+    Column(
+        Modifier.fillMaxWidth().padding(start = d.insetCard, end = d.insetCard, bottom = d.insetCard),
+        verticalArrangement = Arrangement.spacedBy(d.stackTight),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = d.target),
+            horizontalArrangement = Arrangement.spacedBy(d.stackTight),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(painterResource(AppIcons.Ui.CloudOff), null, Modifier.size(d.iconSmall), tint = cs.onSurface)
+            Text(stringResource(R.string.signed_out_status), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        }
+        PrimaryButton(stringResource(R.string.signed_out_sign_in), onSignIn, Modifier.fillMaxWidth(), size = ButtonSize.Small)
     }
 }
 

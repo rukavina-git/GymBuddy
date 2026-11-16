@@ -110,8 +110,12 @@
     <string name="merge_add">Add and sign in</string>
     <string name="merge_stay">Stay signed out</string>
     <string name="merge_failed">Couldn\'t add this phone\'s workouts. Nothing was lost; we\'ll ask again next time.</string>
-    <string name="expired_banner">Backup paused. Sign in again to keep backing up.</string>
-    <string name="expired_sign_in">Sign in</string>
+    <string name="signed_out_title">You\'re signed out</string>
+    <string name="signed_out_body">Your workouts stay on this phone.</string>
+    <string name="signed_out_sign_in">Sign in</string>
+    <string name="signed_out_continue">Continue without account</string>
+    <string name="signed_out_chip">Signed out</string>
+    <string name="signed_out_status">Signed out. Your workouts stay on this phone.</string>
     <string name="deleted_title">This account was deleted</string>
     <string name="deleted_keep">Keep on this phone</string>
     <string name="deleted_erase">Erase…</string>

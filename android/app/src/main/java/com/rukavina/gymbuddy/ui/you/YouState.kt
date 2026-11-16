@@ -17,6 +17,8 @@ data class YouUiState(
     val hiddenExercises: Int = 0,
     val hiddenTemplates: Int = 0,
     val backup: BackupLine = BackupLine.BackedUp(null),
+    /** The login is gone (AuthGate SessionExpired): "Signed out" + Sign in, no backup line (R22-5). */
+    val signedOut: Boolean = false,
 )
 
 /** The account card's backup line (R15-2, R15-12). */
