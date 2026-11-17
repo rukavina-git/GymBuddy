@@ -207,3 +207,15 @@
     design/brand/lockup.svg + wordmark.svg still draw "gymbuddy.".
     Real screenshots + 16:9 set card clip are roadmap 10.4a. Reviewer
     account: recreate it if a reviewer deletes it.
+- [x] 06 CI green, PR develop → main (#11, merge fdf5060, 2026-11-17).
+  Before it: Sync E2E rerun (Maven Central 429), last Sonar smell fixed
+  (SignInFollowUp, 8843d2b), AuthGateViewModelTest (d8e0918, closes the
+  04a reviewer gap), test sources exempt from Sonar coverage (0ab11ea).
+  Dependabot 0 open, Sonar 0 issues, PR gate 89.8% new coverage.
+  - Deviations: no lawyer glance yet; owner call, needed before paid
+    features (terms read by Claude, nothing blocking).
+  - Gotchas: SonarCloud's new analysis scope ignores sonar.sources /
+    sonar.tests (warning in the scan log); test folders are now in
+    coverage-exclusions. Open after merge: approve the prod
+    legal-site.yml publish; prod gets delete-account.sh with the next
+    v* tag; 9.1 stays open until 01b (images) lands.

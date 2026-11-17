@@ -136,7 +136,7 @@ roadmap-details.md §3.
       (docs/council/2026-11-16-signed-out-dialog.md)
 - [x] 9.5 (me) Play Console: Data safety, content rating, audience,
       store listing
-- [ ] 9.6 (me) CI green, PR develop → main
+- [x] 9.6 (me) CI green, PR develop → main
 
 ## Plan 10: release
 

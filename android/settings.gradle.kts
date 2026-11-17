@@ -19,3 +19,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Gym Buddy"
 include(":app")
+
+// Dependabot floors for transitive and plugin libraries.
+apply(from = "gradle/security-pins.settings.gradle.kts")
