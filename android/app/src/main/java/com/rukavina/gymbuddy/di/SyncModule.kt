@@ -22,7 +22,7 @@ import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.data.repository.ConsentRecorder
-import com.rukavina.gymbuddy.data.sync.GuestMergeState
+import com.rukavina.gymbuddy.data.sync.SignInFollowUp
 import com.rukavina.gymbuddy.data.sync.GuestMerge
 import com.rukavina.gymbuddy.data.sync.GuestMergeCoordinator
 import com.rukavina.gymbuddy.domain.sync.SyncReason
@@ -162,15 +162,21 @@ object SyncModule {
 
     @Provides
     @Singleton
+    fun provideSignInFollowUp(
+        signedOutPrompt: SignedOutPrompt,
+        coordinator: GuestMergeCoordinator,
+        consent: ConsentRecorder
+    ) = SignInFollowUp(signedOutPrompt, coordinator, consent)
+
+    @Provides
+    @Singleton
     fun provideAuthGate(
         holder: DatabaseHolder,
         owners: DataOwnerStore,
         merge: GuestMerge,
         firebase: FirebaseAuthSession,
-        coordinator: GuestMergeCoordinator,
         preferences: AppPreferencesRepository,
-        consent: ConsentRecorder,
-        signedOutPrompt: SignedOutPrompt
+        followUp: SignInFollowUp
     ) = AuthGate(
         holder,
         owners,
@@ -181,13 +187,7 @@ object SyncModule {
         clearFailure = { firebase.clearFailure() },
         firebaseEmail = { firebase.currentEmail },
         dropDeadSession = { firebase.signOut() },
-        afterSignIn = {
-            signedOutPrompt.reset() // Plan 9 step 04a: signed in again, the dialog count starts over
-            coordinator.onOwnerChanged(it)
-            // While the merge question is open the account's profile may still
-            // come from the guest; afterMerge records the consent then.
-            if (coordinator.state.value !is GuestMergeState.Asking) consent.applyTo(it)
-        },
+        afterSignIn = { followUp.run(it) },
         setGuest = { preferences.setGuest(it) },
         scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     )
