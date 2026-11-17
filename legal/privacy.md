@@ -51,8 +51,12 @@ When the app crashes or hits an error, it sends a crash report through
 Firebase Crashlytics: the error, the app version, the phone model and
 Android version, and, if you are signed in, your user id. Crash
 reports contain no workout or body data. We use them to fix bugs, which
-is our legitimate interest (Art. 6(1)(f) GDPR). You can object by
-emailing us.
+is our legitimate interest (Art. 6(1)(f) GDPR).
+
+Crash reports are part of how the app works and can't be turned off:
+without them we can't find and fix bugs. If you don't want them sent,
+please don't use the app. Questions or objections:
+[privacy@rukavina.app](mailto:privacy@rukavina.app).
 
 ## Server logs
 

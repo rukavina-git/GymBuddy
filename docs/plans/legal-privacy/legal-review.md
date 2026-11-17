@@ -30,6 +30,9 @@ ads and no purchases. Re-run this review before paid features or ads.
    crash reports and logs. Crashlytics reading device info is a grey
    area under ePrivacy Art. 5(3); common practice for free apps, user
    id only when signed in, no health data. Accepted risk.
+   Owner: no opt-out toggle; the policy says crash reports can't be
+   turned off (don't use the app if you object). Art. 21 objections
+   by email are still answered.
 7. **Transfers.** DPF + SCCs via Google's and GitHub's standard DPAs,
    which apply through their terms. OK.
 8. **Retention.** Server logs rotate by size (Docker 10 MB × 3), so no
@@ -50,5 +53,6 @@ ads and no purchases. Re-run this review before paid features or ads.
 - Says there is no profiling or automated decision-making
   (Art. 13(2)(f)).
 - Consent withdrawal: in the app or by email.
+- Crash reports: required, can't be turned off (owner).
 
 Health-data consent wording unchanged, so no re-consent needed.
