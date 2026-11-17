@@ -226,8 +226,9 @@
   PR #15, merge 3c168cb). 0 open alerts.
   - Gotchas: new plugin-classpath alerts get a floor there, not a
     graph filter. Drop a floor once the plugin ships the fix.
-- Lawyer brief (2026-11-17): `lawyer-brief.md` lists facts + 11
-  questions (Croatian language, address, liability, 2019/770, consent
-  withdrawal, Crashlytics/ePrivacy, transfers, log retention, age,
-  monetization, name). Owner sends it to a lawyer; their answers become
-  a follow-up step. Still needed before paid features.
+- Legal review (2026-11-17, owner: no paid lawyer, AI review
+  instead): `legal-review.md` has 11 verdicts. privacy.md gained
+  "account optional", "no profiling", "withdraw by email". Accepted
+  risks: English only, no postal address, Crashlytics under legitimate
+  interest. Lawyer item closed; re-run the review before paid
+  features or ads.

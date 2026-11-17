@@ -1,4 +1,4 @@
-Last updated: 2026-11-15
+Last updated: 2026-11-17
 
 # {app} privacy policy
 
@@ -37,8 +37,12 @@ them only with your explicit consent, given on the "Keep a copy on our
 servers?" screen when you create an account (Art. 9(2)(a) GDPR). The
 rest we need to run your account (Art. 6(1)(b) GDPR).
 
+An account is optional: the app works fully without one. To create
+one you need an email address (or a Google account); everything else
+is up to you.
+
 We use this data only to back up and sync your account across your
-devices. We don't sell it, show ads based on it, or share it with
+devices. We don't profile you or make automated decisions about you. We don't sell it, show ads based on it, or share it with
 anyone except the providers below.
 
 ## Crash reports
@@ -85,8 +89,9 @@ You can:
 - **Delete it:** delete your account in the app (You → Delete
   account). This removes your account and all synced data at once.
   Without the app, follow [these steps]({base}/delete-account).
-- **Withdraw consent:** deleting the account withdraws it. Data on
-  your phone stays there until you erase it or uninstall the app.
+- **Withdraw consent:** deleting the account withdraws it, in the app
+  or by email from your account's address. Data on your phone stays
+  there until you erase it or uninstall the app.
 - **Object, restrict, or ask about anything else:** email us.
 
 You can also complain to the Croatian data protection authority,
