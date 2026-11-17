@@ -161,3 +161,7 @@ roadmap-details.md §3.
 - Move to paid hosting (e.g. DigitalOcean): restore dump, repoint DNS
 - iOS (designs already in Figma), after Android v1 is live
 - v2 list: architecture plan §14.2
+- Translated legal texts, together with the first app translation:
+  legal/<lang>/*.md → /<lang>/privacy etc., English is master,
+  build.py fails if a translation is older, URL per locale in strings,
+  "translation; English text applies" note (2026-11-17)
