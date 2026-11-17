@@ -279,6 +279,14 @@ class ActiveWorkoutViewModel @Inject constructor(
         followService()
         followRestBuzz()
         followUserNotes()
+        followOwner()
+    }
+
+    /** Signing in from the summary's backup card hides that card: there is nothing left to back up by hand. */
+    private fun followOwner() {
+        viewModelScope.launch {
+            owners.ownerFlow.collect { owner -> if (owner != null) dismissBackup() }
+        }
     }
 
     /**

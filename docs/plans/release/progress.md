@@ -91,3 +91,9 @@
   enableEdgeToEdge and locks no orientation, so both come from
   libraries; not blocking. If a warning names a com.rukavina class,
   fix it in 0.2.x.
+- [x] 04 refinement batch 1 (2026-11-17): summary backup card hides
+  after sign-in, Up next row dropped below 720dp (16:9 clip), Clock
+  provider local zone (Home showed starts 1h early). Tests, lint,
+  device checked (wm size 1080x1920, then reset). Ships in 0.2.1.
+  - Gotcha: lint flags Configuration.screenHeightDp; use
+    LocalWindowInfo.containerSize.

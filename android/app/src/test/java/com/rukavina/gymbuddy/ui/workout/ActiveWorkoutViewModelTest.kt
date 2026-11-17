@@ -1141,6 +1141,20 @@ class ActiveWorkoutViewModelTest {
     }
 
     @Test
+    fun `signing in from the summary hides the backup card`() {
+        val owners = InMemoryDataOwnerStore()
+        val (viewModel, _, _) = buildViewModel(owners = owners)
+        viewModel.startWorkoutFromTemplate(oneSetBench)
+        viewModel.logDone()
+        viewModel.saveWorkout()
+        assertTrue(viewModel.uiState.value.summary!!.offerBackup)
+
+        owners.set("uid-1", "a@b.c")
+
+        assertFalse(viewModel.uiState.value.summary!!.offerBackup)
+    }
+
+    @Test
     fun `an account gets no backup card`() {
         val (viewModel, _, _) = buildViewModel(owners = InMemoryDataOwnerStore("uid-1"))
         viewModel.startWorkoutFromTemplate(oneSetBench)

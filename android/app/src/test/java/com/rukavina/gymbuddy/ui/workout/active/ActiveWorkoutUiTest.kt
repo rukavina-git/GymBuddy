@@ -219,6 +219,19 @@ class ActiveWorkoutUiTest {
         rule.onAllNodesWithText("Up next").assertCountEquals(0)
     }
 
+    @Test
+    fun upNextShowsOnTallScreens() {
+        show(second = true)
+        rule.onNodeWithText("Up next").assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun noUpNextOnShortScreens() {
+        show(second = true)
+        rule.onAllNodesWithText("Up next").assertCountEquals(0)
+    }
+
     // --- 06b ---
 
     @Test
