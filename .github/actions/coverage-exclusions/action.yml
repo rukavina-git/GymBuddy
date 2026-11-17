@@ -42,6 +42,8 @@ runs:
         # NOT here: its forComparison() extension functions carry real
         # normalisation logic and have no tests today.
         backend_patterns=(
+          # Test code (same SonarCloud scope issue as Android below).
+          'src/test/**'
           '**/*Config.kt'
           '**/GymBuddyApplication.kt'
           '**/api/dto/ErrorDto.kt'
@@ -63,6 +65,11 @@ runs:
         # plain `when` mapping function, not a composable, so it's
         # deliberately left out and stays counted.
         android_patterns=(
+          # Test code. SonarCloud's new analysis scope ignores sonar.tests
+          # and its path heuristic missed app/src/test on PR 11 (a new test
+          # file counted as uncovered code).
+          'app/src/test/**'
+          'app/src/androidTest/**'
           'app/src/main/java/**/*Screen.kt'
           'app/src/main/java/**/*Dialog.kt'
           'app/src/main/java/**/*BottomSheet.kt'
