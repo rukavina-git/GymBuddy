@@ -66,6 +66,9 @@
     Email lists and Google Groups are exclusive on a track (radio
     buttons); several groups are allowed.
   - Only the owner's account uses prod so far.
+  - 2026-11-17: Google approved the group/country changes, owner
+    published and submitted the tester service form. Waiting for
+    opt-ins; day 0 = first day with 12+.
 - [x] 03 prod release-build pass (10.1), 2026-11-17, USB phone
   (SM-S731B), Play 0.2.0 / 2000, prod backend. All passed: sign out,
   guest onboarding + workout, email sign-up from the workout summary
