@@ -25,7 +25,7 @@
   - Deviation: 01.5 owner smoke check from Play deferred to the
     refinement pass (10.1a), owner wants to move straight to the closed
     track. 10.1 stays open until then.
-- [x] 02 closed track ready (v0.2.0 on alpha, sent for review) HASH
+- [x] 02 closed track ready (v0.2.0 on alpha, sent for review) be12539
   - Rule checked 2026-11-17 (Play Console Help 14151465): personal
     accounts created after 2023-11-13 need >= 12 testers opted in
     continuously for >= 14 days in a closed test; leave + rejoin
