@@ -69,14 +69,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # Sonar's blame/new-code data needs real history - a shallow
           # checkout would attribute every line to the checkout commit.
           fetch-depth: 0
 
       - name: Download JaCoCo report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: jacoco-report-${{ inputs.module-path }}
           path: ${{ inputs.coverage-report-dir }}
@@ -90,7 +90,7 @@ jobs:
 
       - name: SonarCloud scan
         id: scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@v8
         # Gate is a warning, not a block (ADR 0013, 8.2a): a red gate
         # must not stop develop. The release check reads the gate
         # before any v* tag or main PR.
