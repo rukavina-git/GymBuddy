@@ -219,3 +219,10 @@
     coverage-exclusions. Open after merge: approve the prod
     legal-site.yml publish; prod gets delete-account.sh with the next
     v* tag; 9.1 stays open until 01b (images) lands.
+- Post-merge (2026-11-17): main's first dependency graph raised 28
+  Dependabot alerts, all from build plugins/test tools (nothing
+  shipped). gradle/security-pins.settings.gradle.kts (android/ and
+  backend/, identical) raises them in every configuration (ccdbd3d,
+  PR #15, merge 3c168cb). 0 open alerts.
+  - Gotchas: new plugin-classpath alerts get a floor there, not a
+    graph filter. Drop a floor once the plugin ships the fix.
