@@ -188,3 +188,22 @@
     timeout and the state write stays expired (re-read failure after
     setting the state); onContinue writes prefs in two edits. Worth
     covering in 10.1a.
+- [x] 05 Play Console (owner, 2026-11-17, Claude guided). Data safety,
+  privacy URL (gymtracker.rukavina.app/privacy, was a gist), target
+  audience 16+, health apps (fitness), ads No, advertising ID No (no
+  AD_ID in merged manifests), content rating kept (Feb 2026, PEGI 3),
+  sign-in details (prod reviewer account, email + password), FGS
+  specialUse + video (youtube.com/watch?v=s71TDXWiET8, qa build),
+  store listing "Gym Tracker: Workout Log", icon, feature graphic,
+  3 placeholder screenshots. Nothing sent for review (waits for 10.2).
+  - Deviations: delete-account page published by hand to the VPS
+    (site.bak-2026-11-17 kept) so Play's URL check passes before the
+    main release; prod still lacks delete-account.sh until 9.6.
+    Data safety marks Email/User IDs/Health/Fitness as Required
+    (data-safety.md notes it).
+  - Gotchas: Play Console guessed URLs (app-content/...) redirect to
+    home; navigate Monitor and improve → Policy and programs → App
+    content. Short description must not say "no ads" (promo keyword).
+    design/brand/lockup.svg + wordmark.svg still draw "gymbuddy.".
+    Real screenshots + 16:9 set card clip are roadmap 10.4a. Reviewer
+    account: recreate it if a reviewer deletes it.

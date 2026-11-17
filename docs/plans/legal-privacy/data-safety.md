@@ -18,6 +18,11 @@ privacy policy first.
 service providers acting for us, which Play does not count as
 sharing. Answer "Shared: No" for every type.
 
+**As submitted (2026-11-17, owner):** Email, User IDs, Health info and
+Fitness info were marked **Required** (anyone with an account sends
+them); Name and Other info Optional; crash logs and device IDs
+Required. Over-declaring is safe; the table below is the stricter view.
+
 **Collected types.** Ephemeral: No for all. Optional: see the column.
 Guests send only crash data (row 7 and 8); everything else needs an
 account, and guest mode makes an account optional, so account data is

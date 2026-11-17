@@ -134,7 +134,7 @@ roadmap-details.md §3.
       (list: docs/council/2026-11-02-onboarding.md)
 - [x] 9.4a Signed-out dialog + markers, deleted-account race fix
       (docs/council/2026-11-16-signed-out-dialog.md)
-- [ ] 9.5 (me) Play Console: Data safety, content rating, audience,
+- [x] 9.5 (me) Play Console: Data safety, content rating, audience,
       store listing
 - [ ] 9.6 (me) CI green, PR develop → main
 
