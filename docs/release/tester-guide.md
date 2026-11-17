@@ -7,7 +7,10 @@ Thanks for testing! It takes 2 minutes to join.
    account you gave me:
    https://play.google.com/apps/testing/com.rukavina.gymbuddy
 2. Tap **Become a tester**.
-3. Tap **Download it on Google Play** and install Gym Tracker.
+3. Install Gym Tracker from Google Play:
+   https://play.google.com/store/apps/details?id=com.rukavina.gymbuddy
+   If Play shows an error, wait a few minutes and try again. Right
+   after joining, it takes Google a moment to let you in.
 
 ## Stay in for 14 days
 Google only counts you if you stay opted in for 14 days in a row.

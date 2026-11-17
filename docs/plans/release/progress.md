@@ -39,8 +39,8 @@
     details, category Health & Fitness, store listing en-US).
   - Opt-in link: https://play.google.com/apps/testing/com.rukavina.gymbuddy
     Store link: https://play.google.com/store/apps/details?id=com.rukavina.gymbuddy
-  - Review state: changes sent for review 2026-11-17 (owner); result
-    pending.
+  - Review state: approved 2026-11-17, closed release 2000 live on
+    alpha (full rollout).
   - Tester guide: docs/release/tester-guide.md.
   - Deviations: tester list named "me", not "gym-tracker-testers".
     Release created by hand in Console (Add from library, 2000), not
@@ -51,3 +51,18 @@
     lane should work unchanged. If it fails again, set
     track_promote_release_status "draft" or promote in Console.
     Reviewer sign-in details must work on prod.
+- Enrollment started early (2026-11-17, owner): order change in
+  00-overview.md. Track switched from email list "me" to Google Groups:
+  owner group (rukavina@…, owner + friends) and
+  testers-community@googlegroups.com (paid tester service, checklist
+  in memory). Countries: all. These track changes are in Google review
+  now; then owner publishes, then submits the service's form (join
+  link, no test account: testers make their own, icon
+  ic_launcher-playstore.png). Day 0 of the 14 = the day opted-in
+  reaches 12; log it here.
+  - Gotchas: the opt-in "download it on Google Play" link errored
+    right after opting in, worked minutes later (same URL as the
+    "public version" link). Testers: if it errors, wait and retry.
+    Email lists and Google Groups are exclusive on a track (radio
+    buttons); several groups are allowed.
+  - Only the owner's account uses prod so far.
