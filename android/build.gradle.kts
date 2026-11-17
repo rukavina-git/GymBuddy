@@ -6,7 +6,7 @@
 buildscript {
     configurations.getByName("classpath") {
         resolutionStrategy {
-            force("org.apache.commons:commons-lang3:3.20.0")
+            force("org.apache.commons:commons-lang3:3.22.0")
         }
     }
 }

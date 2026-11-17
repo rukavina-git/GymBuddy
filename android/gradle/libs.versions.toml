@@ -34,7 +34,7 @@ material3 = "1.4.0"
 googleServices = "4.6.0"
 crashlyticsGradle = "3.0.8"
 googleidVersion = "1.2.1"
-kotlinxCoroutinesTest = "1.10.2"
+kotlinxCoroutinesTest = "1.11.0"
 turbine = "1.2.1"
 robolectric = "4.18"
 # Must match api/openapitools.json's generator-cli version so the app
