@@ -152,6 +152,8 @@ review first, then 10.1a refinement + 10.4a, new version, then 10.3
       list, one step per batch)
 - [x] 10.2 (me) Internal testing track via fastlane (v0.2.0, 2026-11-17)
 - [ ] 10.3 (me) Closed testing (check the current tester rule)
+  - [x] Closed track set up, v0.2.0 sent for Google review, no
+    testers yet (Plan 10 step 02, 2026-11-17)
 - [ ] 10.4 Fix tester findings (one step per batch)
 - [ ] 10.4a Real store screenshots (2026-11-17, owner): after the
       refinement pass, realistic data, signed in, no AI exercise images

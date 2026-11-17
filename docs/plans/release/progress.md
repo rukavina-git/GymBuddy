@@ -25,3 +25,29 @@
   - Deviation: 01.5 owner smoke check from Play deferred to the
     refinement pass (10.1a), owner wants to move straight to the closed
     track. 10.1 stays open until then.
+- [x] 02 closed track ready (v0.2.0 on alpha, sent for review) HASH
+  - Rule checked 2026-11-17 (Play Console Help 14151465): personal
+    accounts created after 2023-11-13 need >= 12 testers opted in
+    continuously for >= 14 days in a closed test; leave + rejoin
+    restarts the count; internal testing doesn't count; Google may
+    ask for more testing if engagement is low. Production access
+    review ~7 days.
+  - Track "Closed testing - Alpha": 177 countries (rest of world),
+    email list "me" (owner only), feedback ivankarlo.rukavina@gmail.com.
+    App content completed in the same submission (data safety,
+    content rating, target audience 16+, ads, health apps, sign-in
+    details, category Health & Fitness, store listing en-US).
+  - Opt-in link: https://play.google.com/apps/testing/com.rukavina.gymbuddy
+    Store link: https://play.google.com/store/apps/details?id=com.rukavina.gymbuddy
+  - Review state: changes sent for review 2026-11-17 (owner); result
+    pending.
+  - Tester guide: docs/release/tester-guide.md.
+  - Deviations: tester list named "me", not "gym-tracker-testers".
+    Release created by hand in Console (Add from library, 2000), not
+    by the promote job (see gotcha).
+  - Gotchas: promote job (run 44097008238) failed: "Only releases
+    with status draft may be created on draft app." The app stays a
+    draft app until its first review passes; after that the promote
+    lane should work unchanged. If it fails again, set
+    track_promote_release_status "draft" or promote in Console.
+    Reviewer sign-in details must work on prod.
