@@ -97,3 +97,7 @@
   device checked (wm size 1080x1920, then reset). Ships in 0.2.1.
   - Gotcha: lint flags Configuration.screenHeightDp; use
     LocalWindowInfo.containerSize.
+- Day 0 = 2026-11-17: owner sees 12+ opted in (Console hides the exact
+  count past 12; Statistics "Data unavailable" for a new app, ~1-2
+  days lag). Day 14 = 2026-12-01: apply for production on/after it.
+  If the dashboard tick drops, the clock restarts.
