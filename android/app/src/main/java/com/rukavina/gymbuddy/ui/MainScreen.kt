@@ -1,5 +1,6 @@
 package com.rukavina.gymbuddy.ui
 
+import android.net.Uri
 import com.rukavina.gymbuddy.ui.template.relativeDay
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.Lifecycle
@@ -50,12 +51,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import com.rukavina.gymbuddy.ui.guest.SessionExpiredBanner
+import com.rukavina.gymbuddy.ui.guest.SignedOutDialog
 import com.rukavina.gymbuddy.ui.guest.AuthGateViewModel
 import com.rukavina.gymbuddy.ui.guest.AccountDeletedDialog
 import com.rukavina.gymbuddy.data.sync.AuthGateState
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.CircularProgressIndicator
@@ -92,6 +91,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import com.rukavina.gymbuddy.ui.guest.GuestMergeViewModel
 import com.rukavina.gymbuddy.ui.you.AboutScreen
+import com.rukavina.gymbuddy.ui.you.licences.LicenceTextScreen
+import com.rukavina.gymbuddy.ui.you.licences.LicencesScreen
 import com.rukavina.gymbuddy.ui.you.DeleteAccountScreen
 import com.rukavina.gymbuddy.ui.you.HiddenExercisesScreen
 import com.rukavina.gymbuddy.ui.you.HiddenTemplatesScreen
@@ -142,18 +143,22 @@ fun MainScreen(rootNavController: NavHostController) {
         )
     }
 
+    // Plan 9 step 04a: over everything, a running workout too; only its buttons close it.
+    val signedOutDialog by authGateViewModel.signedOutDialog.collectAsState()
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { authGateViewModel.onMainResumed() }
+    if (signedOutDialog) {
+        SignedOutDialog(
+            onSignIn = {
+                authGateViewModel.leaveForSignIn()
+                rootNavController.navigate(NavRoutes.signIn())
+            },
+            onContinue = authGateViewModel::continueWithoutAccount,
+        )
+    }
+
     if (ownerReady) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            if (gateState is AuthGateState.SessionExpired) {
-                SessionExpiredBanner(
-                    onSignIn = { rootNavController.navigate(NavRoutes.signIn()) },
-                    modifier = Modifier.statusBarsPadding()
-                )
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                MainContent(rootNavController, snackbar)
-            }
-        }
+        val onSignedOut = if (gateState is AuthGateState.SessionExpired) authGateViewModel::openSignedOutDialog else null
+        MainContent(rootNavController, snackbar, onSignedOut)
     } else {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -162,7 +167,12 @@ fun MainScreen(rootNavController: NavHostController) {
 }
 
 @Composable
-private fun MainContent(rootNavController: NavHostController, snackbar: SnackbarHostState) {
+private fun MainContent(
+    rootNavController: NavHostController,
+    snackbar: SnackbarHostState,
+    /** Set while signed out (Home chip, You card). */
+    onSignedOut: (() -> Unit)?,
+) {
     val bottomNavController = rememberNavController()
     val backStackEntry by bottomNavController.currentBackStackEntryAsState()
     val backStack by bottomNavController.currentBackStack.collectAsState()
@@ -276,6 +286,7 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                         }
                         openWorkout()
                     },
+                    onSignedOut = onSignedOut,
                     unfinished = unfinished,
                 )
             }
@@ -452,6 +463,7 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
                         onDeleteAccount = { bottomNavController.navigate(NavRoutes.DeleteAccount) { launchSingleTop = true } },
                         onLeft = { rootNavController.openWelcome() },
                     ),
+                    signedOut = onSignedOut != null,
                 )
             }
 
@@ -464,7 +476,20 @@ private fun MainContent(rootNavController: NavHostController, snackbar: Snackbar
             composable(NavRoutes.About) {
                 AboutScreen(
                     onBack = { bottomNavController.popBackStack() },
+                    onLicences = { bottomNavController.navigate(NavRoutes.Licences) },
                     onSyncDebug = { bottomNavController.navigate(NavRoutes.SyncDebug) },
+                )
+            }
+            composable(NavRoutes.Licences) {
+                LicencesScreen(
+                    onBack = { bottomNavController.popBackStack() },
+                    onOpenLicence = { id -> bottomNavController.navigate("licence/" + Uri.encode(id)) },
+                )
+            }
+            composable(NavRoutes.LicenceText) { entry ->
+                LicenceTextScreen(
+                    id = entry.arguments?.getString("id").orEmpty(),
+                    onBack = { bottomNavController.popBackStack() },
                 )
             }
             composable(NavRoutes.Profile) {

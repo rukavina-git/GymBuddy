@@ -4,10 +4,29 @@ name: OWASP Dependency Check
 # is attributable to backend or android at a glance rather than
 # one combined report.
 
-# Manual only for now: the scan kept failing CI. Fix the findings, then
-# restore push/pull_request triggers on Gradle files (see git history).
+# Non-blocking (ADR 0013). Runs when dependencies change, plus weekly
+# so new CVEs on unchanged deps still show up. Data comes from the
+# dependency-check NVD mirror (see _owasp.yml), no API key needed.
 on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'android/**/*.gradle.kts'
+      - 'android/gradle/**'
+      - 'android/config/dependency-check-suppressions.xml'
+      - 'backend/**/*.gradle.kts'
+      - 'backend/gradle/**'
+      - 'backend/config/dependency-check-suppressions.xml'
+      - '.github/workflows/owasp.yml'
+      - '.github/workflows/_owasp.yml'
+  schedule:
+    - cron: '0 4 * * 1'
   workflow_dispatch: {}
+
+# A newer push makes an older scan of the same branch pointless.
+concurrency:
+  group: owasp-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend:
@@ -19,8 +38,6 @@ jobs:
     with:
       module-path: backend
       java-version: '21'
-    secrets:
-      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
   android:
     name: Android
@@ -35,5 +52,4 @@ jobs:
       report-dir: 'app/build/reports/dependency-check'
       secret-file-path: 'app/src/qa/google-services.json'
     secrets:
-      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
       secret-file-content: ${{ secrets.GOOGLE_SERVICES_JSON_QA }}

@@ -1,9 +1,9 @@
-# ${API_HOST} and ${TEST_API_HOST} are filled in by the nginx
+# ${API_HOST}, ${TEST_API_HOST} and ${SITE_HOST} are filled in by the nginx
 # image's envsubst step. nginx's own variables ($host, $remote_addr,
 # ...) have no braces here, so envsubst leaves them alone.
 #
-# Prod and test share one cert (lineage named after API_HOST, both
-# names on it), so the test block can never point at a missing
+# Prod, test and the site share one cert (lineage named after
+# API_HOST, all names on it), so no block can point at a missing
 # cert and take prod down with it.
 
 server_tokens off;
@@ -47,7 +47,7 @@ server {
 server {
     listen 80;
     listen [::]:80;
-    server_name ${API_HOST} ${TEST_API_HOST};
+    server_name ${API_HOST} ${TEST_API_HOST} ${SITE_HOST};
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -99,5 +99,25 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Site: static legal pages (Plan 9 step 02), built by legal/build.py
+# and copied to /opt/gymbuddy/site by legal-site.yml. Extensionless
+# URLs: /privacy serves privacy/index.html. SITE_HOST is
+# gymtracker.rukavina.app: the apex rukavina.app is a Vercel site.
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${SITE_HOST};
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Content-Security-Policy "default-src 'none'; style-src 'self'; frame-ancestors 'none'" always;
+
+    root /usr/share/nginx/site;
+    location / {
+        try_files $uri $uri/index.html =404;
     }
 }

@@ -5,7 +5,7 @@ import com.rukavina.gymbuddy.auth.testsupport.TestSecurityConfig
 import com.rukavina.gymbuddy.testsupport.AbstractPostgresIntegrationTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
@@ -50,5 +50,14 @@ class SyncUnreadableBodyTest : AbstractPostgresIntegrationTest() {
         pushRaw("{\"exercises\": \"not-an-array\"}")
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value("VALIDATION_FAILED"))
+    }
+
+    // Older or newer clients send fields this server doesn't know (offline
+    // phones lag behind releases). Ignoring them keeps their sync alive;
+    // Jackson 3 (Boot 4) must keep Boot 3's lenient default.
+    @Test
+    fun `unknown field is ignored, not rejected`() {
+        pushRaw("{\"exercises\": [], \"someFutureField\": {\"x\": 1}}")
+            .andExpect(status().isOk)
     }
 }

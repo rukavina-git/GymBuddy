@@ -1,16 +1,16 @@
 package com.rukavina.gymbuddy.api
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.dataformat.yaml.YAMLFactory
 import com.rukavina.gymbuddy.auth.testsupport.TestSecurityConfig
 import com.rukavina.gymbuddy.testsupport.AbstractPostgresIntegrationTest
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.web.servlet.MockMvc
@@ -96,8 +96,8 @@ class OpenApiSpecDriftTest : AbstractPostgresIntegrationTest() {
     private fun operationsOf(spec: JsonNode): Map<Operation, JsonNode> {
         val result = mutableMapOf<Operation, JsonNode>()
         val paths = spec.get("paths") ?: return result
-        paths.fields().forEach { (path, pathItem) ->
-            pathItem.fields().forEach { (method, operation) ->
+        paths.properties().forEach { (path, pathItem) ->
+            pathItem.properties().forEach { (method, operation) ->
                 if (method.lowercase() in HTTP_METHODS) {
                     result[Operation(path, method.lowercase())] = resolveRefs(operation, spec)
                 }
@@ -115,8 +115,8 @@ class OpenApiSpecDriftTest : AbstractPostgresIntegrationTest() {
     private fun compareParameters(op: Operation, committed: JsonNode, generated: JsonNode): List<String> {
         fun paramKey(p: JsonNode) = Triple(p.get("name")?.asText(), p.get("in")?.asText(), p.get("required")?.asBoolean(false) ?: false)
 
-        val committedParams = (committed.get("parameters") ?: jsonMapper.createArrayNode()).map(::paramKey).toSet()
-        val generatedParamsByNameAndIn = (generated.get("parameters") ?: jsonMapper.createArrayNode())
+        val committedParams = (committed.get("parameters") ?: jsonMapper.createArrayNode()).values().map(::paramKey).toSet()
+        val generatedParamsByNameAndIn = (generated.get("parameters") ?: jsonMapper.createArrayNode()).values()
             .associateBy { it.get("name")?.asText() to it.get("in")?.asText() }
 
         val problems = mutableListOf<String>()
@@ -151,8 +151,8 @@ class OpenApiSpecDriftTest : AbstractPostgresIntegrationTest() {
         val generatedSchema = requestBodySchema(generated)
             ?: return listOf("${describe(op)}: has a documented request body but the generated operation has none")
 
-        val committedProps = committedSchema.get("properties")?.fieldNames()?.asSequence()?.toSet().orEmpty()
-        val generatedProps = generatedSchema.get("properties")?.fieldNames()?.asSequence()?.toSet().orEmpty()
+        val committedProps = committedSchema.get("properties")?.propertyNames()?.toSet().orEmpty()
+        val generatedProps = generatedSchema.get("properties")?.propertyNames()?.toSet().orEmpty()
 
         val missing = committedProps - generatedProps
         return if (missing.isEmpty()) emptyList() else listOf("${describe(op)}: request body propert${if (missing.size == 1) "y" else "ies"} $missing documented but not generated")
@@ -183,8 +183,8 @@ class OpenApiSpecDriftTest : AbstractPostgresIntegrationTest() {
      * false-flagging every documented error status as "missing".
      */
     private fun compareResponseCodes(op: Operation, committed: JsonNode, generated: JsonNode): List<String> {
-        val committedHasResponses = committed.path("responses").fieldNames().hasNext()
-        val generatedHasResponses = generated.path("responses").fieldNames().hasNext()
+        val committedHasResponses = committed.path("responses").propertyNames().isNotEmpty()
+        val generatedHasResponses = generated.path("responses").propertyNames().isNotEmpty()
         return if (committedHasResponses && !generatedHasResponses) {
             listOf("${describe(op)}: spec documents response(s) but springdoc generated none at all")
         } else {
@@ -203,7 +203,7 @@ class OpenApiSpecDriftTest : AbstractPostgresIntegrationTest() {
                 return resolveRefs(target, root, seen + ref)
             }
             val result = jsonMapper.createObjectNode()
-            obj.fields().forEach { (key, value) -> result.set<JsonNode>(key, resolveRefs(value, root, seen)) }
+            obj.properties().forEach { (key, value) -> result.set(key, resolveRefs(value, root, seen)) }
             return result
         }
         if (node.isArray) {

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Gets the Let's Encrypt certificate for API_HOST + TEST_API_HOST
+# + SITE_HOST
 # (ADR 0016). One cert for both names, lineage named after API_HOST,
 # so nginx's test block never points at a missing cert. The certbot
 # service renews it later.
@@ -18,7 +19,7 @@
 #   docker compose exec nginx nginx -s reload
 #
 # Env:
-#   API_HOST, TEST_API_HOST  default: from the env file next to this script
+#   API_HOST, TEST_API_HOST, SITE_HOST  default: from the env file next to this script
 #   CERT_EMAIL  required, for Let's Encrypt expiry notices
 #   STAGING_CA  "1" uses Let's Encrypt's staging CA (test certs)
 #   WEBROOT     "1" goes through the running nginx instead of standalone
@@ -37,8 +38,10 @@ read_env() {
 }
 API_HOST="${API_HOST:-$(read_env API_HOST)}"
 TEST_API_HOST="${TEST_API_HOST:-$(read_env TEST_API_HOST)}"
+SITE_HOST="${SITE_HOST:-$(read_env SITE_HOST)}"
 [[ -n "$API_HOST" ]] || die "API_HOST is required"
 [[ -n "$TEST_API_HOST" ]] || die "TEST_API_HOST is required"
+[[ -n "$SITE_HOST" ]] || die "SITE_HOST is required"
 [[ -n "${CERT_EMAIL:-}" ]] || die "CERT_EMAIL is required"
 
 extra=()
@@ -47,14 +50,14 @@ if [[ "${STAGING_CA:-0}" == "1" ]]; then extra=(--test-cert); fi
 # the name list changes.
 certonly=(certonly --non-interactive --agree-tos --no-eff-email
   --keep-until-expiring --email "$CERT_EMAIL"
-  --cert-name "$API_HOST" -d "$API_HOST" -d "$TEST_API_HOST" "${extra[@]}")
+  --cert-name "$API_HOST" -d "$API_HOST" -d "$TEST_API_HOST" -d "$SITE_HOST" "${extra[@]}")
 
 if [[ "${WEBROOT:-0}" == "1" ]]; then
   docker compose ps --status running --services | grep -qx nginx \
     || die "WEBROOT=1 needs nginx running; on a fresh box run without it"
   docker compose run --rm --no-deps --entrypoint certbot certbot \
     "${certonly[@]}" --webroot -w /var/www/certbot
-  echo "cert ready for $API_HOST + $TEST_API_HOST. Next: docker compose exec nginx nginx -s reload"
+  echo "cert ready for $API_HOST + $TEST_API_HOST + $SITE_HOST. Next: docker compose exec nginx nginx -s reload"
   exit 0
 fi
 
@@ -65,4 +68,4 @@ fi
 docker compose run --rm --no-deps -p 80:80 --entrypoint certbot certbot \
   "${certonly[@]}" --standalone
 
-echo "cert ready for $API_HOST + $TEST_API_HOST. Next: docker compose up -d"
+echo "cert ready for $API_HOST + $TEST_API_HOST + $SITE_HOST. Next: docker compose up -d"

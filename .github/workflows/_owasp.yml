@@ -18,20 +18,14 @@ name: (reusable) OWASP dependency-check
 # debugRuntimeClasspath/runtimeClasspath: 510 and 296 distinct resolved
 # artifacts respectively, not 1.
 #
-# This also means a real NVD sync happens on every run now (autoUpdate
-# defaults to true in both build files - deliberately left unset there
-# rather than forced, since core's own freshness check already skips
-# redundant re-downloads on a warm cache).
+# CVE data comes from the dependency-check project's NVD mirror
+# (nvd.datafeedUrl in both build files), not the NVD API: the API
+# returned 503 on every run on 2026-11-15, and needs an API key. The
+# mirror needs neither; a cold sync takes about a minute.
 #
-# NVD_API_KEY is REQUIRED, not just a speed optimization: verified
-# locally that dependency-check-gradle 13.0.0 does not fall back to
-# unauthenticated NVD access when no key is configured - it fails
-# immediately ("Invalid API Key, length of 0") rather than doing a
-# slower anonymous sync. Request a key at
-# https://nvd.nist.gov/developers/request-an-api-key (free, near-
-# instant), then add it as the NVD_API_KEY secret (repo or org level:
-# Settings -> Secrets and variables -> Actions) before running this
-# workflow - it cannot succeed without one.
+# Scope: what ships only (android prodReleaseRuntimeClasspath, backend
+# minus Kotlin tooling). False positives live in each module's
+# config/dependency-check-suppressions.xml, one entry per CVE + reason.
 
 on:
   workflow_call:
@@ -61,8 +55,6 @@ on:
         type: string
         default: ''
     secrets:
-      NVD_API_KEY:
-        required: false
       secret-file-content:
         required: false
 
@@ -103,8 +95,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-owasp-${{ inputs.module-path }}-
 
-      - name: Cache NVD database
-        uses: actions/cache@v6
+      # Restore and save are split so a failed run
+      # still saves whatever it downloaded. actions/cache only saves on
+      # success, which is why every past run started from an empty DB.
+      - name: Restore NVD database
+        uses: actions/cache/restore@v6
         with:
           # Must match the dependencyCheck { data.directory = ... } set
           # in this module's build file, or this cache silently caches
@@ -126,9 +121,14 @@ jobs:
         run: printf '%s' "$FILE_CONTENT" > "${{ inputs.secret-file-path }}"
 
       - name: OWASP Dependency-Check
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: ./gradlew ${{ inputs.gradle-task }} --stacktrace
+
+      - name: Save NVD database
+        if: always() && hashFiles(format('{0}/dependency-check-data/**', inputs.module-path)) != ''
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ inputs.module-path }}/dependency-check-data
+          key: nvd-db-${{ inputs.module-path }}-${{ runner.os }}-${{ github.run_id }}
 
       - name: List OWASP report directory
         if: always()

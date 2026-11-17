@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.util.regex.Pattern
 
 plugins {
     alias(libs.plugins.android.application)
@@ -9,8 +10,10 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.openapi.generator)
+    alias(libs.plugins.aboutlibraries.android)
     jacoco
-    id("org.owasp.dependencycheck") version "13.0.0"
+    // Version and the commons-lang3 force live in the root build file.
+    id("org.owasp.dependencycheck")
 }
 
 kotlin {
@@ -58,6 +61,10 @@ findProperty("gymbuddy.releaseTag")?.toString()?.let { tag ->
 android {
     namespace = "com.rukavina.gymbuddy"
     compileSdk = libs.versions.compileSdk.get().toInt()
+    // Needed to pull symbol tables out of the AndroidX .so files for
+    // Play (otherwise AGP skips it with only a log line and Play warns
+    // "no debug symbols"). CI installs this exact version.
+    ndkVersion = "30.0.16248370"
 
     defaultConfig {
         applicationId = "com.rukavina.gymbuddy"
@@ -105,7 +112,7 @@ android {
         release {
             signingConfig = signingConfigs.getByName("release")
             ndk {
-                debugSymbolLevel = "FULL"
+                debugSymbolLevel = "SYMBOL_TABLE"
             }
             // Mapping upload needs Firebase credentials; local and CI
             // builds skip it. Pass -Pgymbuddy.uploadMapping=true to upload.
@@ -331,18 +338,16 @@ val jacocoExcludes = listOf(
     "**/data/remote/generated/**"
 )
 
-buildscript {
-    configurations.getByName("classpath") {
-        resolutionStrategy {
-            force("org.apache.commons:commons-lang3:3.20.0")
-        }
-    }
-}
-
 dependencyCheck {
     formats = listOf("HTML", "SARIF")
     data.directory = "$rootDir/dependency-check-data"
-    System.getenv("NVD_API_KEY")?.takeIf { it.isNotBlank() }?.let { nvd.apiKey = it }
+    // Only what ships in the store build. Build tooling (Kotlin compiler,
+    // KSP, lint) is covered by the dependency graph (dependency-graph.yml).
+    scanConfigurations = listOf("prodReleaseRuntimeClasspath")
+    suppressionFile = "$rootDir/config/dependency-check-suppressions.xml"
+    // NVD mirror run by the dependency-check project (daily rebuild).
+    // The NVD API itself kept returning 503; see backend/build.gradle.kts.
+    nvd.datafeedUrl = "https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz"
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {
@@ -374,4 +379,50 @@ tasks.register<JacocoReport>("jacocoTestReport") {
             include("outputs/unit_test_code_coverage/qaDebugUnitTest/testQaDebugUnitTest.exec", "jacoco/testQaDebugUnitTest.exec")
         }
     )
+}
+
+// Plan 9 step 01 (ADR 0018): every runtime library with its licence,
+// shown on the in-app licences page. The build fails on any licence
+// outside the owner's list (CLAUDE.md); Google's SDK terms are allowed
+// only for Google's own SDKs.
+aboutLibraries {
+    license {
+        strictMode = com.mikepenz.aboutlibraries.plugin.StrictMode.FAIL
+        allowedLicenses.addAll(
+            "Apache-2.0", "MIT", "BSD-2-Clause", "BSD-3-Clause", "ISC",
+            "OFL-1.1", "CC0-1.0", "CC-BY-4.0", "Unlicense",
+            // The same licences with the project's own copyright line
+            // (config/aboutlibraries/licenses), since MIT, BSD and OFL
+            // must ship with it and the SPDX texts are blank templates.
+            "MIT-calendar", "MIT-fluent-emoji", "BSD-3-Clause-protobuf", "OFL-1.1-figtree",
+        )
+        val googleSdks = listOf(
+            "com.google.android.gms",
+            "com.google.android.libraries.identity.googleid",
+            "com.google.android.recaptcha",
+            "com.google.android.play",
+            "com.google.firebase",
+        )
+        allowedLicensesMap = mapOf(
+            "ASDKL" to googleSdks, // Android SDK License
+            "PCSDKToS" to googleSdks, // Play Core SDK Terms
+            "7546fd760989f8b6ad8de53f6c981adb" to googleSdks, // Play Integrity API Terms
+        )
+    }
+    collect {
+        configPath = file("$rootDir/config/aboutlibraries")
+    }
+    library {
+        // Shown instead through config/aboutlibraries/libraries entries
+        // that carry the project's own licence text (copyright line).
+        // Exact artifact names only, so nothing else can drop out.
+        exclusionPatterns.addAll(
+            Pattern.compile("com\\.kizitonwose\\.calendar:(compose|core|data)"),
+            Pattern.compile("androidx\\.datastore:datastore-preferences-external-protobuf"),
+        )
+    }
+    export {
+        prettyPrint = true
+        excludeFields.addAll("developers", "funding")
+    }
 }

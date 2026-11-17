@@ -120,31 +120,40 @@ roadmap-details.md §3.
 - [x] 8.3 fastlane: test build to testers, prod AAB to the Play
       internal track, store listing kept in the repo
 - [x] 8.4 Backend CD: develop → test, `v*` tag → prod
-- [ ] 8.5 (me) Play Console app, upload key, service account, secrets
+- [x] 8.5 (me) Play Console app, upload key, service account, secrets
 - [ ] 8.6 (me) CI green, PR develop → main
 
 ## Plan 9: legal + privacy
 
 - [ ] 9.1 Third-party licence audit (incl. stock exercise photos) +
       in-app open-source licences screen
-- [ ] 9.2 Privacy policy + terms at a public URL, linked in-app
-- [ ] 9.3 Web account deletion page (Play requires one)
-- [ ] 9.4 Compliance pass: health-data consent, 16+ audience,
+- [x] 9.2 Privacy policy + terms at a public URL, linked in-app
+- [x] 9.3 Web account deletion page (Play requires one)
+- [x] 9.4 Compliance pass: health-data consent, 16+ audience,
       Crashlytics payloads, timer/notification rules
       (list: docs/council/2026-11-02-onboarding.md)
-- [ ] 9.5 (me) Play Console: Data safety, content rating, audience,
+- [x] 9.4a Signed-out dialog + markers, deleted-account race fix
+      (docs/council/2026-11-16-signed-out-dialog.md)
+- [x] 9.5 (me) Play Console: Data safety, content rating, audience,
       store listing
 - [ ] 9.6 (me) CI green, PR develop → main
 
 ## Plan 10: release
 
-- [ ] 10.0 OWASP triage + triggers back on (fix parked on
+- [x] 10.0 OWASP triage + triggers back on (fix parked on
       `feature/owasp-triage`)
 - [ ] 10.1 (me) Release build manual pass on test, then prod: R8,
       sign-in, guest, sync, logout, account deletion
+- [ ] 10.1a Full test + refinement pass before real release (owner's
+      list, one step per batch)
 - [ ] 10.2 (me) Internal testing track via fastlane
 - [ ] 10.3 (me) Closed testing (check the current tester rule)
 - [ ] 10.4 Fix tester findings (one step per batch)
+- [ ] 10.4a Real store screenshots (2026-11-17, owner): after the
+      refinement pass, realistic data, signed in, no AI exercise images
+      (else label them in Play). The testers' listing has quick
+      placeholder shots. Also fix: on a 1080x1920 (16:9) screen the
+      workout set card is clipped at the bottom.
 - [ ] 10.5 (me) Full manual pass, production release → Android v1 done
 
 ## Later

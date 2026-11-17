@@ -1,0 +1,73 @@
+name: Legal pages
+
+# Builds legal/*.md into static pages (Plan 9 step 02) and, on main,
+# copies them to /opt/gymbuddy/site on the VPS, where nginx serves
+# them as SITE_HOST/privacy and /terms (gymtracker.rukavina.app). Uses the prod
+# environment's deploy secrets (owner approval, main only).
+# Files are extracted in place: nginx bind-mounts the directory, so
+# replacing it would leave nginx on the old one.
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'legal/**'
+      - '.github/workflows/legal-site.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'legal/**'
+      - '.github/workflows/legal-site.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: legal-site
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build legal pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: python3 -I legal/build.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: legal-site
+          path: legal/site
+          retention-days: 7
+
+  publish:
+    name: Publish to the VPS
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: prod
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: legal-site
+          path: site
+      - name: Copy over SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_SSH_KEY" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
+            echo "::error::DEPLOY_HOST, DEPLOY_SSH_KEY and DEPLOY_KNOWN_HOSTS must be set (prod environment secrets)"
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+          tar -C site -cz . | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o BatchMode=yes \
+            "deploy@$DEPLOY_HOST" \
+            "mkdir -p /opt/gymbuddy/site && tar -xz --no-same-owner -C /opt/gymbuddy/site"

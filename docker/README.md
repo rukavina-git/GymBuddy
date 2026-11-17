@@ -54,7 +54,8 @@ publishes 5432/8080 and builds the image.
 As `deploy`, once:
 
     mkdir -p /opt/gymbuddy        # as root: then chown deploy:deploy
-    scp -r docker/server/{compose.yaml,init-cert.sh,deploy.sh,nginx} deploy@<host>:/opt/gymbuddy/
+    scp -r docker/server/{compose.yaml,init-cert.sh,deploy.sh,delete-account.sh,nginx} deploy@<host>:/opt/gymbuddy/
+    mkdir /opt/gymbuddy/site      # as deploy, before nginx first starts
     # on the server: copy .env.example to /opt/gymbuddy/.env, fill it,
     # chmod 600 it
     cd /opt/gymbuddy
@@ -62,8 +63,8 @@ As `deploy`, once:
     docker compose up -d
     curl https://<API_HOST>/v1/health
 
-- `init-cert.sh` gets one cert for `API_HOST` and `TEST_API_HOST`
-  (lineage named after `API_HOST`), so the test block can never
+- `init-cert.sh` gets one cert for `API_HOST`, `TEST_API_HOST` and
+  `SITE_HOST` (lineage named after `API_HOST`), so no block can ever
   point at a missing cert. On a fresh box it runs certbot standalone
   on port 80, so nginx must be stopped (nginx can't start without a
   cert). With nginx running, `WEBROOT=1` goes through nginx instead
@@ -71,6 +72,17 @@ As `deploy`, once:
   `docker compose exec nginx nginx -s reload`.
 - After that the `certbot` service tries `certbot renew --webroot`
   every 12 h, and nginx reloads every 6 h to pick up a new cert.
+- `SITE_HOST` (gymtracker.rukavina.app; not the apex, which is a
+  Vercel site) serves the static legal pages from
+  `/opt/gymbuddy/site`, at `/privacy` and `/terms`
+  (Plan 9 step 02). `legal-site.yml` copies them there from main; by
+  hand: `python3 -I legal/build.py`, then
+  `scp -r legal/site/. deploy@<host>:/opt/gymbuddy/site/`.
+  Create `site` as `deploy` before nginx starts, or Docker makes it
+  root-owned and the copy fails. Adding SITE_HOST to an existing box:
+  put it in the env file first, then copy the new compose.yaml (it
+  requires the variable), then `WEBROOT=1 ./init-cert.sh` and
+  `docker compose up -d nginx` (new env + volume need a recreate).
 - Unknown `Host` gets no response (444 on 80, TLS handshake refused on
   443), so scanners hitting the IP see nothing.
 - The env file is owned by `deploy`, mode 0600: compose runs as
@@ -194,6 +206,29 @@ and fails (red) when its `DEPLOY_*` secrets are empty.
 It encrypts with `gpg --symmetric` (AES256) and upload only the
 `.gpg` file (`gymbuddy-vps-<ts>.dump.gpg`) as an artifact kept
 30 days. The repo is public, so the dump is never stored unencrypted.
+
+### Account deletion requests
+
+For people without the app (gymtracker.rukavina.app/delete-account):
+they email privacy@ from their account's address. Plan 9 step 03.
+
+1. Only act if the request came from the account's own email address.
+2. Firebase console (prod project) → Authentication → Users: search
+   the email, copy the **User UID**.
+3. On the server, as `deploy`:
+
+       cd /opt/gymbuddy && ./delete-account.sh <uid>
+
+   It asks for the uid again, then runs the backend image once under
+   the `account-delete` profile: the same deletion as in the app
+   (all synced data, then the Firebase login), no web server. Exit 0
+   means both are gone. If it says the Firebase user was not deleted,
+   the data already is: delete the user in the console.
+4. Reply that the account is deleted (within 30 days of the request;
+   backups age out 30 days later).
+
+The same script works in `/opt/gymbuddy-test` against the test stack
+(copy it there too), which is the place to try it first.
 
 ### Restore
 

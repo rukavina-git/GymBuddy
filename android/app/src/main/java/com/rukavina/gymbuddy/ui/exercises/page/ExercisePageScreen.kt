@@ -1,5 +1,7 @@
 package com.rukavina.gymbuddy.ui.exercises.page
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -81,6 +83,7 @@ import com.rukavina.gymbuddy.ui.workout.WorkoutSet as UiSet
 
 /** Raw size (DESIGN.md §4): the bundled photo's frame on R13-1 (384 × 216). */
 private const val PHOTO_RATIO = 16f / 9f
+private const val BUNDLED_IMAGE_WIDTH = 0.6f
 /** Raw size (DESIGN.md §4): stand-in glyph, as EmptyState's (Figma R17-E4). */
 private val StandInGlyph = 40.dp
 
@@ -218,8 +221,13 @@ internal fun ExercisePageContent(
                 contentPadding = PaddingValues(start = d.insetScreen, end = d.insetScreen, bottom = d.section),
                 verticalArrangement = Arrangement.spacedBy(d.stack),
             ) {
-                exercise.thumbnailUrl?.takeIf { exercise.source == EntitySource.DEFAULT }?.let { url ->
-                    item(key = "photo") { Photo(url, exercise.name) }
+                val bundled = ExerciseImages.forId(exercise.id).takeIf { exercise.source == EntitySource.DEFAULT }
+                if (bundled != null) {
+                    item(key = "photo") { BundledImage(bundled, exercise.name) }
+                } else {
+                    exercise.thumbnailUrl?.takeIf { exercise.source == EntitySource.DEFAULT }?.let { url ->
+                        item(key = "photo") { Photo(url, exercise.name) }
+                    }
                 }
                 item(key = "title") { Title(exercise, state.own) }
                 val last = state.history.last
@@ -282,6 +290,26 @@ private fun HowTo(instructions: List<String>, onAdd: () -> Unit) {
         instructions.forEachIndexed { i, step ->
             BodyLine(stringResource(R.string.exercise_step, i + 1, step))
         }
+    }
+}
+
+/**
+ * Bundled exercise image (Plan 9 step 01b): a square, centred at
+ * [BUNDLED_IMAGE_WIDTH] of the screen so the 512 px source stays sharp
+ * and the whole figure shows (owner, 2026-11-13).
+ */
+@Composable
+private fun BundledImage(@DrawableRes image: Int, name: String) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Image(
+            painter = painterResource(image),
+            contentDescription = stringResource(R.string.exercise_photo_cd, name),
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxWidth(BUNDLED_IMAGE_WIDTH)
+                .aspectRatio(1f)
+                .clip(MaterialTheme.shapes.large),
+        )
     }
 }
 

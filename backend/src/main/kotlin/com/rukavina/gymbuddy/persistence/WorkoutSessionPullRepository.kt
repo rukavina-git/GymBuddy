@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.persistence
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.rukavina.gymbuddy.api.dto.PerformedExerciseDto
 import com.rukavina.gymbuddy.api.dto.WorkoutSessionDto
 import com.rukavina.gymbuddy.api.dto.WorkoutSetDto

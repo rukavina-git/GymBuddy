@@ -118,7 +118,7 @@ class DataExporterTest {
 
     @Test
     fun `file name uses the date`() {
-        assertEquals("gymbuddy-export-2026-11-03.json", DataExporter.fileName(clock))
+        assertEquals("gym-tracker-export-2026-11-03.json", DataExporter.fileName(clock))
     }
 
     private suspend fun seed() {

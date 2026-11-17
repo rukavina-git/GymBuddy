@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "exercises": [
     {
       "id": "019fe506-359a-7601-92f2-f441cf1dae33",
@@ -33,8 +33,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-359b-7a6f-82f9-90f196c28c0a",
@@ -67,8 +66,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Squat/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-359c-7fb2-942a-65d8449bbd9a",
@@ -102,8 +100,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-359d-71d4-a51e-49d6d3b0e760",
@@ -135,8 +132,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-359e-734f-84b4-bfbe1cb1ce35",
@@ -170,8 +166,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "REPS_ONLY",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-359f-79f1-96c5-ebfb531468f8",
@@ -203,8 +198,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "DURATION",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35a0-77c6-9434-2e771281c227",
@@ -234,8 +228,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35a1-7b5a-9ff0-fe15be1e6e3e",
@@ -265,8 +258,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35a2-7c84-b00f-0c4f433180f8",
@@ -298,8 +290,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35a3-76e9-b9e2-a956216b7f5f",
@@ -331,8 +322,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35a4-7bda-8105-7700fc9609e5",
@@ -366,8 +356,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Incline_Bench_Press_-_Medium_Grip/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35a5-7a26-b6eb-3ff8b3a134c9",
@@ -401,8 +390,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35a6-7b02-94a3-1ea222589774",
@@ -435,8 +423,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35a7-777f-ac60-67574cbc06f7",
@@ -468,8 +455,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35a8-7b6e-a450-a7d1d3c7d0ad",
@@ -502,8 +488,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35a9-753d-8fe5-6977136a13d3",
@@ -535,8 +520,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35aa-7eed-8e2a-89f8ad56d156",
@@ -569,8 +553,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35ab-78cf-8ecd-1da7a4a527ac",
@@ -603,8 +586,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35ac-7721-81de-641623045b62",
@@ -636,8 +618,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35ad-748c-9746-93ff8da9ba63",
@@ -669,8 +650,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35ae-7f94-9c21-58c0f1fa09d7",
@@ -703,8 +683,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35af-7246-b78e-aeaab3a49230",
@@ -737,8 +716,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35b0-7ed4-8772-3f0fe4f3aeba",
@@ -770,8 +748,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35b1-783a-8928-809823dce5c4",
@@ -801,8 +778,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35b2-757f-a130-42a498a93369",
@@ -834,8 +810,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35b3-7d27-b390-cdbb73c7cd62",
@@ -867,8 +842,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Arnold_Dumbbell_Press/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35b4-7b32-83e2-6244b1e7d9c0",
@@ -900,8 +874,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shrug/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35b5-7334-bbaf-0cfabc29cfbd",
@@ -931,8 +904,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35b6-73fa-804a-ed95dfa3c92d",
@@ -962,8 +934,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35b7-7c5c-92a1-99813a6a8455",
@@ -994,8 +965,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35b8-72ad-901a-b8cc7e665073",
@@ -1029,8 +999,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35b9-7802-85de-b0a9682a8dbc",
@@ -1063,8 +1032,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35ba-7707-8a53-7d0526921af6",
@@ -1094,8 +1062,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35bb-7357-8c72-401003939cf2",
@@ -1125,8 +1092,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hammer_Curls/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35bc-7a3e-9895-70de3b94f943",
@@ -1157,8 +1123,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35bd-742b-b5de-ae7303ccedd6",
@@ -1188,8 +1153,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35be-7140-b9fe-bff1822040fc",
@@ -1219,8 +1183,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35bf-7429-9e35-0a0f1062be96",
@@ -1250,8 +1213,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35c0-78d9-961a-47d99bf06ff8",
@@ -1281,8 +1243,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35c1-7e41-9bed-e192a9d6a12d",
@@ -1312,8 +1273,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35c2-7efc-a884-30f32d884431",
@@ -1346,8 +1306,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35c3-7228-92d8-399f90509a74",
@@ -1377,8 +1336,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35c4-7e96-ba37-5c21a0f3d541",
@@ -1408,8 +1366,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35c5-7e9d-9bff-db6cca316522",
@@ -1442,8 +1399,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg"
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35c6-7c41-a8f8-d8a708d074f0",
@@ -1476,8 +1432,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35c7-7210-a41a-af15ffc08a58",
@@ -1507,8 +1462,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "REPS_ONLY",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35c8-70f3-83aa-68a24c0af02a",
@@ -1538,8 +1492,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "REPS_ONLY",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35c9-79e4-b2cf-c0a0eb3a9a24",
@@ -1569,8 +1522,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35ca-7c5a-bc2c-1fbb28056716",
@@ -1600,8 +1552,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "REPS_ONLY",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35cb-7080-9e3a-9135726bd29c",
@@ -1634,8 +1585,7 @@
       "category": "CARDIO",
       "exerciseType": "COMPOUND",
       "trackingType": "REPS_ONLY",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35cc-7cdd-915b-6bc9835ac9b1",
@@ -1665,8 +1615,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35cd-7cb5-b39b-6fc73c1dd946",
@@ -1696,8 +1645,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "REPS_ONLY",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35ce-7bb2-ac34-1cf9758d9bfd",
@@ -1731,8 +1679,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35cf-716f-be29-70ea5d1c8a51",
@@ -1764,8 +1711,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35d0-7520-b3e9-f4fa230d2e1a",
@@ -1798,8 +1744,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35d1-7779-835a-03fad2a0e63b",
@@ -1831,8 +1776,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35d2-72b8-8b9b-3188abd1a9eb",
@@ -1862,8 +1806,7 @@
       "category": "STRENGTH",
       "exerciseType": "ISOLATION",
       "trackingType": "REPS_ONLY",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35d3-7f3d-9ab0-d1c26b59e962",
@@ -1895,8 +1838,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35d4-7f59-af83-ad2466c8d39c",
@@ -1929,8 +1871,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     },
     {
       "id": "019fe506-35d5-7d7f-ae9b-22bbc70bf77d",
@@ -1960,8 +1901,7 @@
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
       "trackingType": "WEIGHT_REPS",
-      "videoUrl": "",
-      "thumbnailUrl": ""
+      "videoUrl": ""
     }
   ]
 }

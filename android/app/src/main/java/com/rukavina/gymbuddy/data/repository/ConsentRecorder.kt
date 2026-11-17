@@ -38,7 +38,7 @@ class ConsentRecorder @Inject constructor(
     }
 
     companion object {
-        /** Wording version of the consent box. Final text comes with the privacy pass (roadmap 4.6). */
+        /** Wording version of the consent screen. Reviewed in Plan 9 step 04: unchanged. Bump it when consent_body changes. */
         const val CONSENT_VERSION = "2026-11-03"
     }
 }

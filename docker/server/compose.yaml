@@ -55,6 +55,7 @@ services:
     environment:
       API_HOST: ${API_HOST:?must be set}
       TEST_API_HOST: ${TEST_API_HOST:?must be set}
+      SITE_HOST: ${SITE_HOST:?must be set}
     networks:
       - default
       - edge
@@ -64,6 +65,8 @@ services:
       - ./nginx/api.conf.template:/etc/nginx/templates/default.conf.template:ro
       - letsencrypt:/etc/letsencrypt:ro
       - certbot-www:/var/www/certbot:ro
+      # Static legal pages, copied here by legal-site.yml.
+      - ./site:/usr/share/nginx/site:ro
     # Reload every 6 h so a cert renewed by certbot is picked up
     # without giving any container the Docker socket.
     command: >-

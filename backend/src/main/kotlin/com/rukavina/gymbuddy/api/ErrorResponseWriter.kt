@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.rukavina.gymbuddy.api.dto.ErrorDto
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.MediaType

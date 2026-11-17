@@ -16,6 +16,15 @@ spring:
   jpa:
     open-in-view: false
 
+  # Boot 3 (Jackson 2) behaviour, kept on purpose under Jackson 3: clients
+  # lag behind releases, so unknown fields are ignored and an explicit null
+  # for a number/boolean reads as 0/false instead of a 400.
+  # SyncUnreadableBodyTest covers the unknown-field case.
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+      fail-on-null-for-primitives: false
+
 # Plain text locally. On the VPS (docker/server/compose.yaml), LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs
 # switches the console to one JSON object per line; MDC keys (traceId,
 # userId, clientVersion, clientPlatform - see api/RequestMdcFilter.kt)
@@ -24,6 +33,10 @@ spring:
 springdoc:
   api-docs:
     path: /v3/api-docs
+  # Must match the swagger-ui webjar pinned in build.gradle.kts; springdoc
+  # otherwise serves its own built-in version's path and the page 500s.
+  swagger-ui:
+    version: 5.35.0
 
 # FIREBASE_CREDENTIALS_B64 (base64-encoded service account JSON) is read
 # directly via @Value in auth/FirebaseAdminConfig.kt, not through this

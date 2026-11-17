@@ -8,6 +8,8 @@ import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
 import com.rukavina.gymbuddy.data.sync.AuthGate
 import com.rukavina.gymbuddy.data.sync.AuthSession
+import com.rukavina.gymbuddy.data.sync.SharedPrefsSignedOutStore
+import com.rukavina.gymbuddy.data.sync.SignedOutPrompt
 import com.rukavina.gymbuddy.data.sync.DataOwnerStore
 import com.rukavina.gymbuddy.data.sync.OwnerReleasingAuthSession
 import com.rukavina.gymbuddy.data.sync.SharedPrefsDataOwnerStore
@@ -20,7 +22,7 @@ import com.rukavina.gymbuddy.data.sync.remote.SyncApis
 import com.rukavina.gymbuddy.domain.sync.SyncRequester
 import com.rukavina.gymbuddy.data.repository.AppPreferencesRepository
 import com.rukavina.gymbuddy.data.repository.ConsentRecorder
-import com.rukavina.gymbuddy.data.sync.GuestMergeState
+import com.rukavina.gymbuddy.data.sync.SignInFollowUp
 import com.rukavina.gymbuddy.data.sync.GuestMerge
 import com.rukavina.gymbuddy.data.sync.GuestMergeCoordinator
 import com.rukavina.gymbuddy.domain.sync.SyncReason
@@ -55,6 +57,13 @@ object SyncModule {
             context.getSharedPreferences("data_owner", Context.MODE_PRIVATE),
             initialOwner = { firebase.currentUid }
         )
+
+    @Provides
+    @Singleton
+    fun provideSignedOutPrompt(@ApplicationContext context: Context, clock: Clock) = SignedOutPrompt(
+        SharedPrefsSignedOutStore(context.getSharedPreferences(SignedOutPrompt.PREFS_NAME, Context.MODE_PRIVATE)),
+        now = { clock.millis() }
+    )
 
     /** Every app sign-out goes through here, so it's voluntary: the data owner is released first. */
     @Provides
@@ -153,30 +162,32 @@ object SyncModule {
 
     @Provides
     @Singleton
+    fun provideSignInFollowUp(
+        signedOutPrompt: SignedOutPrompt,
+        coordinator: GuestMergeCoordinator,
+        consent: ConsentRecorder
+    ) = SignInFollowUp(signedOutPrompt, coordinator, consent)
+
+    @Provides
+    @Singleton
     fun provideAuthGate(
         holder: DatabaseHolder,
         owners: DataOwnerStore,
         merge: GuestMerge,
         firebase: FirebaseAuthSession,
-        coordinator: GuestMergeCoordinator,
         preferences: AppPreferencesRepository,
-        consent: ConsentRecorder
+        followUp: SignInFollowUp
     ) = AuthGate(
         holder,
         owners,
         merge,
         firebaseUid = { firebase.currentUid },
         probe = { firebase.probe() },
-        lastFailure = { firebase.lastFailure },
+        failure = firebase.failure,
         clearFailure = { firebase.clearFailure() },
         firebaseEmail = { firebase.currentEmail },
         dropDeadSession = { firebase.signOut() },
-        afterSignIn = {
-            coordinator.onOwnerChanged(it)
-            // While the merge question is open the account's profile may still
-            // come from the guest; afterMerge records the consent then.
-            if (coordinator.state.value !is GuestMergeState.Asking) consent.applyTo(it)
-        },
+        afterSignIn = { followUp.run(it) },
         setGuest = { preferences.setGuest(it) },
         scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     )

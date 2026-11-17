@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWASP dependency-check false positives on the prodRelease runtime
+  classpath (triaged 2026-11-15, ADR 0013). Each entry names exact CVEs;
+  a new CVE on the same library still shows up.
+-->
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <suppress>
+    <notes>CVE-2008-7298 is about the 2008 Android stock browser's cookie
+      handling, not androidx.browser (Custom Tabs).</notes>
+    <filePath regex="true">.*browser-1\.[0-9.]+.*</filePath>
+    <cve>CVE-2008-7298</cve>
+  </suppress>
+  <suppress>
+    <notes>CVE-2025-29903 is in JetBrains Runtime (the JDK fork), matched
+      to Compose runtime by vendor name. CVE-2026-53914 is the Kotlin
+      compiler's build-cache deserialization (fixed 2.4.20, we build with
+      2.4.21); CVE-2020-29582 was fixed in 1.4.21. Neither applies to
+      stdlib/reflect at runtime.</notes>
+    <filePath regex="true">.*(org\.jetbrains\.|/transformed/runtime(-saveable)?/|kotlin-(stdlib|reflect)).*</filePath>
+    <cve>CVE-2025-29903</cve>
+    <cve>CVE-2026-53914</cve>
+    <cve>CVE-2020-29582</cve>
+  </suppress>
+  <suppress>
+    <notes>Tasks.org to-do app CVEs, name-matched to
+      kotlinx-coroutines-play-services ("Tasks" API).</notes>
+    <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlinx/kotlinx-coroutines-play-services@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>scotty-minified.jar is a stripped, repackaged Guava subset inside
+      firebase-crashlytics (latest). The temp-dir CVEs need local file
+      access on a shared Unix host; the alloc one needs untrusted
+      serialized input. Neither path exists in the app. Re-check when
+      Crashlytics updates.</notes>
+    <filePath regex="true">.*scotty-minified\.jar$</filePath>
+    <cve>CVE-2018-10237</cve>
+    <cve>CVE-2020-8908</cve>
+    <cve>CVE-2023-2976</cve>
+  </suppress>
+</suppressions>

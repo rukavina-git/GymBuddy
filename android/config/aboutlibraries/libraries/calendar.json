@@ -1,0 +1,10 @@
+{
+  "uniqueId": "override:com.kizitonwose.calendar",
+  "artifactVersion": "2.10.1",
+  "name": "Calendar (kizitonwose)",
+  "description": "Calendar views: compose, core, data.",
+  "website": "https://github.com/kizitonwose/Calendar",
+  "licenses": [
+    "MIT-calendar"
+  ]
+}

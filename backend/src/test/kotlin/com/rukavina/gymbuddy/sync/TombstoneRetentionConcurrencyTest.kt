@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.sync
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.rukavina.gymbuddy.api.dto.PullResponseDto
 import com.rukavina.gymbuddy.api.dto.PushRequestDto
 import com.rukavina.gymbuddy.api.dto.PushResponseDto
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
@@ -93,7 +93,7 @@ class TombstoneRetentionConcurrencyTest : AbstractPostgresIntegrationTest() {
             "SELECT seq FROM change_log WHERE user_id = :uid AND entity_id = :entityId ORDER BY seq",
             mapOf("uid" to uid, "entityId" to entityId),
             Long::class.java,
-        )
+        ).filterNotNull()
 
     private fun exerciseExists(id: String): Boolean =
         jdbcTemplate.queryForObject(

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rukavina.gymbuddy.R
+import com.rukavina.gymbuddy.ui.guest.SignedOutChip
 import com.rukavina.gymbuddy.domain.model.WorkoutTemplate
 import com.rukavina.gymbuddy.domain.usecase.template.TemplateStats
 import com.rukavina.gymbuddy.ui.design.AppBottomSheet
@@ -100,6 +101,8 @@ fun HomeScreen(
     onOpenWorkout: () -> Unit = {},
     onEmptyWorkout: () -> Unit = {},
     unfinished: UnfinishedActions = UnfinishedActions(),
+    /** Set while signed out: the Signed out chip (R22-4) opens the dialog. */
+    onSignedOut: (() -> Unit)? = null,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -107,6 +110,7 @@ fun HomeScreen(
         state, workoutRunning, onStartTemplate, onOpenTemplate, onAllTemplates, onOpenWeek, workout, onOpenWorkout, onEmptyWorkout, unfinished,
         onRetryBackup = viewModel::retryBackup,
         onRetryResync = viewModel::retryResync,
+        onSignedOut = onSignedOut,
     )
 }
 
@@ -155,6 +159,7 @@ internal fun HomeContent(
     unfinished: UnfinishedActions = UnfinishedActions(),
     onRetryBackup: () -> Unit = {},
     onRetryResync: () -> Unit = {},
+    onSignedOut: (() -> Unit)? = null,
 ) {
     val d = GymBuddyTheme.dimens
     val resyncing = state.resync != Resync.Idle
@@ -171,9 +176,10 @@ internal fun HomeContent(
             Box(Modifier.fillMaxWidth().heightIn(min = TopBarHeight).padding(start = d.hairline), contentAlignment = Alignment.CenterStart) {
                 Image(
                     painterResource(AppIcons.Brand.Wordmark),
-                    contentDescription = stringResource(R.string.app_name),
+                    contentDescription = stringResource(R.string.cd_app_name),
                     modifier = Modifier.height(WordmarkHome).semantics { heading() },
                 )
+                onSignedOut?.let { SignedOutChip(it, Modifier.align(Alignment.CenterEnd)) }
             }
             if (workoutRunning && workout != null && workout.unfinishedSince == null) {
                 InProgressCard(workout, state.zone, onOpenWorkout)

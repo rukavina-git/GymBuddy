@@ -190,3 +190,24 @@
   on android and backend. deploy.yml callers got `secrets: inherit`:
   environment secrets were empty, so test deploys failed. First green
   test deploy at b5d6265. Dependabot #39 (minimatch) closes with 8.6.
+- First qa build to App Distribution (2026-11-13, run 43470936616):
+  release 0.1.0 (1000) to group `testers`. Fixes on the way: plugin
+  takes the qa app id (read from the qa Firebase config), and
+  google-apis-core held < 1 (1.x raw uploads have no Content-Length).
+- 8.5 done (2026-11-15): upload key reset live; 0.1.0 (1000) AAB
+  (upload key SHA1 13:1D:F3…) uploaded by hand to internal and
+  published. Play app signing key: SHA1 F2:67:B9:C3…, SHA-256
+  08:E6:B5:24… (owner adds both + upload SHA1 to the prod Firebase
+  app for Google sign-in). Play warned "no native debug symbols":
+  only AndroidX prebuilt .so files (graphics.path, datastore), shipped
+  stripped, nothing to upload. With a live internal release,
+  `fastlane internal` (release_status completed) should now work;
+  first run with the next v* tag after 8.6.
+- Native symbols (2026-11-15, after 8.5): Play's "no debug symbols"
+  warning came from AGP skipping extraction without an NDK. Now
+  `ndkVersion = "30.0.16248370"` (CI installs it in release + testers
+  workflows), `debugSymbolLevel = SYMBOL_TABLE`. The AAB now carries
+  BUNDLE-METADATA/...debugsymbols for libdatastore_shared_counter.
+  libandroidx.graphics.path ships fully stripped from AndroidX ("native
+  debug metadata has already been stripped"), so it gets none. Check
+  at the next Play upload whether the warning is gone.

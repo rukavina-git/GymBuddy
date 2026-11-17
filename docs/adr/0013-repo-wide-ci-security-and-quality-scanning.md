@@ -133,3 +133,50 @@ named `main`" from the 8.1 update.
 - **Trade-off.** A red gate on `develop` can be ignored for a while;
   the release rule catches it. If that proves too loose, set
   `continue-on-error` back to false for `develop`.
+
+## Amendment 2026-11-15: GitHub dependency graph is the primary scanner
+
+OWASP's classloader clash was fixed (commons-lang3 forced in the android
+root build), but NVD's API answered 503 on every run, so the scan never
+produced a result. Per-push coverage now comes from
+`.github/workflows/dependency-graph.yml`: it submits the full resolved
+Gradle tree of android and backend, and Dependabot alerts (GitHub
+Advisory Database) cover transitive libraries. OWASP stays weekly +
+manual, non-blocking.
+
+First triage (develop vs main, 2026-11-15):
+- Backend runtime: Guava <= 33.7.1 (GHSA-xxph-c9ww-hj94) pinned to
+  33.8.0-jre; OpenTelemetry API <= 1.66.0 (GHSA-ccrj-gw8r-854m) pinned
+  to 1.68.0 via `opentelemetry.version`. Jackson 2 (2.21.7) and Jackson
+  3 (3.1.7) already at fixed versions.
+- Android app: no flagged library is in `prodReleaseRuntimeClasspath`.
+- Build tooling only (AGP, OpenAPI Generator, Kotlin Gradle plugin):
+  Bouncy Castle 1.80.2, jackson 2.22.1, guava, jsoup, jdom2,
+  handlebars, jose4j, httpclient, org.json, commons-lang3 3.16. Runs on
+  CI and the dev machine only, never shipped. Accepted; they clear as
+  those plugins update (Dependabot opens the PRs).
+
+### Later the same day: OWASP back on, from the NVD mirror
+
+Both build files set `nvd.datafeedUrl` to the dependency-check
+project's own NVD mirror (rebuilt daily on GitHub Pages), so the scan
+needs no NVD API and no `NVD_API_KEY` (the secret can be deleted). A
+cold sync takes about a minute. `owasp.yml` runs again on pushes that
+touch Gradle files, plus weekly; still non-blocking.
+
+The scan now covers only what ships: android `prodReleaseRuntimeClasspath`
+(578 deps), backend minus the Kotlin tooling classpaths (263 deps).
+Build tooling stays with the dependency graph above.
+
+Fixes from the first full result:
+- Backend Kotlin 2.3.21 → 2.4.21 (`kotlin.version` over the Boot BOM):
+  CVE-2026-53914, build-cache deserialization, fixed in 2.4.20.
+- swagger-ui webjar 5.34.0 → 5.35.0 (DOMPurify CVE-2026-116802..4).
+
+False positives, suppressed per CVE with the reason in each module's
+`config/dependency-check-suppressions.xml`: OpenTelemetry Go/JS CVEs on
+the Java jars, `dev.cel:protobuf` read as protobuf-java, the 2008
+Android browser CVE on androidx.browser, JetBrains Runtime on Compose
+runtime, Kotlin compiler CVEs on stdlib/reflect, Tasks.org CVEs on
+coroutines-play-services, and Crashlytics' bundled Guava subset.
+Result: 0 open findings in both modules.

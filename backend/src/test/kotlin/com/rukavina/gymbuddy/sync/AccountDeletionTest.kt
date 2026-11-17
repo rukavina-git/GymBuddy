@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.sync
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.rukavina.gymbuddy.api.dto.PushRequestDto
 import com.rukavina.gymbuddy.api.dto.PushResponseDto
 import com.rukavina.gymbuddy.auth.FirebaseUserDeleter
@@ -9,10 +9,12 @@ import com.rukavina.gymbuddy.auth.testsupport.TestSecurityConfig
 import com.rukavina.gymbuddy.testsupport.AbstractPostgresIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.boot.DefaultApplicationArguments
 import org.mockito.BDDMockito.willThrow
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
@@ -46,6 +48,9 @@ class AccountDeletionTest : AbstractPostgresIntegrationTest() {
 
     @Autowired
     private lateinit var jdbcTemplate: NamedParameterJdbcTemplate
+
+    @Autowired
+    private lateinit var accountDeletionService: AccountDeletionService
 
     @MockitoBean
     private lateinit var firebaseUserDeleter: FirebaseUserDeleter
@@ -157,6 +162,45 @@ class AccountDeletionTest : AbstractPostgresIntegrationTest() {
 
         val afterTarget = rowCounts(uid)
         assertTrue(afterTarget.values.all { it == 0 }, "the database delete must have committed despite the later Firebase failure, got: $afterTarget")
+    }
+
+    // AccountDeleteRunner (account-delete profile, privacy@ requests):
+    // same service, so the same rows go. Firebase uids are alphanumeric.
+    private fun runner(uid: String) = AccountDeleteRunner(accountDeletionService, uid)
+
+    @Test
+    fun `the account-delete runner deletes one user's data and Firebase login, nobody else's`() {
+        val target = "runnerTarget${System.nanoTime()}"
+        val other = "runnerOther${System.nanoTime()}"
+        pushFullSetOf(target)
+        pushFullSetOf(other)
+        val beforeOther = rowCounts(other)
+
+        runner(target).run(DefaultApplicationArguments())
+
+        val afterTarget = rowCounts(target)
+        assertTrue(afterTarget.values.all { it == 0 }, "expected every table empty for the deleted user, got: $afterTarget")
+        assertEquals(beforeOther, rowCounts(other), "another user's data must be completely untouched")
+        verify(firebaseUserDeleter).deleteUser(target)
+    }
+
+    @Test
+    fun `the account-delete runner rejects a blank or malformed uid before touching anything`() {
+        listOf("", "has space", "a;DROP TABLE x", "x".repeat(129)).forEach { bad ->
+            assertThrows<IllegalArgumentException> { runner(bad).run(DefaultApplicationArguments()) }
+        }
+    }
+
+    @Test
+    fun `the account-delete runner fails loudly when the Firebase login could not be removed`() {
+        val uid = "runnerFirebaseFails${System.nanoTime()}"
+        pushFullSetOf(uid)
+        willThrow(RuntimeException("simulated Firebase outage")).given(firebaseUserDeleter).deleteUser(uid)
+
+        val e = assertThrows<IllegalStateException> { runner(uid).run(DefaultApplicationArguments()) }
+
+        assertTrue(e.message!!.contains("Firebase console"), "message should say what to do, got: ${e.message}")
+        assertTrue(rowCounts(uid).values.all { it == 0 }, "data must be deleted even though Firebase failed")
     }
 
     private fun assertTrue(condition: Boolean, message: String) {

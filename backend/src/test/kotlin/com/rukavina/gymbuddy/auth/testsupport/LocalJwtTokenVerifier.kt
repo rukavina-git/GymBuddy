@@ -1,6 +1,6 @@
 package com.rukavina.gymbuddy.auth.testsupport
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.rukavina.gymbuddy.auth.TokenVerificationException
 import com.rukavina.gymbuddy.auth.TokenVerifier
 import com.rukavina.gymbuddy.auth.VerifiedIdentity

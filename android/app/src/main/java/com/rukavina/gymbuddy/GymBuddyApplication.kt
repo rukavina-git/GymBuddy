@@ -62,7 +62,7 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
 
     override fun onCreate() {
         super.onCreate()
-        Log.d("AppInfo", "Gym Buddy Application starting...")
+        Log.d("AppInfo", "Gym Tracker starting...")
 
         SyncTriggers.observeForeground(ProcessLifecycleOwner.get().lifecycle, syncScheduler)
         SyncTriggers.observeNetwork(this, syncScheduler)
@@ -76,6 +76,7 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
         // startup); false only where Firebase isn't configured, e.g.
         // Robolectric tests booting this Application.
         authGate.observeReleases()
+        authGate.observeFailures()
         if (FirebaseApp.getApps(this).isNotEmpty()) authSession.observeSignIn(
             crashReporter,
             onUid = { authGate.onFirebaseUid(it) },

@@ -95,7 +95,7 @@ fun SignInScreen(
     when (val dialog = state.dialog) {
         is SignInDialog.NoAccount -> AppChoiceDialog(
             title = stringResource(R.string.no_account_title),
-            body = stringResource(R.string.no_account_body, dialog.email?.let(::maskEmail) ?: ""),
+            body = stringResource(R.string.no_account_body, dialog.email?.let(::maskEmail) ?: "", stringResource(R.string.brand_name)),
             actions = listOf(
                 DialogAction(stringResource(R.string.no_account_create), viewModel::noAccountCreate, DialogActionTone.Lime),
                 DialogAction(stringResource(R.string.no_account_other), viewModel::noAccountOther),

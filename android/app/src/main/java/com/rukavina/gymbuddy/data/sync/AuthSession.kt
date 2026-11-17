@@ -78,9 +78,12 @@ class FirebaseAuthSession(authProvider: () -> FirebaseAuth = { FirebaseAuth.getI
      * signs the user out by itself on some of them, before AuthGate can ask,
      * so the gate reads this to tell expired from deleted.
      */
-    @Volatile
-    var lastFailure: AuthProbe? = null
-        private set
+    private val _failure = MutableStateFlow<AuthProbe?>(null)
+
+    /** Same as [lastFailure], as a flow: AuthGate waits on it when Firebase's sign-out comes first. */
+    val failure: StateFlow<AuthProbe?> = _failure.asStateFlow()
+
+    val lastFailure: AuthProbe? get() = _failure.value
 
     override suspend fun idToken(): String? {
         val user = auth.currentUser ?: return null
@@ -109,12 +112,12 @@ class FirebaseAuthSession(authProvider: () -> FirebaseAuth = { FirebaseAuth.getI
     }
 
     private fun remember(probe: AuthProbe) {
-        if (probe == AuthProbe.EXPIRED || probe == AuthProbe.DELETED) lastFailure = probe
+        if (probe == AuthProbe.EXPIRED || probe == AuthProbe.DELETED) _failure.value = probe
     }
 
     /** A new sign-in starts with a clean slate. */
     fun clearFailure() {
-        lastFailure = null
+        _failure.value = null
     }
 
     override fun signOut() = auth.signOut()

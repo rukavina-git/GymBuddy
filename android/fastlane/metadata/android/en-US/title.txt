@@ -1,1 +1,1 @@
-Gym Buddy
+Gym Tracker: Workout Log

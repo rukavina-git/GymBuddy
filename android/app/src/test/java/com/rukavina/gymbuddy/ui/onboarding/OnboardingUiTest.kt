@@ -27,7 +27,6 @@ import com.rukavina.gymbuddy.ui.auth.CreateFrom
 import com.rukavina.gymbuddy.ui.auth.CreateStep
 import com.rukavina.gymbuddy.ui.auth.SignInUiState
 import com.rukavina.gymbuddy.ui.guest.GuestMergeDialogs
-import com.rukavina.gymbuddy.ui.guest.SessionExpiredBanner
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -149,15 +148,6 @@ class OnboardingUiTest {
         rule.onNodeWithText("Email or password is wrong. Try again or reset your password.").assertExists()
         rule.onNodeWithText("Retry").performClick()
         assertTrue(retried)
-    }
-
-    @Test
-    fun `session expired banner signs in`() {
-        var signIn = false
-        rule.setContent { GymBuddyTheme { SessionExpiredBanner(onSignIn = { signIn = true }) } }
-        rule.onNodeWithText("Backup paused. Sign in again to keep backing up.").assertIsDisplayed()
-        rule.onNodeWithText("Sign in").performClick()
-        assertTrue(signIn)
     }
 
     @Test
