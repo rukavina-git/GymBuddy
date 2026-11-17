@@ -149,6 +149,11 @@ roadmap-details.md §3.
 - [ ] 10.2 (me) Internal testing track via fastlane
 - [ ] 10.3 (me) Closed testing (check the current tester rule)
 - [ ] 10.4 Fix tester findings (one step per batch)
+- [ ] 10.4a Real store screenshots (2026-11-17, owner): after the
+      refinement pass, realistic data, signed in, no AI exercise images
+      (else label them in Play). The testers' listing has quick
+      placeholder shots. Also fix: on a 1080x1920 (16:9) screen the
+      workout set card is clipped at the bottom.
 - [ ] 10.5 (me) Full manual pass, production release → Android v1 done
 
 ## Later
