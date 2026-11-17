@@ -85,3 +85,9 @@
     after focusing a field; send it again. Google Password Manager on
     the owner's phone offers the playreview@ account on every password
     field and offers to overwrite it on save: always Cancel / Back.
+- Play review warnings on 0.2.0 (2026-11-17, owner recalls, not
+  confirmed by text): deprecated edge-to-edge APIs + likely the
+  large-screen orientation/resizability one. Our code uses
+  enableEdgeToEdge and locks no orientation, so both come from
+  libraries; not blocking. If a warning names a com.rukavina class,
+  fix it in 0.2.x.
