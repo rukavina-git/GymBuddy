@@ -43,7 +43,7 @@ val keystoreProperties = Properties().apply {
 // (X*1_000_000 + Y*1_000 + Z), never typed; Play needs it higher on every
 // upload. CI passes -Pgymbuddy.releaseTag=vX.Y.Z, which must equal
 // "v$appVersion" or the build fails (the tag only checks, never sets).
-val appVersion = "0.1.0"
+val appVersion = "0.2.0"
 
 val appVersionCode: Int = run {
     val match = Regex("""(\d{1,3})\.(\d{1,3})\.(\d{1,3})""").matchEntire(appVersion)

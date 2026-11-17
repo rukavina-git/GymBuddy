@@ -1,0 +1,3 @@
+Gym Tracker 0.2.0
+- Privacy policy and account deletion links in the app
+- Bug fixes and stability improvements

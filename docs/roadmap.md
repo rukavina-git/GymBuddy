@@ -140,6 +140,10 @@ roadmap-details.md §3.
 
 ## Plan 10: release
 
+Owner order (2026-11-17): 10.1 + 10.2 + closed track through Google
+review first, then 10.1a refinement + 10.4a, new version, then 10.3
+(enroll ~15 testers). Plan folder: docs/plans/release/.
+
 - [x] 10.0 OWASP triage + triggers back on (fix parked on
       `feature/owasp-triage`)
 - [ ] 10.1 (me) Release build manual pass on test, then prod: R8,
@@ -161,3 +165,7 @@ roadmap-details.md §3.
 - Move to paid hosting (e.g. DigitalOcean): restore dump, repoint DNS
 - iOS (designs already in Figma), after Android v1 is live
 - v2 list: architecture plan §14.2
+- Translated legal texts, together with the first app translation:
+  legal/<lang>/*.md → /<lang>/privacy etc., English is master,
+  build.py fails if a translation is older, URL per locale in strings,
+  "translation; English text applies" note (2026-11-17)

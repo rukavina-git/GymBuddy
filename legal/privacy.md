@@ -1,4 +1,4 @@
-Last updated: 2026-11-15
+Last updated: 2026-11-17
 
 # {app} privacy policy
 
@@ -37,8 +37,12 @@ them only with your explicit consent, given on the "Keep a copy on our
 servers?" screen when you create an account (Art. 9(2)(a) GDPR). The
 rest we need to run your account (Art. 6(1)(b) GDPR).
 
+An account is optional: the app works fully without one. To create
+one you need an email address (or a Google account); everything else
+is up to you.
+
 We use this data only to back up and sync your account across your
-devices. We don't sell it, show ads based on it, or share it with
+devices. We don't profile you or make automated decisions about you. We don't sell it, show ads based on it, or share it with
 anyone except the providers below.
 
 ## Crash reports
@@ -47,8 +51,12 @@ When the app crashes or hits an error, it sends a crash report through
 Firebase Crashlytics: the error, the app version, the phone model and
 Android version, and, if you are signed in, your user id. Crash
 reports contain no workout or body data. We use them to fix bugs, which
-is our legitimate interest (Art. 6(1)(f) GDPR). You can object by
-emailing us.
+is our legitimate interest (Art. 6(1)(f) GDPR).
+
+Crash reports are part of how the app works and can't be turned off:
+without them we can't find and fix bugs. If you don't want them sent,
+please don't use the app. Questions or objections:
+[privacy@rukavina.app](mailto:privacy@rukavina.app).
 
 ## Server logs
 
@@ -85,8 +93,9 @@ You can:
 - **Delete it:** delete your account in the app (You → Delete
   account). This removes your account and all synced data at once.
   Without the app, follow [these steps]({base}/delete-account).
-- **Withdraw consent:** deleting the account withdraws it. Data on
-  your phone stays there until you erase it or uninstall the app.
+- **Withdraw consent:** deleting the account withdraws it, in the app
+  or by email from your account's address. Data on your phone stays
+  there until you erase it or uninstall the app.
 - **Object, restrict, or ask about anything else:** email us.
 
 You can also complain to the Croatian data protection authority,
