@@ -146,8 +146,9 @@ review first, then 10.1a refinement + 10.4a, new version, then 10.3
 
 - [x] 10.0 OWASP triage + triggers back on (fix parked on
       `feature/owasp-triage`)
-- [ ] 10.1 (me) Release build manual pass on test, then prod: R8,
-      sign-in, guest, sync, logout, account deletion
+- [x] 10.1 (me) Release build manual pass on test, then prod: R8,
+      sign-in, guest, sync, logout, account deletion (prod, 2026-11-17,
+      Plan 10 step 03)
 - [ ] 10.1a Full test + refinement pass before real release (owner's
       list, one step per batch)
 - [x] 10.2 (me) Internal testing track via fastlane (v0.2.0, 2026-11-17)

@@ -66,3 +66,19 @@
     Email lists and Google Groups are exclusive on a track (radio
     buttons); several groups are allowed.
   - Only the owner's account uses prod so far.
+- [x] 03 prod release-build pass (10.1), 2026-11-17, USB phone
+  (SM-S731B), Play 0.2.0 / 2000, prod backend. All passed: sign out,
+  guest onboarding + workout, email sign-up from the workout summary
+  (consent screen, guest workout moved into the account, "Backed up"),
+  sign out + email sign-in (workout back from server), delete account
+  (type delete + password; Welcome after; sign-in then fails with
+  "Email or password is wrong"), Google sign-in back to the owner's
+  test account (jabuka390, Full Body C Nov 12 back). Logcat: no FATAL,
+  no R8 / missing-class errors.
+  - Finding (10.1a): after "Create account" on the workout summary,
+    the summary still shows the "Keep this safe? Create account" card.
+    Hide it once signed in.
+  - Gotchas: `adb shell input text` drops the first text sent right
+    after focusing a field; send it again. Google Password Manager on
+    the owner's phone offers the playreview@ account on every password
+    field and offers to overwrite it on save: always Cancel / Back.
