@@ -3,7 +3,7 @@
 - Started 2026-11-17. 10.0 OWASP done earlier (roadmap). Owner order:
   tester path ready first, then refinement, then a fresh build before
   inviting anyone.
-- [ ] 01 release dry run (v0.2.0 on the internal track)
+- [x] 01 release dry run (v0.2.0 on the internal track) 4a024a0, 54c4607
   - 01.1 done (2026-11-17): pre-flight Sonar 0/0, Dependabot 0, develop
     CI green (Dependency graph failed once on a Gradle plugin portal
     fetch of foojay 1.0.0, rerun). appVersion 0.2.0 = versionCode 2000,
@@ -22,4 +22,6 @@
     group, so new runs stayed pending with no jobs. Owner cancelled
     it. Backend prod deploy runs from the v* tag (backend-release.yml),
     not from the main merge.
-  - Open: 01.5 owner smoke check from Play.
+  - Deviation: 01.5 owner smoke check from Play deferred to the
+    refinement pass (10.1a), owner wants to move straight to the closed
+    track. 10.1 stays open until then.

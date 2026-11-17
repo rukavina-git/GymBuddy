@@ -150,7 +150,7 @@ review first, then 10.1a refinement + 10.4a, new version, then 10.3
       sign-in, guest, sync, logout, account deletion
 - [ ] 10.1a Full test + refinement pass before real release (owner's
       list, one step per batch)
-- [ ] 10.2 (me) Internal testing track via fastlane
+- [x] 10.2 (me) Internal testing track via fastlane (v0.2.0, 2026-11-17)
 - [ ] 10.3 (me) Closed testing (check the current tester rule)
 - [ ] 10.4 Fix tester findings (one step per batch)
 - [ ] 10.4a Real store screenshots (2026-11-17, owner): after the
