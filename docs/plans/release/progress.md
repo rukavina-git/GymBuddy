@@ -97,7 +97,9 @@
   device checked (wm size 1080x1920, then reset). Ships in 0.2.1.
   - Gotcha: lint flags Configuration.screenHeightDp; use
     LocalWindowInfo.containerSize.
-- Day 0 = 2026-11-17: owner sees 12+ opted in (Console hides the exact
-  count past 12; Statistics "Data unavailable" for a new app, ~1-2
-  days lag). Day 14 = 2026-12-01: apply for production on/after it.
-  If the dashboard tick drops, the clock restarts.
+- Day 0 corrected (2026-11-18): the tester service's dashboard showed
+  0/15 testers, testing starting 2026-11-18 (~2.5 h after check). The
+  "12+" seen in Console on 11-17 was not real opt-ins. Service plan:
+  15 testers, 16 days (ends ~2026-12-04). Play's 14 days end
+  ~2026-12-02: apply once Console's checklist shows it met. Track it
+  on the service dashboard; Statistics "Data unavailable" for a new app.
