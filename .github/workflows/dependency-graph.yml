@@ -1,6 +1,6 @@
 name: Dependency graph
 
-# Uploads the full resolved Gradle dependency tree (direct and
+# Uploads the resolved Gradle dependency tree of what ships (direct and
 # transitive) of android and backend to GitHub, so Dependabot alerts
 # and the Security tab cover every library, from the GitHub Advisory
 # Database. Replaces OWASP on every push: NVD's API kept returning 503
@@ -33,10 +33,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Only what ships: the prod release app and the backend's
+          # runtime. Gradle plugins, lint, Robolectric and other build or
+          # test tools (buildscript `classpath`, test configs) stay out;
+          # with them in, every plugin's transitive deps raised alerts
+          # (bouncycastle, jdom2, handlebars...) that never reach users.
           - module: android
             java: '17'
+            configurations: 'prodReleaseRuntimeClasspath'
           - module: backend
             java: '21'
+            configurations: 'runtimeClasspath'
     defaults:
       run:
         working-directory: ${{ matrix.module }}
@@ -58,6 +65,8 @@ jobs:
 
       - name: Submit dependency graph
         uses: gradle/actions/dependency-submission@v4
+        env:
+          DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: ${{ matrix.configurations }}
         with:
           build-root-directory: ${{ matrix.module }}
           dependency-graph-continue-on-failure: false
