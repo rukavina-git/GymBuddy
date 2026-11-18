@@ -13,7 +13,7 @@ Update this file together with `legal/privacy.md`.
 | Backups | full encrypted DB dump | account holders | restore after failure, 6(1)(f) | GitHub (encrypted, can't read) | USA | 30 days |
 | Crash reports | error, app version, phone model, Android version, installation id, uid if signed in | all users | fix bugs, 6(1)(f) | Google (Crashlytics) | EU/USA | 90 days |
 | Server logs | IP, request, uid | all users with an account, web visitors | security and operations, 6(1)(f) | netcup | Germany | rotated, 10 MB × 3 |
-| Privacy requests | email, request content | requesters | answer rights requests, 6(1)(c) | Google (Gmail) | EU/USA | as long as needed to prove the answer |
+| Privacy requests | email, request content | requesters | answer rights requests, 6(1)(c) | email provider | see provider | as long as needed to prove the answer |
 
 Transfers to the USA: EU-US Data Privacy Framework and SCCs (Google DPA).
 GitHub only holds AES-256 encrypted dumps (key not on GitHub).
