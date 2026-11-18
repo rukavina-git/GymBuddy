@@ -114,3 +114,9 @@
   develop CI green (604c096). Bump + changelogs/2001.txt (step 04
   fixes). Next: PR develop → main, owner merges, tag v0.2.1, internal
   → promote to alpha.
+- Step 05 written (2026-11-18): default library + plans refresh from a
+  4-reviewer council (05a library 60->64 in 0.2.2, 05b plans in 0.2.3,
+  05c onboarding mapping in 0.2.4). Owner OK. Starts after the owner's
+  break. Images stay on Gemini (owner), plan exercises first.
+  free-exercise-db images rejected: "Unlicense" label, but maintainer
+  doesn't know their source and some trace to ExRx.net (issues #2, #13).
