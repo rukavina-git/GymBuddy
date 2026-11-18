@@ -146,12 +146,23 @@ review first, then 10.1a refinement + 10.4a, new version, then 10.3
 
 - [x] 10.0 OWASP triage + triggers back on (fix parked on
       `feature/owasp-triage`)
-- [ ] 10.1 (me) Release build manual pass on test, then prod: R8,
-      sign-in, guest, sync, logout, account deletion
+- [x] 10.1 (me) Release build manual pass on test, then prod: R8,
+      sign-in, guest, sync, logout, account deletion (prod, 2026-11-17,
+      Plan 10 step 03)
 - [ ] 10.1a Full test + refinement pass before real release (owner's
       list, one step per batch)
-- [ ] 10.2 (me) Internal testing track via fastlane
+- [x] 10.2 (me) Internal testing track via fastlane (v0.2.0, 2026-11-17)
 - [ ] 10.3 (me) Closed testing (check the current tester rule)
+  - [x] Closed track set up, v0.2.0 sent for Google review, no
+    testers yet (Plan 10 step 02, 2026-11-17)
+  - [x] Closed track approved 2026-11-17; tester groups added
+    (owner's + testers-community), enrollment runs in parallel with
+    10.1a (owner order change)
+  - [ ] 12+ opted in for 14 days (day 0 2026-11-18, day 14
+    ~2026-12-02, service ends ~12-04), then apply for production
+- [ ] 10.1b Default library + plans refresh (Plan 10 step 05: 60->64
+      exercises with cardio, beginner-friendly Full Body, onboarding
+      uses experience), ships in 0.2.2
 - [ ] 10.4 Fix tester findings (one step per batch)
 - [ ] 10.4a Real store screenshots (2026-11-17, owner): after the
       refinement pass, realistic data, signed in, no AI exercise images

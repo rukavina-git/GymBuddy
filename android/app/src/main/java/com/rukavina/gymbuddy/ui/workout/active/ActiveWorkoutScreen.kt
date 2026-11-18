@@ -88,6 +88,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -378,7 +379,10 @@ internal fun ActiveWorkoutContent(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 } else {
-                    UpNextRow(state, actions.onUpNext)
+                    // 16:9 phones (~680dp tall) lose the set card's bottom
+                    // edge behind this row; there the tabs show what's next.
+                    val windowHeight = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
+                    if (windowHeight >= SHORT_SCREEN_DP.dp) UpNextRow(state, actions.onUpNext)
                     PrimaryButton(
                         text = doneLabel(state),
                         onClick = actions.onDone,
@@ -815,6 +819,9 @@ private fun CurrentSetCard(
         modifier = Modifier.fillMaxWidth(),
     )
 }
+
+/** Below this height the Up next row is dropped (Plan 10.1a). */
+internal const val SHORT_SCREEN_DP = 720
 
 @Composable
 private fun UpNextRow(state: ActiveWorkoutUiState, onClick: () -> Unit) {

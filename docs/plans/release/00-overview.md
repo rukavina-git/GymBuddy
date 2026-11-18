@@ -29,14 +29,20 @@ enroll ~15 testers.
    tester group, checklist in memory), 14 days, then tester fixes
    (10.4) and production (10.5).
 
+Order change (2026-11-17, owner): Google approved the closed track
+the same day, so enrollment (phase 5) runs now, in parallel with
+refinement. The 14 days run while phases 2-4 ship as 0.2.x updates
+to the closed track; testers get them automatically.
+
 Step files are written one at a time, each after the previous step
 lands.
 
 ## Invariants
 - Branch rule (ADR 0017): develop → test (App Distribution, qa app),
   v* tags on main → prod (Play). Never push main; main only via PR.
-- Nobody is enrolled as a tester before phase 5 (Google review of
-  the closed track happens in phase 1, with no testers).
+- Testers are enrolled while refining (order change above). Every
+  update to the closed track must be at least as stable as the last:
+  no half-done batches on alpha.
 - Clean before release: Sonar 0 issues, Dependabot 0 open, before
   any v* tag or main PR.
 - No new data collection, no new permissions without asking.

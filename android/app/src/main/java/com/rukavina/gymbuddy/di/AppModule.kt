@@ -126,7 +126,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideClock(): Clock = Clock.systemUTC()
+    // Local zone: screens read clock.zone for "today" and times of day
+    // (UTC showed starts an hour early in CET). millis() is the same either
+    // way. The zone is fixed until the process restarts.
+    fun provideClock(): Clock = Clock.systemDefaultZone()
 
     @Provides
     @Singleton

@@ -56,3 +56,25 @@ ads and no purchases. Re-run this review before paid features or ads.
 - Crash reports: required, can't be turned off (owner).
 
 Health-data consent wording unchanged, so no re-consent needed.
+
+## Second pass (legal plugin compliance check, 2026-11-18)
+
+Claims in the policy checked against the code: all match (export,
+delete incl. Firebase user, consent title and version, Google picture
+link, Crashlytics key allowlist, 30-day encrypted backups, 10 MB × 3
+logs, licences screen).
+
+Changed:
+- Consent body says how to withdraw (Art. 7(3)); CONSENT_VERSION
+  2026-11-18. Recorded only, so no re-consent.
+- Account and welcome lines: you agree to the Terms only; the privacy
+  policy is linked as information, not agreed to.
+- privacy.md: GitHub backups described as encrypted before upload;
+  DPA claim kept for netcup and Google only.
+
+Owner to do:
+- Sign netcup's AVV in the customer panel.
+- Accept Google's data processing terms in Firebase project settings
+  (privacy section), both projects.
+- Keep a short Art. 30 record of processing (health data means the
+  small-business exemption doesn't apply).

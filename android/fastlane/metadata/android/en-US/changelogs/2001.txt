@@ -1,0 +1,4 @@
+Gym Tracker 0.2.1
+- Workout start times now show in your local time
+- The full set card fits on shorter screens
+- The backup card hides once you create an account

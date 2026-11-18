@@ -38,7 +38,7 @@ class ConsentRecorder @Inject constructor(
     }
 
     companion object {
-        /** Wording version of the consent screen. Reviewed in Plan 9 step 04: unchanged. Bump it when consent_body changes. */
-        const val CONSENT_VERSION = "2026-11-03"
+        /** Wording version of the consent screen. 2026-11-18: added how to withdraw (Art. 7(3)). Bump it when consent_body changes. */
+        const val CONSENT_VERSION = "2026-11-18"
     }
 }
