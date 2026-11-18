@@ -1,4 +1,4 @@
-# 05 Default library and plans refresh (0.2.2-0.2.4)
+# 05 Default library and plans refresh (0.2.2)
 
 No Figma frame for 05a/05b (data only). 05c touches onboarding copy:
 link the onboarding frame before starting it.
@@ -18,7 +18,10 @@ sets/reps/rest), but:
 Rejected: product lead's "cut v1 to 40" (the 60 are live in 0.2.0, so
 cuts are deprecations that save nothing; image order solves cost).
 
-## 05a Library 60 -> 64 (ships in 0.2.2)
+One update (owner, 2026-11-18): 05a-05c ship together in 0.2.2,
+built as three commits in this order.
+
+## 05a Library 60 -> 64
 Deprecate 5 (stay in sync data, hidden from pickers):
 - Tricep Dip (merge into Chest Dip, renamed "Dip")
 - Upright Row, Concentration Curl, Dumbbell Front Raise, Bicycle Crunch
@@ -37,7 +40,7 @@ Fix:
 Check first: does the tracking type support distance + time together
 for Treadmill? If not, DISTANCE only.
 
-## 05b Plans (ships in 0.2.3)
+## 05b Plans
 Same pattern as Plan 6: deprecate changed templates, add new ids, so
 users' history and copies stay intact (confirm against the seeder).
 - Full Body A/B/C beginner-friendly: Goblet Squat, Dumbbell Bench
@@ -52,7 +55,7 @@ users' history and copies stay intact (confirm against the seeder).
   Raise 3x12.
 - Pull + Lateral Raise 2x15. Legs: Leg Press 3x10 (session ~70 min).
 
-## 05c Onboarding mapping (ships in 0.2.4)
+## 05c Onboarding mapping
 - "New to lifting" -> Full Body whatever the day count; no ADVANCED
   lifts in a beginner's plan.
 - "Not sure" -> Full Body, said in the copy. 5-7 days: say "repeat the

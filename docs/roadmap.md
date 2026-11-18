@@ -162,7 +162,7 @@ review first, then 10.1a refinement + 10.4a, new version, then 10.3
     ~2026-12-02, service ends ~12-04), then apply for production
 - [ ] 10.1b Default library + plans refresh (Plan 10 step 05: 60->64
       exercises with cardio, beginner-friendly Full Body, onboarding
-      uses experience), ships across 0.2.2-0.2.4
+      uses experience), ships in 0.2.2
 - [ ] 10.4 Fix tester findings (one step per batch)
 - [ ] 10.4a Real store screenshots (2026-11-17, owner): after the
       refinement pass, realistic data, signed in, no AI exercise images
