@@ -73,6 +73,8 @@ script, never by hand:
 - SSH by key only, no password login.
 - Firewall: only SSH, HTTP and HTTPS are open.
 - Automatic security updates and log rotation.
+- fail2ban bans an IP after 5 failed SSH logins in 10 minutes.
+- A root SSH login sends a push to the owner's phone (ntfy).
 - A non-root, no-sudo user runs the containers. CI has its own key.
 
 Docker writes firewall rules that bypass the host firewall, so the
@@ -303,6 +305,8 @@ flowchart LR
 - An external uptime check on the health endpoint.
 - Structured JSON logs from the backend, rotated on the box.
 - Crash reporting on Android.
+- Push alert on every root SSH login, so an unknown login is noticed
+  at once.
 
 ## 11. History
 
@@ -315,6 +319,5 @@ flowchart LR
 
 ## 12. Third-party pieces
 
-All are commercial-friendly: nginx (BSD-2), certbot (Apache 2.0),
-PostgreSQL (PostgreSQL licence), Docker Engine and Compose
-(Apache 2.0). The full table is in ADR 0016.
+Every outside service, tool and asset, with its use case, data,
+cost and licence: [third-party.md](third-party.md).
