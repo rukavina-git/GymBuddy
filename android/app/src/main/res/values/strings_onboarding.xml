@@ -86,10 +86,10 @@
     <string name="create_continue">Continue</string>
     <string name="create_password_helper">At least 8 characters</string>
     <string name="consent_title">Keep a copy on our servers?</string>
-    <string name="consent_body">Workouts and body data like weight count as health data, so we need your OK to store them. We use them only to back up and sync your account. You can delete the account at any time.</string>
+    <string name="consent_body">Workouts and body data like weight count as health data, so we need your OK to store them. We use them only to back up and sync your account. You can withdraw this at any time by deleting your account.</string>
     <string name="consent_agree">Agree and create account</string>
-    <string name="create_terms">By creating an account you agree to the %1$s and the %2$s.</string>
-    <string name="welcome_terms">By continuing you agree to the %1$s and %2$s.</string>
+    <string name="create_terms">By creating an account you agree to the %1$s. How we handle your data: %2$s.</string>
+    <string name="welcome_terms">By continuing you agree to the %1$s. How we handle your data: %2$s.</string>
     <string name="legal_terms">Terms</string>
     <string name="legal_privacy">Privacy policy</string>
 

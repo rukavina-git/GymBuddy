@@ -1,4 +1,4 @@
-Last updated: 2026-11-17
+Last updated: 2026-11-18
 
 # {app} privacy policy
 
@@ -66,13 +66,14 @@ and are overwritten as new ones come in, usually within a few weeks.
 
 ## Providers
 
-These companies process data for us under a data processing agreement:
+These companies process data for us. netcup and Google do so under a
+data processing agreement:
 
 | Provider | What for | Where |
 |---|---|---|
 | netcup GmbH | Server and database | Germany |
 | Google (Firebase Authentication, Crashlytics) | Sign-in, crash reports | EU and USA |
-| GitHub (Microsoft) | Encrypted database backups | USA |
+| GitHub (Microsoft) | Database backups, encrypted before upload so GitHub can't read them | USA |
 
 Transfers to the USA rely on the EU-US Data Privacy Framework and the
 EU Standard Contractual Clauses.
