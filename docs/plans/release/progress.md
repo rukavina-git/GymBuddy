@@ -103,3 +103,14 @@
   15 testers, 16 days (ends ~2026-12-04). Play's 14 days end
   ~2026-12-02: apply once Console's checklist shows it met. Track it
   on the service dashboard; Statistics "Data unavailable" for a new app.
+- Update cadence (2026-11-18, tester service advice + owner): 3-5
+  updates during the 16 days, about one every 3-4 days: 0.2.1 ~11-19,
+  0.2.2 ~11-23, 0.2.3 ~11-26, 0.2.4 ~11-29, 0.2.5 optional ~12-01.
+  Each one stable (tests, lint, Sonar/Dependabot clean, device check).
+  Owner break 11-18..~11-21, then a fresh full pass feeds 0.2.2+.
+  Production form: service's "Production Access Report" pre-fills
+  answers; check every claim against real data before pasting.
+- 0.2.1 (2001) prep 2026-11-18: pre-flight Sonar 0/0, Dependabot 0,
+  develop CI green (604c096). Bump + changelogs/2001.txt (step 04
+  fixes). Next: PR develop → main, owner merges, tag v0.2.1, internal
+  → promote to alpha.
