@@ -12,6 +12,7 @@ import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /** Supplies the bearer token for API calls. Null means nobody is signed in. */
@@ -65,10 +66,15 @@ class SyncApis(val sync: SyncApi, val reference: ReferenceApi, val account: Acco
  * worker thread, never the main thread, so blocking on the token lookup
  * here is safe. With no signed-in user the request goes out without a
  * token and the server answers 401.
+ *
+ * A failed token lookup is rethrown as an [IOException]: OkHttp hands
+ * that to the caller as a failed call, but rethrows anything else on its
+ * worker thread, which kills the app (Firebase's offline refresh error
+ * is an ExecutionException).
  */
 private class BearerTokenInterceptor(private val tokenProvider: AuthTokenProvider) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = runBlocking { tokenProvider.idToken() }
+        val token = token()
         val request = if (token == null) {
             chain.request()
         } else {
@@ -76,6 +82,15 @@ private class BearerTokenInterceptor(private val tokenProvider: AuthTokenProvide
         }
         return chain.proceed(request)
     }
+
+    private fun token(): String? =
+        try {
+            runBlocking { tokenProvider.idToken() }
+        } catch (e: IOException) {
+            throw e
+        } catch (e: Exception) {
+            throw IOException("ID token lookup failed", e)
+        }
 }
 
 /**

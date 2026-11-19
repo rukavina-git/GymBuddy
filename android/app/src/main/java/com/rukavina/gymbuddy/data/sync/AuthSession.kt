@@ -44,7 +44,9 @@ enum class AuthProbe {
 
         /** Firebase's token errors, by error code; anything unknown counts as [OFFLINE] (do nothing). */
         fun classify(error: Throwable): AuthProbe {
-            val cause = (error as? ExecutionException)?.cause ?: error
+            // Tasks.await wraps the error in ExecutionException; coroutine
+            // stack-trace recovery (debug builds, tests) can wrap that again.
+            val cause = generateSequence(error) { it.cause }.firstOrNull { it !is ExecutionException } ?: error
             return when {
                 cause is FirebaseNetworkException || cause is IOException -> OFFLINE
                 cause is FirebaseAuthInvalidUserException && cause.errorCode in DELETED_CODES -> DELETED
@@ -54,6 +56,17 @@ enum class AuthProbe {
         }
     }
 }
+
+/**
+ * What [FirebaseAuthSession.idToken] does with a failed token lookup: a
+ * dead session gives no token (reported to [remember]); anything else is
+ * thrown as an [IOException], the only kind OkHttp hands back to the caller.
+ */
+internal fun tokenAfterFailure(error: Exception, remember: (AuthProbe) -> Unit): String? =
+    when (val probe = AuthProbe.classify(error)) {
+        AuthProbe.EXPIRED, AuthProbe.DELETED -> null.also { remember(probe) }
+        else -> throw IOException("ID token refresh failed", error)
+    }
 
 /**
  * Firebase-backed [AuthSession]. FirebaseAuth is resolved on first use,
@@ -85,16 +98,21 @@ class FirebaseAuthSession(authProvider: () -> FirebaseAuth = { FirebaseAuth.getI
 
     val lastFailure: AuthProbe? get() = _failure.value
 
+    /**
+     * Firebase refreshes the token itself when it's near expiry, which needs
+     * the network. Offline that refresh fails: thrown as [IOException], so
+     * the request fails like any offline call and sync retries later. A
+     * dead session (expired, deleted) gives no token: the server answers
+     * 401 and AuthGate checks the session.
+     */
     override suspend fun idToken(): String? {
         val user = auth.currentUser ?: return null
-        // Firebase refreshes the token itself when it's near expiry.
         return try {
             withContext(Dispatchers.IO) { Tasks.await(user.getIdToken(false)).token }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            remember(AuthProbe.classify(e))
-            throw e
+            tokenAfterFailure(e, ::remember)
         }
     }
 

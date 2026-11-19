@@ -144,6 +144,7 @@ Not part of the product; nothing from them ships except the assets above.
 | Android Studio, Gradle, JDK 17 | Build | Free |
 | Spectral, OpenAPI Generator, Swagger UI | Lint the API contract, generate the client, publish docs | Apache 2.0 |
 | Testcontainers | Real Postgres in backend tests | MIT |
+| MockK (+ ByteBuddy, Objenesis) | Mocks in Android unit tests (FirebaseAuth), test-only, not shipped. github.com/mockk/mockk | Apache 2.0 |
 
 ## 8. Personal data map
 
