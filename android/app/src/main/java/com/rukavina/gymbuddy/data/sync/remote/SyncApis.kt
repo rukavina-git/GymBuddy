@@ -74,13 +74,7 @@ class SyncApis(val sync: SyncApi, val reference: ReferenceApi, val account: Acco
  */
 private class BearerTokenInterceptor(private val tokenProvider: AuthTokenProvider) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = try {
-            runBlocking { tokenProvider.idToken() }
-        } catch (e: IOException) {
-            throw e
-        } catch (e: Exception) {
-            throw IOException("ID token lookup failed", e)
-        }
+        val token = token()
         val request = if (token == null) {
             chain.request()
         } else {
@@ -88,6 +82,15 @@ private class BearerTokenInterceptor(private val tokenProvider: AuthTokenProvide
         }
         return chain.proceed(request)
     }
+
+    private fun token(): String? =
+        try {
+            runBlocking { tokenProvider.idToken() }
+        } catch (e: IOException) {
+            throw e
+        } catch (e: Exception) {
+            throw IOException("ID token lookup failed", e)
+        }
 }
 
 /**

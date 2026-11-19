@@ -51,4 +51,14 @@ class BearerTokenInterceptorTest {
         assertEquals(emptyList<Throwable>(), synchronized(uncaught) { uncaught.toList() })
         assertEquals(0, server.requestCount)
     }
+
+    @Test
+    fun `an IOException from the token lookup reaches the caller as is`() = runTest {
+        val apis = SyncApis.create(server.url("/").toString(), { throw IOException("no network") })
+
+        val error = runCatching { apis.account.deleteAccount() }.exceptionOrNull()
+
+        assertEquals("no network", (error as? IOException)?.message)
+        assertEquals(0, server.requestCount)
+    }
 }

@@ -44,7 +44,9 @@ enum class AuthProbe {
 
         /** Firebase's token errors, by error code; anything unknown counts as [OFFLINE] (do nothing). */
         fun classify(error: Throwable): AuthProbe {
-            val cause = (error as? ExecutionException)?.cause ?: error
+            // Tasks.await wraps the error in ExecutionException; coroutine
+            // stack-trace recovery (debug builds, tests) can wrap that again.
+            val cause = generateSequence(error) { it.cause }.firstOrNull { it !is ExecutionException } ?: error
             return when {
                 cause is FirebaseNetworkException || cause is IOException -> OFFLINE
                 cause is FirebaseAuthInvalidUserException && cause.errorCode in DELETED_CODES -> DELETED

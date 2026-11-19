@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,10 +43,8 @@ class TokenAfterFailureTest {
 
     @Test
     fun `unknown failure is thrown as IOException too`() {
-        try {
+        assertThrows(IOException::class.java) {
             tokenAfterFailure(ExecutionException(IllegalStateException("?")), remembered::add)
-            fail("expected IOException")
-        } catch (_: IOException) {
         }
         assertEquals(emptyList<AuthProbe>(), remembered)
     }
