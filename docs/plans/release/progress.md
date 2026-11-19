@@ -120,6 +120,11 @@
   → IOException (sync retries), dead session → no token (401 →
   AuthGate). Reproduced and verified on device (airplane mode, clock
   +2h). Added to changelogs/2001.txt.
+- 0.2.1 released 2026-11-19: PR #19 → main (b520e14), tag v0.2.1,
+  AAB on internal, promoted to closed (alpha). Backend Release failed
+  as expected-harmless: backend/ unchanged since v0.2.0, but its image
+  lookup only checks 20 same-tree commits and the imaged one (8ecd5d7)
+  is #27. Fix the window before the next backend change.
 - Step 05 written (2026-11-18): default library + plans refresh from a
   4-reviewer council (05a library 60->64, 05b plans, 05c onboarding
   mapping; all in one update, 0.2.2, owner). Owner OK. Starts after the owner's
