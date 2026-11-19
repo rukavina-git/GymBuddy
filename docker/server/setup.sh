@@ -8,11 +8,14 @@
 #   DEPLOY_PUBKEY  required, public key for the deploy user
 #   DEPLOY_USER    default "deploy"
 #   SKIP_SYSTEMD   "1" skips ufw, swap and service reloads (container test)
+#   NTFY_TOPIC     optional, secret ntfy.sh topic for SSH login pushes
+#                  (root logins only). Kept from an earlier run if unset.
 set -euo pipefail
 
 DEPLOY_USER="${DEPLOY_USER:-deploy}"
 DEPLOY_PUBKEY="${DEPLOY_PUBKEY:-}"
 SKIP_SYSTEMD="${SKIP_SYSTEMD:-0}"
+NTFY_TOPIC="${NTFY_TOPIC:-}"
 
 log() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -44,7 +47,8 @@ apt-get update -q
 APT_OPTS=(-yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold)
 apt-get upgrade "${APT_OPTS[@]}"
 apt-get install "${APT_OPTS[@]}" --no-install-recommends \
-  ufw unattended-upgrades ca-certificates curl gnupg openssh-server
+  ufw unattended-upgrades ca-certificates curl gnupg openssh-server \
+  fail2ban python3-systemd
 
 log "docker"
 install -m 0755 -d /etc/apt/keyrings
@@ -94,6 +98,43 @@ PermitRootLogin prohibit-password
 EOF
 sshd -t || die "sshd config invalid; not reloading"
 
+log "fail2ban: ban an IP for 1 h after 5 failed SSH logins in 10 min"
+# Debian 13 has no auth.log; read sshd from the journal.
+cat > /etc/fail2ban/jail.d/10-gymbuddy.conf <<'EOF'
+[sshd]
+enabled = true
+backend = systemd
+maxretry = 5
+findtime = 10m
+bantime = 1h
+EOF
+
+log "ssh login alert: ntfy push on root login"
+install -d -m 0700 /etc/gymbuddy
+topic_file=/etc/gymbuddy/ntfy-topic
+if [[ -n "$NTFY_TOPIC" ]]; then
+  [[ "$NTFY_TOPIC" =~ ^[A-Za-z0-9_-]{16,64}$ ]] \
+    || die "NTFY_TOPIC must be 16-64 letters, digits, _ or - (it is the secret)"
+  printf '%s\n' "$NTFY_TOPIC" > "$topic_file"
+  chmod 0600 "$topic_file"
+fi
+[[ -s "$topic_file" ]] || log "warning: no NTFY_TOPIC, login alerts stay off"
+cat > /usr/local/sbin/gymbuddy-login-alert <<'EOF'
+#!/bin/sh
+# Called by pam_exec from /etc/pam.d/sshd. Never blocks or fails a login.
+[ "$PAM_TYPE" = "open_session" ] || exit 0
+[ "$PAM_USER" = "root" ] || exit 0
+topic="$(cat /etc/gymbuddy/ntfy-topic 2>/dev/null)" || exit 0
+[ -n "$topic" ] || exit 0
+( curl -fsS -m 10 -H "Title: SSH login on $(hostname)" -H "Tags: warning" \
+    -d "$PAM_USER from ${PAM_RHOST:-unknown} at $(date -u '+%Y-%m-%d %H:%M UTC')" \
+    "https://ntfy.sh/$topic" >/dev/null 2>&1 & )
+exit 0
+EOF
+chmod 0755 /usr/local/sbin/gymbuddy-login-alert
+pam_line='session optional pam_exec.so quiet /usr/local/sbin/gymbuddy-login-alert'
+grep -qxF "$pam_line" /etc/pam.d/sshd || printf '%s\n' "$pam_line" >> /etc/pam.d/sshd
+
 log "unattended-upgrades: security only, no auto-reboot"
 cat > /etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
 APT::Periodic::Update-Package-Lists "1";
@@ -113,6 +154,8 @@ log "services"
 # reload-or-restart covers both.
 systemctl reload-or-restart ssh
 systemctl enable --now unattended-upgrades
+systemctl enable fail2ban
+systemctl restart fail2ban
 systemctl enable docker
 if [[ "$docker_changed" == "1" ]]; then systemctl restart docker; fi
 

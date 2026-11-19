@@ -114,6 +114,12 @@
   develop CI green (604c096). Bump + changelogs/2001.txt (step 04
   fixes). Next: PR develop → main, owner merges, tag v0.2.1, internal
   → promote to alpha.
+- 0.2.1 crash fix 2026-11-19: Crashlytics, 0.1.0/0.2.0, 42 crashes, 6
+  users. Offline ID token refresh threw ExecutionException out of the
+  OkHttp interceptor, which OkHttp rethrows on its thread. Now offline
+  → IOException (sync retries), dead session → no token (401 →
+  AuthGate). Reproduced and verified on device (airplane mode, clock
+  +2h). Added to changelogs/2001.txt.
 - Step 05 written (2026-11-18): default library + plans refresh from a
   4-reviewer council (05a library 60->64, 05b plans, 05c onboarding
   mapping; all in one update, 0.2.2, owner). Owner OK. Starts after the owner's

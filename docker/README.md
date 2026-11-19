@@ -33,6 +33,21 @@ except 22/80/443), unattended-upgrades (security only, no auto-reboot),
 creates a `deploy` user (key only, no password, no sudo, in `docker`)
 and turns off SSH password login. Root keeps key login.
 
+It also installs fail2ban (sshd jail: 5 failed logins in 10 min ban
+the IP for 1 h) and a push alert for every root SSH login. Deploy
+user logins (GitHub deploys, nightly backup) don't alert. The alert
+goes to ntfy.sh: install the ntfy app (Apache 2.0), subscribe to a
+secret topic, and pass it once as `NTFY_TOPIC`:
+
+    NTFY_TOPIC="gymbuddy-$(openssl rand -hex 12)"   # keep in Bitwarden
+
+    ssh root@<host> "NTFY_TOPIC=$NTFY_TOPIC DEPLOY_PUBKEY=\"\$(cat)\" bash setup.sh" < ~/.ssh/id_ed25519.pub
+
+The topic name is the only secret: anyone who knows it can read and
+send pushes. It lives in `/etc/gymbuddy/ntfy-topic` (root, 0600); a
+rerun without `NTFY_TOPIC` keeps it. Check bans with
+`fail2ban-client status sshd`.
+
 Keep the root session open until `ssh deploy@<host> docker ps` works
 from a second terminal.
 

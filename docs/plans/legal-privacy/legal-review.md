@@ -43,6 +43,12 @@ ads and no purchases. Re-run this review before paid features or ads.
 10. **Monetization.** Nothing blocks it. Before subscriptions: add
     price, renewal, cancellation, and the withdrawal-right waiver for
     digital content. Before ads: consent (CMP) and a policy update.
+    Not planned (2026-11-18). If it comes: earning money makes the
+    owner a "trader" under the EU Digital Services Act, and Play then
+    shows a phone number and address publicly. Before declaring
+    trader status, get a separate business number (prepaid SIM or
+    eSIM) and use a company (obrt/d.o.o.) address, never the home
+    address. Until then Play shows only name, country and email.
 11. **Name.** "Gym Tracker" is descriptive, weak as a mark but low
     risk to use. OK.
 

@@ -151,6 +151,9 @@ android {
                 // themselves unless this is set - see
                 // app/src/test/.../data/sync/e2e/E2eBackend.kt.
                 it.systemProperty("gymbuddy.e2e.baseUrl", findProperty("e2eBaseUrl")?.toString() ?: "")
+                // MockK's ByteBuddy agent attaches to the test JVM itself;
+                // JDK 9+ blocks that unless allowed.
+                it.jvmArgs("-Djdk.attach.allowAttachSelf=true", "-XX:+EnableDynamicAgentLoading")
                 // TokenParityTest reads the committed Figma tokens.
                 it.systemProperty("gymbuddy.tokensJson", rootDir.resolve("../design/tokens.json").absolutePath)
                 // IconParityTest checks design/icons + brand against res/drawable.
@@ -280,6 +283,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
+    testImplementation(libs.mockk)
     testImplementation(libs.work.testing)
     testImplementation(libs.lifecycle.runtime.testing)
     testImplementation(libs.okhttp.mockwebserver)
