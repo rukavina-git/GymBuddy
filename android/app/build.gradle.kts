@@ -26,6 +26,13 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+// MockK's ByteBuddy agent, loaded when the test JVM starts. Attaching it
+// later (MockK's default) timed out under a full Robolectric run.
+// Resolved through MockK so the version always matches it.
+val mockkAgent: Configuration by configurations.creating {
+    isCanBeConsumed = false
+}
+
 // Output of openApiGenerate below.
 val generatedClientDir = layout.buildDirectory.dir("generated/openapi")
 
@@ -151,9 +158,9 @@ android {
                 // themselves unless this is set - see
                 // app/src/test/.../data/sync/e2e/E2eBackend.kt.
                 it.systemProperty("gymbuddy.e2e.baseUrl", findProperty("e2eBaseUrl")?.toString() ?: "")
-                // MockK's ByteBuddy agent attaches to the test JVM itself;
-                // JDK 9+ blocks that unless allowed.
-                it.jvmArgs("-Djdk.attach.allowAttachSelf=true", "-XX:+EnableDynamicAgentLoading")
+                // MockK's ByteBuddy agent, preloaded (see mockkAgent).
+                val agentJar = mockkAgent.filter { jar -> jar.name.startsWith("byte-buddy-agent") }
+                it.jvmArgumentProviders.add(CommandLineArgumentProvider { listOf("-javaagent:${agentJar.singleFile.absolutePath}") })
                 // TokenParityTest reads the committed Figma tokens.
                 it.systemProperty("gymbuddy.tokensJson", rootDir.resolve("../design/tokens.json").absolutePath)
                 // IconParityTest checks design/icons + brand against res/drawable.
@@ -284,6 +291,7 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
     testImplementation(libs.mockk)
+    mockkAgent(libs.mockk)
     testImplementation(libs.work.testing)
     testImplementation(libs.lifecycle.runtime.testing)
     testImplementation(libs.okhttp.mockwebserver)
