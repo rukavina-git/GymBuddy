@@ -4,6 +4,8 @@
 # environments `testers` and `release`; by hand, follow the same rule.
 # Action paths are relative to android/.
 
+require "yaml"
+
 default_platform(:android)
 
 PLAY_SKIP_LISTING = {
@@ -23,6 +25,17 @@ def qa_firebase_app_id
   end
   UI.user_error!("#{QA_PACKAGE} not in #{path}") unless client
   client.dig("client_info", "mobilesdk_app_id")
+end
+
+# In-app update priority for the release being uploaded, from
+# update-priority.yml by version (RELEASE_TAG vX.Y.Z). Missing = 0.
+def update_priority
+  version = ENV.fetch("RELEASE_TAG", "").delete_prefix("v")
+  priorities = YAML.load_file(File.expand_path("update-priority.yml", __dir__)) || {}
+  priority = Integer(priorities.fetch(version, 0))
+  UI.user_error!("update priority for #{version} must be 0-5, got #{priority}") unless (0..5).cover?(priority)
+  UI.message("In-app update priority for #{version.empty? ? '(no tag)' : version}: #{priority}")
+  priority
 end
 
 platform :android do
@@ -51,6 +64,7 @@ platform :android do
       aab: ENV.fetch("PROD_AAB_PATH", "app/build/outputs/bundle/prodRelease/app-prod-release.aab"),
       json_key: ENV.fetch("PLAY_JSON_KEY_PATH"),
       release_status: "completed",
+      in_app_update_priority: update_priority,
       skip_upload_apk: true,
       **PLAY_SKIP_LISTING
     )

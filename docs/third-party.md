@@ -118,7 +118,8 @@ You → About → Open-source licences.
 
 Main pieces: Kotlin, Jetpack Compose, Hilt, Room, WorkManager,
 Retrofit + Moshi (generated from `api/openapi.yaml`), Firebase Auth
-and Crashlytics SDKs. All Apache 2.0, MIT or Google SDK terms (allowed
+and Crashlytics SDKs, Play In-App Updates (`com.google.android.play:app-update`,
+Play Core SDK Terms; forced or offered updates from 0.2.2). All Apache 2.0, MIT or Google SDK terms (allowed
 for Google's own SDKs only).
 
 | Asset | Source | Licence |

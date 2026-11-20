@@ -139,3 +139,8 @@
   release workflow (fastlane in_app_update_priority, set only on
   upload; check it survives the internal → alpha promote). Record the
   library's licence (Play SDK terms) in docs/third-party.md.
+- In-app updates built 2026-11-20 (PR feat/in-app-updates, ships in
+  0.2.2): priority per version in android/fastlane/update-priority.yml
+  (missing = 0, owner's default). Unit + FakeAppUpdateManager tests.
+  Device check pending (phone not connected); real Play flow can only
+  be seen once 0.2.3 is out to phones on 0.2.2.
