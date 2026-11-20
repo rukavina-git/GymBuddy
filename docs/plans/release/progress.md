@@ -131,3 +131,11 @@
   break. Images stay on Gemini (owner), plan exercises first.
   free-exercise-db images rejected: "Unlicense" label, but maintainer
   doesn't know their source and some trace to ExRx.net (issues #2, #13).
+- Forced updates for 0.2.2 (2026-11-20, owner): 0.2.0 kept crashing
+  after 0.2.1 shipped (testers update slowly, Play can't force it).
+  Add Play in-app updates: on start, a release with update priority
+  >= 4 blocks the app until updated (IMMEDIATE); lower ones get a
+  dismissable prompt or nothing. Priority is chosen per release in the
+  release workflow (fastlane in_app_update_priority, set only on
+  upload; check it survives the internal → alpha promote). Record the
+  library's licence (Play SDK terms) in docs/third-party.md.
