@@ -140,6 +140,7 @@ jobs:
         run: bundle exec fastlane internal
         env:
           PLAY_JSON_KEY_PATH: ${{ runner.temp }}/play.json
+          RELEASE_TAG: ${{ github.ref_name }} # picks the priority in update-priority.yml
 
       - name: Remove secrets
         if: always()
