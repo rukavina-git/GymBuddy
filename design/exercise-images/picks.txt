@@ -27,7 +27,7 @@
 24 | ex_seated_cable_row | fixtest 1 | unsure: cable comes from the top pulley
 25 | ex_tricep_pushdown | 2
 26 | ex_barbell_curl | pose
-27 | ex_hammer_curl | pose | prompt fixed: round-1 grip was palms up
+27 | ex_hammer_curl | 3 | unsure: check grip
 28 | ex_leg_extension | 1
 29 | ex_lying_leg_curl | pose
 30 | ex_dip | pose
