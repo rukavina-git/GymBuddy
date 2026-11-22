@@ -76,9 +76,9 @@ h3 { font-size: 15px; margin: 8px 0 0; color: var(--muted); letter-spacing: .06e
 </div>
 
 <script>
-const NEG = "text, letters, numbers, watermark, logo, label, arrows, frame, border, grid, collage, multiple people, second figure, extra limbs, extra fingers, fused fingers, deformed hands, deformed feet, broken anatomy, face, eyes, mouth, hair, shoes, socks, glow, neon, emissive, glossy, shiny, orange, red, coloured patches, highlighted muscles, coloured clothes, nude, naked, floating equipment, extra barbell, extra dumbbell, cropped head, cropped feet, out of frame, gym interior, busy background, photo, realistic skin, blurry, low quality, sexualised, nsfw";
-const MALE = "a smooth light-grey male mannequin with an athletic build, no face details, no hair, wearing short black shorts, barefoot";
-const FEMALE = "a smooth light-grey female mannequin with an athletic build and a natural average bust, no face details, no hair, wearing a black sports top and short black shorts, barefoot, neutral non-sexualised pose";
+const NEG = "text, letters, numbers, watermark, logo, label, arrows, frame, border, grid, collage, multiple people, second figure, extra limbs, extra fingers, fused fingers, deformed hands, deformed feet, broken anatomy, hair, eyebrows, eyelashes, makeup, shoes, socks, glow, neon, emissive, glossy, shiny, orange, red, coloured patches, highlighted muscles, coloured clothes, nude, naked, floating equipment, extra barbell, extra dumbbell, cropped head, cropped feet, out of frame, gym interior, busy background, photo, realistic skin, blurry, low quality, sexualised, nsfw";
+const MALE = "a smooth light-grey male mannequin with an athletic build, bald sculpted head with a simple nose, ears and lips, no hair, wearing short black shorts, barefoot";
+const FEMALE = "a smooth light-grey female mannequin with an athletic build and a natural average bust, bald sculpted head with a simple nose, ears and lips, no hair, wearing a black sports top and short black shorts, barefoot, neutral non-sexualised pose";
 // [number or "new", name, pose. Tint <working muscles>.]
 const OLD = new Map([
   [2, ["Barbell Back Squat", "deep squat at the bottom: thighs past parallel, hips lower than the knees, bar resting on the upper back, both hands gripping the bar just outside the shoulders, heels flat, chest up. Tint quads and glutes."]],
@@ -147,6 +147,7 @@ OLD.set(23, ["Dumbbell Shoulder Press", "seated upright on a bench with the back
 OLD.set(7, ["Dumbbell Bicep Curl", "standing tall, one dumbbell in each hand, elbows at the sides, palms up, dumbbells curled up to shoulder height. Tint biceps."]);
 OLD.set(34, ["Hammer Curl", "standing tall, one dumbbell in each hand, thumbs pointing up, elbows at the sides, dumbbells curled up to shoulder height. Tint biceps and forearms."]);
 OLD.set(15, ["Dip", OLD.get(15)[1]]);
+OLD.set(9, ["Goblet Squat", "deep squat, torso upright, heels flat, elbows inside the knees; one dumbbell held vertically against the chest with BOTH hands, both palms cupped under its top plate. Tint quads and glutes."]);
 const NEW = {
   "Dumbbell Romanian Deadlift": "bottom of the movement: hips pushed far back, knees slightly bent, flat back, one dumbbell in each hand held at mid-shin close to the legs, arms straight. Tint hamstrings and glutes.",
   "Glute Bridge": "no equipment, lying on the back on the floor, knees bent, feet flat, arms flat at the sides, hips lifted so shoulders, hips and knees form one straight line. Tint glutes and hamstrings.",
