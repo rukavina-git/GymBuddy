@@ -53,7 +53,7 @@ h3 { font-size: 15px; margin: 8px 0 0; color: var(--muted); letter-spacing: .06e
 <div class="page">
   <header>
     <h1>Local exercise images</h1>
-    <p class="lead">60 images, one exercise per image, for the local model on the PC. Numbers match the app's exercise list; "new" ones arrive in 05a. Already done: Back Squat, Front Squat, Conventional and Sumo Deadlift.</p>
+    <p class="lead">64 images, one exercise per image, for the local model on the PC. Numbers match the app's exercise list; "new" ones arrive in 05a. Replaces the earlier Gemini set.</p>
   </header>
 
   <section class="steps">
@@ -158,8 +158,8 @@ const NEW = {
   "Stationary Bike": "seated upright on an exercise bike, hands on the handlebars, one pedal at the bottom with that leg almost straight, the other knee bent at the top. Tint quads, glutes and calves.",
   "Stair Climber": "on a stair climber machine with revolving steps, stepping up, one knee lifted high, upright torso, hands resting lightly on the side rails. Tint glutes and quads."
 };
-const PRIORITY = [1, 9, 53, 18, "Dumbbell Romanian Deadlift", 23, 58, "Glute Bridge", 44, 16, 4, "Assisted Pull-Up", 8, 20, 51, 42, 38, 41, 17, 22, 12, 19, 28, 33, 34, 39, 40, 15, 6, 5, 54, 11];
-const REST = [13, 14, 21, 25, 26, 27, 29, 30, 31, 35, 36, 7, 10, 45, 43, 60, 46, 47, 48, 49, 50, 57, "Machine Chest Press", "Hip Abduction Machine", "Seated Leg Curl", "Treadmill", "Stationary Bike", "Stair Climber"];
+const PRIORITY = [2, 3, 1, 9, 53, 18, "Dumbbell Romanian Deadlift", 23, 58, "Glute Bridge", 44, 16, 4, "Assisted Pull-Up", 8, 20, 51, 42, 38, 41, 17, 22, 12, 19, 28, 33, 34, 39, 40, 15, 6, 5, 54, 11];
+const REST = [56, 59, 13, 14, 21, 25, 26, 27, 29, 30, 31, 35, 36, 7, 10, 45, 43, 60, 46, 47, 48, 49, 50, 57, "Machine Chest Press", "Hip Abduction Machine", "Seated Leg Curl", "Treadmill", "Stationary Bike", "Stair Climber"];
 const entry = k => typeof k === "number" ? [k, ...OLD.get(k)] : ["new", k, NEW[k]];
 const pad = n => String(n).padStart(2, "0");
 const fileName = name => "ex_" + name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") + ".png";

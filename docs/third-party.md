@@ -127,7 +127,7 @@ for Google's own SDKs only).
 | UI icons | Material Symbols Rounded | Apache 2.0 |
 | Font | Figtree | OFL 1.1 |
 | Profile avatars (20 animals) | Microsoft Fluent Emoji 3D | MIT |
-| Exercise images | Made by the owner with Google Gemini | AI output, usable under Google's terms |
+| Exercise images | Made by the owner with Qwen-Image-2512 in local ComfyUI | Apache 2.0 model; per-image record in the generation manifest |
 | Google sign-in button | Google | Google brand rules |
 | Mark, wordmark, app icon, tab icons | Own work | Ours |
 
@@ -140,7 +140,7 @@ Not part of the product; nothing from them ships except the assets above.
 | Tool | Use case | Cost |
 |---|---|---|
 | Figma | Screen designs (Plan 3 onward); UI changes follow a Figma frame | Starter (free) |
-| Google Gemini | Generates exercise images from `design/exercise-images/prompts.html` | Free tier |
+| ComfyUI + Qwen-Image-2512 (owner's PC) | Generates exercise images from `design/exercise-images/local-prompts.json` | Free (Apache 2.0 model) |
 | Claude Code (Anthropic) | Coding assistant; its setup is committed in `.claude/` | Subscription |
 | Android Studio, Gradle, JDK 17 | Build | Free |
 | Spectral, OpenAPI Generator, Swagger UI | Lint the API contract, generate the client, publish docs | Apache 2.0 |
