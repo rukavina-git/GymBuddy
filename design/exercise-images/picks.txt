@@ -1,0 +1,32 @@
+# Round 1 picks (2026-11-22). order | file | variant | note
+01 | ex_barbell_back_s | 2 |
+02 | ex_conventional_dead | 2 |
+03 | ex_barbell_bench_p | 3 |
+04 | ex_goblet_s | 2 |
+05 | ex_dumbbell_bench_p | 2 |
+06 | ex_dumbbell | redo |
+07 | ex_dumbbell_romanian_dead | redo |
+08 | ex_dumbbell_shoulder_p | 2 |
+09 | ex_reverse_l | 4 |
+10 | ex_glute_br | 3 |
+11 | ex_hip_th | redo |
+12 | ex_lat_pull | 4 |
+13 | ex_pul | redo |
+14 | ex_assisted_pul | redo |
+15 | ex_dumbbell_lateral_r | redo |
+16 | ex_face_ | 1 |
+17 | ex_cable_cr | redo |
+18 | ex_standing_calf_r | redo |
+19 | ex_leg_p | 3 |
+20 | ex_romanian_dead | redo |
+21 | ex_barbell_bent_over | redo |
+22 | ex_barbell_overhead_p | 2 |
+23 | ex_incline_dumbbell_p | 2 |
+24 | ex_seated_cable | redo |
+25 | ex_tricep_push | 2 |
+26 | ex_barbell_ | redo |
+27 | ex_hammer_ | 3 | unsure: check grip
+28 | ex_leg_exten | 1 |
+29 | ex_lying_leg_ | redo |
+30 | ex | redo |
+31 | ex_p | 3 |
