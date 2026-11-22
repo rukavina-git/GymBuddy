@@ -989,6 +989,8 @@ The distinguishing feature of this list is that **the storage for most of it alr
 | Widgets | No storage impact |
 | iOS-style left-edge swipe back on 3-button navigation (F5; a first try in Plan 7 step 11o felt jerky) | No storage impact |
 | UI overhaul, including full filter surface | No storage impact |
+| Exercise images, idea 1: start and end pose, switching every ~2 s (owner 2026-11-23). Make the second frame from the v1 pick with Qwen-Image-Edit-2511, so figure and equipment match; separate generations don't match. Still image on "reduce motion". Test on 2 exercises, then decide | No storage impact; one more drawable per exercise |
+| Exercise images, idea 2: animated movement (owner 2026-11-23). Image-to-video (Wan 2.x) between the start and end frames from idea 1, looped forward and back. Risks: warped hands, morphing equipment, ~15–25 MB for all clips (likely downloaded, not bundled). Test after idea 1, then pick one | Clips bundled or on our server |
 
 **The freeze is the point.** Anything not on the v1 list goes to the backlog without exception, regardless of how small it seems while already in the relevant file. Scope creep in a familiar codebase with no deadline remains the most likely cause of this project not shipping.
 
