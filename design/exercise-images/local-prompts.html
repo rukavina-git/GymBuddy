@@ -76,9 +76,9 @@ h3 { font-size: 15px; margin: 8px 0 0; color: var(--muted); letter-spacing: .06e
 </div>
 
 <script>
-const NEG = "text, letters, numbers, watermark, logo, signature, label, arrows, frame, border, grid, collage, split screen, multiple people, second figure, duplicate, extra limbs, extra arms, extra legs, extra hands, extra fingers, missing fingers, fused fingers, deformed hands, deformed feet, twisted joints, broken anatomy, face, eyes, mouth, hair, shoes, socks, logos on clothes, glow, neon, emissive, light rays, stripes on muscles, patchy colour, floating equipment, bent barbell, extra barbell, extra dumbbell, cropped head, cropped feet, out of frame, gym interior, mirror, busy background, photo, realistic skin, blurry, low quality, jpeg artifacts, sexualised, nsfw";
-const MALE = "a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot";
-const FEMALE = "a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose";
+const NEG = "text, letters, numbers, watermark, logo, signature, label, arrows, frame, border, grid, collage, split screen, multiple people, second figure, duplicate, extra limbs, extra arms, extra legs, extra hands, extra fingers, missing fingers, fused fingers, deformed hands, deformed feet, twisted joints, broken anatomy, face, eyes, mouth, hair, shoes, socks, logos on clothes, glow, neon, emissive, light rays, stripes on muscles, patchy colour, floating equipment, bent barbell, extra barbell, extra dumbbell, cropped head, cropped feet, out of frame, gym interior, mirror, busy background, photo, realistic skin, blurry, low quality, jpeg artifacts, sexualised, nsfw, nipples, genitals, clothes, shorts, underwear, sports bra, orange lower legs, orange feet, orange hands, whole limb tinted, whole body tinted";
+const MALE = "a smooth light-grey male mannequin with an athletic build, featureless like a shop or artist's mannequin: no face, no hair, no nipples, no genitals, no clothes, barefoot";
+const FEMALE = "a smooth light-grey female mannequin with an athletic build and a natural average bust, featureless like a shop or artist's mannequin: no face, no hair, no nipples, no genitals, no clothes, barefoot, neutral non-sexualised pose";
 // [number or "new", name, pose. Tint <working muscles>.]
 const OLD = new Map([
   [2, ["Barbell Back Squat", "deep squat at the bottom: thighs past parallel, hips lower than the knees, bar resting on the upper back, both hands gripping the bar just outside the shoulders, heels flat, chest up. Tint quads and glutes."]],
@@ -167,13 +167,17 @@ const fileName = name => "ex_" + name.toLowerCase().replace(/[^a-z0-9]+/g, "_").
 function promptFor(name, desc, i) {
   const m = desc.match(/^(.*?)\s*Tint ([^.]+)\.\s*$/);
   let pose = m ? m[1] : desc, muscles = m ? m[2] : "working muscles";
-  let view = "exact side profile facing right";
+  // Back-of-body muscles: turn 30° towards the back; everything else 30° towards the front.
+  const BACK = /glute|hamstring|lats|upper back|rear shoulder|trapezius|lower back/;
+  let view = BACK.test(muscles)
+    ? "three-quarter rear view: seen from the side and turned about 30 degrees towards the back, facing right, so the back of the body shows and the joint angles stay clear"
+    : "three-quarter front view: seen from the side and turned about 30 degrees towards the front, facing right, so the joint angles stay clear";
   const seen = pose.match(/^seen from ([^:]+):\s*/);
   if (seen) { view = "seen from " + seen[1]; pose = pose.slice(seen[0].length); }
   pose = pose.replace(/\s*Only one barbell\.?/, "");
   return `3D render for a fitness app: ${i % 2 ? FEMALE : MALE}, doing a ${name}, ${view}.
 Pose: ${pose}
-The ${muscles} are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.
+Only the ${muscles} are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. Every other part of the body, including hands, lower legs and feet unless named, stays smooth light grey.
 One figure only, centred, full body and all equipment inside the frame with margin.
 Plain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.
 Only the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.
