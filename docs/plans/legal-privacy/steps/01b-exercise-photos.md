@@ -77,7 +77,7 @@ until most exercises have images.
 ## Status
 2026-11-22: Gemini dropped. The 4 Gemini images (grid 01) and
 prompts.html are removed. All images now come from Qwen-Image-2512
-(Apache 2.0) in the owner's local ComfyUI, one exercise per image:
+(Apache 2.0) run locally in ComfyUI, one exercise per image:
 `design/exercise-images/local-prompts.json` (64 prompts, 3/4 views,
-unclothed featureless mannequin). Claude on the owner's PC queues
-the jobs and writes a manifest (model, seed, prompt per image).
+unclothed featureless mannequin). A script queues the jobs through
+the ComfyUI API and writes a manifest (model, seed, prompt per image).

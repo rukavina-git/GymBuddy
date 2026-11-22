@@ -140,7 +140,7 @@ Not part of the product; nothing from them ships except the assets above.
 | Tool | Use case | Cost |
 |---|---|---|
 | Figma | Screen designs (Plan 3 onward); UI changes follow a Figma frame | Starter (free) |
-| ComfyUI + Qwen-Image-2512 (owner's PC) | Generates exercise images from `design/exercise-images/local-prompts.json` | Free (Apache 2.0 model) |
+| ComfyUI + Qwen-Image-2512 | Generates exercise images from `design/exercise-images/local-prompts.json` | Free (Apache 2.0 model) |
 | Claude Code (Anthropic) | Coding assistant; its setup is committed in `.claude/` | Subscription |
 | Android Studio, Gradle, JDK 17 | Build | Free |
 | Spectral, OpenAPI Generator, Swagger UI | Lint the API contract, generate the client, publish docs | Apache 2.0 |
