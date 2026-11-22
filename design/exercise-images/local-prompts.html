@@ -1,0 +1,234 @@
+<title>Local Exercise Prompts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one column of grid cards, read and copied on a phone; app's Soft Dark palette. */
+:root {
+  color-scheme: dark;
+  --ground: #121418;
+  --surface: #1C1F26;
+  --raised: #262A33;
+  --text: #F3F4F6;
+  --soft: #C9CDD4;
+  --muted: #9AA1AD;
+  --lime: #D4FF24;
+  --on-lime: #121418;
+  --cobalt: #4D86F0;
+  --font: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+body { background: var(--ground); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.45; }
+.page { max-width: 760px; margin: 0 auto; padding-block: 24px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px; }
+h1 { font-size: 26px; margin: 0; text-wrap: balance; }
+.lead { color: var(--soft); margin: 6px 0 0; }
+.steps { background: var(--surface); border-radius: 16px; padding: 16px; color: var(--soft); }
+.steps ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.steps b { color: var(--text); }
+.progress { display: flex; align-items: center; gap: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.track { flex: 1; height: 6px; background: var(--raised); border-radius: 99px; overflow: hidden; }
+.fill { height: 100%; width: 0; background: var(--cobalt); transition: width .2s; }
+.card { background: var(--surface); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card.done { opacity: .6; }
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.head h2 { font-size: 18px; margin: 0; }
+.file { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.tiles li { background: var(--raised); border-radius: 10px; padding: 8px 10px; font-size: 14px; min-width: 0; }
+.tiles .pos { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.tiles .num { color: var(--muted); font-variant-numeric: tabular-nums; }
+details summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+pre { white-space: pre-wrap; word-break: break-word; font-family: var(--mono); font-size: 12.5px; color: var(--soft); background: var(--ground); border-radius: 10px; padding: 12px; margin: 8px 0 0; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.copy { font: inherit; font-weight: 600; background: var(--lime); color: var(--on-lime); border: 0; border-radius: 999px; padding: 10px 18px; cursor: pointer; }
+.copy:active { background: #B8DE1F; }
+label.chk { display: inline-flex; align-items: center; gap: 8px; color: var(--soft); font-size: 14px; cursor: pointer; padding: 8px 4px; }
+label.chk input { width: 20px; height: 20px; accent-color: var(--cobalt); }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+.neg pre { margin: 0; }
+h3 { font-size: 15px; margin: 8px 0 0; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+</style>
+
+<div class="page">
+  <header>
+    <h1>Local exercise images</h1>
+    <p class="lead">60 images, one exercise per image, for the local model on the PC. Numbers match the app's exercise list; "new" ones arrive in 05a. Already done: Back Squat, Front Squat, Conventional and Sumo Deadlift.</p>
+  </header>
+
+  <section class="steps">
+    <ol>
+      <li>Size <b>1024×1024</b> (square). Paste the <b>negative prompt</b> below once; it is the same for every image.</li>
+      <li>Tap <b>Copy prompt</b> on a card, generate 2–4 images, keep the best one.</li>
+      <li>Save it under the file name on the card and send it to Claude. Tick it here.</li>
+      <li>Go in order: the first block is in the live plans, so it matters most.</li>
+    </ol>
+  </section>
+
+  <section class="card neg">
+    <div class="head"><h2>Negative prompt</h2><span class="file">same for all</span></div>
+    <pre id="negText"></pre>
+    <div class="actions"><button type="button" class="copy" id="negCopy">Copy negative</button></div>
+  </section>
+
+  <div class="progress"><span id="count"></span><div class="track"><div class="fill" id="fill"></div></div></div>
+  <div id="list" style="display:flex;flex-direction:column;gap:12px"></div>
+</div>
+
+<script>
+const NEG = "text, letters, numbers, watermark, logo, signature, label, arrows, frame, border, grid, collage, split screen, multiple people, second figure, duplicate, extra limbs, extra arms, extra legs, extra hands, extra fingers, missing fingers, fused fingers, deformed hands, deformed feet, twisted joints, broken anatomy, face, eyes, mouth, hair, shoes, socks, logos on clothes, glow, neon, emissive, light rays, stripes on muscles, patchy colour, floating equipment, bent barbell, extra barbell, extra dumbbell, cropped head, cropped feet, out of frame, gym interior, mirror, busy background, photo, realistic skin, blurry, low quality, jpeg artifacts, sexualised, nsfw";
+const MALE = "a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot";
+const FEMALE = "a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose";
+// [number or "new", name, pose. Tint <working muscles>.]
+const OLD = new Map([
+  [2, ["Barbell Back Squat", "deep squat at the bottom: thighs past parallel, hips lower than the knees, bar resting on the upper back, both hands gripping the bar just outside the shoulders, heels flat, chest up. Tint quads and glutes."]],
+  [56, ["Front Squat", "bottom of a front squat: bar resting on the front of the shoulders, elbows high and pointing forward, torso upright, hips lower than the knees, heels flat. Tint quads and glutes."]],
+  [3, ["Conventional Deadlift", "start position: barbell on the floor over the middle of the feet, hands gripping it just outside the knees, flat back, hips higher than the knees, shoulders over the bar. Tint hamstrings, glutes and lower back."]],
+  [59, ["Sumo Deadlift", "start position, seen from a front three-quarter angle so the wide stance shows: very wide stance, toes pointing out, hands gripping the bar between the knees, bar on the floor, chest up, flat back. Tint glutes, inner thighs and quads."]],
+  [41, ["Romanian Deadlift", "bottom of the movement: hips pushed far back, knees slightly bent, flat back, barbell held at mid-shin close to the legs, arms straight. Tint hamstrings and glutes."]],
+  [17, ["Barbell Bent-Over Row", "torso bent forward about 45 degrees, flat back, knees slightly bent, barbell pulled up to the lower ribs, elbows driven back. Tint upper back, lats and rear shoulders."]],
+  [21, ["T-Bar Row", "one end of a barbell anchored on the floor, plates on the other end; standing over the bar, torso bent about 45 degrees, flat back, both hands on a V-handle under the plates, pulled up to the chest. Tint upper back and lats."]],
+  [27, ["Barbell Shrug", "standing tall, arms straight, barbell hanging at the thighs, shoulders shrugged up towards the ears. Tint the upper trapezius."]],
+  [22, ["Barbell Overhead Press", "standing, barbell locked out directly overhead with straight arms, bar above the middle of the feet, head slightly forward under the bar, tight core. Tint shoulders and triceps."]],
+  [55, ["Upright Row", "standing, close grip, barbell pulled up to chest height, elbows high above the wrists. Tint side shoulders and upper trapezius."]],
+  [33, ["Barbell Curl", "standing tall, elbows at the sides, palms up, barbell curled up to upper-chest height. Only one barbell. Tint biceps."]],
+  [23, ["Dumbbell Shoulder Press", "standing, one dumbbell in each hand pressed overhead, arms almost straight. Tint shoulders and triceps."]],
+  [1, ["Barbell Bench Press", "top position: lying on a flat bench, arms straight, bar directly above the shoulders, knees bent about 90 degrees, both feet flat on the floor in front of the bench, the near plate covering the far one. Tint chest, front shoulders and triceps."]],
+  [11, ["Incline Barbell Bench Press", "bench back inclined about 30 degrees, lying on it, arms straight, bar directly above the upper chest, feet flat on the floor. Tint upper chest and front shoulders."]],
+  [31, ["Close-Grip Bench Press", "top position on a flat bench: hands shoulder-width apart (narrower than a normal bench press), arms straight, bar above the chest, elbows close to the body, feet flat on the floor. Tint triceps and chest."]],
+  [44, ["Hip Thrust", "upper back resting across the long side of a flat bench, barbell across the hips, hips lifted so the torso and thighs form one straight line, knees bent 90 degrees, feet flat on the floor. Tint glutes and hamstrings."]],
+  [53, ["Dumbbell Bench Press", "lying on a flat bench, one dumbbell in each hand pressed up above the chest, arms straight, feet flat on the floor. Tint chest, front shoulders and triceps."]],
+  [12, ["Incline Dumbbell Press", "bench back inclined about 30 degrees, one dumbbell in each hand pressed up above the upper chest, feet flat on the floor. Tint upper chest and front shoulders."]],
+  [13, ["Dumbbell Chest Fly", "seen from slightly above and to the side so the open arms show: lying on a flat bench, arms opened wide to the sides with a slight bend in the elbows, dumbbells level with the chest. Tint chest."]],
+  [18, ["Dumbbell Row", "one knee and the same-side hand on a flat bench, back flat and parallel to the floor, the other hand rowing one dumbbell up to the hip, elbow pointing up. Tint lats and upper back."]],
+  [8, ["Dumbbell Lateral Raise", "seen from the front, not the side, so both arms show: standing, arms raised out to the sides to shoulder height with a slight elbow bend, one dumbbell in each hand. Tint side shoulders."]],
+  [24, ["Dumbbell Front Raise", "standing, arms raised straight in front to shoulder height, one dumbbell in each hand. Tint front shoulders."]],
+  [25, ["Rear Delt Fly", "seen from the front so both arms show: bent forward at the hips until the torso is almost parallel to the floor, flat back, arms raised out to the sides, one dumbbell in each hand. Tint rear shoulders and upper back."]],
+  [26, ["Arnold Press", "seen from a front three-quarter angle: standing, dumbbells in front of the shoulders, palms facing the body, elbows in front, about to press up. Tint shoulders."]],
+  [7, ["Dumbbell Bicep Curl", "standing, only ONE dumbbell, in the near hand, curled up to shoulder height, elbow at the side, palm up; the far arm hangs relaxed with an empty hand. Tint biceps."]],
+  [34, ["Hammer Curl", "standing, only ONE dumbbell, in the near hand, thumb pointing up, curled up to shoulder height, elbow at the side; the far arm hangs relaxed with an empty hand. Tint biceps and forearm."]],
+  [37, ["Concentration Curl", "seated on the end of a flat bench, leaning forward, elbow braced on the inner thigh, one dumbbell curled up towards the shoulder. Tint biceps."]],
+  [29, ["Overhead Tricep Extension", "standing, one dumbbell held with both hands behind the head, upper arms pointing straight up beside the ears, elbows bent so the dumbbell is lowered behind the head. Tint triceps."]],
+  [30, ["Skull Crusher", "lying on a flat bench, a short EZ curl bar (zig-zag shaped bar) held above the forehead, upper arms vertical, elbows bent 90 degrees, feet flat on the floor. Tint triceps."]],
+  [35, ["Preacher Curl", "seated at a preacher curl bench, upper arms resting on the angled pad, a short EZ curl bar curled halfway up. Tint biceps."]],
+  [32, ["Tricep Dip", "hands on the edge of a flat bench behind the hips, legs straight out in front with heels on the floor, elbows bent 90 degrees pointing back, body lowered beside the bench. Tint triceps."]],
+  [15, ["Chest Dip", "on parallel dip bars, torso leaning forward, elbows bent 90 degrees, knees bent with the feet crossed behind. Tint chest and triceps."]],
+  [9, ["Goblet Squat", "one dumbbell held vertically against the chest with both hands, deep squat, torso upright, elbows inside the knees, heels flat. Tint quads and glutes."]],
+  [10, ["Walking Dumbbell Lunge", "long step forward, both knees bent 90 degrees, back knee just above the floor, front knee over the ankle, torso upright, one dumbbell hanging in each hand. Tint quads and glutes."]],
+  [45, ["Bulgarian Split Squat", "rear foot resting laces-down on a flat bench behind, front foot well forward, lowered until the front thigh is parallel to the floor, torso upright, one dumbbell hanging in each hand. Tint quads and glutes."]],
+  [58, ["Reverse Lunge", "no equipment, hands on the hips, one leg stepped back, both knees bent 90 degrees, back knee just above the floor, torso upright. Tint quads and glutes."]],
+  [14, ["Cable Crossover", "seen from the front so both arms show: standing between two tall cable towers, a handle in each hand, arms pulled together in front of the hips, slight forward lean. Tint chest."]],
+  [16, ["Lat Pulldown", "seated at a lat pulldown machine, thighs under the pads, wide bar pulled down to the upper chest, chest up, slight lean back. Tint lats and biceps."]],
+  [19, ["Seated Cable Row", "seated on a low cable row bench, feet on the foot platform, knees slightly bent, torso upright, V-handle pulled to the stomach, elbows back. Tint lats and upper back."]],
+  [20, ["Face Pull", "standing facing a cable tower, rope attachment at face height pulled towards the forehead, elbows high and wide, hands beside the ears. Tint rear shoulders and upper back."]],
+  [4, ["Pull-Up", "hanging from a pull-up bar, overhand grip a little wider than the shoulders, pulled up so the chin is above the bar, legs straight down. Tint lats and biceps."]],
+  [54, ["Chin-Up", "hanging from a pull-up bar, underhand grip shoulder-width, pulled up so the chin is above the bar, legs straight down. Tint lats and biceps."]],
+  [47, ["Hanging Leg Raise", "hanging from a pull-up bar with straight arms, straight legs raised to horizontal so the body forms an L. Tint abs and hip flexors."]],
+  [28, ["Tricep Pushdown", "standing facing a cable tower, high pulley, short straight bar pushed down until the arms are straight, elbows pinned at the sides. Tint triceps."]],
+  [36, ["Cable Curl", "standing facing a cable tower, low pulley, short straight bar curled up to chest height, elbows at the sides. Tint biceps."]],
+  [51, ["Cable Crunch", "kneeling facing a cable tower, rope from the high pulley held beside the head, crunched down so the elbows reach the thighs, back rounded. Tint abs."]],
+  [5, ["Push-Up", "top position: arms straight, hands under the shoulders, body in one straight line from head to heels, on the toes. Tint chest, triceps and front shoulders."]],
+  [6, ["Plank", "forearms on the floor, elbows under the shoulders, body in one straight line from head to heels, on the toes. Tint abs."]],
+  [38, ["Leg Press", "seated in a 45-degree leg press machine, back flat against the pad, feet on the sled platform, knees bent about 90 degrees. Tint quads and glutes."]],
+  [39, ["Leg Extension", "seated in a leg extension machine, shin pad in front of the ankles, legs extended straight. Tint quads."]],
+  [40, ["Lying Leg Curl", "lying face down on a leg curl machine, pad behind the ankles, knees bent about 90 degrees, heels towards the glutes. Tint hamstrings."]],
+  [60, ["Hack Squat", "in a hack squat machine, back against the angled back pad, shoulders under the shoulder pads, feet on the platform, knees bent about 90 degrees. Tint quads and glutes."]],
+  [42, ["Standing Calf Raise", "in a standing calf raise machine, shoulders under the pads, balls of the feet on the edge of a block, heels raised high. Tint calves."]],
+  [43, ["Seated Calf Raise", "seated in a seated calf raise machine, pad on top of the knees, balls of the feet on the platform, heels raised high. Tint calves."]],
+  [46, ["Crunch", "lying on the back on the floor, knees bent, feet flat, fingertips lightly behind the head, shoulders lifted off the floor. Tint abs."]],
+  [57, ["Leg Raise", "lying on the back on the floor, hands flat at the sides, straight legs raised to vertical, lower back on the floor. Tint lower abs and hip flexors."]],
+  [48, ["Russian Twist", "seen from the front: seated on the floor, leaning back about 45 degrees, knees bent, feet lifted off the floor, hands clasped, torso rotated to one side. Tint obliques and abs."]],
+  [49, ["Dead Bug", "lying on the back, one arm pointing straight up, knees bent 90 degrees above the hips, the other arm reaching back overhead and the opposite leg extended straight just above the floor. Tint abs."]],
+  [50, ["Mountain Climber", "high plank on straight arms, one knee driven towards the chest, the other leg straight back on the toes. Tint abs, shoulders and hip flexors."]],
+  [52, ["Bicycle Crunch", "lying on the back, shoulders lifted, fingertips behind the head, one knee pulled in while the opposite elbow turns towards it, the other leg extended low above the floor. Tint abs and obliques."]],
+]);
+// Single-figure fixes for the old grid wording, plus the 9 new exercises.
+OLD.set(23, ["Dumbbell Shoulder Press", "seated upright on a bench with the back pad raised, one dumbbell in each hand pressed overhead, arms almost straight, feet flat on the floor. Tint shoulders and triceps."]);
+OLD.set(7, ["Dumbbell Bicep Curl", "standing tall, one dumbbell in each hand, elbows at the sides, palms up, dumbbells curled up to shoulder height. Tint biceps."]);
+OLD.set(34, ["Hammer Curl", "standing tall, one dumbbell in each hand, thumbs pointing up, elbows at the sides, dumbbells curled up to shoulder height. Tint biceps and forearms."]);
+OLD.set(15, ["Dip", OLD.get(15)[1]]);
+const NEW = {
+  "Dumbbell Romanian Deadlift": "bottom of the movement: hips pushed far back, knees slightly bent, flat back, one dumbbell in each hand held at mid-shin close to the legs, arms straight. Tint hamstrings and glutes.",
+  "Glute Bridge": "no equipment, lying on the back on the floor, knees bent, feet flat, arms flat at the sides, hips lifted so shoulders, hips and knees form one straight line. Tint glutes and hamstrings.",
+  "Assisted Pull-Up": "on an assisted pull-up machine, kneeling on the padded knee platform, hands on the high handles, pulled up so the chin is above the hands, torso upright. Tint lats and biceps.",
+  "Machine Chest Press": "seated in a chest press machine, back against the upright pad, feet flat on the floor, both handles pressed forward at chest height, arms almost straight. Tint chest, front shoulders and triceps.",
+  "Hip Abduction Machine": "seen from the front: seated in a hip abduction machine, back against the pad, pads on the outside of the knees, legs pushed wide apart. Tint outer glutes.",
+  "Seated Leg Curl": "seated in a seated leg curl machine, thigh pad on top of the thighs, lower pad behind the lower legs, knees bent about 90 degrees with the heels pulled under the seat. Tint hamstrings.",
+  "Treadmill": "running on a treadmill, mid-stride, upright torso, arms bent about 90 degrees swinging, hands free of the rails. Tint quads, hamstrings and calves.",
+  "Stationary Bike": "seated upright on an exercise bike, hands on the handlebars, one pedal at the bottom with that leg almost straight, the other knee bent at the top. Tint quads, glutes and calves.",
+  "Stair Climber": "on a stair climber machine with revolving steps, stepping up, one knee lifted high, upright torso, hands resting lightly on the side rails. Tint glutes and quads."
+};
+const PRIORITY = [1, 9, 53, 18, "Dumbbell Romanian Deadlift", 23, 58, "Glute Bridge", 44, 16, 4, "Assisted Pull-Up", 8, 20, 51, 42, 38, 41, 17, 22, 12, 19, 28, 33, 34, 39, 40, 15, 6, 5, 54, 11];
+const REST = [13, 14, 21, 25, 26, 27, 29, 30, 31, 35, 36, 7, 10, 45, 43, 60, 46, 47, 48, 49, 50, 57, "Machine Chest Press", "Hip Abduction Machine", "Seated Leg Curl", "Treadmill", "Stationary Bike", "Stair Climber"];
+const entry = k => typeof k === "number" ? [k, ...OLD.get(k)] : ["new", k, NEW[k]];
+const pad = n => String(n).padStart(2, "0");
+const fileName = name => "ex_" + name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") + ".png";
+
+function promptFor(name, desc, i) {
+  const m = desc.match(/^(.*?)\s*Tint ([^.]+)\.\s*$/);
+  let pose = m ? m[1] : desc, muscles = m ? m[2] : "working muscles";
+  let view = "exact side profile facing right";
+  const seen = pose.match(/^seen from ([^:]+):\s*/);
+  if (seen) { view = "seen from " + seen[1]; pose = pose.slice(seen[0].length); }
+  pose = pose.replace(/\s*Only one barbell\.?/, "");
+  return `3D render for a fitness app: ${i % 2 ? FEMALE : MALE}, doing a ${name}, ${view}.
+Pose: ${pose}
+The ${muscles} are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.
+One figure only, centred, full body and all equipment inside the frame with margin.
+Plain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.
+Only the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.
+Correct, safe technique, anatomically correct hands and feet, equipment obeys gravity.`;
+}
+
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem("local-done") || "[]"); } catch { return []; } },
+  set(v) { try { localStorage.setItem("local-done", JSON.stringify(v)); } catch {} },
+};
+let done = new Set(store.get());
+const total = PRIORITY.length + REST.length;
+function progress() {
+  document.getElementById("count").textContent = `${done.size} of ${total} sent`;
+  document.getElementById("fill").style.width = (done.size / total * 100) + "%";
+}
+function copyBtn(btn, text, pre, details, label) {
+  btn.addEventListener("click", () => {
+    const ok = () => { btn.textContent = "Copied"; setTimeout(() => btn.textContent = label, 1500); };
+    const fallback = () => { if (details) details.open = true; const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Selected, copy it"; };
+    try { navigator.clipboard.writeText(text).then(ok, fallback); } catch { fallback(); }
+  });
+}
+document.getElementById("negText").textContent = NEG;
+copyBtn(document.getElementById("negCopy"), NEG, document.getElementById("negText"), null, "Copy negative");
+
+const list = document.getElementById("list");
+let idx = 0;
+[["In the live plans", PRIORITY], ["The rest", REST]].forEach(([title, keys]) => {
+  const h = document.createElement("h3"); h.textContent = `${title} · ${keys.length}`; list.appendChild(h);
+  keys.forEach(k => {
+    const [num, name, desc] = entry(k);
+    const i = idx++;
+    const text = promptFor(name, desc, i);
+    const id = fileName(name);
+    const card = document.createElement("article");
+    card.className = "card" + (done.has(id) ? " done" : "");
+    card.innerHTML = `
+      <div class="head"><h2><span class="num">${typeof num === "number" ? "#" + pad(num) : "new"}</span> ${name}</h2><span class="file">${i % 2 ? "Female" : "Male"} · ${id}</span></div>
+      <details><summary>Show prompt</summary><pre></pre></details>
+      <div class="actions">
+        <button type="button" class="copy">Copy prompt</button>
+        <label class="chk"><input type="checkbox" id="c-${id}"> Sent to Claude</label>
+      </div>`;
+    const pre = card.querySelector("pre"); pre.textContent = text;
+    copyBtn(card.querySelector(".copy"), text, pre, card.querySelector("details"), "Copy prompt");
+    const box = card.querySelector("input");
+    box.checked = done.has(id);
+    box.addEventListener("change", () => {
+      box.checked ? done.add(id) : done.delete(id);
+      card.classList.toggle("done", box.checked);
+      store.set([...done]); progress();
+    });
+    list.appendChild(card);
+  });
+});
+progress();
+</script>

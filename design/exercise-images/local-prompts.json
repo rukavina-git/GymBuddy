@@ -1,0 +1,549 @@
+{
+ "size": [
+  1024,
+  1024
+ ],
+ "negative": "text, letters, numbers, watermark, logo, signature, label, arrows, frame, border, grid, collage, split screen, multiple people, second figure, duplicate, extra limbs, extra arms, extra legs, extra hands, extra fingers, missing fingers, fused fingers, deformed hands, deformed feet, twisted joints, broken anatomy, face, eyes, mouth, hair, shoes, socks, logos on clothes, glow, neon, emissive, light rays, stripes on muscles, patchy colour, floating equipment, bent barbell, extra barbell, extra dumbbell, cropped head, cropped feet, out of frame, gym interior, mirror, busy background, photo, realistic skin, blurry, low quality, jpeg artifacts, sexualised, nsfw",
+ "images": [
+  {
+   "order": 1,
+   "group": "plan",
+   "number": 1,
+   "name": "Barbell Bench Press",
+   "file": "ex_barbell_bench_press",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Barbell Bench Press, exact side profile facing right.\nPose: top position: lying on a flat bench, arms straight, bar directly above the shoulders, knees bent about 90 degrees, both feet flat on the floor in front of the bench, the near plate covering the far one.\nThe chest, front shoulders and triceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 2,
+   "group": "plan",
+   "number": 9,
+   "name": "Goblet Squat",
+   "file": "ex_goblet_squat",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Goblet Squat, exact side profile facing right.\nPose: one dumbbell held vertically against the chest with both hands, deep squat, torso upright, elbows inside the knees, heels flat.\nThe quads and glutes are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 3,
+   "group": "plan",
+   "number": 53,
+   "name": "Dumbbell Bench Press",
+   "file": "ex_dumbbell_bench_press",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Dumbbell Bench Press, exact side profile facing right.\nPose: lying on a flat bench, one dumbbell in each hand pressed up above the chest, arms straight, feet flat on the floor.\nThe chest, front shoulders and triceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 4,
+   "group": "plan",
+   "number": 18,
+   "name": "Dumbbell Row",
+   "file": "ex_dumbbell_row",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Dumbbell Row, exact side profile facing right.\nPose: one knee and the same-side hand on a flat bench, back flat and parallel to the floor, the other hand rowing one dumbbell up to the hip, elbow pointing up.\nThe lats and upper back are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 5,
+   "group": "plan",
+   "number": "new",
+   "name": "Dumbbell Romanian Deadlift",
+   "file": "ex_dumbbell_romanian_deadlift",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Dumbbell Romanian Deadlift, exact side profile facing right.\nPose: bottom of the movement: hips pushed far back, knees slightly bent, flat back, one dumbbell in each hand held at mid-shin close to the legs, arms straight.\nThe hamstrings and glutes are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 6,
+   "group": "plan",
+   "number": 23,
+   "name": "Dumbbell Shoulder Press",
+   "file": "ex_dumbbell_shoulder_press",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Dumbbell Shoulder Press, exact side profile facing right.\nPose: seated upright on a bench with the back pad raised, one dumbbell in each hand pressed overhead, arms almost straight, feet flat on the floor.\nThe shoulders and triceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 7,
+   "group": "plan",
+   "number": 58,
+   "name": "Reverse Lunge",
+   "file": "ex_reverse_lunge",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Reverse Lunge, exact side profile facing right.\nPose: no equipment, hands on the hips, one leg stepped back, both knees bent 90 degrees, back knee just above the floor, torso upright.\nThe quads and glutes are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 8,
+   "group": "plan",
+   "number": "new",
+   "name": "Glute Bridge",
+   "file": "ex_glute_bridge",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Glute Bridge, exact side profile facing right.\nPose: no equipment, lying on the back on the floor, knees bent, feet flat, arms flat at the sides, hips lifted so shoulders, hips and knees form one straight line.\nThe glutes and hamstrings are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 9,
+   "group": "plan",
+   "number": 44,
+   "name": "Hip Thrust",
+   "file": "ex_hip_thrust",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Hip Thrust, exact side profile facing right.\nPose: upper back resting across the long side of a flat bench, barbell across the hips, hips lifted so the torso and thighs form one straight line, knees bent 90 degrees, feet flat on the floor.\nThe glutes and hamstrings are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 10,
+   "group": "plan",
+   "number": 16,
+   "name": "Lat Pulldown",
+   "file": "ex_lat_pulldown",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Lat Pulldown, exact side profile facing right.\nPose: seated at a lat pulldown machine, thighs under the pads, wide bar pulled down to the upper chest, chest up, slight lean back.\nThe lats and biceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 11,
+   "group": "plan",
+   "number": 4,
+   "name": "Pull-Up",
+   "file": "ex_pull_up",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Pull-Up, exact side profile facing right.\nPose: hanging from a pull-up bar, overhand grip a little wider than the shoulders, pulled up so the chin is above the bar, legs straight down.\nThe lats and biceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 12,
+   "group": "plan",
+   "number": "new",
+   "name": "Assisted Pull-Up",
+   "file": "ex_assisted_pull_up",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Assisted Pull-Up, exact side profile facing right.\nPose: on an assisted pull-up machine, kneeling on the padded knee platform, hands on the high handles, pulled up so the chin is above the hands, torso upright.\nThe lats and biceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 13,
+   "group": "plan",
+   "number": 8,
+   "name": "Dumbbell Lateral Raise",
+   "file": "ex_dumbbell_lateral_raise",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Dumbbell Lateral Raise, seen from the front, not the side, so both arms show.\nPose: standing, arms raised out to the sides to shoulder height with a slight elbow bend, one dumbbell in each hand.\nThe side shoulders are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 14,
+   "group": "plan",
+   "number": 20,
+   "name": "Face Pull",
+   "file": "ex_face_pull",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Face Pull, exact side profile facing right.\nPose: standing facing a cable tower, rope attachment at face height pulled towards the forehead, elbows high and wide, hands beside the ears.\nThe rear shoulders and upper back are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 15,
+   "group": "plan",
+   "number": 51,
+   "name": "Cable Crunch",
+   "file": "ex_cable_crunch",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Cable Crunch, exact side profile facing right.\nPose: kneeling facing a cable tower, rope from the high pulley held beside the head, crunched down so the elbows reach the thighs, back rounded.\nThe abs are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 16,
+   "group": "plan",
+   "number": 42,
+   "name": "Standing Calf Raise",
+   "file": "ex_standing_calf_raise",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Standing Calf Raise, exact side profile facing right.\nPose: in a standing calf raise machine, shoulders under the pads, balls of the feet on the edge of a block, heels raised high.\nThe calves are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 17,
+   "group": "plan",
+   "number": 38,
+   "name": "Leg Press",
+   "file": "ex_leg_press",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Leg Press, exact side profile facing right.\nPose: seated in a 45-degree leg press machine, back flat against the pad, feet on the sled platform, knees bent about 90 degrees.\nThe quads and glutes are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 18,
+   "group": "plan",
+   "number": 41,
+   "name": "Romanian Deadlift",
+   "file": "ex_romanian_deadlift",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Romanian Deadlift, exact side profile facing right.\nPose: bottom of the movement: hips pushed far back, knees slightly bent, flat back, barbell held at mid-shin close to the legs, arms straight.\nThe hamstrings and glutes are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 19,
+   "group": "plan",
+   "number": 17,
+   "name": "Barbell Bent-Over Row",
+   "file": "ex_barbell_bent_over_row",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Barbell Bent-Over Row, exact side profile facing right.\nPose: torso bent forward about 45 degrees, flat back, knees slightly bent, barbell pulled up to the lower ribs, elbows driven back.\nThe upper back, lats and rear shoulders are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 20,
+   "group": "plan",
+   "number": 22,
+   "name": "Barbell Overhead Press",
+   "file": "ex_barbell_overhead_press",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Barbell Overhead Press, exact side profile facing right.\nPose: standing, barbell locked out directly overhead with straight arms, bar above the middle of the feet, head slightly forward under the bar, tight core.\nThe shoulders and triceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 21,
+   "group": "plan",
+   "number": 12,
+   "name": "Incline Dumbbell Press",
+   "file": "ex_incline_dumbbell_press",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Incline Dumbbell Press, exact side profile facing right.\nPose: bench back inclined about 30 degrees, one dumbbell in each hand pressed up above the upper chest, feet flat on the floor.\nThe upper chest and front shoulders are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 22,
+   "group": "plan",
+   "number": 19,
+   "name": "Seated Cable Row",
+   "file": "ex_seated_cable_row",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Seated Cable Row, exact side profile facing right.\nPose: seated on a low cable row bench, feet on the foot platform, knees slightly bent, torso upright, V-handle pulled to the stomach, elbows back.\nThe lats and upper back are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 23,
+   "group": "plan",
+   "number": 28,
+   "name": "Tricep Pushdown",
+   "file": "ex_tricep_pushdown",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Tricep Pushdown, exact side profile facing right.\nPose: standing facing a cable tower, high pulley, short straight bar pushed down until the arms are straight, elbows pinned at the sides.\nThe triceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 24,
+   "group": "plan",
+   "number": 33,
+   "name": "Barbell Curl",
+   "file": "ex_barbell_curl",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Barbell Curl, exact side profile facing right.\nPose: standing tall, elbows at the sides, palms up, barbell curled up to upper-chest height.\nThe biceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 25,
+   "group": "plan",
+   "number": 34,
+   "name": "Hammer Curl",
+   "file": "ex_hammer_curl",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Hammer Curl, exact side profile facing right.\nPose: standing tall, one dumbbell in each hand, thumbs pointing up, elbows at the sides, dumbbells curled up to shoulder height.\nThe biceps and forearms are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 26,
+   "group": "plan",
+   "number": 39,
+   "name": "Leg Extension",
+   "file": "ex_leg_extension",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Leg Extension, exact side profile facing right.\nPose: seated in a leg extension machine, shin pad in front of the ankles, legs extended straight.\nThe quads are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 27,
+   "group": "plan",
+   "number": 40,
+   "name": "Lying Leg Curl",
+   "file": "ex_lying_leg_curl",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Lying Leg Curl, exact side profile facing right.\nPose: lying face down on a leg curl machine, pad behind the ankles, knees bent about 90 degrees, heels towards the glutes.\nThe hamstrings are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 28,
+   "group": "plan",
+   "number": 15,
+   "name": "Dip",
+   "file": "ex_dip",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Dip, exact side profile facing right.\nPose: on parallel dip bars, torso leaning forward, elbows bent 90 degrees, knees bent with the feet crossed behind.\nThe chest and triceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 29,
+   "group": "plan",
+   "number": 6,
+   "name": "Plank",
+   "file": "ex_plank",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Plank, exact side profile facing right.\nPose: forearms on the floor, elbows under the shoulders, body in one straight line from head to heels, on the toes.\nThe abs are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 30,
+   "group": "plan",
+   "number": 5,
+   "name": "Push-Up",
+   "file": "ex_push_up",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Push-Up, exact side profile facing right.\nPose: top position: arms straight, hands under the shoulders, body in one straight line from head to heels, on the toes.\nThe chest, triceps and front shoulders are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 31,
+   "group": "plan",
+   "number": 54,
+   "name": "Chin-Up",
+   "file": "ex_chin_up",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Chin-Up, exact side profile facing right.\nPose: hanging from a pull-up bar, underhand grip shoulder-width, pulled up so the chin is above the bar, legs straight down.\nThe lats and biceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 32,
+   "group": "plan",
+   "number": 11,
+   "name": "Incline Barbell Bench Press",
+   "file": "ex_incline_barbell_bench_press",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Incline Barbell Bench Press, exact side profile facing right.\nPose: bench back inclined about 30 degrees, lying on it, arms straight, bar directly above the upper chest, feet flat on the floor.\nThe upper chest and front shoulders are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 33,
+   "group": "rest",
+   "number": 13,
+   "name": "Dumbbell Chest Fly",
+   "file": "ex_dumbbell_chest_fly",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Dumbbell Chest Fly, seen from slightly above and to the side so the open arms show.\nPose: lying on a flat bench, arms opened wide to the sides with a slight bend in the elbows, dumbbells level with the chest.\nThe chest are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 34,
+   "group": "rest",
+   "number": 14,
+   "name": "Cable Crossover",
+   "file": "ex_cable_crossover",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Cable Crossover, seen from the front so both arms show.\nPose: standing between two tall cable towers, a handle in each hand, arms pulled together in front of the hips, slight forward lean.\nThe chest are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 35,
+   "group": "rest",
+   "number": 21,
+   "name": "T-Bar Row",
+   "file": "ex_t_bar_row",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a T-Bar Row, exact side profile facing right.\nPose: one end of a barbell anchored on the floor, plates on the other end; standing over the bar, torso bent about 45 degrees, flat back, both hands on a V-handle under the plates, pulled up to the chest.\nThe upper back and lats are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 36,
+   "group": "rest",
+   "number": 25,
+   "name": "Rear Delt Fly",
+   "file": "ex_rear_delt_fly",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Rear Delt Fly, seen from the front so both arms show.\nPose: bent forward at the hips until the torso is almost parallel to the floor, flat back, arms raised out to the sides, one dumbbell in each hand.\nThe rear shoulders and upper back are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 37,
+   "group": "rest",
+   "number": 26,
+   "name": "Arnold Press",
+   "file": "ex_arnold_press",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Arnold Press, seen from a front three-quarter angle.\nPose: standing, dumbbells in front of the shoulders, palms facing the body, elbows in front, about to press up.\nThe shoulders are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 38,
+   "group": "rest",
+   "number": 27,
+   "name": "Barbell Shrug",
+   "file": "ex_barbell_shrug",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Barbell Shrug, exact side profile facing right.\nPose: standing tall, arms straight, barbell hanging at the thighs, shoulders shrugged up towards the ears.\nThe the upper trapezius are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 39,
+   "group": "rest",
+   "number": 29,
+   "name": "Overhead Tricep Extension",
+   "file": "ex_overhead_tricep_extension",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Overhead Tricep Extension, exact side profile facing right.\nPose: standing, one dumbbell held with both hands behind the head, upper arms pointing straight up beside the ears, elbows bent so the dumbbell is lowered behind the head.\nThe triceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 40,
+   "group": "rest",
+   "number": 30,
+   "name": "Skull Crusher",
+   "file": "ex_skull_crusher",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Skull Crusher, exact side profile facing right.\nPose: lying on a flat bench, a short EZ curl bar (zig-zag shaped bar) held above the forehead, upper arms vertical, elbows bent 90 degrees, feet flat on the floor.\nThe triceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 41,
+   "group": "rest",
+   "number": 31,
+   "name": "Close-Grip Bench Press",
+   "file": "ex_close_grip_bench_press",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Close-Grip Bench Press, exact side profile facing right.\nPose: top position on a flat bench: hands shoulder-width apart (narrower than a normal bench press), arms straight, bar above the chest, elbows close to the body, feet flat on the floor.\nThe triceps and chest are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 42,
+   "group": "rest",
+   "number": 35,
+   "name": "Preacher Curl",
+   "file": "ex_preacher_curl",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Preacher Curl, exact side profile facing right.\nPose: seated at a preacher curl bench, upper arms resting on the angled pad, a short EZ curl bar curled halfway up.\nThe biceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 43,
+   "group": "rest",
+   "number": 36,
+   "name": "Cable Curl",
+   "file": "ex_cable_curl",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Cable Curl, exact side profile facing right.\nPose: standing facing a cable tower, low pulley, short straight bar curled up to chest height, elbows at the sides.\nThe biceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 44,
+   "group": "rest",
+   "number": 7,
+   "name": "Dumbbell Bicep Curl",
+   "file": "ex_dumbbell_bicep_curl",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Dumbbell Bicep Curl, exact side profile facing right.\nPose: standing tall, one dumbbell in each hand, elbows at the sides, palms up, dumbbells curled up to shoulder height.\nThe biceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 45,
+   "group": "rest",
+   "number": 10,
+   "name": "Walking Dumbbell Lunge",
+   "file": "ex_walking_dumbbell_lunge",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Walking Dumbbell Lunge, exact side profile facing right.\nPose: long step forward, both knees bent 90 degrees, back knee just above the floor, front knee over the ankle, torso upright, one dumbbell hanging in each hand.\nThe quads and glutes are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 46,
+   "group": "rest",
+   "number": 45,
+   "name": "Bulgarian Split Squat",
+   "file": "ex_bulgarian_split_squat",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Bulgarian Split Squat, exact side profile facing right.\nPose: rear foot resting laces-down on a flat bench behind, front foot well forward, lowered until the front thigh is parallel to the floor, torso upright, one dumbbell hanging in each hand.\nThe quads and glutes are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 47,
+   "group": "rest",
+   "number": 43,
+   "name": "Seated Calf Raise",
+   "file": "ex_seated_calf_raise",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Seated Calf Raise, exact side profile facing right.\nPose: seated in a seated calf raise machine, pad on top of the knees, balls of the feet on the platform, heels raised high.\nThe calves are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 48,
+   "group": "rest",
+   "number": 60,
+   "name": "Hack Squat",
+   "file": "ex_hack_squat",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Hack Squat, exact side profile facing right.\nPose: in a hack squat machine, back against the angled back pad, shoulders under the shoulder pads, feet on the platform, knees bent about 90 degrees.\nThe quads and glutes are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 49,
+   "group": "rest",
+   "number": 46,
+   "name": "Crunch",
+   "file": "ex_crunch",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Crunch, exact side profile facing right.\nPose: lying on the back on the floor, knees bent, feet flat, fingertips lightly behind the head, shoulders lifted off the floor.\nThe abs are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 50,
+   "group": "rest",
+   "number": 47,
+   "name": "Hanging Leg Raise",
+   "file": "ex_hanging_leg_raise",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Hanging Leg Raise, exact side profile facing right.\nPose: hanging from a pull-up bar with straight arms, straight legs raised to horizontal so the body forms an L.\nThe abs and hip flexors are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 51,
+   "group": "rest",
+   "number": 48,
+   "name": "Russian Twist",
+   "file": "ex_russian_twist",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Russian Twist, seen from the front.\nPose: seated on the floor, leaning back about 45 degrees, knees bent, feet lifted off the floor, hands clasped, torso rotated to one side.\nThe obliques and abs are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 52,
+   "group": "rest",
+   "number": 49,
+   "name": "Dead Bug",
+   "file": "ex_dead_bug",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Dead Bug, exact side profile facing right.\nPose: lying on the back, one arm pointing straight up, knees bent 90 degrees above the hips, the other arm reaching back overhead and the opposite leg extended straight just above the floor.\nThe abs are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 53,
+   "group": "rest",
+   "number": 50,
+   "name": "Mountain Climber",
+   "file": "ex_mountain_climber",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Mountain Climber, exact side profile facing right.\nPose: high plank on straight arms, one knee driven towards the chest, the other leg straight back on the toes.\nThe abs, shoulders and hip flexors are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 54,
+   "group": "rest",
+   "number": 57,
+   "name": "Leg Raise",
+   "file": "ex_leg_raise",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Leg Raise, exact side profile facing right.\nPose: lying on the back on the floor, hands flat at the sides, straight legs raised to vertical, lower back on the floor.\nThe lower abs and hip flexors are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 55,
+   "group": "rest",
+   "number": "new",
+   "name": "Machine Chest Press",
+   "file": "ex_machine_chest_press",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Machine Chest Press, exact side profile facing right.\nPose: seated in a chest press machine, back against the upright pad, feet flat on the floor, both handles pressed forward at chest height, arms almost straight.\nThe chest, front shoulders and triceps are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 56,
+   "group": "rest",
+   "number": "new",
+   "name": "Hip Abduction Machine",
+   "file": "ex_hip_abduction_machine",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Hip Abduction Machine, seen from the front.\nPose: seated in a hip abduction machine, back against the pad, pads on the outside of the knees, legs pushed wide apart.\nThe outer glutes are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 57,
+   "group": "rest",
+   "number": "new",
+   "name": "Seated Leg Curl",
+   "file": "ex_seated_leg_curl",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Seated Leg Curl, exact side profile facing right.\nPose: seated in a seated leg curl machine, thigh pad on top of the thighs, lower pad behind the lower legs, knees bent about 90 degrees with the heels pulled under the seat.\nThe hamstrings are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 58,
+   "group": "rest",
+   "number": "new",
+   "name": "Treadmill",
+   "file": "ex_treadmill",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Treadmill, exact side profile facing right.\nPose: running on a treadmill, mid-stride, upright torso, arms bent about 90 degrees swinging, hands free of the rails.\nThe quads, hamstrings and calves are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 59,
+   "group": "rest",
+   "number": "new",
+   "name": "Stationary Bike",
+   "file": "ex_stationary_bike",
+   "body": "male",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey male mannequin with an athletic build, no hair, plain matte black shorts, barefoot, doing a Stationary Bike, exact side profile facing right.\nPose: seated upright on an exercise bike, hands on the handlebars, one pedal at the bottom with that leg almost straight, the other knee bent at the top.\nThe quads, glutes and calves are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  },
+  {
+   "order": 60,
+   "group": "rest",
+   "number": "new",
+   "name": "Stair Climber",
+   "file": "ex_stair_climber",
+   "body": "female",
+   "prompt": "3D render for a fitness app: a faceless smooth light-grey female mannequin with an athletic build, natural average bust, no hair, plain matte black sports top and shorts, barefoot, neutral non-sexualised pose, doing a Stair Climber, exact side profile facing right.\nPose: on a stair climber machine with revolving steps, stepping up, one knee lifted high, upright torso, hands resting lightly on the side rails.\nThe glutes and quads are tinted a soft matte warm orange (#FF8A5B), one smooth even colour, no glow. The rest of the body is smooth light grey.\nOne figure only, centred, full body and all equipment inside the frame with margin.\nPlain dark charcoal background (#121418) with a slightly lighter floor. Soft studio light from the upper left, subtle rim light.\nOnly the equipment named in the pose, plain dark grey, no logos; barbells are full-length with round plates.\nCorrect, safe technique, anatomically correct hands and feet, equipment obeys gravity."
+  }
+ ]
+}
