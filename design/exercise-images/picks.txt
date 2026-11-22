@@ -1,34 +1,34 @@
 # Picks. order | file | variant | note
 # A number = round-1 variant in <name>/. "fixtest N" = variant N in _fixtest/<name>/.
 # "pose" = still wrong after round 2; will be redone later with a pose guide.
-01 | ex_barbell_back_s | 2 |
-02 | ex_conventional_dead | 2 |
-03 | ex_barbell_bench_p | 3 |
-04 | ex_goblet_s | 2 |
-05 | ex_dumbbell_bench_p | 2 |
-06 | ex_dumbbell | pose |
-07 | ex_dumbbell_romanian_dead | pose |
-08 | ex_dumbbell_shoulder_p | 2 |
-09 | ex_reverse_l | 4 |
-10 | ex_glute_br | 3 |
-11 | ex_hip_th | pose |
-12 | ex_lat_pull | 4 |
-13 | ex_pul | pose |
-14 | ex_assisted_pul | pose |
-15 | ex_dumbbell_lateral_r | pose |
-16 | ex_face_ | 1 |
-17 | ex_cable_cr | pose |
-18 | ex_standing_calf_r | pose |
-19 | ex_leg_p | 3 |
-20 | ex_romanian_dead | pose |
-21 | ex_barbell_bent_over | pose |
-22 | ex_barbell_overhead_p | 2 |
-23 | ex_incline_dumbbell_p | 2 |
-24 | ex_seated_cable | pose |
-25 | ex_tricep_push | 2 |
-26 | ex_barbell_ | pose |
-27 | ex_hammer_ | 3 | unsure: check grip
-28 | ex_leg_exten | 1 |
-29 | ex_lying_leg_ | pose |
-30 | ex | pose |
-31 | ex_p | 3 |
+01 | ex_barbell_back_squat | 2
+02 | ex_conventional_deadlift | 2
+03 | ex_barbell_bench_press | 3
+04 | ex_goblet_squat | 2
+05 | ex_dumbbell_bench_press | 2
+06 | ex_dumbbell_row | pose
+07 | ex_dumbbell_romanian_deadlift | pose
+08 | ex_dumbbell_shoulder_press | 2
+09 | ex_reverse_lunge | 4
+10 | ex_glute_bridge | 3
+11 | ex_hip_thrust | pose
+12 | ex_lat_pulldown | 4
+13 | ex_pull_up | fixtest 1
+14 | ex_assisted_pull_up | fixtest 2 | unsure: reads as kneeling pulldown
+15 | ex_dumbbell_lateral_raise | fixtest 1
+16 | ex_face_pull | 1
+17 | ex_cable_crunch | fixtest 1
+18 | ex_standing_calf_raise | pose
+19 | ex_leg_press | 3
+20 | ex_romanian_deadlift | fixtest 2 | unsure: knees still a bit bent
+21 | ex_barbell_bent_over_row | pose
+22 | ex_barbell_overhead_press | 2
+23 | ex_incline_dumbbell_press | 2
+24 | ex_seated_cable_row | fixtest 1 | unsure: cable comes from the top pulley
+25 | ex_tricep_pushdown | 2
+26 | ex_barbell_curl | pose
+27 | ex_hammer_curl | 3 | unsure: check grip
+28 | ex_leg_extension | 1
+29 | ex_lying_leg_curl | pose
+30 | ex_dip | pose
+31 | ex_plank | 3
