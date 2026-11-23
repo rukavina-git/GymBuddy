@@ -1,5 +1,5 @@
 plugins {
-    id("org.springframework.boot") version "4.1.2"
+    id("org.springframework.boot") version "4.2.0"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.4.21"
     kotlin("plugin.spring") version "2.4.21"
@@ -68,7 +68,7 @@ dependencies {
         implementation("com.google.guava:guava:33.8.0-jre") {
             because("GHSA-xxph-c9ww-hj94: Guava <= 33.7.1 (via firebase-admin)")
         }
-        implementation("org.webjars:swagger-ui:5.35.0") {
+        implementation("org.webjars:swagger-ui:5.35.1") {
             because("springdoc 3.2.0 ships 5.34.0, whose DOMPurify has CVE-2026-116802..4")
             // Keep springdoc.swagger-ui.version in application.yml equal (SwaggerUiTest).
         }
