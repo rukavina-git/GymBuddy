@@ -16,9 +16,9 @@ import com.google.android.gms.security.ProviderInstaller
 internal object SecurityProvider {
     private const val TAG = "SecurityProvider"
 
-    fun install(context: Context) {
+    fun install(context: Context, installer: (Context) -> Unit = ProviderInstaller::installIfNeeded) {
         try {
-            ProviderInstaller.installIfNeeded(context)
+            installer(context)
         } catch (e: GooglePlayServicesRepairableException) {
             Log.w(TAG, "Play services needs an update; using the platform provider", e)
         } catch (e: GooglePlayServicesNotAvailableException) {

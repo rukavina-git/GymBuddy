@@ -1,12 +1,10 @@
 package com.rukavina.gymbuddy.ui.auth
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.os.Build
 import android.view.Window
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
@@ -25,7 +23,7 @@ internal fun HideOverlayWindows() {
     val context = LocalContext.current
     // Install-time permission, so always granted in the app; not in Robolectric.
     if (context.checkSelfPermission(Manifest.permission.HIDE_OVERLAY_WINDOWS) != PackageManager.PERMISSION_GRANTED) return
-    val window = context.findActivity()?.window ?: return
+    val window = LocalActivity.current?.window ?: return
     DisposableEffect(window) {
         windowOverlays.acquire(window)
         onDispose { windowOverlays.release(window) }
@@ -59,10 +57,4 @@ internal class OverlayHideCounter<K : Any>(private val apply: (K, Boolean) -> Un
             counts[key] = count - 1
         }
     }
-}
-
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }
