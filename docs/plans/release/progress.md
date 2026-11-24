@@ -151,3 +151,8 @@
   tests. No exercise images (Gemini set removed; Qwen set next).
   Backend Release cancelled (backend/ unchanged; image lookup window
   still to fix). Dependabot version PRs off (limit 0).
+- 0.2.3 released 2026-11-24: PR #26 → main (50bd048), tag v0.2.3, AAB
+  on internal, promoted to closed (alpha). Update priority 4: first
+  forced update for 0.2.2 phones. Sign-out confirmation, Play rating
+  prompt; new store listing text pasted by hand. Backend Release
+  waiting on the image check again (backend/ unchanged).
