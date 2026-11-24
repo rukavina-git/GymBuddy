@@ -39,6 +39,8 @@ turbine = "1.2.1"
 robolectric = "4.18"
 mockk = "1.14.11"
 playAppUpdate = "2.1.0"
+# Already pulled in by Firebase; declared for ProviderInstaller (TLS fixes).
+playServicesBase = "18.5.0"
 # Must match api/openapitools.json's generator-cli version so the app
 # compiles the same generated client that CI's codegen tripwire does.
 openapiGenerator = "7.27.0"
@@ -98,6 +100,7 @@ turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 play-app-update = { module = "com.google.android.play:app-update", version.ref = "playAppUpdate" }
+play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
 retrofit-converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit" }

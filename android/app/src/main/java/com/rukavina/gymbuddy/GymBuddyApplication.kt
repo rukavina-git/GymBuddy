@@ -18,6 +18,7 @@ import com.rukavina.gymbuddy.data.local.seeder.ExerciseSeeder
 import com.rukavina.gymbuddy.data.local.seeder.WorkoutTemplateSeeder
 import com.rukavina.gymbuddy.data.sync.FirebaseAuthSession
 import com.rukavina.gymbuddy.data.sync.AuthGate
+import com.rukavina.gymbuddy.data.sync.SecurityProvider
 import com.rukavina.gymbuddy.data.sync.SyncScheduler
 import com.rukavina.gymbuddy.data.sync.SyncTriggers
 import dagger.hilt.android.HiltAndroidApp
@@ -63,6 +64,8 @@ class GymBuddyApplication : Application(), SingletonImageLoader.Factory, Configu
     override fun onCreate() {
         super.onCreate()
         Log.d("AppInfo", "Gym Tracker starting...")
+        // First on the IO scope, so it normally finishes before the first sync.
+        applicationScope.launch { SecurityProvider.install(this@GymBuddyApplication) }
 
         SyncTriggers.observeForeground(ProcessLifecycleOwner.get().lifecycle, syncScheduler)
         SyncTriggers.observeNetwork(this, syncScheduler)

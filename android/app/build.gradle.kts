@@ -278,6 +278,7 @@ dependencies {
     implementation(libs.moshi.adapters)
     implementation(libs.okhttp)
     implementation(libs.play.app.update)
+    implementation(libs.play.services.base)
     implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.work.runtime.ktx)
