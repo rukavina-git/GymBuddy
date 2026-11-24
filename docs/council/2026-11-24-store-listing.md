@@ -37,3 +37,8 @@ description still opened with "Placeholder listing (Plan 8.3)".
 - No exercise count in the listing (owner: the library changes).
 - Check keyword rankings in Play Console 2-4 weeks after going public.
 - Screenshots: next, after the exercise images ship.
+
+## Owner correction (2026-11-24)
+Offline's real value is privacy, not "no signal" (almost every gym
+has internet). Listing now says: without an account, workouts never
+leave the phone. Never sell offline as a basement/no-signal feature.

@@ -1,5 +1,5 @@
 Gym Tracker is a simple workout log for the gym. Log sets, reps and weight in a few taps and keep an honest history of every session.
-It works fully offline, with no account needed. Sign in only if you want a backup and sync across your devices.
+No account needed: your workouts stay on your phone and the app works fully offline. Sign in only if you want a backup and sync across your devices.
 
 LOG FAST
 • Start from a template and your sets are already laid out.
@@ -34,7 +34,7 @@ PROGRESS AND HISTORY
 • Every past workout in one list. Search it or filter by exercise.
 
 YOUR DATA, YOUR CHOICE
-• Your workouts are saved on your phone, so this workout log works offline, even at a gym with no signal.
+• Without an account, your workouts never leave your phone. This workout log needs no internet.
 • Make an account (Google or email) only if you want a backup and sync across devices.
 • Export a backup file whenever you like.
 • Delete your account and data from inside the app.
