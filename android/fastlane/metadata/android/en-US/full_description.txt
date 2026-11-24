@@ -22,7 +22,7 @@ EXERCISE LIBRARY
 
 MORE THAN WEIGHT AND REPS
 Each exercise is logged as what it is:
-• Weight and reps for barbell, dumbbell and machine lifts
+• Weight and reps for barbell, dumbbell and machine lifts, in kg or lb
 • Reps only for pull-ups, push-ups and dips
 • Time for planks and holds, with optional added weight
 • Distance and time for runs and rows
@@ -45,9 +45,5 @@ No social feed, no followers, nothing to share. Just your training.
 
 FOR BEGINNERS AND EXPERIENCED LIFTERS
 A workout tracker for both. New to strength training? Follow a starter plan and the how-to for each exercise. Lifting for years? Build your own templates and the app stays out of your way.
-
-ALSO
-• kg or lb
-• Dark theme
 
 Made by a solo developer in the EU. Found a bug or missing something? Tap Send feedback in the app.
