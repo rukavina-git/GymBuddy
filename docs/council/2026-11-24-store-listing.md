@@ -26,7 +26,7 @@ description still opened with "Placeholder listing (Plan 8.3)".
   sets, reps and weight in a few taps. Works offline, no account
   needed." (74) as the alternate.
 - Full (~2.4k chars): copywriter draft, trimmed to verified features
-  (60 exercises, 23 templates + 3 starter plans, rest timer + buzz,
+  (exercise library, no count; 23 templates + 3 starter plans, rest timer + buzz,
   lock-screen controls, notes, save as template, onboarding plan
   suggestion, Send feedback). "workout log" x2, "offline" x2,
   "workout tracker" x1.
@@ -34,6 +34,6 @@ description still opened with "Placeholder listing (Plan 8.3)".
 ## Follow-ups
 - Not uploaded by fastlane (skip_upload_metadata): owner pastes into
   Play Console > Main store listing.
-- Change "60 exercises" when the image update changes the count.
+- No exercise count in the listing (owner: the library changes).
 - Check keyword rankings in Play Console 2-4 weeks after going public.
 - Screenshots: next, after the exercise images ship.
