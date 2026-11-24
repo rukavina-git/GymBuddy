@@ -1,0 +1,2 @@
+Gym Tracker 0.2.3
+- Sign out now asks first, so a stray tap can't sign you out
