@@ -22,7 +22,7 @@ EXERCISE LIBRARY
 
 MORE THAN WEIGHT AND REPS
 Each exercise is logged as what it is:
-• Weight and reps for barbell, dumbbell and machine lifts, in kg or lb
+• Weight and reps for barbell, dumbbell and machine lifts
 • Reps only for pull-ups, push-ups and dips
 • Time for planks and holds, with optional added weight
 • Distance and time for runs and rows
