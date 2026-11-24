@@ -75,5 +75,9 @@ corners (16:9 crop cut heads and feet). Exercise list stays text-only
 until most exercises have images.
 
 ## Status
-Done: #2 Back Squat, #56 Front Squat, #3 Conventional Deadlift,
-#59 Sumo Deadlift (grid 01). Next: grid 02.
+2026-11-22: Gemini dropped. The 4 Gemini images (grid 01) and
+prompts.html are removed. All images now come from Qwen-Image-2512
+(Apache 2.0) run locally in ComfyUI, one exercise per image:
+`design/exercise-images/local-prompts.json` (64 prompts, 3/4 views,
+unclothed featureless mannequin). A script queues the jobs through
+the ComfyUI API and writes a manifest (model, seed, prompt per image).

@@ -71,8 +71,8 @@ users' history and copies stay intact (confirm against the seeder).
 - Sync: deprecated rows still sync; existing user sessions untouched.
 - Device check on the qa build: pickers, a plan start, onboarding.
 
-## Images (owner, Gemini, prompts in design/exercise-images)
-Done: 4 (Back Squat, Front Squat, Conventional and Sumo Deadlift).
+## Images (owner, local Qwen-Image-2512, prompts in design/exercise-images)
+Done: 0 (Gemini set removed 2026-11-22; see 01b status).
 Order: exercises in the live plans after 05b first (about 34), most
 used first, each prompt of 4 grouped by equipment/setup; then the
 rest. Skip deprecated ones. An exercise without an image shows the

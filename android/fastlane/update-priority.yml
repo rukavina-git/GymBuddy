@@ -1,0 +1,7 @@
+# In-app update priority per release (Play, 0-5). Missing = 0.
+#   0    normal: Play auto-updates, the app shows nothing
+#   1-3  the app offers the update once per version (dismissable)
+#   4-5  forced: the app won't open until updated
+# Only phones on 0.2.2+ react. Set it before tagging; Play can't change
+# it after upload. The promote to closed testing keeps it.
+"0.2.2": 0

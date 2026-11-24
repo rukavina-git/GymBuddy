@@ -26,6 +26,13 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+// MockK's ByteBuddy agent, loaded when the test JVM starts. Attaching it
+// later (MockK's default) timed out under a full Robolectric run.
+// Resolved through MockK so the version always matches it.
+val mockkAgent: Configuration by configurations.creating {
+    isCanBeConsumed = false
+}
+
 // Output of openApiGenerate below.
 val generatedClientDir = layout.buildDirectory.dir("generated/openapi")
 
@@ -43,7 +50,7 @@ val keystoreProperties = Properties().apply {
 // (X*1_000_000 + Y*1_000 + Z), never typed; Play needs it higher on every
 // upload. CI passes -Pgymbuddy.releaseTag=vX.Y.Z, which must equal
 // "v$appVersion" or the build fails (the tag only checks, never sets).
-val appVersion = "0.2.1"
+val appVersion = "0.2.2"
 
 val appVersionCode: Int = run {
     val match = Regex("""(\d{1,3})\.(\d{1,3})\.(\d{1,3})""").matchEntire(appVersion)
@@ -151,9 +158,9 @@ android {
                 // themselves unless this is set - see
                 // app/src/test/.../data/sync/e2e/E2eBackend.kt.
                 it.systemProperty("gymbuddy.e2e.baseUrl", findProperty("e2eBaseUrl")?.toString() ?: "")
-                // MockK's ByteBuddy agent attaches to the test JVM itself;
-                // JDK 9+ blocks that unless allowed.
-                it.jvmArgs("-Djdk.attach.allowAttachSelf=true", "-XX:+EnableDynamicAgentLoading")
+                // MockK's ByteBuddy agent, preloaded (see mockkAgent).
+                val agentJar = mockkAgent.filter { jar -> jar.name.startsWith("byte-buddy-agent") }
+                it.jvmArgumentProviders.add(CommandLineArgumentProvider { listOf("-javaagent:${agentJar.singleFile.absolutePath}") })
                 // TokenParityTest reads the committed Figma tokens.
                 it.systemProperty("gymbuddy.tokensJson", rootDir.resolve("../design/tokens.json").absolutePath)
                 // IconParityTest checks design/icons + brand against res/drawable.
@@ -270,6 +277,8 @@ dependencies {
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapters)
     implementation(libs.okhttp)
+    implementation(libs.play.app.update)
+    implementation(libs.play.services.base)
     implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.work.runtime.ktx)
@@ -284,6 +293,7 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
     testImplementation(libs.mockk)
+    mockkAgent(libs.mockk)
     testImplementation(libs.work.testing)
     testImplementation(libs.lifecycle.runtime.testing)
     testImplementation(libs.okhttp.mockwebserver)

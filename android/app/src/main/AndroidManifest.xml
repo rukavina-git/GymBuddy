@@ -12,6 +12,8 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Keeps the CPU awake until the rest buzz fires (released right after). -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Hides other apps' overlays while a password field shows (tapjacking). -->
+    <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
 
     <application
         android:name=".GymBuddyApplication"

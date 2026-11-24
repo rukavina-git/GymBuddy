@@ -120,9 +120,27 @@
   → IOException (sync retries), dead session → no token (401 →
   AuthGate). Reproduced and verified on device (airplane mode, clock
   +2h). Added to changelogs/2001.txt.
+- 0.2.1 released 2026-11-19: PR #19 → main (b520e14), tag v0.2.1,
+  AAB on internal, promoted to closed (alpha). Backend Release failed
+  as expected-harmless: backend/ unchanged since v0.2.0, but its image
+  lookup only checks 20 same-tree commits and the imaged one (8ecd5d7)
+  is #27. Fix the window before the next backend change.
 - Step 05 written (2026-11-18): default library + plans refresh from a
   4-reviewer council (05a library 60->64, 05b plans, 05c onboarding
   mapping; all in one update, 0.2.2, owner). Owner OK. Starts after the owner's
   break. Images stay on Gemini (owner), plan exercises first.
   free-exercise-db images rejected: "Unlicense" label, but maintainer
   doesn't know their source and some trace to ExRx.net (issues #2, #13).
+- Forced updates for 0.2.2 (2026-11-20, owner): 0.2.0 kept crashing
+  after 0.2.1 shipped (testers update slowly, Play can't force it).
+  Add Play in-app updates: on start, a release with update priority
+  >= 4 blocks the app until updated (IMMEDIATE); lower ones get a
+  dismissable prompt or nothing. Priority is chosen per release in the
+  release workflow (fastlane in_app_update_priority, set only on
+  upload; check it survives the internal → alpha promote). Record the
+  library's licence (Play SDK terms) in docs/third-party.md.
+- In-app updates built 2026-11-20 (PR feat/in-app-updates, ships in
+  0.2.2): priority per version in android/fastlane/update-priority.yml
+  (missing = 0, owner's default). Unit + FakeAppUpdateManager tests.
+  Device check pending (phone not connected); real Play flow can only
+  be seen once 0.2.3 is out to phones on 0.2.2.

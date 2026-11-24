@@ -134,6 +134,7 @@ internal fun EmailPasswordFields(
     onToggleShow: () -> Unit,
     onDone: () -> Unit,
 ) {
+    HideOverlayWindows()
     AppTextField(
         value = email,
         onValueChange = onEmail,

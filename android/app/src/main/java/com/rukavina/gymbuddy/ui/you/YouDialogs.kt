@@ -18,6 +18,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import com.rukavina.gymbuddy.R
+import com.rukavina.gymbuddy.ui.auth.HideOverlayWindows
 import com.rukavina.gymbuddy.data.sync.LocalDataCounts
 import com.rukavina.gymbuddy.ui.design.AppBottomSheet
 import com.rukavina.gymbuddy.ui.design.AppIconButton
@@ -156,6 +157,7 @@ internal fun DeletePasswordDialog(viewModel: YouViewModel, onClose: () -> Unit) 
     var password by rememberSaveable { mutableStateOf("") }
     var busy by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    HideOverlayWindows()
     AppChoiceDialog(
         title = stringResource(R.string.you_delete_password_title),
         body = stringResource(R.string.you_delete_password_body),
@@ -237,6 +239,7 @@ internal fun PasswordDialog(isSetup: Boolean, viewModel: YouViewModel, onDone: (
             if (isSetup) viewModel.setupPassword(new, result) else viewModel.changePassword(current, new, result)
         }
     }
+    HideOverlayWindows()
     AppChoiceDialog(
         title = stringResource(if (isSetup) R.string.you_set_password else R.string.you_change_password),
         body = stringResource(R.string.you_password_rule),
