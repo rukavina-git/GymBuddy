@@ -17,4 +17,18 @@ the device checks. Plan: 3-4 more after 0.2.1 (see progress.md cadence).
 - Backup reminder card hides once you create an account.
 - To check after release: crash-free rate on 0.2.1 in Crashlytics.
 
-## 0.2.2 (planned ~11-23)
+## 0.2.2 (2002), planned 2026-11-24
+- In-app updates: the app asks Play for a newer version on every open.
+  Priority per release (android/fastlane/update-priority.yml) decides:
+  4-5 forced, 1-3 offered once, 0 left to Play. Lets us push urgent
+  fixes to testers fast from now on. 0.2.2 itself ships with 0.
+- Security pass (Ward / OWASP MASVS static check, 2026-11-23):
+  - Play services security provider updated at startup (TLS fixes on
+    older Android).
+  - Password fields hide other apps' overlays (tapjacking), Android 12+.
+- Sync failure-mode tests (offline, expired session) added.
+- Known: the 4 old Gemini exercise images are removed; the new
+  Qwen-Image set lands in the next update, so no exercise shows an
+  image in 0.2.2.
+- To check after release: crash-free rate on 0.2.2, and that 0.2.3
+  shows the update prompt on a tester phone.

@@ -1,0 +1,4 @@
+Gym Tracker 0.2.2
+- The app now tells you when a new version is ready
+- Safer connections on older Android versions
+- Password screens block other apps from drawing over them
