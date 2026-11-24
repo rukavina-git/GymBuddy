@@ -216,7 +216,11 @@ class YouViewModel @Inject constructor(
                 Log.w(TAG, "pending count failed", e)
                 emptyList()
             }
-            if (lines.isEmpty()) logout() else _logoutState.value = LogoutUiState.Confirm(lines, offline = !onlineCheck.isOnline())
+            _logoutState.value = if (lines.isEmpty()) {
+                LogoutUiState.ConfirmSynced
+            } else {
+                LogoutUiState.Confirm(lines, offline = !onlineCheck.isOnline())
+            }
         }
     }
 

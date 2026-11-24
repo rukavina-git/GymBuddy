@@ -49,6 +49,8 @@ sealed interface ExportUiState {
 /** Where sign out stands (R15-8, R15-13). */
 sealed class LogoutUiState {
     data object Idle : LogoutUiState()
+    /** Everything is backed up: a plain "are you sure" against accidental taps. */
+    data object ConfirmSynced : LogoutUiState()
     /** Changes are only on this phone: back up first or sign out anyway. [offline] adds the "connect first" line. */
     data class Confirm(val lines: List<String>, val offline: Boolean) : LogoutUiState()
     /** Pushing unsynced changes before signing out. */

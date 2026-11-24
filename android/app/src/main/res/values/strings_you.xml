@@ -44,6 +44,7 @@
     <string name="you_cancel">Cancel</string>
     <string name="you_close">Close</string>
     <string name="you_sign_out_title">Sign out?</string>
+    <string name="you_sign_out_synced_body">Your workouts are backed up. Sign in again to get them back on this phone.</string>
     <string name="you_sign_out_body">Signing out clears this phone. %1$s are only here.</string>
     <string name="you_sign_out_offline">Connect to the internet to back up first.</string>
     <string name="you_sign_out_failed_backup">Couldn\'t back up just now. Try again, or sign out anyway.</string>

@@ -1,6 +1,7 @@
 # Picks. order | file | variant | note
 # A number = round-1 variant in <name>/. "fixtest N" = variant N in _fixtest/<name>/.
 # "pose" = still wrong after round 2; will be redone later with a pose guide.
+# Lines 32-64: round-3 main run (_sheets/). "redo" = all 4 variants wrong; needs a prompt fix.
 01 | ex_barbell_back_squat | 2
 02 | ex_conventional_deadlift | 2
 03 | ex_barbell_bench_press | 3
@@ -32,3 +33,36 @@
 29 | ex_lying_leg_curl | pose
 30 | ex_dip | pose
 31 | ex_plank | 3
+32 | ex_push_up | 2
+33 | ex_chin_up | 2 | unsure: check underhand grip
+34 | ex_incline_barbell_bench_press | 2
+35 | ex_front_squat | 2 | unsure: may read as back squat (elbows down)
+36 | ex_sumo_deadlift | 3
+37 | ex_dumbbell_chest_fly | 3 | unsure: only half lying on the bench
+38 | ex_cable_crossover | 4
+39 | ex_t_bar_row | redo | normal barbell with V-handles, no landmine or T-bar
+40 | ex_rear_delt_fly | 2 | unsure: front view, hip hinge hard to see
+41 | ex_arnold_press | 3
+42 | ex_barbell_shrug | 2
+43 | ex_overhead_tricep_extension | 2
+44 | ex_skull_crusher | redo | EZ bar drawn as a zigzag spring; torso hovers in 2-4
+45 | ex_close_grip_bench_press | 2
+46 | ex_preacher_curl | redo | no preacher pad
+47 | ex_cable_curl | 2 | unsure: cable comes from the top pulley, should be low
+48 | ex_dumbbell_bicep_curl | 3
+49 | ex_walking_dumbbell_lunge | 3
+50 | ex_bulgarian_split_squat | 3
+51 | ex_seated_calf_raise | redo | no knee pad or weight on the thighs
+52 | ex_hack_squat | redo | folding incline frame, no shoulder pads
+53 | ex_crunch | 3
+54 | ex_hanging_leg_raise | 2
+55 | ex_russian_twist | 1
+56 | ex_dead_bug | redo | all sit up; should lie flat, arms up, knees bent 90 degrees
+57 | ex_mountain_climber | redo | plain plank, no knee drawn toward the chest
+58 | ex_leg_raise | 2
+59 | ex_machine_chest_press | 4
+60 | ex_hip_abduction_machine | redo | no pads outside the knees
+61 | ex_seated_leg_curl | redo | no ankle pad behind the lower legs
+62 | ex_treadmill | 2
+63 | ex_stationary_bike | 2
+64 | ex_stair_climber | redo | fixed staircase, not a stair-climber machine

@@ -32,3 +32,13 @@ the device checks. Plan: 3-4 more after 0.2.1 (see progress.md cadence).
   image in 0.2.2.
 - To check after release: crash-free rate on 0.2.2, and that 0.2.3
   shows the update prompt on a tester phone.
+
+## 0.2.3 (2003), 2026-11-24
+From the paid testers' report (docs/plans/release/tester-feedback-2026-11-24.md):
+- Sign out now asks first, also when everything is backed up.
+- Play rating prompt (In-App Review) after the 3rd finished workout,
+  once more after the 10th, never mid-workout.
+- Store listing rewritten (ASO council), pasted in Play Console.
+- Update priority 4: first forced update, tested from 0.2.2 phones.
+- To check after release: a 0.2.2 phone is forced to update; crash-free
+  rate on 0.2.3.

@@ -176,11 +176,24 @@ class YouViewModelTest {
     }
 
     @Test
-    fun `sign out with nothing waiting signs out at once`() = runBlocking {
+    fun `sign out with nothing waiting asks first, then signs out`() = runBlocking {
         val vm = buildViewModel()
-        val event = async(start = CoroutineStart.UNDISPATCHED) { vm.logoutEvent.first() }
 
         vm.signOut()
+        assertEquals(
+            LogoutUiState.ConfirmSynced,
+            withTimeout(5_000) { vm.logoutState.first { it != LogoutUiState.Idle } },
+        )
+        assertEquals(0, auth.signOuts)
+
+        vm.cancelLogout()
+        assertEquals(LogoutUiState.Idle, vm.logoutState.value)
+        assertEquals(0, auth.signOuts)
+
+        vm.signOut()
+        withTimeout(5_000) { vm.logoutState.first { it == LogoutUiState.ConfirmSynced } }
+        val event = async(start = CoroutineStart.UNDISPATCHED) { vm.logoutEvent.first() }
+        vm.logout()
 
         withTimeout(5_000) { event.await() }
         assertEquals(1, auth.signOuts)

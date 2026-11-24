@@ -1,5 +1,49 @@
-Placeholder listing (Plan 8.3). Final copy and screenshots come with Plan 9/10.
+Gym Tracker is a simple workout log for the gym. Log sets, reps and weight in a few taps and keep an honest history of every session.
+No account needed: your workouts stay on your phone and the app works fully offline. Sign in only if you want a backup and sync across your devices.
 
-Gym Tracker is a calm workout tracker. Build templates, start a workout,
-and log sets, reps and weight in a few taps. Everything works offline;
-with an account your workouts sync across devices.
+LOG FAST
+• Start from a template and your sets are already laid out.
+• Rest timer between sets, with an optional buzz when rest is over.
+• Set a default rest time for each exercise.
+• Control your workout from the lock screen notification.
+• Left mid-workout? Resume it, or finish at your last set.
+
+PLANS AND TEMPLATES
+• Starter plans you rotate through, day by day, plus ready-made workouts.
+• Not sure where to start? Answer three questions and get a suggested plan.
+• Build your own templates for any split: full body, upper/lower, push/pull/legs.
+• Start an empty workout and add exercises as you go.
+• Save a finished workout as a new template.
+
+EXERCISE LIBRARY
+• A growing library of exercises with main muscles, equipment and how-to steps.
+• Add your own exercises and keep a note on each one (seat height, grip, cues).
+• Hide the ones you never do.
+
+MORE THAN WEIGHT AND REPS
+Each exercise is logged as what it is:
+• Weight and reps for barbell, dumbbell and machine lifts
+• Reps only for pull-ups, push-ups and dips
+• Time for planks and holds, with optional added weight
+• Distance and time for runs and rows
+• Distance with weight for carries like the farmer's walk
+
+PROGRESS AND HISTORY
+• Weekly totals at a glance.
+• A chart of your heaviest set each session, for any lift you pick.
+• Every past workout in one list. Search it or filter by exercise.
+
+YOUR DATA, YOUR CHOICE
+• Without an account, your workouts never leave your phone. This workout log needs no internet.
+• Make an account (Google or email) only if you want a backup and sync across devices.
+• Export a backup file whenever you like.
+• Delete your account and data from inside the app.
+• Crash reports help fix bugs.
+
+A TOOL, NOT A NETWORK
+No social feed, no followers, nothing to share. Just your training.
+
+FOR BEGINNERS AND EXPERIENCED LIFTERS
+A workout tracker for both. New to strength training? Follow a starter plan and the how-to for each exercise. Lifting for years? Build your own templates and the app stays out of your way.
+
+Made by a solo developer in the EU. Found a bug or missing something? Tap Send feedback in the app.
