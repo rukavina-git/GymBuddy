@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rukavina.gymbuddy.R
+import com.rukavina.gymbuddy.review.StoreReview
 import com.rukavina.gymbuddy.ui.design.AppLinkButton
 import com.rukavina.gymbuddy.ui.design.AppTextButton
 import com.rukavina.gymbuddy.ui.design.ListRow
@@ -71,7 +74,13 @@ fun WorkoutSummaryScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val summary = state.summary
-    val close = { viewModel.closeSummary(); onDone() }
+    val activity = LocalActivity.current
+    val review = remember(activity) { activity?.let(StoreReview::create) }
+    val close = {
+        viewModel.closeSummary()
+        if (activity != null) review?.onWorkoutFinished(activity)
+        onDone()
+    }
     BackHandler { close() }
     if (summary == null) return
     WorkoutSummaryContent(

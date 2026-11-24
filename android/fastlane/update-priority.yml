@@ -5,3 +5,4 @@
 # Only phones on 0.2.2+ react. Set it before tagging; Play can't change
 # it after upload. The promote to closed testing keeps it.
 "0.2.2": 0
+"0.2.3": 4
