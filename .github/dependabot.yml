@@ -1,13 +1,15 @@
-# Version updates (security alerts are on separately in repo settings).
-# Weekly, PRs into develop, minor + patch grouped per ecosystem so a week
-# is one PR to review. Majors come one PR each: they need a look.
+# Version update PRs are OFF (open-pull-requests-limit: 0): the owner
+# doesn't want Dependabot creating branches or commits. Bumps are done by
+# hand on request. Security alerts stay on (repo settings); automatic
+# security-fix PRs are off too. Set a limit > 0 to turn PRs back on;
+# the groups below are kept for that.
 version: 2
 updates:
   - package-ecosystem: gradle
     directory: /android
     target-branch: develop
     schedule: { interval: weekly, day: monday }
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     groups:
       android-minor:
         update-types: [minor, patch]
@@ -16,7 +18,7 @@ updates:
     directory: /backend
     target-branch: develop
     schedule: { interval: weekly, day: monday }
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     groups:
       backend-minor:
         update-types: [minor, patch]
@@ -25,7 +27,7 @@ updates:
     directory: /api
     target-branch: develop
     schedule: { interval: weekly, day: monday }
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 0
     groups:
       api-minor:
         update-types: [minor, patch]
@@ -34,7 +36,7 @@ updates:
     directory: /
     target-branch: develop
     schedule: { interval: weekly, day: monday }
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 0
     groups:
       actions:
         update-types: [minor, patch, major]
