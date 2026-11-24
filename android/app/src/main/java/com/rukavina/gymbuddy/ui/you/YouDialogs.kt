@@ -88,6 +88,15 @@ internal fun SignOutDialogs(
 ) {
     val title = stringResource(R.string.you_sign_out_title)
     when (state) {
+        LogoutUiState.ConfirmSynced -> AppChoiceDialog(
+            title = title,
+            body = stringResource(R.string.you_sign_out_synced_body),
+            actions = listOf(
+                DialogAction(stringResource(R.string.you_cancel), onCancel),
+                DialogAction(stringResource(R.string.you_sign_out), onBackUp, DialogActionTone.Danger),
+            ),
+            onDismiss = onCancel,
+        )
         is LogoutUiState.Confirm -> SignOutQuestion(
             title = title,
             lines = state.lines,
