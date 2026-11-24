@@ -144,3 +144,10 @@
   (missing = 0, owner's default). Unit + FakeAppUpdateManager tests.
   Device check pending (phone not connected); real Play flow can only
   be seen once 0.2.3 is out to phones on 0.2.2.
+- 0.2.2 released 2026-11-24: PR #25 → main, tag v0.2.2, AAB on
+  internal, promoted to closed (alpha). Ships in-app updates (priority
+  0), Ward fixes (Play security provider update, overlay hiding on
+  password screens; both checked on device) and sync failure-mode
+  tests. No exercise images (Gemini set removed; Qwen set next).
+  Backend Release cancelled (backend/ unchanged; image lookup window
+  still to fix). Dependabot version PRs off (limit 0).
