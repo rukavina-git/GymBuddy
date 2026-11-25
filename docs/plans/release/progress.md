@@ -261,7 +261,7 @@
   - Page goes live with the 0.2.4 merge to main (legal-site.yml).
   - (me) Play Console Data safety: add row 9, submit with 0.2.4.
 - 06d split in two (2026-11-25, owner OK).
-- [x] 06d1 admin backend + spec (2026-11-25), HASH
+- [x] 06d1 admin backend + spec (2026-11-25), 070f496
   - **Spec change:** tag Admin, GET /v1/admin/feedback (status,
     cursor, limit; items + nextCursor + counts), PATCH
     /v1/admin/feedback/{id} (status and/or note), schemas
