@@ -159,7 +159,7 @@
 - Step 06 written (2026-11-25): in-app feedback for 0.2.4 (owner:
   v1, runs before 05; ntfy ping without text + read script; email
   option removed). Next after 06: owner's full app check (10.1a).
-- [x] 06a feedback API + backend (2026-11-25), HASH
+- [x] 06a feedback API + backend (2026-11-25), a5a9d97
   - **Spec change:** POST /v1/feedback (security optional) +
     FeedbackRequest. V9__feedback.sql. New backend package `feedback`
     (service, rate limiter, ntfy notifier), added to CLAUDE.md.
