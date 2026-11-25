@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.google.android.play.core.install.model.AppUpdateType
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -24,7 +25,8 @@ class InAppUpdatesTest {
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
     private val fake = FakeAppUpdateManager(activity)
     private val launcher = activity.activityResultRegistry.register("update", ActivityResultContracts.StartIntentSenderForResult()) {}
-    private val updates = InAppUpdates(activity, fake, launcher)
+    private val decisions = mutableListOf<UpdateAction>()
+    private val updates = InAppUpdates(activity, fake, launcher) { decisions += it }
 
     private fun available(priority: Int) {
         fake.setUpdateAvailable(2002, AppUpdateType.IMMEDIATE)
@@ -41,6 +43,7 @@ class InAppUpdatesTest {
         available(0)
         checkNow()
         assertFalse(fake.isImmediateFlowVisible)
+        assertEquals(listOf(UpdateAction.NONE), decisions)
     }
 
     @Test
@@ -48,6 +51,7 @@ class InAppUpdatesTest {
         available(4)
         checkNow()
         assertTrue(fake.isImmediateFlowVisible)
+        assertEquals(listOf(UpdateAction.FORCE), decisions)
 
         updates.onResult(Activity.RESULT_CANCELED)
         assertTrue(activity.isFinishing)

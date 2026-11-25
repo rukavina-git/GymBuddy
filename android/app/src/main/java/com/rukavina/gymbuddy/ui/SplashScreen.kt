@@ -34,7 +34,13 @@ fun SplashScreen(navController: NavHostController, guestViewModel: GuestViewMode
     LaunchedEffect(Unit) {
         if (guestViewModel.opensMain()) navController.openMain() else navController.openWelcome()
     }
-    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
+    BrandCover()
+}
+
+/** App icon on ground: the start screen, also held over the app while Play's update check runs. */
+@Composable
+fun BrandCover(modifier: Modifier = Modifier) {
+    Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
         Image(painterResource(AppIcons.Brand.AppIcon), stringResource(R.string.cd_app_name), Modifier.size(SplashMark))
     }
 }

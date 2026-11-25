@@ -24,6 +24,8 @@ class InAppUpdates(
     private val activity: Activity,
     private val manager: AppUpdateManager,
     private val launcher: ActivityResultLauncher<IntentSenderRequest>,
+    /** Every check's outcome; NONE also when Play can't answer. */
+    private val onDecided: (UpdateAction) -> Unit = {},
 ) {
     private val prefs = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
     private var forced = false
@@ -31,7 +33,10 @@ class InAppUpdates(
     fun check() {
         manager.appUpdateInfo
             .addOnSuccessListener(::act)
-            .addOnFailureListener { Log.d(TAG, "update check unavailable: ${it.message}") }
+            .addOnFailureListener {
+                Log.d(TAG, "update check unavailable: ${it.message}")
+                onDecided(UpdateAction.NONE)
+            }
     }
 
     /** Result of Play's update screen. Backing out of a forced update closes the app. */
@@ -48,7 +53,9 @@ class InAppUpdates(
             immediateAllowed = info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE),
         )
         val lastPrompted = prefs.getInt(KEY_PROMPTED, NONE).takeIf { it != NONE }
-        when (UpdatePolicy.decide(offer, lastPrompted)) {
+        val action = UpdatePolicy.decide(offer, lastPrompted)
+        onDecided(action)
+        when (action) {
             UpdateAction.NONE -> return
             UpdateAction.FORCE -> forced = true
             UpdateAction.PROMPT -> {
