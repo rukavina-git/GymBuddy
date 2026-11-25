@@ -44,8 +44,9 @@ gets a text box + Send inside the app.
 ## 06b Android
 - Screen You → Send feedback: one multiline field, char counter near
   the cap, Send. Short line under it: what is sent (text, app and
-  phone version, account if signed in). Link the Figma frame first,
-  or reuse existing components and add the frame after (owner picks).
+  phone version, account if signed in). No Figma frame (owner,
+  2026-11-25): small screen, built from existing components and
+  design/DESIGN.md.
 - Room table `pending_feedback` (schema bump + migration + test).
   Send = insert row + enqueue WorkManager job (network constraint,
   backoff). Job posts each row and deletes it on 204/400. Token
