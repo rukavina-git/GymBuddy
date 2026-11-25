@@ -47,21 +47,27 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Backend Build pushes sha-<7> only for pushes that touch backend/,
-      # so the tagged commit may have no image. Any recent commit with
-      # the same backend/ tree runs the same code: take the newest one
-      # that has an image. The tag usually follows the merge right away,
-      # so the main build may still be running: retry up to 25 min.
+      # tagged with the push's head commit, so the tagged commit may have
+      # no image. Any commit with the same backend/ tree (same tree hash,
+      # Dockerfile included) runs the same code: take the newest one
+      # that has an image. A release with backend/ unchanged can have
+      # dozens of same-tree commits (v0.2.3: 79, the image on #27), so
+      # the first pass checks them all. The tag usually follows the
+      # merge right away, so the main build may still be running: later
+      # passes recheck only the newest 10, for up to 25 min.
       - name: Find image
         id: image
         run: |
           image=ghcr.io/rukavina-git/gymbuddy-backend
-          candidates=()
+          tree="$(git rev-parse "$GITHUB_SHA:backend")"
+          all=()
           while read -r c; do
-            if git diff --quiet "$c" "$GITHUB_SHA" -- backend; then
-              candidates+=("$c")
+            if [[ "$(git rev-parse "$c:backend" 2>/dev/null)" == "$tree" ]]; then
+              all+=("$c")
             fi
-          done < <(git rev-list -n 200 "$GITHUB_SHA")
-          candidates=("${candidates[@]:0:20}")
+          done < <(git rev-list -n 500 "$GITHUB_SHA")
+          echo "${#all[@]} commits share backend/ tree $tree"
+          candidates=("${all[@]}")
           for _ in $(seq 1 50); do
             for c in "${candidates[@]}"; do
               tag="sha-${c::7}"
@@ -72,6 +78,7 @@ jobs:
               fi
             done
             echo "No image yet for ${#candidates[@]} candidate commits, waiting ..."
+            candidates=("${all[@]:0:10}")
             sleep 30
           done
           echo "::error::No GHCR image with this backend/ tree. Did Backend Build pass on main? Fallback: Deploy backend by hand."

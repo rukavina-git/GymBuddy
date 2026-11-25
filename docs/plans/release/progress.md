@@ -201,3 +201,8 @@
   - Open (hardening, after 0.2.4): `deploy` logins don't alert but
     deploy is root-equivalent; alert on deploy unless it's the GitHub
     Actions key (needs separate keys + a way to see the key in PAM).
+- Backend Release image lookup fixed (2026-11-25): matches commits by
+  backend/ tree hash over the last 500, first pass checks all of them
+  (no 20 cap), retries check the newest 10. Simulated on v0.2.3: 79
+  same-tree commits, finds sha-8ecd5d7 (the old code gave up).
+  actionlint clean. Real proof: the 0.2.4 tag.
