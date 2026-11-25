@@ -67,57 +67,80 @@ gets a text box + Send inside the app.
 ## 06d Feedback admin page
 Owner, 2026-11-25: reading feedback over SSH is not acceptable; wants
 a UI to read it and mark its status. Backend-only (no app release),
-but live on prod before 0.2.4 reaches testers. Order: 06b, 06c, 06d,
-then ship.
+but live on prod before 0.2.4 reaches testers. Order: 06b, 06c, 06d1,
+06d2, then ship 0.2.4. Two steps to keep each small.
 
+Shape (both steps):
 - Where: `/admin/` on each API host (api-test.rukavina.app/admin/,
-  api.rukavina.app/admin/). No new DNS name or cert. One static HTML
-  page + JS + CSS served by the backend (Spring static resources), no
-  build tool, no framework. Works in a phone browser.
-- Sign-in: Firebase Auth web SDK, Google sign-in, against that
-  stack's Firebase project. The page sends the ID token as bearer.
-  Firebase web config comes from `GET /admin/config.js`, built from
-  env (`ADMIN_FIREBASE_API_KEY`, `ADMIN_FIREBASE_AUTH_DOMAIN`,
-  `ADMIN_FIREBASE_PROJECT_ID`); unset = page shows "admin off".
-- Who: env `ADMIN_UIDS` (comma list, owner's uid per project). Any
-  other valid token gets 403; no token 401. Unset = every admin call
-  403.
+  api.rukavina.app/admin/). No new DNS name or cert.
+- Who: env `ADMIN_UIDS` (comma list, owner's uid in that stack's
+  Firebase project). No token 401, valid token not on the list 403,
+  list unset = every admin call 403.
+- Statuses: open (default), solved, wont_fix, spam. Optional note
+  (max 500 chars), e.g. "fixed in 0.2.5".
+- Privacy: no change (text stays on our server; owner reads it).
+- Keep feedback.sh (works when the page is down).
+
+### 06d1 Backend + spec
 - **Spec change (api/openapi.yaml):** tag `admin`, bearer required.
   - `GET /v1/admin/feedback?status=&cursor=&limit=`: newest first;
     id, message, status, note, account ("guest" or uid), appVersion,
     osVersion, deviceModel, createdAt, receivedAt, updatedAt; opaque
-    cursor like sync.
+    cursor like sync; plus counts per status for the filter chips.
   - `PATCH /v1/admin/feedback/{id}`: `status` and/or `note`; 200 with
-    the row, 404 unknown id.
+    the row, 404 unknown id, 400 bad status / note too long.
 - Flyway `V10__feedback_status.sql`: `status` text not null default
-  'open' (check: open, solved, wont_fix, spam), `note` text null (max
-  500), `updated_at`. Index on (status, received_at).
-- Page: filter chips All / Open / Solved / Won't fix / Spam (default
-  Open), count per status. Each card: message (line breaks kept,
-  rendered as text, never HTML), date, app / Android / device, guest
-  or account, status picker, note field. Saves on change. Plain
-  design from design/DESIGN.md colours, dark.
-- ntfy: `Click` header = that stack's `/admin/` URL, so tapping the
-  ping opens the list (env `ADMIN_URL`; unset = no click).
-- nginx: `/admin/` and `/v1/admin/` limit_req (e.g. 30/min per IP).
-  CSP for `/admin/`: scripts from self + Firebase's gstatic/
-  googleapis hosts only, `frame-ancestors 'none'`, no inline script.
-- Security: admin endpoints only on bearer + uid allowlist; message
-  rendered with textContent; no feedback text in logs. Firebase
-  authorized domains: add both API hosts (owner, console).
-- Privacy: no change (text stays on our server; owner reads it).
+  'open' (check constraint on the 4 values), `note` text null,
+  `updated_at`. Index on (status, received_at).
+- Admin check: uid from the Firebase token (existing filter), against
+  `ADMIN_UIDS`. Never treat Spring's anonymous principal as a uid
+  (06a gotcha).
+- Retention (privacy policy, 06c): a daily scheduled job deletes
+  feedback with `received_at` older than 2 years, any status. Test it.
+- ntfy: `Click` header = env `ADMIN_URL` (that stack's `/admin/`), so
+  tapping the ping opens the list; unset = no click.
+- 06a reviewer leftovers, fix here: bound `createdAt` (Long.MAX gave
+  500; reject far past/future with 400), feedback.sh strips control
+  chars before printing.
+- compose.yaml (both stacks): pass `ADMIN_UIDS`, `ADMIN_URL`.
+- Tests: admin controller (401, 403 non-admin, 403 empty list, list +
+  status filter + cursor + counts, patch status/note, 404, 400),
+  retention job, createdAt bounds, ntfy Click header; drift test
+  green; backend build green.
+
+### 06d2 Page + nginx + server
+- One static page (HTML + JS + CSS, no build tool, no framework)
+  served by the backend from Spring static resources at `/admin/`;
+  security permits the static files, the API stays bearer-only.
+- Sign-in: Firebase Auth web SDK (pinned version, from gstatic),
+  Google sign-in with **popup** (redirect breaks on mobile browsers
+  with storage partitioning), against that stack's Firebase project.
+  Web config from `GET /admin/config.js`, built from env
+  (`ADMIN_FIREBASE_API_KEY`, `ADMIN_FIREBASE_AUTH_DOMAIN`,
+  `ADMIN_FIREBASE_PROJECT_ID`); unset = page shows "admin off".
+  Sends the ID token as bearer; refreshes it before calls.
+- Page: filter chips Open / Solved / Won't fix / Spam / All (default
+  Open) with counts. Each card: message (line breaks kept, set with
+  textContent, never innerHTML), date in Europe/Zagreb, app /
+  Android / device, guest or account, status picker, note field.
+  Saves on change, shows saved/failed. Load more at the end. Dark,
+  colours from design/DESIGN.md, phone width first.
+- nginx: `/admin/` and `/v1/admin/` limit_req (~30/min per IP). CSP
+  for `/admin/`: script-src self + www.gstatic.com; connect-src self
+  + identitytoolkit / securetoken.googleapis.com; frame-src the
+  project's `*.firebaseapp.com` (popup/auth iframe); no inline
+  script; frame-ancestors 'none'.
 - third-party.md: Firebase JS SDK (Apache 2.0), loaded from gstatic.
-- Retention (privacy policy, 06c): a daily job deletes feedback older
-  than 2 years (`received_at`), any status. Test it.
-- Keep feedback.sh (works when the page is down).
-- Tests: admin controller (401, 403 non-admin, 403 empty allowlist,
-  list + filter + cursor, patch status/note, 404, bad status 400),
-  drift test green. Device check: sign in on the phone browser on
-  test, mark a curl message solved, filter shows it.
-- (me) Firebase console: register a web app in both projects, add
-  authorized domains; put the 3 config values + `ADMIN_UIDS` +
-  `ADMIN_URL` in both `.env` files, `docker compose up -d backend`.
-  Bitwarden entry for the uids/config (not secret, but kept together).
+- Deploy (owner, guided like 06a): Firebase console: register a web
+  app in both projects, add both API hosts as authorized domains;
+  5 env values per stack (`ADMIN_FIREBASE_*` x3, `ADMIN_UIDS`,
+  `ADMIN_URL`); scp both compose.yaml files and the nginx template;
+  `nginx -t` in a throwaway container before `restart nginx`;
+  `docker compose up -d backend` after env changes (check with
+  printenv). Bitwarden entry for the uids/config.
+- Check: phone browser on test: sign in, see the curl and device
+  messages, mark one solved, filter shows it; a second Google account
+  gets 403; tapping the ntfy ping opens the page.
 
 ## Done when
 Feedback from a guest and a signed-in qa build arrives on the test

@@ -260,3 +260,6 @@
     fields), third-party.md (ntfy row, data map) updated.
   - Page goes live with the 0.2.4 merge to main (legal-site.yml).
   - (me) Play Console Data safety: add row 9, submit with 0.2.4.
+- Next: 06d1 (admin backend + spec), then 06d2 (page, nginx, server),
+  then ship 0.2.4 (bump, changelog, closed-test log, PR, tag, Play
+  Data safety row 9). 06d split in two (2026-11-25, owner OK).
