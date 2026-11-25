@@ -80,6 +80,10 @@ Shape (both steps):
   (max 500 chars), e.g. "fixed in 0.2.5".
 - Privacy: no change (text stays on our server; owner reads it).
 - Keep feedback.sh (works when the page is down).
+- Owner: the panel may grow later; don't build for it now. Only keep
+  the cheap seams: one admin guard for all of `/v1/admin/**` (not
+  inside the feedback controller), and the page has a header with
+  "Feedback" as its only section. No roles, admin table, framework.
 
 ### 06d1 Backend + spec
 - **Spec change (api/openapi.yaml):** tag `admin`, bearer required.
