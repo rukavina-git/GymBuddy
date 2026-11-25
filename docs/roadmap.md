@@ -176,6 +176,11 @@ review first, then 10.1a refinement + 10.4a, new version, then 10.3
 
 ## Later
 
+- Admin page: releases section (owner 2026-11-25, after 06d2). Per
+  stack: version, release date, changelog text, link to the git tag /
+  commit. Idea: CI writes it at release time from the v* tag and
+  fastlane changelogs/<code>.txt (prod), develop commit + App
+  Distribution build (test); no DB needed. Uses 06d's page header.
 - Move to paid hosting (e.g. DigitalOcean): restore dump, repoint DNS
 - iOS (designs already in Figma), after Android v2 (owner 2026-11-25)
 - v2 list: architecture plan §14.2
