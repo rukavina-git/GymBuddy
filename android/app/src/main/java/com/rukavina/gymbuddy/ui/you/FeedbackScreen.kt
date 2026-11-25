@@ -2,9 +2,12 @@ package com.rukavina.gymbuddy.ui.you
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -48,7 +51,9 @@ internal fun FeedbackContent(
     val d = GymBuddyTheme.dimens
     val cs = MaterialTheme.colorScheme
     Surface(Modifier.fillMaxSize(), color = cs.background) {
-        Column(Modifier.fillMaxSize().imePadding()) {
+        // Full screen (TabNavigation.isFullScreen): the frame already pads
+        // the navigation bar, which the IME inset includes.
+        Column(Modifier.fillMaxSize().consumeWindowInsets(WindowInsets.navigationBars).imePadding()) {
             BackTopBar(onBack = onBack, title = stringResource(R.string.you_feedback))
             Column(
                 Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = d.insetScreen),

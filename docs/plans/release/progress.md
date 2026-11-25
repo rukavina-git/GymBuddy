@@ -206,7 +206,7 @@
   (no 20 cap), retries check the newest 10. Simulated on v0.2.3: 79
   same-tree commits, finds sha-8ecd5d7 (the old code gave up).
   actionlint clean. Real proof: the 0.2.4 tag.
-- [ ] 06b Android feedback (2026-11-25), code done, device check open
+- [x] 06b Android feedback (2026-11-25), 1ea75a9 + device fixes
   - You › Help › Send feedback (row above About; mailto row and
     FEEDBACK_EMAIL removed). One field (6 lines), counter from 1800,
     "too long" error past 2000, what-is-sent line, Send; then "Thanks,
@@ -228,5 +228,18 @@
     lint green.
   - Gotcha: outbox tests use runBlocking; runTest's virtual clock fires
     the send timeout while Room works on its own executor.
-  - Open: device check on qa (phone not connected): guest + signed in,
-    airplane mode then online, rows on test, ping.
+  - Device check (SM-S731B, qa, signed in as crashfix-test-1119):
+    online send → "Thanks, sent"; airplane mode → "Saved"
+    (UnknownHostException logged), back online → FeedbackWorker
+    SUCCESS. Guest send on device not done (would sign out the test
+    account); covered by unit tests + the curl check. Owner: confirm
+    both rows and pings on test with feedback.sh.
+  - Device fixes: keyboard hid Send (tab bar + IME padding counted
+    twice). Feedback route is now full screen (isFullScreen, like Edit
+    workout), and the screen consumes the navigation-bar inset before
+    imePadding.
+  - Gotchas: `am force-stop` cancels the app's WorkManager jobs until
+    the next launch (a swipe-away doesn't); relaunching ran the worker.
+    No sqlite3 on the phone; use WM-WorkerWrapper logs. A blank Home
+    seen once in airplane mode didn't reproduce (likely a transition
+    caught mid-way).
