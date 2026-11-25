@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Debug-only fake Play update screen. -->
+    <string name="debug_fake_update" translatable="false">Fake Play update (debug)\n\nPress back to cancel</string>
+</resources>

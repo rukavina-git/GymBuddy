@@ -14,9 +14,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.lifecycle.lifecycleScope
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.rukavina.gymbuddy.update.InAppUpdates
 import com.rukavina.gymbuddy.update.UpdateCover
+import com.rukavina.gymbuddy.update.UpdateManagers
 import com.rukavina.gymbuddy.navigation.AppNavHost
 import com.rukavina.gymbuddy.ui.BrandCover
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        updates = InAppUpdates(this, AppUpdateManagerFactory.create(this), updateLauncher) { action ->
+        updates = InAppUpdates(this, UpdateManagers.create(this), updateLauncher) { action ->
             cover.onDecided(action)
             covered = cover.covered
         }
