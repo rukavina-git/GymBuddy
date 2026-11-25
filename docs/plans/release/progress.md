@@ -156,3 +156,6 @@
   forced update for 0.2.2 phones. Sign-out confirmation, Play rating
   prompt; new store listing text pasted by hand. Backend Release
   waiting on the image check again (backend/ unchanged).
+- Step 06 written (2026-11-25): in-app feedback for 0.2.4 (owner:
+  v1, runs before 05; ntfy ping without text + read script; email
+  option removed). Next after 06: owner's full app check (10.1a).
