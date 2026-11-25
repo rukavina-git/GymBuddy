@@ -27,7 +27,8 @@ the device checks. Plan: 3-4 more after 0.2.1 (see progress.md cadence).
     older Android).
   - Password fields hide other apps' overlays (tapjacking), Android 12+.
 - Sync failure-mode tests (offline, expired session) added.
-- Known: the 4 old Gemini exercise images are removed; the new
+- Known: the 4 old Gemini exercise images are removed (2026-11-25:
+  images parked for v2, still frames don't show the movement); the new
   Qwen-Image set lands in the next update, so no exercise shows an
   image in 0.2.2.
 - To check after release: crash-free rate on 0.2.2, and that 0.2.3
