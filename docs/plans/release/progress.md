@@ -193,3 +193,11 @@
   solved / won't fix / spam + note). Spec change. Order: 06b, 06c,
   06d, ship 0.2.4. Backend image lookup window fix still due before
   the next backend release.
+- Root SSH login alert turned on (2026-11-25, owner): it had been off
+  since Plan 5. setup.sh ran before the alert existed, so the pam line
+  and script were missing and no topic was set. Installed by hand
+  (same code as setup.sh), own topic in /etc/gymbuddy/ntfy-topic
+  (Bitwarden "GymBuddy ntfy SSH login topic"); test login pinged.
+  - Open (hardening, after 0.2.4): `deploy` logins don't alert but
+    deploy is root-equivalent; alert on deploy unless it's the GitHub
+    Actions key (needs separate keys + a way to see the key in PAM).
