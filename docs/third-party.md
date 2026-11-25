@@ -109,6 +109,7 @@ All run on the VPS in Docker or on the host, never in the app.
 | certbot | Renews certificates | Apache 2.0 |
 | PostgreSQL 17 | Database, one per environment | PostgreSQL Licence |
 | Spring Boot, Flyway, Firebase Admin SDK | Backend framework, migrations, token checks | Apache 2.0 |
+| Firebase JS SDK 13.3.0 (loaded from www.gstatic.com) | Google sign-in on the owner's feedback admin page (`/admin/`, browser only, not in the app) | Apache 2.0 |
 
 ## 6. Inside the app
 

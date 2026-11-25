@@ -37,6 +37,10 @@ services:
       # nobody) and this stack's /admin/ URL for the ping's tap.
       ADMIN_UIDS: ${ADMIN_UIDS:-}
       ADMIN_URL: ${ADMIN_URL:-}
+      # Firebase web app config for /admin/ (unset = page says "admin off").
+      ADMIN_FIREBASE_API_KEY: ${ADMIN_FIREBASE_API_KEY:-}
+      ADMIN_FIREBASE_AUTH_DOMAIN: ${ADMIN_FIREBASE_AUTH_DOMAIN:-}
+      ADMIN_FIREBASE_PROJECT_ID: ${ADMIN_FIREBASE_PROJECT_ID:-}
       JAVA_TOOL_OPTIONS: -Xmx300m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
     expose:

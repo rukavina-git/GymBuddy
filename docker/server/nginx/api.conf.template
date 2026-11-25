@@ -29,6 +29,10 @@ resolver 127.0.0.11 valid=10s ipv6=off;
 limit_req_zone $binary_remote_addr zone=feedback:1m rate=10r/m;
 limit_req_status 429;
 
+# The feedback admin page and its API (Plan 10 step 06d): one owner, so
+# a low per-IP limit; the backend still checks the token and uid list.
+limit_req_zone $binary_remote_addr zone=admin:1m rate=30r/m;
+
 # Port 80, any Host: answer ACME challenges, so certbot --webroot can
 # add a name through the running nginx. Everything else: drop.
 server {
@@ -78,6 +82,32 @@ server {
     # Never plain "backend": see the alias note in compose.yaml.
     set $backend_upstream http://backend-prod:8080;
 
+    # Admin page: strict CSP. Firebase Google sign-in by popup needs
+    # gstatic (SDK), apis.google.com (its loader), the Firebase auth
+    # APIs and the project's firebaseapp.com auth iframe. A location's
+    # add_header replaces the server's, so HSTS is repeated here.
+    location /admin/ {
+        limit_req zone=admin burst=20 nodelay;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header Referrer-Policy no-referrer always;
+        add_header Content-Security-Policy "default-src 'none'; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self'; img-src 'self'; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; frame-src https://*.firebaseapp.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" always;
+        proxy_pass $backend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /v1/admin/ {
+        limit_req zone=admin burst=20 nodelay;
+        proxy_pass $backend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
     location = /v1/feedback {
         limit_req zone=feedback burst=5 nodelay;
         client_max_body_size 16k;
@@ -109,6 +139,32 @@ server {
     client_max_body_size 1m;
 
     set $backend_upstream http://backend-test:8080;
+
+    # Admin page: strict CSP. Firebase Google sign-in by popup needs
+    # gstatic (SDK), apis.google.com (its loader), the Firebase auth
+    # APIs and the project's firebaseapp.com auth iframe. A location's
+    # add_header replaces the server's, so HSTS is repeated here.
+    location /admin/ {
+        limit_req zone=admin burst=20 nodelay;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header Referrer-Policy no-referrer always;
+        add_header Content-Security-Policy "default-src 'none'; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self'; img-src 'self'; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; frame-src https://*.firebaseapp.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" always;
+        proxy_pass $backend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /v1/admin/ {
+        limit_req zone=admin burst=20 nodelay;
+        proxy_pass $backend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 
     location = /v1/feedback {
         limit_req zone=feedback burst=5 nodelay;

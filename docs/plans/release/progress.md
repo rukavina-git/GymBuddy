@@ -305,5 +305,52 @@
     throw in buildRequest() after the insert (500 on POST); type
     mismatch handler is global.
   - Roadmap: 10.4b stays open until 0.2.4 ships (no 06d1 line).
-- Next: 06d2 (page, nginx, server), then ship 0.2.4 (bump, changelog,
-  closed-test log, PR, tag, Play Data safety row 9).
+- [x] 06d2 admin page + nginx (2026-11-25), repo part; HASH
+  - backend static/admin/ (index.html, admin.js, admin.css; plain ES
+    module, Firebase JS SDK 13.3.0 from gstatic, Google popup sign-in).
+    AdminPageController (@Hidden, no spec change): /admin -> /admin/,
+    /admin/ forwards to index.html, GET /admin/config.js from
+    ADMIN_FIREBASE_API_KEY / _AUTH_DOMAIN / _PROJECT_ID (any blank =
+    null = "Admin is off"), no-store, `<` and U+2028/9 escaped.
+    SecurityConfig: GET /admin and /admin/** permitAll; /v1/admin/**
+    unchanged. Both compose files pass the 3 new env values.
+  - Page: chips Open/Solved/Won't fix/Spam/All with counts (default
+    Open), cards with message (textContent, pre-wrap), date
+    Europe/Zagreb (createdAt), app / OS / device, guest or uid, status
+    select + note (saves on change, Saved / error), Load more (50 per
+    page). 401 -> one forced token refresh + retry; 403 -> "not an admin".
+  - nginx: zone admin 30r/m per IP, burst 20, on /admin/ and /v1/admin/
+    (prod + test). CSP on /admin/ (HSTS repeated there: a location's
+    add_header replaces the server's). `nginx -t` passed locally with
+    envsubst + a throwaway cert (nginx:1.27-alpine).
+  - third-party.md: Firebase JS SDK row (section 5).
+  - Tests: AdminPageTest (redirect, page/js/css without token, config
+    null when unset, values, blank, escaping, /v1/admin still 401).
+    Backend 176/176 incl. drift test.
+  - Deviations: CSP script-src also allows https://apis.google.com
+    (Firebase popup loads its gapi loader from there). frame-src is
+    https://*.firebaseapp.com (one template for both projects). No
+    Figma frame (owner-only internal page, owner OK); colours from
+    design/tokens.json, system font (no Figtree download).
+  - Open (reviewer, not fixed): SHOULD: a chip tap during a running
+    load is dropped but the filter still changes (list and chip
+    disagree; Load more mixes filters) -> ignore taps while loading;
+    two quick status changes race -> disable the select while saving.
+    NITs: card shows createdAt but list sorts by receivedAt; osVersion
+    shown raw; config.js load failure says "Admin is off"; burst 20
+    may 429 during fast triage; raw U+2028/9 chars in
+    AdminPageController source (write as escapes).
+  - (me) Deploy, test first then prod: Firebase console per project:
+    register a web app (copy apiKey, authDomain, projectId), add the
+    API host to Auth > Settings > Authorized domains. .env: the 3
+    ADMIN_FIREBASE_* + ADMIN_UIDS (owner uid in that project) +
+    ADMIN_URL (https://<host>/admin/). Backend image from develop
+    (test) / tag (prod). scp both compose.yaml + nginx template,
+    `nginx -t` in a throwaway container, restart nginx, `docker
+    compose up -d backend`, check printenv. Bitwarden entry.
+  - Check (me, phone): sign in on test, see curl + device messages,
+    mark one solved, filter shows it; second Google account gets
+    "not an admin"; ntfy ping opens the page. Then prod.
+- Next: fix the two reviewer SHOULDs before prod use (small), owner
+  deploy + phone check, then ship 0.2.4 (bump, changelog, closed-test
+  log, PR, tag, Play Data safety row 9).

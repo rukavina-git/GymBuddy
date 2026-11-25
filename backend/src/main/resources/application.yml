@@ -59,6 +59,12 @@ gymbuddy:
     uids: ${ADMIN_UIDS:}
     # This stack's /admin/ page; the feedback ping opens it. Blank = no link.
     url: ${ADMIN_URL:}
+    # Firebase web app config for the /admin/ page (public values, from
+    # that stack's Firebase project). Any blank = page shows "admin off".
+    firebase:
+      api-key: ${ADMIN_FIREBASE_API_KEY:}
+      auth-domain: ${ADMIN_FIREBASE_AUTH_DOMAIN:}
+      project-id: ${ADMIN_FIREBASE_PROJECT_ID:}
   sync:
     # How long a tombstoned entity is kept before TombstoneRetentionService
     # hard-deletes it and its change_log rows (Group H). Configuration, not

@@ -39,6 +39,10 @@ class SecurityConfig(
                 authorize(HttpMethod.POST, "/v1/feedback", permitAll)
                 // The one admin guard for every admin route (AdminAccess).
                 authorize("/v1/admin/**", adminAccess)
+                // The admin page's static files and web config are public;
+                // its data comes from /v1/admin/** above, bearer-only.
+                authorize(HttpMethod.GET, "/admin", permitAll)
+                authorize(HttpMethod.GET, "/admin/**", permitAll)
                 authorize("/v3/api-docs/**", permitAll)
                 authorize("/swagger-ui/**", permitAll)
                 authorize("/swagger-ui.html", permitAll)
