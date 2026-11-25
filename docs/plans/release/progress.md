@@ -179,3 +179,17 @@
     rate token spent before dedupe; UTF-16 vs code point length.
   - (me) Before 06b on test: NTFY_FEEDBACK_TOPIC in both stacks' .env,
     scp feedback.sh + nginx template, deploy.
+- 06a on the server (2026-11-25, owner): topic set in both env files
+  (separate test/prod topics, Bitwarden), both compose files,
+  feedback.sh and nginx template copied, `nginx -t` in a throwaway
+  container passed, nginx restarted. Test: curl POST 204, same id
+  again = one row, ping on the phone, feedback.sh shows it.
+  - Gotchas: a changed env file needs `docker compose up -d backend`
+    (the backend ran without the topic until then; check with
+    `docker compose exec backend printenv NTFY_FEEDBACK_TOPIC`).
+    Resending the same id is a dedupe: no row, no ping.
+- 06d added (2026-11-25, owner): feedback admin page at /admin/ on
+  each API host (Firebase Google sign-in, uid allowlist, status open /
+  solved / won't fix / spam + note). Spec change. Order: 06b, 06c,
+  06d, ship 0.2.4. Backend image lookup window fix still due before
+  the next backend release.

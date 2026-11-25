@@ -64,7 +64,61 @@ gets a text box + Send inside the app.
   Update docs/plans/legal-privacy/data-safety.md.
 - docs/third-party.md: ntfy for feedback pings.
 
+## 06d Feedback admin page
+Owner, 2026-11-25: reading feedback over SSH is not acceptable; wants
+a UI to read it and mark its status. Backend-only (no app release),
+but live on prod before 0.2.4 reaches testers. Order: 06b, 06c, 06d,
+then ship.
+
+- Where: `/admin/` on each API host (api-test.rukavina.app/admin/,
+  api.rukavina.app/admin/). No new DNS name or cert. One static HTML
+  page + JS + CSS served by the backend (Spring static resources), no
+  build tool, no framework. Works in a phone browser.
+- Sign-in: Firebase Auth web SDK, Google sign-in, against that
+  stack's Firebase project. The page sends the ID token as bearer.
+  Firebase web config comes from `GET /admin/config.js`, built from
+  env (`ADMIN_FIREBASE_API_KEY`, `ADMIN_FIREBASE_AUTH_DOMAIN`,
+  `ADMIN_FIREBASE_PROJECT_ID`); unset = page shows "admin off".
+- Who: env `ADMIN_UIDS` (comma list, owner's uid per project). Any
+  other valid token gets 403; no token 401. Unset = every admin call
+  403.
+- **Spec change (api/openapi.yaml):** tag `admin`, bearer required.
+  - `GET /v1/admin/feedback?status=&cursor=&limit=`: newest first;
+    id, message, status, note, account ("guest" or uid), appVersion,
+    osVersion, deviceModel, createdAt, receivedAt, updatedAt; opaque
+    cursor like sync.
+  - `PATCH /v1/admin/feedback/{id}`: `status` and/or `note`; 200 with
+    the row, 404 unknown id.
+- Flyway `V10__feedback_status.sql`: `status` text not null default
+  'open' (check: open, solved, wont_fix, spam), `note` text null (max
+  500), `updated_at`. Index on (status, received_at).
+- Page: filter chips All / Open / Solved / Won't fix / Spam (default
+  Open), count per status. Each card: message (line breaks kept,
+  rendered as text, never HTML), date, app / Android / device, guest
+  or account, status picker, note field. Saves on change. Plain
+  design from design/DESIGN.md colours, dark.
+- ntfy: `Click` header = that stack's `/admin/` URL, so tapping the
+  ping opens the list (env `ADMIN_URL`; unset = no click).
+- nginx: `/admin/` and `/v1/admin/` limit_req (e.g. 30/min per IP).
+  CSP for `/admin/`: scripts from self + Firebase's gstatic/
+  googleapis hosts only, `frame-ancestors 'none'`, no inline script.
+- Security: admin endpoints only on bearer + uid allowlist; message
+  rendered with textContent; no feedback text in logs. Firebase
+  authorized domains: add both API hosts (owner, console).
+- Privacy: no change (text stays on our server; owner reads it).
+- third-party.md: Firebase JS SDK (Apache 2.0), loaded from gstatic.
+- Keep feedback.sh (works when the page is down).
+- Tests: admin controller (401, 403 non-admin, 403 empty allowlist,
+  list + filter + cursor, patch status/note, 404, bad status 400),
+  drift test green. Device check: sign in on the phone browser on
+  test, mark a curl message solved, filter shows it.
+- (me) Firebase console: register a web app in both projects, add
+  authorized domains; put the 3 config values + `ADMIN_UIDS` +
+  `ADMIN_URL` in both `.env` files, `docker compose up -d backend`.
+  Bitwarden entry for the uids/config (not secret, but kept together).
+
 ## Done when
 Feedback from a guest and a signed-in qa build arrives on the test
 backend, the owner's phone pings, the script shows it, and an offline
-message arrives after reconnect. Ships in 0.2.4.
+message arrives after reconnect. The owner reads it and marks its
+status on /admin/ from the phone, on test and prod. Ships in 0.2.4.
