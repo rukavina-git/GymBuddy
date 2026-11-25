@@ -1,4 +1,4 @@
-Last updated: 2026-11-18
+Last updated: 2026-11-25
 
 # {app} privacy policy
 
@@ -58,6 +58,24 @@ without them we can't find and fix bugs. If you don't want them sent,
 please don't use the app. Questions or objections:
 [privacy@rukavina.app](mailto:privacy@rukavina.app).
 
+## Feedback
+
+If you send feedback in the app (You → Send feedback), we store your
+message, the app version, the Android version and the phone model,
+and, if you are signed in, your user id. We use it to answer what you
+reported and improve the app, which is our legitimate interest
+(Art. 6(1)(f) GDPR). Sending feedback is optional.
+
+Feedback is stored on our server and read only by us. When a message
+arrives we get a push notification through ntfy.sh that says only "New
+feedback": your message is never sent to ntfy.sh. Please don't put
+health details or other sensitive information in a message.
+
+We keep feedback for up to 2 years. If you were signed in, it is
+deleted with your account. Feedback sent without an account can't be
+linked to you; to have it deleted, email us roughly when you sent it
+and what it said.
+
 ## Server logs
 
 Our servers log requests, including IP addresses, to keep the service
@@ -83,6 +101,7 @@ EU Standard Contractual Clauses.
 Your account data stays until you delete the account. Backups of the
 database are kept for 30 days, so deleted data is gone from them after
 30 days at most. Crash reports are kept by Firebase for 90 days.
+Feedback is kept for up to 2 years, or until you delete your account.
 
 ## Your rights
 

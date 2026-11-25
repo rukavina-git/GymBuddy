@@ -39,10 +39,16 @@ account, and guest mode makes an account optional, so account data is
 | 6 | Health and fitness → Fitness info | workouts, sets, plans, exercises, notes; experience, activity level, goal, training days | App functionality | Yes |
 | 7 | App info and performance → Crash logs | Crashlytics reports | Analytics (fixing bugs) | No |
 | 8 | Device or other IDs | Crashlytics installation id | Analytics (fixing bugs) | No |
+| 9 | App activity → Other user-generated content | in-app feedback message (Plan 10 step 06, 0.2.4) | App functionality | Yes |
+
+Feedback also carries app version, Android version and phone model:
+the same fields as crash logs (row 7), so no new type. Guests can
+send feedback too, so row 9 is collected from guests as well.
 
 Not collected: location, contacts, photos/videos (avatars are
-presets), audio, files, calendar, messages, web history, app
-interactions/analytics, financial info, installed apps. No ads SDK.
+presets), audio, files, calendar, messages (feedback is "other
+user-generated content", not messages between users), web history,
+app interactions/analytics, financial info, installed apps. No ads SDK.
 
 ## Foreground service (Android 14+ declaration)
 

@@ -86,15 +86,16 @@ Release tooling: fastlane (MIT) uploads builds to Play
 
 | Tool | Use case | Licence / cost | Where |
 |---|---|---|---|
-| **ntfy.sh** + ntfy iPhone app | Push to the owner's phone on every root SSH login to the VPS. Deploy-user logins (CI) don't alert | Free; app and server Apache 2.0 / GPL-2.0 dual, not shipped | `docker/server/setup.sh`; secret topic in Bitwarden |
+| **ntfy.sh** + ntfy iPhone app | Push to the owner's phone on every root SSH login to the VPS (deploy-user logins don't alert), and "New feedback" from the backend (one topic per stack, no message text) | Free; app and server Apache 2.0 / GPL-2.0 dual, not shipped | `docker/server/setup.sh`, `FeedbackNotifier`; secret topics in Bitwarden |
 | **fail2ban** | Bans an IP for 1 h after 5 failed SSH logins in 10 min | GPL-2.0, server only | `setup.sh` |
 | **ufw** | Firewall: only 22, 80, 443 open | GPL-3.0, server only | `setup.sh` |
 | **unattended-upgrades** | Automatic security updates, no auto-reboot | GPL-2.0, server only | `setup.sh` |
 | **Uptime check** | Pings `/v1/health`, alerts on outage | Free plan | Owner's account |
 | **Bitwarden** | All secrets and keys (deploy key, DB passwords, backup key, ntfy topic) | Free/personal | Never in the repo |
 
-ntfy.sh messages are not end-to-end encrypted. They only say who
-logged in, from which IP and when; no user data.
+ntfy.sh messages are not end-to-end encrypted. Login pushes say who
+logged in, from which IP and when; feedback pushes say only "New
+feedback". No user data.
 
 ## 5. Server software
 
@@ -156,6 +157,7 @@ Not part of the product; nothing from them ships except the assets above.
 | Email, sign-in | Firebase Auth | Google (processor) |
 | Crash reports | Crashlytics | Google (processor) |
 | Encrypted DB backups | GitHub artifacts, 30 days | GitHub can't read them |
+| Feedback (text, app/OS/device, uid if signed in) | netcup, 2 years or until the account is deleted | Nobody (ntfy.sh gets only "New feedback") |
 | Server logs (IPs) | netcup, rotated (10 MB × 3) | Nobody |
 
 Legal side: [privacy policy](../legal/privacy.md),

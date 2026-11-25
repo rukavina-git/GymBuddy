@@ -243,3 +243,20 @@
     No sqlite3 on the phone; use WM-WorkerWrapper logs. A blank Home
     seen once in airplane mode didn't reproduce (likely a transition
     caught mid-way).
+  - Wording (owner: "more professional"): "Feedback sent / Thank you
+    for helping us improve the app", "Feedback saved / It couldn't be
+    sent right now and will be sent automatically as soon as
+    possible" (not "offline": 429/5xx/slow also queue). 8448fbf.
+  - Owner: no guest device test needed (same request without a token).
+- [ ] 06c legal + Play (2026-11-25), repo part done
+  - privacy.md: Feedback section (what, why 6(1)(f), ntfy gets no
+    content, don't send health details, 2 years or with the account,
+    guests ask by email), retention line, date 2026-11-25. ntfy.sh not
+    in the providers table: it receives no personal data.
+  - Retention 2 years chosen by Claude (step had none; backend kept
+    forever): cleanup job added to 06d.
+  - records-of-processing.md, data-safety.md (row 9: App activity →
+    Other user-generated content, optional; device fields = crash log
+    fields), third-party.md (ntfy row, data map) updated.
+  - Page goes live with the 0.2.4 merge to main (legal-site.yml).
+  - (me) Play Console Data safety: add row 9, submit with 0.2.4.

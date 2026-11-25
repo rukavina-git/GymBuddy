@@ -107,6 +107,8 @@ then ship.
   authorized domains: add both API hosts (owner, console).
 - Privacy: no change (text stays on our server; owner reads it).
 - third-party.md: Firebase JS SDK (Apache 2.0), loaded from gstatic.
+- Retention (privacy policy, 06c): a daily job deletes feedback older
+  than 2 years (`received_at`), any status. Test it.
 - Keep feedback.sh (works when the page is down).
 - Tests: admin controller (401, 403 non-admin, 403 empty allowlist,
   list + filter + cursor, patch status/note, 404, bad status 400),
