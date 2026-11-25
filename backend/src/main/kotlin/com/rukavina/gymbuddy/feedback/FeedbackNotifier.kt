@@ -20,24 +20,29 @@ import java.time.Duration
 class FeedbackNotifier(
     @Value("\${gymbuddy.feedback.ntfy-topic:}") private val topic: String,
     @Value("\${gymbuddy.feedback.ntfy-url:https://ntfy.sh}") private val baseUrl: String,
+    @Value("\${gymbuddy.admin.url:}") private val adminUrl: String,
 ) {
     private val log = LoggerFactory.getLogger(FeedbackNotifier::class.java)
     private val client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build()
 
     fun newFeedback() {
         if (topic.isBlank()) return
-        val request = HttpRequest.newBuilder(URI.create("${baseUrl.trimEnd('/')}/$topic"))
-            .timeout(Duration.ofSeconds(10))
-            .header("Title", "Gym Tracker")
-            .header("Tags", "speech_balloon")
-            .POST(HttpRequest.BodyPublishers.ofString("New feedback"))
-            .build()
-        client.sendAsync(request, HttpResponse.BodyHandlers.discarding())
+        client.sendAsync(buildRequest(), HttpResponse.BodyHandlers.discarding())
             .whenComplete { response, error ->
                 when {
                     error != null -> log.warn("Feedback ping failed: {}", error.toString())
                     response.statusCode() !in 200..299 -> log.warn("Feedback ping got HTTP {}", response.statusCode())
                 }
             }
+    }
+
+    /** Tapping the ping opens the admin page when ADMIN_URL is set. */
+    internal fun buildRequest(): HttpRequest {
+        val builder = HttpRequest.newBuilder(URI.create("${baseUrl.trimEnd('/')}/$topic"))
+            .timeout(Duration.ofSeconds(10))
+            .header("Title", "Gym Tracker")
+            .header("Tags", "speech_balloon")
+        if (adminUrl.isNotBlank()) builder.header("Click", adminUrl.trim())
+        return builder.POST(HttpRequest.BodyPublishers.ofString("New feedback")).build()
     }
 }

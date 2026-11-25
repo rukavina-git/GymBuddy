@@ -1,6 +1,7 @@
 package com.rukavina.gymbuddy.api
 
 import com.rukavina.gymbuddy.api.dto.ErrorDto
+import com.rukavina.gymbuddy.feedback.FeedbackNotFoundException
 import com.rukavina.gymbuddy.feedback.FeedbackValidationException
 import com.rukavina.gymbuddy.sync.CursorDecodeException
 import com.rukavina.gymbuddy.sync.CursorExpiredException
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 
 /**
  * Maps uncaught controller exceptions to the Error shape in
@@ -58,6 +60,27 @@ class GlobalExceptionHandler(private val syncMetrics: SyncMetrics) {
         val traceId = RequestContext.traceId()
         logger.info("400 VALIDATION_FAILED [traceId={}] {} {}: {}", traceId, request.method, request.requestURI, ex.message)
         val body = ErrorDto(error = "VALIDATION_FAILED", message = ex.message ?: "Invalid feedback.", traceId = traceId)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+    }
+
+    @ExceptionHandler(FeedbackNotFoundException::class)
+    fun handleFeedbackNotFound(ex: FeedbackNotFoundException, request: HttpServletRequest): ResponseEntity<ErrorDto> {
+        val traceId = RequestContext.traceId()
+        logger.info("404 NOT_FOUND [traceId={}] {} {}", traceId, request.method, request.requestURI)
+        val body = ErrorDto(error = "NOT_FOUND", message = ex.message ?: "Not found.", traceId = traceId)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+    }
+
+    /** A query or path parameter of the wrong type (e.g. limit=abc): 400, not 500. */
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun handleTypeMismatch(ex: MethodArgumentTypeMismatchException, request: HttpServletRequest): ResponseEntity<ErrorDto> {
+        val traceId = RequestContext.traceId()
+        logger.info("400 VALIDATION_FAILED [traceId={}] {} {}: bad parameter {}", traceId, request.method, request.requestURI, ex.name)
+        val body = ErrorDto(error = "VALIDATION_FAILED", message = "Bad value for parameter ${ex.name}.", traceId = traceId)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .contentType(MediaType.APPLICATION_JSON)
             .body(body)

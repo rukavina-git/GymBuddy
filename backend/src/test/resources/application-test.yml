@@ -1,0 +1,8 @@
+# Test profile only (AbstractPostgresIntegrationTest). Set for every
+# test context, not per class: another distinct context would open
+# another Hikari pool and push the shared Postgres past max_connections.
+gymbuddy:
+  admin:
+    # The only admin in AdminFeedbackControllerTest. The empty-list rule
+    # is unit-tested in AdminAccessAndNotifierTest.
+    uids: " admin-1 , ,"

@@ -26,6 +26,7 @@ class SecurityConfig(
     private val rateLimitFilter: RateLimitFilter,
     private val restAuthenticationEntryPoint: RestAuthenticationEntryPoint,
     private val restAccessDeniedHandler: RestAccessDeniedHandler,
+    private val adminAccess: AdminAccess,
 ) {
 
     @Bean
@@ -36,6 +37,8 @@ class SecurityConfig(
                 // Guests can send feedback (no account, no token); a valid
                 // token still sets the uid. See FeedbackController.
                 authorize(HttpMethod.POST, "/v1/feedback", permitAll)
+                // The one admin guard for every admin route (AdminAccess).
+                authorize("/v1/admin/**", adminAccess)
                 authorize("/v3/api-docs/**", permitAll)
                 authorize("/swagger-ui/**", permitAll)
                 authorize("/swagger-ui.html", permitAll)

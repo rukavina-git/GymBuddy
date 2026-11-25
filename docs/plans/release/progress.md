@@ -260,6 +260,50 @@
     fields), third-party.md (ntfy row, data map) updated.
   - Page goes live with the 0.2.4 merge to main (legal-site.yml).
   - (me) Play Console Data safety: add row 9, submit with 0.2.4.
-- Next: 06d1 (admin backend + spec), then 06d2 (page, nginx, server),
-  then ship 0.2.4 (bump, changelog, closed-test log, PR, tag, Play
-  Data safety row 9). 06d split in two (2026-11-25, owner OK).
+- 06d split in two (2026-11-25, owner OK).
+- [x] 06d1 admin backend + spec (2026-11-25), HASH
+  - **Spec change:** tag Admin, GET /v1/admin/feedback (status,
+    cursor, limit; items + nextCursor + counts), PATCH
+    /v1/admin/feedback/{id} (status and/or note), schemas
+    FeedbackStatus, AdminFeedbackItem/Counts/Page/Update, Error enum
+    + NOT_FOUND, NotFound response. createdAt range documented.
+  - V10__feedback_status.sql: status (check 4 values, default open),
+    note (<= 500), updated_at (backfilled = received_at), index
+    (status, received_at DESC, id DESC).
+  - auth/AdminAccess: one AuthorizationManager on /v1/admin/** in
+    SecurityConfig; env ADMIN_UIDS (comma list, blank = nobody).
+    No token / invalid token 401, other uid 403.
+  - FeedbackAdminService (keyset cursor base64url "receivedAt|id"),
+    AdminFeedbackController, FeedbackRetention (730 days, daily 03:30,
+    off under test). ntfy Click = ADMIN_URL. createdAt must be
+    2020-01-01 .. now + 1 day. feedback.sh strips C0/C1 controls
+    (keeps newline, tab), shows status + note. Both compose files pass
+    ADMIN_UIDS, ADMIN_URL.
+  - Tests: AdminFeedbackControllerTest (401, 403, invalid token, list
+    order/account/counts/cursor/filter, last page null cursor, 400s,
+    patch status/note/clear, 404, retention), AdminAccessAndNotifierTest
+    (empty list, anonymous, Click header), createdAt bounds. Backend
+    168/168 (incl. drift test), Spectral clean, Android
+    compileQaDebugKotlin green with the new generated AdminApi. Clean
+    regex checked on postgres:16 (ESC, BEL, C1 gone).
+  - Deviations: limit is clamped to 1-100 (like sync pull), not 400.
+    Empty-list 403 is a unit test, not MockMvc (see gotcha). Added a
+    global MethodArgumentTypeMismatchException -> 400 handler (limit=abc
+    was 500; also affects sync pull). Empty note clears it.
+  - Gotchas: a new per-class `properties =` Spring context made
+    TombstoneRetentionConcurrencyTest fail with "too many clients"
+    (each context has its own Hikari pool on the shared container).
+    Test admin uid lives in src/test/resources/application-test.yml.
+    KDoc containing `/v1/admin/**` opens a nested comment (Kotlin):
+    don't write `/**` inside a doc comment.
+  - Open (reviewer, not fixed): **SHOULD before 0.2.4 Sonar check:**
+    AdminDtos `val wont_fix` likely trips Sonar naming; use
+    @JsonProperty("wont_fix") val wontFix. NITs: spec says null status
+    = unchanged but FeedbackStatus isn't nullable, and `{}` is 400 but
+    the schema lacks minProperties: 1; note length counted in UTF-16
+    (stricter than char_length); a control char in ADMIN_URL would
+    throw in buildRequest() after the insert (500 on POST); type
+    mismatch handler is global.
+  - Roadmap: 10.4b stays open until 0.2.4 ships (no 06d1 line).
+- Next: 06d2 (page, nginx, server), then ship 0.2.4 (bump, changelog,
+  closed-test log, PR, tag, Play Data safety row 9).

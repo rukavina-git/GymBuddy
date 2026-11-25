@@ -51,6 +51,14 @@ gymbuddy:
     # ntfy.sh topic for "New feedback" pushes (no user text). Blank = off.
     # A secret: set only in the server's .env, never committed.
     ntfy-topic: ${NTFY_FEEDBACK_TOPIC:}
+    # Deleted after this many days, any status (privacy policy: 2 years).
+    retention-days: ${FEEDBACK_RETENTION_DAYS:730}
+    retention-cron: ${FEEDBACK_RETENTION_CRON:0 30 3 * * *}
+  admin:
+    # Firebase uids allowed on /v1/admin/** (comma list). Blank = nobody.
+    uids: ${ADMIN_UIDS:}
+    # This stack's /admin/ page; the feedback ping opens it. Blank = no link.
+    url: ${ADMIN_URL:}
   sync:
     # How long a tombstoned entity is kept before TombstoneRetentionService
     # hard-deletes it and its change_log rows (Group H). Configuration, not

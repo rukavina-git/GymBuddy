@@ -31,6 +31,10 @@ services:
       FIREBASE_CREDENTIALS_B64: ${FIREBASE_CREDENTIALS_B64:?must be set}
       # Optional secret ntfy topic for "New feedback" pushes; unset = off.
       NTFY_FEEDBACK_TOPIC: ${NTFY_FEEDBACK_TOPIC:-}
+      # Feedback admin page: allowed Firebase uids (comma list; unset =
+      # nobody) and this stack's /admin/ URL for the ping's tap.
+      ADMIN_UIDS: ${ADMIN_UIDS:-}
+      ADMIN_URL: ${ADMIN_URL:-}
       # Smaller heap than prod: little traffic, and both share 2 GB.
       JAVA_TOOL_OPTIONS: -Xmx192m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs

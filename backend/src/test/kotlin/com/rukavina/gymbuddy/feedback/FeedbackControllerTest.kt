@@ -123,6 +123,19 @@ class FeedbackControllerTest : AbstractPostgresIntegrationTest() {
     }
 
     @Test
+    fun `createdAt far in the past or future is 400, not 500`() {
+        send(json(extra = ""","createdAt":${Long.MAX_VALUE}""")).andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.error").value("VALIDATION_FAILED"))
+        send(json(extra = ""","createdAt":${Long.MIN_VALUE}""")).andExpect(status().isBadRequest)
+        send(json(extra = ""","createdAt":1""")).andExpect(status().isBadRequest)
+        val twoDaysAhead = System.currentTimeMillis() + Duration.ofDays(2).toMillis()
+        send(json(extra = ""","createdAt":$twoDaysAhead""")).andExpect(status().isBadRequest)
+        val oneHourAhead = System.currentTimeMillis() + Duration.ofHours(1).toMillis()
+        send(json(extra = ""","createdAt":$oneHourAhead""")).andExpect(status().isNoContent)
+        verify(notifier, times(1)).newFeedback()
+    }
+
+    @Test
     fun `exactly the cap is accepted`() {
         send(json(message = "x".repeat(FEEDBACK_MAX_CHARS))).andExpect(status().isNoContent)
     }

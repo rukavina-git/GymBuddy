@@ -70,6 +70,11 @@ tags:
     description: Authenticated user profile bootstrap and account deletion.
   - name: Feedback
     description: Free-text feedback from the app, signed in or guest.
+  - name: Admin
+    description: |
+      Owner-only endpoints behind the /admin/ page. Bearer required, and
+      the token's uid must be on the server's admin list: no token is
+      401, any other uid is 403.
   - name: System
     description: Operational endpoints not scoped to a user.
 
@@ -440,6 +445,71 @@ paths:
           description: Stored, or already stored under this id.
         '400': { $ref: '#/components/responses/BadRequest' }
         '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /v1/admin/feedback:
+    get:
+      tags: [ Admin ]
+      summary: List feedback
+      description: |
+        Feedback messages, newest first (by receivedAt), with counts per
+        status for the filter chips. Pass `nextCursor` back as `cursor`
+        for the next page; it is opaque, like the sync cursor.
+      operationId: listAdminFeedback
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Only this status. Omit for every status.
+          schema: { $ref: '#/components/schemas/FeedbackStatus' }
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          description: Page size, clamped to 1-100.
+          schema: { type: integer, format: int32, default: 20 }
+      responses:
+        '200':
+          description: One page.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminFeedbackPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /v1/admin/feedback/{id}:
+    patch:
+      tags: [ Admin ]
+      summary: Set a feedback message's status or note
+      description: |
+        Changes `status`, `note` or both and bumps `updatedAt`. An absent
+        or null field is left as is; an empty `note` clears it.
+      operationId: updateAdminFeedback
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminFeedbackUpdate' }
+      responses:
+        '200':
+          description: The updated message.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminFeedbackItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
         '500': { $ref: '#/components/responses/InternalError' }
 
   /v1/reference/version:
@@ -1501,7 +1571,71 @@ components:
         createdAt:
           type: integer
           format: int64
-          description: When the user pressed Send, epoch ms (client clock).
+          description: |
+            When the user pressed Send, epoch ms (client clock). Must be
+            between 2020-01-01 and one day after the server's now.
+
+    FeedbackStatus:
+      type: string
+      enum: [ open, solved, wont_fix, spam ]
+
+    AdminFeedbackItem:
+      type: object
+      required: [ id, message, status, note, account, appVersion, osVersion, deviceModel, createdAt, receivedAt, updatedAt ]
+      properties:
+        id: { type: string, format: uuid }
+        message: { type: string }
+        status: { $ref: '#/components/schemas/FeedbackStatus' }
+        note: { type: [string, "null"], maxLength: 500 }
+        account:
+          type: string
+          description: '`guest`, or the sender''s Firebase uid.'
+        appVersion: { type: [string, "null"] }
+        osVersion: { type: [string, "null"] }
+        deviceModel: { type: [string, "null"] }
+        createdAt:
+          type: integer
+          format: int64
+          description: Client clock at Send, epoch ms.
+        receivedAt:
+          type: integer
+          format: int64
+          description: Server time the message was stored, epoch ms.
+        updatedAt:
+          type: integer
+          format: int64
+          description: Last status or note change (receivedAt until then), epoch ms.
+
+    AdminFeedbackCounts:
+      type: object
+      description: Messages per status, over all feedback (not just this page).
+      required: [ open, solved, wont_fix, spam ]
+      properties:
+        open: { type: integer, format: int64 }
+        solved: { type: integer, format: int64 }
+        wont_fix: { type: integer, format: int64 }
+        spam: { type: integer, format: int64 }
+
+    AdminFeedbackPage:
+      type: object
+      required: [ items, nextCursor, counts ]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AdminFeedbackItem' }
+        nextCursor:
+          type: [string, "null"]
+          description: Null when there are no more rows.
+        counts: { $ref: '#/components/schemas/AdminFeedbackCounts' }
+
+    AdminFeedbackUpdate:
+      type: object
+      properties:
+        status: { $ref: '#/components/schemas/FeedbackStatus' }
+        note:
+          type: [string, "null"]
+          maxLength: 500
+          description: Trimmed. Empty clears the note.
 
     Error:
       type: object
@@ -1520,6 +1654,7 @@ components:
             - UNAUTHENTICATED
             - FORBIDDEN
             - VALIDATION_FAILED
+            - NOT_FOUND
             - CURSOR_EXPIRED
             - RATE_LIMITED
             - INTERNAL
@@ -1694,6 +1829,11 @@ components:
           schema: { $ref: '#/components/schemas/Error' }
     Forbidden:
       description: Authenticated, but not permitted to perform this action. error is FORBIDDEN.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: No such resource. error is NOT_FOUND.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
