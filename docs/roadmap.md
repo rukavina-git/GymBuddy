@@ -121,7 +121,7 @@ roadmap-details.md §3.
       internal track, store listing kept in the repo
 - [x] 8.4 Backend CD: develop → test, `v*` tag → prod
 - [x] 8.5 (me) Play Console app, upload key, service account, secrets
-- [ ] 8.6 (me) CI green, PR develop → main
+- [x] 8.6 (me) CI green, PR develop → main
 
 ## Plan 9: legal + privacy
 
@@ -163,7 +163,10 @@ review first, then 10.1a refinement + 10.4a, new version, then 10.3
 - [ ] 10.1b Default library + plans refresh (Plan 10 step 05: 60->64
       exercises with cardio, beginner-friendly Full Body, onboarding
       uses experience), ships in 0.2.2
-- [ ] 10.4 Fix tester findings (one step per batch)
+- [ ] 10.4 Fix tester findings (one step per batch). Report
+      2026-11-24: no bugs; logout confirm done in 0.2.3
+- [ ] 10.4b In-app feedback: text box + Send, no email app (owner
+      2026-11-25, v1, ships in 0.2.4)
 - [ ] 10.4a Real store screenshots (2026-11-17, owner): after the
       refinement pass, realistic data, signed in, no AI exercise images
       (else label them in Play). The testers' listing has quick
@@ -174,7 +177,7 @@ review first, then 10.1a refinement + 10.4a, new version, then 10.3
 ## Later
 
 - Move to paid hosting (e.g. DigitalOcean): restore dump, repoint DNS
-- iOS (designs already in Figma), after Android v1 is live
+- iOS (designs already in Figma), after Android v2 (owner 2026-11-25)
 - v2 list: architecture plan §14.2
 - Translated legal texts, together with the first app translation:
   legal/<lang>/*.md → /<lang>/privacy etc., English is master,

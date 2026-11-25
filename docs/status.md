@@ -4,35 +4,35 @@ Current project status, short. Dated audits with full evidence are in
 STATUS_YYYY-MM-DD.md files. What's next: roadmap.md (checklist) and
 roadmap-details.md (what each step means).
 
-Updated 2026-11-02.
+Updated 2026-11-25.
 
 ## Where things are
 
-- **Backend:** on the netcup VPS at api.rukavina.app (since 2026-11-12). Sync,
-  reference, /me, account deletion, tombstone job, rate limit, spec
-  drift test, JSON logs with traceId/userId/client version. One
-  environment only (test comes in Plan 5). Deploys by hand via the
-  Deploy workflow (docker/README.md, Hosting).
-- **Android:** v1 skeleton UI on the sync engine (outbox, push, pull,
-  410 resync, logout flush-and-warn). Room v26 baseline with migration
-  tests, no destructive fallback, Crashlytics. Device checks passed
-  2026-10-31 (phase5-data-safety progress.md, step 05).
-- **Design:** full Soft Dark redesign locked in Figma; build guide is
-  design/DESIGN.md. Not built in Compose yet (Plan 7).
-- **CI:** green on main at 4349324 (PR #4): Android Build, Backend
-  Build, Sync E2E, API Client Codegen, API Docs, CodeQL. OWASP is
-  manual-only and non-blocking (ADR 0013). Dependabot: 35/35 fixed.
-  develop is 44 commits ahead of main (Plan 3 docs).
-- **iOS:** not started.
+- **Stage:** Android v1 in Play closed testing (Plan 10). 0.2.0-0.2.3
+  shipped to alpha; tester day 0 was 2026-11-18, Play's 14 days end
+  ~2026-12-02, then apply for production. Details:
+  docs/plans/release/progress.md.
+- **Backend:** netcup VPS, prod at api.rukavina.app plus a test stack
+  on the same box (docs/infrastructure.md). develop deploys test, a
+  `v*` tag deploys prod after approval.
+- **Android:** Soft Dark redesign built in Compose (Plan 7), qa/prod
+  flavors, guest mode, export, Play in-app updates and rating prompt,
+  Crashlytics. Exercise images parked for v2.
+- **CI/CD:** Android/Backend build, Sync E2E, Lint, Sonar, CodeQL;
+  fastlane uploads (ADR 0017). OWASP manual. Dependabot version PRs off.
+- **iOS:** not started; after Android v2.
 
-## Known gaps (planned)
+## Next (owner, 2026-11-25)
 
-- An offline edit waits for the next app open if the app is swiped
-  away (4.4).
-- A dead session fails sync silently with 401 (6.3).
-- No test environment; debug builds use prod (Plan 5).
-- No release pipeline, store listing, privacy policy or licence record
-  for the stock exercise photos (Plans 8, 9).
+1. In-app feedback (text box + Send), v1, ships in 0.2.4.
+2. Owner's full app check → refinement batches (10.1a).
+3. Store screenshots (10.4a), licence audit (9.1), library refresh
+   (10.1b), production release (10.5).
+
+## Known gaps
+
+- Backend Release fails when backend/ is unchanged (image lookup
+  only checks 20 same-tree commits).
 
 ## Schema history
 

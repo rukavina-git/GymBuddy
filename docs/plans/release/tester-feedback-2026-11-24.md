@@ -7,10 +7,10 @@ we did. Council for the listing: docs/council/2026-11-24-store-listing.md.
 | # | Their point | Outcome |
 |---|---|---|
 | 1 | Description lacks keywords and text (ASO) | Done: new listing text (council), owner pastes in Play Console |
-| 2 | Screenshots don't show features | After exercise images ship (owner) |
+| 2 | Screenshots don't show features | 10.4a, without images (parked for v2) |
 | 3 | Walkthrough is basic, not interactive | v2 (owner likes the idea), see below |
 | 4 | Logout has no confirmation | Done in 0.2.3 |
-| - | Feedback mechanism | Exists (You → Send feedback, email). v2: in-app form |
+| - | Feedback mechanism | v1: in-app text box + Send, 0.2.4 (10.4b) |
 | - | Regular updates | Ongoing (closed-test cadence) |
 | - | Highlight offline in listing + onboarding | Listing done; welcome screen already says it |
 | - | Progress reports / graphs | Already v2 (Statistics and charts) |
