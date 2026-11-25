@@ -305,7 +305,7 @@
     throw in buildRequest() after the insert (500 on POST); type
     mismatch handler is global.
   - Roadmap: 10.4b stays open until 0.2.4 ships (no 06d1 line).
-- [x] 06d2 admin page + nginx (2026-11-25), repo part; HASH
+- [x] 06d2 admin page + nginx (2026-11-25), repo part; 8bc8315
   - backend static/admin/ (index.html, admin.js, admin.css; plain ES
     module, Firebase JS SDK 13.3.0 from gstatic, Google popup sign-in).
     AdminPageController (@Hidden, no spec change): /admin -> /admin/,
