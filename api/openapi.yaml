@@ -68,6 +68,8 @@ tags:
       owned; clients cannot write to these through this API.
   - name: Account
     description: Authenticated user profile bootstrap and account deletion.
+  - name: Feedback
+    description: Free-text feedback from the app, signed in or guest.
   - name: System
     description: Operational endpoints not scoped to a user.
 
@@ -408,6 +410,36 @@ paths:
           description: Account and all associated data deleted.
         '401': { $ref: '#/components/responses/Unauthenticated' }
         '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /v1/feedback:
+    post:
+      tags: [ Feedback ]
+      summary: Send feedback
+      description: |
+        Stores one free-text feedback message. Works signed in or as a
+        guest: the token is optional. With a valid token the message is
+        linked to the account (and deleted with it); without one, or with
+        an invalid one, it is stored without an account.
+
+        `id` is client-generated (UUIDv7), so a retry after a lost
+        response is safe: a known id returns 204 again and stores nothing.
+        Clients queue unsent messages locally and send them when online.
+        Rate limited per account, or per client IP for guests.
+      operationId: sendFeedback
+      security:
+        - { }
+        - firebaseAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FeedbackRequest' }
+      responses:
+        '204':
+          description: Stored, or already stored under this id.
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalError' }
 
   /v1/reference/version:
@@ -1440,6 +1472,36 @@ components:
           format: int32
           readOnly: true
           description: Server-assigned revision number. Clients must not set this.
+
+    FeedbackRequest:
+      type: object
+      required: [ id, message, createdAt ]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated UUIDv7. Makes retries idempotent.
+        message:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: What the user typed. Not blank after trimming.
+        appVersion:
+          type: [string, "null"]
+          maxLength: 32
+          description: App version name, e.g. `0.2.4`.
+        osVersion:
+          type: [string, "null"]
+          maxLength: 32
+          description: OS name and version, e.g. `Android 15`.
+        deviceModel:
+          type: [string, "null"]
+          maxLength: 64
+          description: Device maker and model, e.g. `samsung SM-S731B`.
+        createdAt:
+          type: integer
+          format: int64
+          description: When the user pressed Send, epoch ms (client clock).
 
     Error:
       type: object

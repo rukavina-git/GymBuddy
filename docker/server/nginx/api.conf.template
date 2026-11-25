@@ -22,6 +22,13 @@ ssl_session_timeout 1d;
 # test stack is down (that host gets 502).
 resolver 127.0.0.11 valid=10s ipv6=off;
 
+# POST /v1/feedback is open to guests (no token), so it gets a per-IP
+# limit here on top of the backend's 5/hour per uid or IP. Coarse on
+# purpose: it stops floods before they reach Java. Shared by prod and
+# test (keyed by IP only).
+limit_req_zone $binary_remote_addr zone=feedback:1m rate=10r/m;
+limit_req_status 429;
+
 # Port 80, any Host: answer ACME challenges, so certbot --webroot can
 # add a name through the running nginx. Everything else: drop.
 server {
@@ -71,6 +78,16 @@ server {
     # Never plain "backend": see the alias note in compose.yaml.
     set $backend_upstream http://backend-prod:8080;
 
+    location = /v1/feedback {
+        limit_req zone=feedback burst=5 nodelay;
+        client_max_body_size 16k;
+        proxy_pass $backend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
     location / {
         proxy_pass $backend_upstream;
         proxy_set_header Host $host;
@@ -92,6 +109,16 @@ server {
     client_max_body_size 1m;
 
     set $backend_upstream http://backend-test:8080;
+
+    location = /v1/feedback {
+        limit_req zone=feedback burst=5 nodelay;
+        client_max_body_size 16k;
+        proxy_pass $backend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 
     location / {
         proxy_pass $backend_upstream;

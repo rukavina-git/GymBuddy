@@ -69,7 +69,7 @@ publishes 5432/8080 and builds the image.
 As `deploy`, once:
 
     mkdir -p /opt/gymbuddy        # as root: then chown deploy:deploy
-    scp -r docker/server/{compose.yaml,init-cert.sh,deploy.sh,delete-account.sh,nginx} deploy@<host>:/opt/gymbuddy/
+    scp -r docker/server/{compose.yaml,init-cert.sh,deploy.sh,delete-account.sh,feedback.sh,nginx} deploy@<host>:/opt/gymbuddy/
     mkdir /opt/gymbuddy/site      # as deploy, before nginx first starts
     # on the server: copy .env.example to /opt/gymbuddy/.env, fill it,
     # chmod 600 it
@@ -121,7 +121,7 @@ smoke test sent prod requests to test before the aliases).
 As `deploy`, once (after the prod stack runs):
 
     mkdir -p /opt/gymbuddy-test   # as root: then chown deploy:deploy
-    scp docker/server/test/compose.yaml docker/server/deploy.sh deploy@<host>:/opt/gymbuddy-test/
+    scp docker/server/test/compose.yaml docker/server/deploy.sh docker/server/feedback.sh deploy@<host>:/opt/gymbuddy-test/
     # on the server: copy test/.env.example to
     # /opt/gymbuddy-test/.env, fill it (own DB password, the test
     # Firebase project), chmod 600 it
@@ -244,6 +244,20 @@ they email privacy@ from their account's address. Plan 9 step 03.
 
 The same script works in `/opt/gymbuddy-test` against the test stack
 (copy it there too), which is the place to try it first.
+
+### Feedback
+
+In-app feedback (Plan 10 step 06) lands in the `feedback` table. A
+new message sends an ntfy push saying only "New feedback"; the text
+never leaves the server. Read it as `deploy`:
+
+    cd /opt/gymbuddy && ./feedback.sh       # newest 20; ./feedback.sh 50
+
+The test stack has its own copy in its folder. Pushes are off until
+the stack's `.env` has `NTFY_FEEDBACK_TOPIC=<secret topic>` (16+
+random letters/digits, its own topic, not the SSH-alert one;
+subscribe to it in the ntfy app), then `docker compose up -d backend`.
+Limits: nginx 10/min per IP, the backend 5/hour per account or IP.
 
 ### Restore
 

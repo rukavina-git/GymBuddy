@@ -1,6 +1,7 @@
 package com.rukavina.gymbuddy.api
 
 import com.rukavina.gymbuddy.api.dto.ErrorDto
+import com.rukavina.gymbuddy.feedback.FeedbackValidationException
 import com.rukavina.gymbuddy.sync.CursorDecodeException
 import com.rukavina.gymbuddy.sync.CursorExpiredException
 import com.rukavina.gymbuddy.sync.SyncMetrics
@@ -47,6 +48,16 @@ class GlobalExceptionHandler(private val syncMetrics: SyncMetrics) {
         val traceId = RequestContext.traceId()
         logger.info("400 VALIDATION_FAILED [traceId={}] {} {}: {}", traceId, request.method, request.requestURI, ex.message)
         val body = ErrorDto(error = "VALIDATION_FAILED", message = "Malformed request body.", traceId = traceId)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+    }
+
+    @ExceptionHandler(FeedbackValidationException::class)
+    fun handleFeedbackValidation(ex: FeedbackValidationException, request: HttpServletRequest): ResponseEntity<ErrorDto> {
+        val traceId = RequestContext.traceId()
+        logger.info("400 VALIDATION_FAILED [traceId={}] {} {}: {}", traceId, request.method, request.requestURI, ex.message)
+        val body = ErrorDto(error = "VALIDATION_FAILED", message = ex.message ?: "Invalid feedback.", traceId = traceId)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .contentType(MediaType.APPLICATION_JSON)
             .body(body)

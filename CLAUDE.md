@@ -51,7 +51,7 @@ Kotlin backend, sharing nothing but the OpenAPI contract.
 - Package root com.rukavina.gymbuddy (backend and android).
 - Client-generated UUIDv7 ids. Soft deletes (tombstones).
 - Metric storage, imperial only at display.
-- Backend packages: api, domain, persistence, sync, auth, config.
+- Backend packages: api, domain, persistence, sync, auth, config, feedback.
 - Android: domain/ has no Android or Room imports. Room entities map to
   domain models in data/local/mapper.
 - Flyway migrations: backend/src/main/resources/db/migration/V<n>__name.sql

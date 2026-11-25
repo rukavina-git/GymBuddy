@@ -159,3 +159,23 @@
 - Step 06 written (2026-11-25): in-app feedback for 0.2.4 (owner:
   v1, runs before 05; ntfy ping without text + read script; email
   option removed). Next after 06: owner's full app check (10.1a).
+- [x] 06a feedback API + backend (2026-11-25), HASH
+  - **Spec change:** POST /v1/feedback (security optional) +
+    FeedbackRequest. V9__feedback.sql. New backend package `feedback`
+    (service, rate limiter, ntfy notifier), added to CLAUDE.md.
+  - Tests: FeedbackControllerTest (guest, signed in, invalid token,
+    retry, 400s, 429 per IP and per uid, window, account delete);
+    backend 156/156, Spectral clean.
+  - Deviations: nginx limit 10/min per IP + burst 5 (step said ~5/min).
+    Body cap 16k. Notifier uses java.net.http, no @Async.
+  - Gotchas: guests reach controllers with Spring's anonymous token
+    (principal "anonymousUser"); never read the principal as a uid
+    without excluding AnonymousAuthenticationToken. nginx config not
+    syntax-checked locally (needs certs); check `nginx -t` on deploy.
+  - Open (reviewer, not fixed): nginx 429 is HTML without Retry-After
+    (spec says JSON + header); createdAt unbounded (Long.MAX -> 500);
+    feedback.sh prints raw control chars (terminal escapes); expired
+    token stores as guest (06b: refresh token first; 06c wording);
+    rate token spent before dedupe; UTF-16 vs code point length.
+  - (me) Before 06b on test: NTFY_FEEDBACK_TOPIC in both stacks' .env,
+    scp feedback.sh + nginx template, deploy.

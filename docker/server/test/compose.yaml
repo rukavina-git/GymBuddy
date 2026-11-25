@@ -29,6 +29,8 @@ services:
       DATABASE_URL: jdbc:postgresql://db:5432/gymbuddy?user=gymbuddy
       DB_PASSWORD: ${DB_PASSWORD:?must be set}
       FIREBASE_CREDENTIALS_B64: ${FIREBASE_CREDENTIALS_B64:?must be set}
+      # Optional secret ntfy topic for "New feedback" pushes; unset = off.
+      NTFY_FEEDBACK_TOPIC: ${NTFY_FEEDBACK_TOPIC:-}
       # Smaller heap than prod: little traffic, and both share 2 GB.
       JAVA_TOOL_OPTIONS: -Xmx192m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs

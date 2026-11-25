@@ -3,6 +3,7 @@ package com.rukavina.gymbuddy.auth
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.invoke
@@ -32,6 +33,9 @@ class SecurityConfig(
         http {
             authorizeHttpRequests {
                 authorize("/v1/health", permitAll)
+                // Guests can send feedback (no account, no token); a valid
+                // token still sets the uid. See FeedbackController.
+                authorize(HttpMethod.POST, "/v1/feedback", permitAll)
                 authorize("/v3/api-docs/**", permitAll)
                 authorize("/swagger-ui/**", permitAll)
                 authorize("/swagger-ui.html", permitAll)
