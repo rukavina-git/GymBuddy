@@ -1,7 +1,5 @@
 package com.rukavina.gymbuddy.ui.you
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +12,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import com.rukavina.gymbuddy.BuildConfig
@@ -24,15 +21,11 @@ import com.rukavina.gymbuddy.ui.design.ListRow
 import com.rukavina.gymbuddy.ui.legal.LegalLinks
 import com.rukavina.gymbuddy.ui.theme.GymBuddyTheme
 
-private const val FEEDBACK_EMAIL = "ivankarlo.rukavina@gmail.com"
-
-/** You › About: version, feedback, privacy policy, terms, open-source licences, and Sync debug on debug builds. */
+/** You › About: version, privacy policy, terms, open-source licences, and Sync debug on debug builds. */
 @Composable
 fun AboutScreen(onBack: () -> Unit, onLicences: () -> Unit, onSyncDebug: () -> Unit) {
     val d = GymBuddyTheme.dimens
-    val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
-    val feedbackSubject = stringResource(R.string.you_feedback_subject, stringResource(R.string.brand_name))
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize()) {
             BackTopBar(onBack = onBack, title = stringResource(R.string.you_about))
@@ -46,15 +39,6 @@ fun AboutScreen(onBack: () -> Unit, onLicences: () -> Unit, onSyncDebug: () -> U
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = d.group),
-                )
-                ListRow(
-                    title = stringResource(R.string.you_feedback),
-                    subtitle = stringResource(R.string.you_feedback_sub),
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$FEEDBACK_EMAIL"))
-                            .putExtra(Intent.EXTRA_SUBJECT, feedbackSubject)
-                        runCatching { context.startActivity(intent) }
-                    },
                 )
                 ListRow(
                     title = stringResource(R.string.you_privacy),

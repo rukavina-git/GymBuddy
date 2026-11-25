@@ -35,6 +35,7 @@ class YouUiTest {
         onHiddenExercises = {},
         onHiddenTemplates = {},
         onAbout = {},
+        onFeedback = {},
         onDeleteAccount = {},
         onLeft = {},
     )

@@ -33,7 +33,9 @@ class AccountDeletionCoordinator(
     private val deleteOnServer: suspend () -> Int,
     private val deleteProfileImages: () -> Unit,
     private val auth: AuthSession,
-    private val runExclusive: suspend (suspend () -> Unit) -> Unit
+    private val runExclusive: suspend (suspend () -> Unit) -> Unit,
+    /** Unsent in-app feedback of this account (FeedbackOutbox); it would be linked to the account. */
+    private val deletePendingFeedback: suspend (uid: String) -> Unit = {},
 ) {
     /**
      * Set once the server answered 204. The account is then provably gone,
@@ -76,6 +78,7 @@ class AccountDeletionCoordinator(
             // leaves the user signed in and able to retry.
             store.wipeEverythingForLogout()
             deleteProfileImages()
+            auth.currentUid?.let { deletePendingFeedback(it) }
             auth.signOut()
             // Done: the next account on this device starts from the server again.
             serverDeleted = false

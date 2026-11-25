@@ -4,6 +4,7 @@ import android.content.Context
 import com.rukavina.gymbuddy.BuildConfig
 import com.rukavina.gymbuddy.data.crash.CrashReporter
 import com.rukavina.gymbuddy.data.crash.FirebaseCrashReporter
+import com.rukavina.gymbuddy.data.feedback.FeedbackOutbox
 import com.rukavina.gymbuddy.data.local.db.DatabaseHolder
 import com.rukavina.gymbuddy.data.sync.AccountDeletionCoordinator
 import com.rukavina.gymbuddy.data.sync.AuthGate
@@ -125,14 +126,16 @@ object SyncModule {
         apis: SyncApis,
         engine: SyncEngine,
         auth: AuthSession,
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        feedback: FeedbackOutbox
     ) = AccountDeletionCoordinator(
         store,
         deleteOnServer = { apis.account.deleteAccount().code() },
         // Older builds let users pick a photo; remove any left on the phone.
         deleteProfileImages = { File(context.filesDir, "profile_images").deleteRecursively() },
         auth = auth,
-        runExclusive = { block -> engine.exclusive(block) }
+        runExclusive = { block -> engine.exclusive(block) },
+        deletePendingFeedback = { feedback.deleteForAccount(it) }
     )
 
     @Provides

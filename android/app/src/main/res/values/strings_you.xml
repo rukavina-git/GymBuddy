@@ -95,7 +95,6 @@
 
     <!-- Export sheet (R15-11, JSON only) -->
     <string name="you_export_file">Backup file (JSON)</string>
-    <string name="you_feedback_subject">%1$s feedback</string>
     <string name="you_export_file_sub">Can be imported back into %1$s, now and in future versions.</string>
     <string name="you_export_save">Save file</string>
     <string name="you_export_done">Export saved</string>
@@ -110,7 +109,23 @@
     <string name="you_hidden_templates_empty_body">Hide a template from its ⋯ menu and it leaves your lists. Bring it back from here.</string>
     <string name="you_version">Version %1$s</string>
     <string name="you_feedback">Send feedback</string>
-    <string name="you_feedback_sub">Questions or ideas? Email the developer.</string>
+    <string name="you_feedback_sub">Ideas, bugs, questions</string>
+    <!-- Send feedback screen (Plan 10 step 06b) -->
+    <string name="feedback_label">Your message</string>
+    <string name="feedback_placeholder">What works, what doesn\'t, what\'s missing?</string>
+    <string name="feedback_counter">%1$d / %2$d</string>
+    <plurals name="feedback_too_long">
+        <item quantity="one">%1$d character too long</item>
+        <item quantity="other">%1$d characters too long</item>
+    </plurals>
+    <string name="feedback_what_is_sent">Sent with it: app version, Android version and phone model, and your account if you\'re signed in.</string>
+    <string name="feedback_send">Send</string>
+    <string name="feedback_failed">Couldn\'t save your message. Try again.</string>
+    <string name="feedback_sent_title">Thanks, sent</string>
+    <string name="feedback_sent_body">I read every message.</string>
+    <string name="feedback_queued_title">Saved</string>
+    <string name="feedback_queued_body">It sends by itself when you\'re online.</string>
+    <string name="feedback_done">Done</string>
     <string name="you_sync_debug">Sync debug</string>
     <string name="you_privacy">Privacy policy</string>
     <string name="you_privacy_sub">What we store and why</string>

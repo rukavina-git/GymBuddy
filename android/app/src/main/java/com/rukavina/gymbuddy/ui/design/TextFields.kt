@@ -54,6 +54,8 @@ fun AppTextField(
     isError: Boolean = false,
     enabled: Boolean = true,
     singleLine: Boolean = true,
+    /** Multiline fields only: visible lines while short. */
+    minLines: Int = 1,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
@@ -80,6 +82,7 @@ fun AppTextField(
         onValueChange = onValueChange,
         enabled = enabled,
         singleLine = singleLine,
+        minLines = if (singleLine) 1 else minLines,
         textStyle = type.bodyLarge.copy(color = if (enabled) cs.onSurface else c.disabled),
         cursorBrush = SolidColor(c.cobalt),
         keyboardOptions = keyboardOptions,

@@ -29,6 +29,8 @@ object NavRoutes {
     const val You = "you"
     const val Profile = "profile"
     const val About = "about"
+    /** You › Send feedback (Plan 10 step 06b). */
+    const val Feedback = "feedback"
     const val Licences = "licences"
     /** One licence text; id is URL-encoded (Uri.encode). */
     const val LicenceText = "licence/{id}"

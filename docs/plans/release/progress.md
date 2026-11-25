@@ -206,3 +206,27 @@
   (no 20 cap), retries check the newest 10. Simulated on v0.2.3: 79
   same-tree commits, finds sha-8ecd5d7 (the old code gave up).
   actionlint clean. Real proof: the 0.2.4 tag.
+- [ ] 06b Android feedback (2026-11-25), code done, device check open
+  - You › Help › Send feedback (row above About; mailto row and
+    FEEDBACK_EMAIL removed). One field (6 lines), counter from 1800,
+    "too long" error past 2000, what-is-sent line, Send; then "Thanks,
+    sent" or "Saved, it sends by itself when you're online".
+  - Deviation (owner OK): queue in its own Room file `feedback_db`
+    (FeedbackDatabase v1, schema exported), not a table in the
+    per-account AppDatabase, so a sign-in/out can't strand a message.
+    Row keeps the author uid; the token is sent only if that uid is
+    still signed in, else it goes as guest. Account deletion drops
+    that uid's unsent rows.
+  - FeedbackOutbox: insert, try at once (8 s cap), else FeedbackWorker
+    (network constraint, exponential backoff). 2xx and other 4xx drop
+    the row; no answer, 429, 5xx keep it and stop the run.
+  - SyncApis.retrofit() extracted so FeedbackApi shares the client
+    setup. AppTextField got `minLines`.
+  - Tests: FeedbackOutboxTest, FeedbackWorkerTest,
+    RetrofitFeedbackRemoteTest (token rule), FeedbackViewModelTest,
+    AccountDeletionCoordinatorTest extended. Build, all unit tests,
+    lint green.
+  - Gotcha: outbox tests use runBlocking; runTest's virtual clock fires
+    the send timeout while Room works on its own executor.
+  - Open: device check on qa (phone not connected): guest + signed in,
+    airplane mode then online, rows on test, ping.
