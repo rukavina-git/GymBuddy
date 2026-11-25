@@ -118,13 +118,13 @@
         <item quantity="one">%1$d character too long</item>
         <item quantity="other">%1$d characters too long</item>
     </plurals>
-    <string name="feedback_what_is_sent">Sent with it: app version, Android version and phone model, and your account if you\'re signed in.</string>
+    <string name="feedback_what_is_sent">Includes your app version, Android version and device model, and your account if you\'re signed in.</string>
     <string name="feedback_send">Send</string>
     <string name="feedback_failed">Couldn\'t save your message. Try again.</string>
-    <string name="feedback_sent_title">Thanks, sent</string>
-    <string name="feedback_sent_body">I read every message.</string>
-    <string name="feedback_queued_title">Saved</string>
-    <string name="feedback_queued_body">It sends by itself when you\'re online.</string>
+    <string name="feedback_sent_title">Feedback sent</string>
+    <string name="feedback_sent_body">Thank you for helping us improve the app.</string>
+    <string name="feedback_queued_title">Feedback saved</string>
+    <string name="feedback_queued_body">It couldn\'t be sent right now and will be sent automatically as soon as possible.</string>
     <string name="feedback_done">Done</string>
     <string name="you_sync_debug">Sync debug</string>
     <string name="you_privacy">Privacy policy</string>
