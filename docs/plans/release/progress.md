@@ -397,3 +397,14 @@
   real test of the tree-hash image lookup), Android Release → internal,
   promote to alpha; check /admin/ on prod; Sonar: mark the V10 UPDATE
   as Accepted.
+- 0.2.4 released 2026-11-26: tag v0.2.4, Backend Release to prod
+  (tree-hash image lookup worked on a real tag), AAB 2004 on internal,
+  promoted to closed (alpha) by the promote job (run 45806478547, now
+  works on the published app). Prod /admin/ sign-in checked by owner.
+  main merged back into develop (now a release-loop step in
+  android/README.md). Old branches feature/owasp-triage and
+  fix/token-interceptor-crash deleted.
+  - Gotchas: Maven Central 429s on shared runner IPs broke 3 CI jobs
+    today (Gradle plugin portal, OpenAPI generator jar, Robolectric
+    android-all jar). The generator jar and Robolectric jars are now
+    cached in CI; if a download flake recurs, cache that path too.

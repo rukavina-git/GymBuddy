@@ -44,7 +44,7 @@ From the paid testers' report (docs/plans/release/tester-feedback-2026-11-24.md)
 - To check after release: a 0.2.2 phone is forced to update; crash-free
   rate on 0.2.3.
 
-## 0.2.4 (2004), 2026-11-26
+## 0.2.4 (2004), released 2026-11-26
 - In-app feedback (You > Help > Send feedback): one text box, no email
   app. Works for guests and accounts; offline messages queue and send
   on reconnect. Owner gets a ping and reads/triages them on an admin
