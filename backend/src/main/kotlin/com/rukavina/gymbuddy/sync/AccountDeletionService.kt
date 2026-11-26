@@ -33,7 +33,7 @@ class AccountDeletionService(
         val rows = transactionTemplate.execute {
             advisoryLock.acquireForUser(uid)
             accountDataDeleter.deleteAllDataFor(uid)
-        } ?: 0
+        }
 
         val firebaseUserDeleted = try {
             firebaseUserDeleter.deleteUser(uid)

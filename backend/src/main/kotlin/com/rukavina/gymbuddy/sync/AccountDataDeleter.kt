@@ -36,6 +36,7 @@ class AccountDataDeleter(private val jdbcTemplate: NamedParameterJdbcTemplate) {
             "DELETE FROM body_weight_entries WHERE owner_id = :uid",
             "DELETE FROM change_log WHERE user_id = :uid",
             "DELETE FROM sync_retention_watermark WHERE user_id = :uid",
+            "DELETE FROM feedback WHERE user_id = :uid",
         ).sumOf { jdbcTemplate.update(it, params) }
     }
 }

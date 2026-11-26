@@ -45,6 +45,26 @@ gymbuddy:
   rate-limit:
     capacity: ${RATE_LIMIT_CAPACITY:60}
     refill-per-minute: ${RATE_LIMIT_REFILL_PER_MINUTE:60}
+  feedback:
+    # POST /v1/feedback: messages per uid (or guest IP) per rolling hour.
+    max-per-hour: ${FEEDBACK_MAX_PER_HOUR:5}
+    # ntfy.sh topic for "New feedback" pushes (no user text). Blank = off.
+    # A secret: set only in the server's .env, never committed.
+    ntfy-topic: ${NTFY_FEEDBACK_TOPIC:}
+    # Deleted after this many days, any status (privacy policy: 2 years).
+    retention-days: ${FEEDBACK_RETENTION_DAYS:730}
+    retention-cron: ${FEEDBACK_RETENTION_CRON:0 30 3 * * *}
+  admin:
+    # Firebase uids allowed on /v1/admin/** (comma list). Blank = nobody.
+    uids: ${ADMIN_UIDS:}
+    # This stack's /admin/ page; the feedback ping opens it. Blank = no link.
+    url: ${ADMIN_URL:}
+    # Firebase web app config for the /admin/ page (public values, from
+    # that stack's Firebase project). Any blank = page shows "admin off".
+    firebase:
+      api-key: ${ADMIN_FIREBASE_API_KEY:}
+      auth-domain: ${ADMIN_FIREBASE_AUTH_DOMAIN:}
+      project-id: ${ADMIN_FIREBASE_PROJECT_ID:}
   sync:
     # How long a tombstoned entity is kept before TombstoneRetentionService
     # hard-deletes it and its change_log rows (Group H). Configuration, not

@@ -56,10 +56,10 @@ class FullSyncEntityDiscovery(private val jdbcTemplate: NamedParameterJdbcTempla
             .addValue("offset", offset)
         val rows = jdbcTemplate.query(sql, params) { rs, _ ->
             EntityRef(EntityType.valueOf(rs.getString("entity_type")), rs.getString("entity_id"))
-        }
+        }.toList()
 
         val hasMore = rows.size > limit
-        val page = if (hasMore) rows.subList(0, limit) else rows
+        val page = rows.take(limit)
         return FullSyncPage(page, hasMore)
     }
 }

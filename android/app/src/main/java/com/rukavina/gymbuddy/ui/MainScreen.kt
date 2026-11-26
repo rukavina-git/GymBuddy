@@ -91,6 +91,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import com.rukavina.gymbuddy.ui.guest.GuestMergeViewModel
 import com.rukavina.gymbuddy.ui.you.AboutScreen
+import com.rukavina.gymbuddy.ui.you.FeedbackScreen
 import com.rukavina.gymbuddy.ui.you.licences.LicenceTextScreen
 import com.rukavina.gymbuddy.ui.you.licences.LicencesScreen
 import com.rukavina.gymbuddy.ui.you.DeleteAccountScreen
@@ -460,6 +461,7 @@ private fun MainContent(
                         onHiddenExercises = { bottomNavController.navigate(NavRoutes.HiddenExercises) },
                         onHiddenTemplates = { bottomNavController.navigate(NavRoutes.HiddenTemplates) },
                         onAbout = { bottomNavController.navigate(NavRoutes.About) },
+                        onFeedback = { bottomNavController.navigate(NavRoutes.Feedback) { launchSingleTop = true } },
                         onDeleteAccount = { bottomNavController.navigate(NavRoutes.DeleteAccount) { launchSingleTop = true } },
                         onLeft = { rootNavController.openWelcome() },
                     ),
@@ -479,6 +481,9 @@ private fun MainContent(
                     onLicences = { bottomNavController.navigate(NavRoutes.Licences) },
                     onSyncDebug = { bottomNavController.navigate(NavRoutes.SyncDebug) },
                 )
+            }
+            composable(NavRoutes.Feedback) {
+                FeedbackScreen(onBack = { bottomNavController.popBackStack() })
             }
             composable(NavRoutes.Licences) {
                 LicencesScreen(

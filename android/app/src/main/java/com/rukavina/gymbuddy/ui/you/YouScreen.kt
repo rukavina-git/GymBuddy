@@ -83,6 +83,8 @@ data class YouNav(
     val onHiddenExercises: () -> Unit,
     val onHiddenTemplates: () -> Unit,
     val onAbout: () -> Unit,
+    /** Send feedback (Plan 10 step 06b). */
+    val onFeedback: () -> Unit,
     /** Delete account screen (F13). */
     val onDeleteAccount: () -> Unit,
     /** Signed out, erased or deleted. */
@@ -242,6 +244,8 @@ internal fun YouContent(state: YouUiState, actions: YouActions, clock: Clock) {
                 }
                 item(key = "help") {
                     Group(stringResource(R.string.you_group_help)) {
+                        ValueRow(stringResource(R.string.you_feedback), null, actions.nav.onFeedback, subtitle = stringResource(R.string.you_feedback_sub))
+                        RowDivider()
                         ValueRow(stringResource(R.string.you_about), null, actions.nav.onAbout)
                     }
                 }

@@ -27,7 +27,8 @@ the device checks. Plan: 3-4 more after 0.2.1 (see progress.md cadence).
     older Android).
   - Password fields hide other apps' overlays (tapjacking), Android 12+.
 - Sync failure-mode tests (offline, expired session) added.
-- Known: the 4 old Gemini exercise images are removed; the new
+- Known: the 4 old Gemini exercise images are removed (2026-11-25:
+  images parked for v2, still frames don't show the movement); the new
   Qwen-Image set lands in the next update, so no exercise shows an
   image in 0.2.2.
 - To check after release: crash-free rate on 0.2.2, and that 0.2.3
@@ -42,3 +43,16 @@ From the paid testers' report (docs/plans/release/tester-feedback-2026-11-24.md)
 - Update priority 4: first forced update, tested from 0.2.2 phones.
 - To check after release: a 0.2.2 phone is forced to update; crash-free
   rate on 0.2.3.
+
+## 0.2.4 (2004), 2026-11-26
+- In-app feedback (You > Help > Send feedback): one text box, no email
+  app. Works for guests and accounts; offline messages queue and send
+  on reconnect. Owner gets a ping and reads/triages them on an admin
+  page. Privacy policy and Play Data safety updated (optional "Other
+  user-generated content").
+- Start screen stays up while Play's update check runs (no flash of
+  Home behind an update prompt).
+- Backend code-quality pass (Sonar).
+- Update priority 0 (nothing urgent).
+- To check after release: feedback from a tester phone arrives on
+  prod; crash-free rate on 0.2.4.

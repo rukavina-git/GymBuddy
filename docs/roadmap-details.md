@@ -5,7 +5,7 @@ Re-plan of 2026-10-29, re-ordered 2026-11-02. The checklist is
 §13 (execution plan) and §17 (next actions) of
 `architecture-and-execution-plan-v2.md`. The rest of that document
 (decisions, data model, sync protocol, scope freeze §14) still holds.
-iOS is out of scope until Android v1 is live.
+iOS is out of scope until Android v2 is done (owner 2026-11-25).
 
 ## 1. Where we are
 

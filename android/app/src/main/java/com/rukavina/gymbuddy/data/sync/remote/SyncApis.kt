@@ -36,17 +36,7 @@ class SyncApis(val sync: SyncApi, val reference: ReferenceApi, val account: Acco
             client: OkHttpClient = defaultClient(),
             clientVersion: String = BuildConfig.VERSION_NAME,
         ): SyncApis {
-            val retrofit = Retrofit.Builder()
-                .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
-                .client(
-                    client.newBuilder()
-                        .addInterceptor(ClientInfoInterceptor(clientVersion))
-                        .addInterceptor(BearerTokenInterceptor(tokenProvider))
-                        .build()
-                )
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
-                .build()
+            val retrofit = retrofit(baseUrl, tokenProvider, client, clientVersion)
             return SyncApis(
                 retrofit.create(SyncApi::class.java),
                 retrofit.create(ReferenceApi::class.java),
@@ -54,7 +44,29 @@ class SyncApis(val sync: SyncApi, val reference: ReferenceApi, val account: Acco
             )
         }
 
-        private fun defaultClient() = OkHttpClient.Builder()
+        /**
+         * The Retrofit setup every generated service uses: the spec's
+         * Moshi, `X-Client-*` headers and the bearer token from
+         * [tokenProvider] (none when it returns null).
+         */
+        fun retrofit(
+            baseUrl: String,
+            tokenProvider: AuthTokenProvider,
+            client: OkHttpClient = defaultClient(),
+            clientVersion: String = BuildConfig.VERSION_NAME,
+        ): Retrofit = Retrofit.Builder()
+            .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
+            .client(
+                client.newBuilder()
+                    .addInterceptor(ClientInfoInterceptor(clientVersion))
+                    .addInterceptor(BearerTokenInterceptor(tokenProvider))
+                    .build()
+            )
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
+            .build()
+
+        fun defaultClient(): OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build()

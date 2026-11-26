@@ -36,7 +36,7 @@ class WorkoutSessionPullRepository(
             FROM workout_sessions
             WHERE owner_id = :userId AND id::text IN (:ids)
         """.trimIndent()
-        val sessions = jdbcTemplate.query(sql, mapOf("userId" to userId, "ids" to ids)) { rs, _ -> mapSessionRow(rs) }
+        val sessions = jdbcTemplate.query(sql, mapOf("userId" to userId, "ids" to ids)) { rs, _ -> mapSessionRow(rs) }.toList()
         if (sessions.isEmpty()) return emptyList()
 
         val sessionIds = sessions.map { it.id }
@@ -49,7 +49,7 @@ class WorkoutSessionPullRepository(
         """.trimIndent()
         val performedExercisesBySessionId = jdbcTemplate.query(peSql, mapOf("sessionIds" to sessionIds)) { rs, _ ->
             rs.getString("workout_session_id") to mapPerformedExerciseRow(rs)
-        }
+        }.toList()
 
         val performedExerciseIds = performedExercisesBySessionId.map { it.second.id }
         val setsByPerformedExerciseId = if (performedExerciseIds.isEmpty()) {

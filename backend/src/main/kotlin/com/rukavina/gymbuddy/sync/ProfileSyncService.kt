@@ -84,7 +84,7 @@ class ProfileSyncService(
                         )
                 }
                 outcome to stored?.revision
-            }!!
+            }
 
             SyncAudit.log(log, traceId, uid, EntityType.USER_PROFILE, uid, result.status, revisionBefore, result.revision, result.reason)
             result

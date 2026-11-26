@@ -81,8 +81,11 @@ class AccountDeletionCoordinatorTest {
         deleteOnServer,
         deleteProfileImages = { imagesDir.deleteRecursively() },
         auth = auth,
-        runExclusive = runExclusive
+        runExclusive = runExclusive,
+        deletePendingFeedback = { feedbackDeletedFor += it }
     )
+
+    private val feedbackDeletedFor = mutableListOf<String>()
 
     @Test
     fun `204 wipes user data, outbox and cursor, keeps reference data, signs out, deletes images`() = runBlocking {
@@ -102,6 +105,7 @@ class AccountDeletionCoordinatorTest {
         assertEquals("reference library kept", 1, db.exerciseDao().getDefaultExerciseCount())
         assertEquals(1, auth.signOuts)
         assertFalse(imagesDir.exists())
+        assertEquals("unsent feedback of the account goes too", listOf("uid-1"), feedbackDeletedFor)
     }
 
     private suspend fun assertNothingDeleted(sessionId: String) {
@@ -109,6 +113,7 @@ class AccountDeletionCoordinatorTest {
         assertEquals(1, db.syncDao().outboxCount())
         assertEquals(0, auth.signOuts)
         assertTrue(imagesDir.exists())
+        assertTrue(feedbackDeletedFor.isEmpty())
     }
 
     @Test
