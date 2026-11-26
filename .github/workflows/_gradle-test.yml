@@ -85,6 +85,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-${{ inputs.module-path }}-
 
+      # Robolectric downloads its android-all jar from Maven Central at
+      # test time; shared runner IPs get 429s there. Cache it.
+      - name: Cache Robolectric jars
+        if: inputs.module-path == 'android'
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ hashFiles('android/gradle/libs.versions.toml') }}
+          restore-keys: robolectric-
+
       - name: Write ${{ inputs.secret-file-path }} from secret
         if: inputs.secret-file-path != ''
         env:

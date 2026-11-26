@@ -75,6 +75,15 @@ jobs:
           GOOGLE_SERVICES_JSON_QA: ${{ secrets.GOOGLE_SERVICES_JSON_QA }}
         run: printf '%s' "$GOOGLE_SERVICES_JSON_QA" > app/src/qa/google-services.json
 
+      # Robolectric downloads its android-all jar from Maven Central at
+      # test time; shared runner IPs get 429s there. Cache it.
+      - name: Cache Robolectric jars
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ hashFiles('android/gradle/libs.versions.toml') }}
+          restore-keys: robolectric-
+
       - name: Run sync e2e scenarios
         working-directory: android
         run: ./gradlew testQaDebugUnitTest --tests 'com.rukavina.gymbuddy.data.sync.e2e.*' -Pe2eBaseUrl=http://localhost:8080 --stacktrace
