@@ -375,7 +375,7 @@
   android 0, backend 22 (clean-before-release rule). Fixed 21: useless
   `!!` / `?:` after transactionTemplate.execute / queryForObject
   (Spring 7 nullness), `.toList()` on jdbcTemplate.query results,
-  `rows.take(limit)` for subList pages, admin.js `void load(...)`,
+  `rows.take(limit)` for subList pages (rows `.toList()` too), admin.js `void load(...)`,
   index.html `<output>` for the status line. appVersion 0.2.4 (2004),
   update priority 0 (owner), changelogs/2004.txt, closed-test-updates
   entry. Backend build green, android build + unit tests + lint green.
@@ -388,3 +388,7 @@
     clean-before-release rule.
   - Gotchas: Sonar's develop analysis showed new-rule hits (S6619,
     S6524) in old sync code, not only new code.
+  - CI on PR #27: Lint failed once on a Gradle plugin portal fetch
+    (kotlin.android 2.4.21), same flake as 01.1; rerun via new push.
+    Sonar then flagged the `rows` lists in ChangeLogReader and
+    FullSyncEntityDiscovery: `.toList()` added.

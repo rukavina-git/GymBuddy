@@ -50,7 +50,7 @@ class ChangeLogReader(private val jdbcTemplate: NamedParameterJdbcTemplate) {
             .addValue("fetchLimit", limit + 1)
         val rows = jdbcTemplate.query(sql, params) { rs, _ ->
             Triple(rs.getLong("seq"), rs.getString("entity_type"), rs.getString("entity_id"))
-        }
+        }.toList()
 
         if (rows.isEmpty()) return DeltaPage(emptyList(), afterSeq, hasMore = false)
 
