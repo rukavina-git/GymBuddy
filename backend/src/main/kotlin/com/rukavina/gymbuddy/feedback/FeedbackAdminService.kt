@@ -48,7 +48,7 @@ class FeedbackAdminService(private val repository: FeedbackRepository) {
             counts = AdminFeedbackCountsDto(
                 open = counts["open"] ?: 0,
                 solved = counts["solved"] ?: 0,
-                wont_fix = counts["wont_fix"] ?: 0,
+                wontFix = counts["wont_fix"] ?: 0,
                 spam = counts["spam"] ?: 0,
             ),
         )

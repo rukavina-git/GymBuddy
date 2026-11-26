@@ -94,15 +94,17 @@ function start(firebaseConfig) {
     return res.json();
   }
 
-  async function load(reset) {
+  // One load at a time. The filter only changes once its page has
+  // arrived, so the chips, the list and the cursor always agree.
+  async function load(reset, filter = state.filter) {
     if (state.loading) return;
     state.loading = true;
-    if (reset) state.cursor = null;
     const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
-    if (state.filter !== "all") params.set("status", state.filter);
-    if (state.cursor) params.set("cursor", state.cursor);
+    if (filter !== "all") params.set("status", filter);
+    if (!reset && state.cursor) params.set("cursor", state.cursor);
     try {
       const page = await api("/v1/admin/feedback?" + params);
+      state.filter = filter;
       state.counts = page.counts;
       state.cursor = page.nextCursor;
       renderChips();
@@ -128,9 +130,7 @@ function start(firebaseConfig) {
       b.setAttribute("aria-selected", String(s.key === state.filter));
       b.textContent = `${s.label} ${s.key === "all" ? total : counts[s.key] ?? 0}`;
       b.addEventListener("click", () => {
-        if (state.filter === s.key) return;
-        state.filter = s.key;
-        load(true);
+        if (state.filter !== s.key) load(true, s.key);
       });
       return b;
     });
@@ -174,7 +174,7 @@ function start(firebaseConfig) {
     let currentStatus = item.status;
     select.addEventListener("change", async () => {
       const next = select.value;
-      if (await save(item.id, { status: next }, saved)) {
+      if (await save(item.id, { status: next }, saved, [select, note])) {
         moveCount(currentStatus, next);
         currentStatus = next;
       } else {
@@ -191,7 +191,7 @@ function start(firebaseConfig) {
     note.addEventListener("change", async () => {
       const next = note.value.trim();
       if (next === currentNote) return;
-      if (await save(item.id, { note: next }, saved)) currentNote = next;
+      if (await save(item.id, { note: next }, saved, [select, note])) currentNote = next;
     });
     note.addEventListener("keydown", (e) => {
       if (e.key === "Enter") note.blur();
@@ -202,7 +202,10 @@ function start(firebaseConfig) {
     return li;
   }
 
-  async function save(id, body, saved) {
+  // The card's controls are locked while a save runs, so two quick
+  // changes can't reach the server out of order.
+  async function save(id, body, saved, controls) {
+    for (const c of controls) c.disabled = true;
     saved.classList.remove("error");
     saved.textContent = "Saving…";
     try {
@@ -217,6 +220,8 @@ function start(firebaseConfig) {
       saved.classList.add("error");
       saved.textContent = errorText(e, "Not saved");
       return false;
+    } finally {
+      for (const c of controls) c.disabled = false;
     }
   }
 

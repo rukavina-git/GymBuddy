@@ -1,5 +1,7 @@
 package com.rukavina.gymbuddy.api.dto
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 /** Mirrors AdminFeedbackItem in api/openapi.yaml. account is "guest" or the Firebase uid. */
 data class AdminFeedbackItemDto(
     val id: String,
@@ -19,7 +21,8 @@ data class AdminFeedbackItemDto(
 data class AdminFeedbackCountsDto(
     val open: Long,
     val solved: Long,
-    val wont_fix: Long,
+    @get:JsonProperty("wont_fix")
+    val wontFix: Long,
     val spam: Long,
 )
 

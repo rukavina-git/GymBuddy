@@ -362,5 +362,12 @@
     secrets: no Bitwarden entry.
   - Still to check on test: mark solved + filter, second Google account
     gets "not an admin", ntfy ping opens the page.
-- Next: fix the two reviewer SHOULDs (small), then ship 0.2.4 (bump,
-  changelog, closed-test log, PR, tag); check /admin/ on prod after.
+  - Owner checked on test (2026-11-26): solved + filter, second account
+    "not an admin", ntfy ping opens the page. All work.
+- Reviewer SHOULDs fixed (2026-11-26): admin.js chip taps are ignored
+  while a load runs and the filter only switches once its page arrives;
+  a card's status + note are disabled while a save runs. AdminDtos
+  `wontFix` with @get:JsonProperty("wont_fix") (JSON unchanged, no spec
+  change). Backend 176/176.
+- Next: ship 0.2.4 (bump, changelog, closed-test log, PR, tag); check
+  /admin/ on prod after.
