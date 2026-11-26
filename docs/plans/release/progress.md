@@ -392,3 +392,8 @@
     (kotlin.android 2.4.21), same flake as 01.1; rerun via new push.
     Sonar then flagged the `rows` lists in ChangeLogReader and
     FullSyncEntityDiscovery: `.toList()` added.
+- 0.2.4 merged 2026-11-26: PR #27 → main (62c439d), CI green.
+  Next (me): tag v0.2.4 on main, approve Backend Release (prod, first
+  real test of the tree-hash image lookup), Android Release → internal,
+  promote to alpha; check /admin/ on prod; Sonar: mark the V10 UPDATE
+  as Accepted.
