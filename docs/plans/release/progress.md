@@ -408,3 +408,9 @@
     today (Gradle plugin portal, OpenAPI generator jar, Robolectric
     android-all jar). The generator jar and Robolectric jars are now
     cached in CI; if a download flake recurs, cache that path too.
+- CI download hardening (2026-11-26, dca4f9a): Gradle retries downloads
+  4x with backoff (gradle.properties, android + backend). Robolectric
+  runs offline from a jar Gradle fetches (robolectricAndroidAll).
+  - Gotcha: bumping robolectric needs robolectricAndroidAll bumped too
+    (libs.versions.toml comment); a mismatch fails tests with "Unable
+    to find ... android-all-instrumented".
