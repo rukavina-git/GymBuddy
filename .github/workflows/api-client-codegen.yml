@@ -53,6 +53,15 @@ jobs:
         # don't get to run arbitrary code during install.
         run: npm ci --ignore-scripts
 
+      # The wrapper downloads the generator jar from Maven Central on every
+      # run, and shared runner IPs get 429s there. Cache the jar (after
+      # npm ci, which wipes node_modules), keyed on the pinned version.
+      - name: Cache generator jar
+        uses: actions/cache@v6
+        with:
+          path: api/node_modules/@openapitools/openapi-generator-cli/versions
+          key: openapi-generator-jar-${{ hashFiles('api/openapitools.json') }}
+
       - name: Generate Kotlin client
         working-directory: api
         run: npm run generate:kotlin
