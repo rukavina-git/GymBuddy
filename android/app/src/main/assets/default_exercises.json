@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "exercises": [
     {
       "id": "019fe506-359a-7601-92f2-f441cf1dae33",
@@ -165,7 +165,7 @@
       ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "trackingType": "REPS_ONLY",
+      "trackingType": "WEIGHT_REPS",
       "videoUrl": ""
     },
     {
@@ -415,7 +415,7 @@
       "secondaryMuscles": [
         "SHOULDERS"
       ],
-      "difficulty": "BEGINNER",
+      "difficulty": "INTERMEDIATE",
       "equipmentNeeded": [
         "DUMBBELL",
         "BENCH"
@@ -752,7 +752,7 @@
     },
     {
       "id": "019fe506-35b1-783a-8928-809823dce5c4",
-      "deprecated": false,
+      "deprecated": true,
       "name": "Dumbbell Front Raise",
       "description": "An isolation exercise targeting the front deltoids.",
       "instructions": [
@@ -1003,7 +1003,7 @@
     },
     {
       "id": "019fe506-35b9-7802-85de-b0a9682a8dbc",
-      "deprecated": false,
+      "deprecated": true,
       "name": "Tricep Dip",
       "description": "A bodyweight exercise that targets the triceps using parallel bars or a bench.",
       "instructions": [
@@ -1157,7 +1157,7 @@
     },
     {
       "id": "019fe506-35be-7140-b9fe-bff1822040fc",
-      "deprecated": false,
+      "deprecated": true,
       "name": "Concentration Curl",
       "description": "A seated single-arm curl that isolates the bicep with strict form.",
       "instructions": [
@@ -1619,7 +1619,7 @@
     },
     {
       "id": "019fe506-35cd-7cb5-b39b-6fc73c1dd946",
-      "deprecated": false,
+      "deprecated": true,
       "name": "Bicycle Crunch",
       "description": "A dynamic crunch variation that targets both the rectus abdominis and obliques.",
       "instructions": [
@@ -1715,7 +1715,7 @@
     },
     {
       "id": "019fe506-35d0-7520-b3e9-f4fa230d2e1a",
-      "deprecated": false,
+      "deprecated": true,
       "name": "Upright Row",
       "description": "A shoulder exercise that targets the lateral deltoids and traps.",
       "instructions": [
@@ -1894,12 +1894,295 @@
         "LEGS"
       ],
       "secondaryMuscles": [],
+      "difficulty": "INTERMEDIATE",
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "trackingType": "WEIGHT_REPS",
+      "videoUrl": ""
+    },
+    {
+      "id": "01a21950-32e4-74ec-9d6f-3eb593ed90a4",
+      "deprecated": false,
+      "name": "Treadmill",
+      "description": "Walking, jogging or running on a treadmill. An easy way to warm up or add steady cardio, and you can set the pace and incline exactly.",
+      "instructions": [
+        "Step onto the side rails and start the belt at a slow walk",
+        "Step onto the belt and walk for a few minutes to warm up",
+        "Raise the speed or incline to your working pace",
+        "Keep an upright posture and land under your hips",
+        "Slow down for the last few minutes before stopping"
+      ],
+      "tips": [
+        "Don't hold the handrails while walking; it takes work off your legs",
+        "Incline walking is a joint-friendly alternative to running",
+        "Use the safety clip if your treadmill has one"
+      ],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE"
+      ],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
+      "category": "CARDIO",
+      "exerciseType": "COMPOUND",
+      "trackingType": "DISTANCE_DURATION",
+      "videoUrl": ""
+    },
+    {
+      "id": "01a21950-32e5-7c61-b0d6-309e78002c0f",
+      "deprecated": false,
+      "name": "Stationary Bike",
+      "description": "Steady cycling on a stationary bike. Low impact on the knees and hips, good for warm-ups, cardio sessions and recovery days.",
+      "instructions": [
+        "Set the seat so your knee is slightly bent at the bottom of the pedal stroke",
+        "Start pedalling at an easy resistance to warm up",
+        "Raise the resistance to your working level",
+        "Keep your upper body relaxed and your core steady",
+        "Ease off for the last few minutes before stopping"
+      ],
+      "tips": [
+        "A seat that is too low strains the knees",
+        "Push and pull through the whole pedal circle",
+        "Short harder intervals are a good way to add intensity"
+      ],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
+      "category": "CARDIO",
+      "exerciseType": "COMPOUND",
+      "trackingType": "DURATION",
+      "videoUrl": ""
+    },
+    {
+      "id": "01a21950-32e6-7778-8d8a-753887d1eebd",
+      "deprecated": false,
+      "name": "Stair Climber",
+      "description": "Climbing steps on a stair machine. Hard cardio that also works the glutes and quads.",
+      "instructions": [
+        "Step on and hold the rails lightly for balance",
+        "Start at a slow step speed to warm up",
+        "Raise the speed to your working pace",
+        "Push through the whole foot on each step",
+        "Slow down for the last minute before stepping off"
+      ],
+      "tips": [
+        "Don't lean on the rails; stand tall and let your legs do the work",
+        "Take full steps rather than short, quick ones",
+        "Start with short sessions; it gets hard quickly"
+      ],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE"
+      ],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
+      "category": "CARDIO",
+      "exerciseType": "COMPOUND",
+      "trackingType": "DURATION",
+      "videoUrl": ""
+    },
+    {
+      "id": "01a21950-32e7-76b1-a8df-6857c433b47c",
+      "deprecated": false,
+      "name": "Machine Chest Press",
+      "description": "A seated pressing machine for the chest. The fixed path makes it a safe way to learn pressing and to train hard without a spotter.",
+      "instructions": [
+        "Set the seat so the handles are level with your mid-chest",
+        "Sit with your back flat against the pad and grip the handles",
+        "Press the handles forward until your arms are almost straight",
+        "Return slowly until you feel a stretch in your chest",
+        "Repeat for the planned reps"
+      ],
+      "tips": [
+        "Keep your shoulder blades pulled back against the pad",
+        "Don't lock your elbows hard at the top",
+        "Control the way back; don't let the stack slam"
+      ],
+      "primaryMuscles": [
+        "CHEST"
+      ],
+      "secondaryMuscles": [
+        "SHOULDERS",
+        "ARMS"
+      ],
       "difficulty": "BEGINNER",
       "equipmentNeeded": [
         "MACHINE"
       ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
+      "trackingType": "WEIGHT_REPS",
+      "videoUrl": ""
+    },
+    {
+      "id": "01a21950-32e8-7f58-8b7c-8bcb203677e7",
+      "deprecated": false,
+      "name": "Assisted Pull-Up",
+      "description": "A pull-up on an assisted machine or with a band, where the support takes part of your body weight. The way to build up to full pull-ups.",
+      "instructions": [
+        "Set the assistance weight (more weight means more help)",
+        "Kneel or stand on the platform and grip the bar wider than your shoulders",
+        "Pull your chest up toward the bar",
+        "Lower yourself slowly until your arms are straight",
+        "Repeat for the planned reps"
+      ],
+      "tips": [
+        "Use less assistance as you get stronger",
+        "Start each rep by pulling your shoulders down",
+        "Avoid swinging or kicking"
+      ],
+      "primaryMuscles": [
+        "BACK"
+      ],
+      "secondaryMuscles": [
+        "ARMS"
+      ],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "trackingType": "WEIGHT_REPS",
+      "videoUrl": ""
+    },
+    {
+      "id": "01a21950-32e9-7e5d-a320-cf446713ea86",
+      "deprecated": false,
+      "name": "Dumbbell Romanian Deadlift",
+      "description": "A hip hinge with dumbbells that trains the hamstrings and glutes. Easier to learn than the barbell version.",
+      "instructions": [
+        "Stand holding a dumbbell in each hand in front of your thighs",
+        "Unlock your knees slightly",
+        "Push your hips back and lower the dumbbells along your legs",
+        "Stop when you feel a strong stretch in your hamstrings",
+        "Drive your hips forward to stand back up"
+      ],
+      "tips": [
+        "Keep your back flat the whole time",
+        "Keep the dumbbells close to your legs",
+        "Your knees stay soft but barely bend further"
+      ],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "BACK"
+      ],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": [
+        "DUMBBELL"
+      ],
+      "category": "STRENGTH",
+      "exerciseType": "COMPOUND",
+      "trackingType": "WEIGHT_REPS",
+      "videoUrl": ""
+    },
+    {
+      "id": "01a21950-32ea-712e-9979-d82407e6aa8c",
+      "deprecated": false,
+      "name": "Hip Abduction Machine",
+      "description": "A seated machine that pushes the legs apart to train the outer glutes. Helps hip stability for squats and lunges.",
+      "instructions": [
+        "Sit with your back against the pad and the pads on the outside of your knees",
+        "Set the start position so your legs are together",
+        "Push your knees outward as far as you comfortably can",
+        "Pause briefly, then return slowly",
+        "Repeat for the planned reps"
+      ],
+      "tips": [
+        "Control the return; don't let the weights slam",
+        "Leaning slightly forward shifts more work to the glutes",
+        "Use a weight you can move without rocking"
+      ],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "trackingType": "WEIGHT_REPS",
+      "videoUrl": ""
+    },
+    {
+      "id": "01a21950-32eb-74f9-b6d7-7e53e92b742a",
+      "deprecated": false,
+      "name": "Seated Leg Curl",
+      "description": "A seated machine curl for the hamstrings. The seated position stretches the hamstrings more than the lying version.",
+      "instructions": [
+        "Sit with the back of your lower legs on the pad and the thigh pad snug",
+        "Grip the handles and keep your back against the seat",
+        "Curl your heels down and back as far as you can",
+        "Pause briefly, then return slowly",
+        "Repeat for the planned reps"
+      ],
+      "tips": [
+        "Line up your knees with the machine's pivot",
+        "Don't let your hips lift off the seat",
+        "Control the way up"
+      ],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": [
+        "MACHINE"
+      ],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
+      "trackingType": "WEIGHT_REPS",
+      "videoUrl": ""
+    },
+    {
+      "id": "01a21950-32ec-7341-91cf-ef31d3cdb1a6",
+      "deprecated": false,
+      "name": "Glute Bridge",
+      "description": "A floor exercise that lifts the hips to train the glutes. A beginner-friendly version of the hip thrust; add weight on the hips as you get stronger.",
+      "instructions": [
+        "Lie on your back with knees bent and feet flat, hip-width apart",
+        "Brace your core and press through your heels",
+        "Lift your hips until your body is straight from knees to shoulders",
+        "Squeeze your glutes at the top for a moment",
+        "Lower your hips slowly to the floor"
+      ],
+      "tips": [
+        "Push through your heels, not your toes",
+        "Don't arch your lower back at the top",
+        "Add a dumbbell or plate on your hips to progress"
+      ],
+      "primaryMuscles": [
+        "LEGS"
+      ],
+      "secondaryMuscles": [
+        "CORE"
+      ],
+      "difficulty": "BEGINNER",
+      "equipmentNeeded": [
+        "BODYWEIGHT"
+      ],
+      "category": "STRENGTH",
+      "exerciseType": "ISOLATION",
       "trackingType": "WEIGHT_REPS",
       "videoUrl": ""
     }

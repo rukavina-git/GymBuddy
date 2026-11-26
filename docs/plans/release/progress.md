@@ -414,3 +414,42 @@
   - Gotcha: bumping robolectric needs robolectricAndroidAll bumped too
     (libs.versions.toml comment); a mismatch fails tests with "Unable
     to find ... android-all-instrumented".
+- [x] 05a library 10 -> 11 (2026-11-26), HASH
+  - default_exercises.json v11: 69 rows, 64 live. Deprecated Tricep
+    Dip, Upright Row, Concentration Curl, Dumbbell Front Raise, Bicycle
+    Crunch. Added Treadmill (DISTANCE_DURATION: supported), Stationary
+    Bike, Stair Climber (DURATION), Machine Chest Press, Assisted
+    Pull-Up, Dumbbell RDL, Hip Abduction Machine, Seated Leg Curl, Glute
+    Bridge. Push-Up REPS_ONLY -> WEIGHT_REPS (rule: bodyweight = weight
+    optional; the others already were). Chest Fly, Hack Squat ->
+    INTERMEDIATE.
+  - V11__exercise_library_11.sql from new generator
+    backend/tools/generate_exercise_library_11_seed.py (8 UPDATEs by
+    id, 9 INSERTs, exercise_library_version 11). No openapi change, no
+    Room schema change.
+  - Search aliases: domain/search/ExerciseAliases.kt (app-side map by
+    id): "glute bridge" -> Hip Thrust, "rope" -> Tricep Pushdown,
+    "cable fly" -> Cable Crossover. Used by filterExercises (library +
+    picker).
+  - Tests: backend build green (ReferenceControllerTest 69 / v11, drift
+    test); Android build, unit tests (ExerciseAliasesTest new), lint
+    green.
+  - Deviations (owner OK): Mountain Climber -> DURATION and Chest Dip
+    -> "Dip" moved to 05b (both in live templates that copy name +
+    tracking type). Aliases app-side, not a field. V11, not V9.
+  - Device check pending: no phone connected. Signed-in qa users only
+    see v11 once the test backend runs V11 (develop deploy); a guest
+    gets the bundle at once.
+  - Open (reviewer, not fixed): SHOULD: Assisted Pull-Up is WEIGHT_REPS,
+    so more assistance shows as a new "best" (WorkoutSummaryScreen
+    picks max weight); decide REPS_ONLY or accept. SHOULD: no backend
+    test compares V11 rows with the bundle (ids, deprecated,
+    difficulty, trackingType). NITs: alias hits rank the same as name
+    hits (nameMatchStillComesFirst passes on alphabetical order);
+    generator only diffs 3 fields, no assert the rest is unchanged;
+    Mountain Climber change was likely safe in 05a (exercise type wins
+    at workout time, ActiveWorkoutViewModel:539).
+  - Gotchas: don't ship 05a to alpha before the owner's 10.1a check.
+    05b must deprecate + re-add templates that touch Chest Dip and
+    Mountain Climber. Exercise images: the 9 prompts are already in
+    local-prompts.json.

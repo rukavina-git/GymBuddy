@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.rukavina.gymbuddy.domain.model.Exercise
 import com.rukavina.gymbuddy.domain.model.MuscleGroup
 import com.rukavina.gymbuddy.domain.repository.ExerciseRepository
+import com.rukavina.gymbuddy.domain.search.ExerciseAliases
 import com.rukavina.gymbuddy.domain.search.TypoMatcher
 import com.rukavina.gymbuddy.ui.exercises.create.ExerciseCreator
 import com.rukavina.gymbuddy.ui.exercises.create.ExerciseForm
@@ -84,7 +85,7 @@ fun filterExercises(all: List<Exercise>, query: String, muscle: MuscleGroup?): L
     all.asSequence()
         .filter { it.deletedAt == null && !it.deprecated }
         .filter { muscle == null || muscle in it.primaryMuscles }
-        .mapNotNull { e -> TypoMatcher.match(query, e.name)?.let { e to it } }
+        .mapNotNull { e -> ExerciseAliases.match(query, e.id, e.name)?.let { e to it } }
         .sortedWith(compareBy<Pair<Exercise, TypoMatcher.Match>> { it.second }.thenBy { it.first.name.lowercase() })
         .map { it.first }
         .toList()
