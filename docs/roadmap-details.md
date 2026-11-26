@@ -310,7 +310,8 @@ owner's company uses it. Plan: `docs/plans/environments`.
 
 ### Plan 10: release
 
-10.0 **OWASP.** The fix is parked on `feature/owasp-triage`
+10.0 **OWASP.** The parked branch `feature/owasp-triage` was dropped
+     2026-11-26 (334 commits stale; owner: redo from scratch). It had
      (commons-lang3 classloader clash, NVD cache saved on failure,
      push/PR/weekly triggers); merge it, run, triage each finding (bump,
      replace, or suppress with a reason). Stays non-blocking (ADR 0013).

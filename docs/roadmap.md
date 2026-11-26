@@ -144,8 +144,8 @@ Owner order (2026-11-17): 10.1 + 10.2 + closed track through Google
 review first, then 10.1a refinement + 10.4a, new version, then 10.3
 (enroll ~15 testers). Plan folder: docs/plans/release/.
 
-- [x] 10.0 OWASP triage + triggers back on (fix parked on
-      `feature/owasp-triage`)
+- [x] 10.0 OWASP triage + triggers back on (parked branch
+      `feature/owasp-triage` dropped 2026-11-26: redo from scratch)
 - [x] 10.1 (me) Release build manual pass on test, then prod: R8,
       sign-in, guest, sync, logout, account deletion (prod, 2026-11-17,
       Plan 10 step 03)
