@@ -56,6 +56,19 @@ jobs:
             17
             21
 
+      # Gradle deps incl. Robolectric's ~150 MB SDK jar (fetched by Gradle,
+      # see robolectricAndroidAll in app/build.gradle.kts). Saves the
+      # download and Maven Central 429s on most runs.
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-e2e-${{ hashFiles('android/**/*.gradle*', 'backend/**/*.gradle*', 'android/gradle/libs.versions.toml', 'backend/gradle/libs.versions.toml', '*/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-e2e-
+
       - name: Start the e2e backend
         working-directory: backend
         env:
@@ -74,15 +87,6 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON_QA: ${{ secrets.GOOGLE_SERVICES_JSON_QA }}
         run: printf '%s' "$GOOGLE_SERVICES_JSON_QA" > app/src/qa/google-services.json
-
-      # Robolectric downloads its android-all jar from Maven Central at
-      # test time; shared runner IPs get 429s there. Cache it.
-      - name: Cache Robolectric jars
-        uses: actions/cache@v6
-        with:
-          path: ~/.m2/repository/org/robolectric
-          key: robolectric-${{ hashFiles('android/gradle/libs.versions.toml') }}
-          restore-keys: robolectric-
 
       - name: Run sync e2e scenarios
         working-directory: android

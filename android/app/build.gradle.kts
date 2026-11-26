@@ -33,6 +33,19 @@ val mockkAgent: Configuration by configurations.creating {
     isCanBeConsumed = false
 }
 
+// Robolectric's Android jar, fetched by Gradle (retries + Gradle cache)
+// instead of Robolectric's own downloader, which has no retry and failed
+// on Maven Central 429s in CI. Tests run Robolectric offline from here.
+val robolectricAndroidAll: Configuration = configurations.create("robolectricAndroidAll") {
+    isCanBeConsumed = false
+    isTransitive = false
+}
+val robolectricJarsDir = layout.buildDirectory.dir("robolectric-jars")
+val robolectricJars = tasks.register<Sync>("robolectricJars") {
+    from(robolectricAndroidAll)
+    into(robolectricJarsDir)
+}
+
 // Output of openApiGenerate below.
 val generatedClientDir = layout.buildDirectory.dir("generated/openapi")
 
@@ -165,6 +178,11 @@ android {
                 it.systemProperty("gymbuddy.tokensJson", rootDir.resolve("../design/tokens.json").absolutePath)
                 // IconParityTest checks design/icons + brand against res/drawable.
                 it.systemProperty("gymbuddy.designDir", rootDir.resolve("../design").absolutePath)
+                // Robolectric reads its SDK jar from robolectricJars, never
+                // the network (see robolectricAndroidAll).
+                it.dependsOn(robolectricJars)
+                it.systemProperty("robolectric.offline", "true")
+                it.systemProperty("robolectric.dependency.dir", robolectricJarsDir.get().asFile.absolutePath)
                 // Robolectric loads app classes through its own class
                 // loader, which JaCoCo skips by default: every Robolectric
                 // test then reports 0% coverage for the code it runs.
@@ -293,6 +311,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
+    robolectricAndroidAll(libs.robolectric.android.all)
     testImplementation(libs.mockk)
     mockkAgent(libs.mockk)
     testImplementation(libs.work.testing)

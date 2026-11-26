@@ -37,6 +37,10 @@ googleidVersion = "1.2.1"
 kotlinxCoroutinesTest = "1.11.0"
 turbine = "1.2.1"
 robolectric = "4.18"
+# SDK 34 jar that Robolectric 4.18 runs (DefaultSdkProvider: 14 -> 10818077,
+# PREINSTRUMENTED_VERSION 7). Bump together with robolectric; a mismatch fails
+# offline tests with "Unable to find ... android-all-instrumented".
+robolectricAndroidAll = "14-robolectric-10818077-i7"
 mockk = "1.14.11"
 playAppUpdate = "2.1.0"
 playReview = "2.0.2"
@@ -99,6 +103,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+robolectric-android-all = { module = "org.robolectric:android-all-instrumented", version.ref = "robolectricAndroidAll" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 play-app-update = { module = "com.google.android.play:app-update", version.ref = "playAppUpdate" }
 play-review = { module = "com.google.android.play:review", version.ref = "playReview" }
