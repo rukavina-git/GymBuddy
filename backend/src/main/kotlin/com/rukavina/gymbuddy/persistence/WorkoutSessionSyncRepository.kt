@@ -137,7 +137,7 @@ class WorkoutSessionSyncRepository(
                    exercise_primary_muscles, superset_group
             FROM performed_exercises WHERE workout_session_id = :sessionId::uuid ORDER BY order_index
         """.trimIndent()
-        val exercises = jdbcTemplate.query(peSql, MapSqlParameterSource("sessionId", sessionId)) { rs, _ -> mapPerformedExerciseRow(rs) }
+        val exercises = jdbcTemplate.query(peSql, MapSqlParameterSource("sessionId", sessionId)) { rs, _ -> mapPerformedExerciseRow(rs) }.toList()
 
         val setsSql = """
             SELECT ws.id, ws.performed_exercise_id, ws.weight_kg, ws.reps, ws.duration_seconds, ws.distance_meters,

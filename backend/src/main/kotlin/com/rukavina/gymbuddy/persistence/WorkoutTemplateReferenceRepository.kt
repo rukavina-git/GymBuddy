@@ -24,7 +24,7 @@ class WorkoutTemplateReferenceRepository(private val jdbcTemplate: NamedParamete
             WHERE source = 'DEFAULT'
             ORDER BY title
         """.trimIndent()
-        val templates = jdbcTemplate.query(templatesSql, emptyMap<String, Any>()) { rs, _ -> mapTemplateRow(rs) }
+        val templates = jdbcTemplate.query(templatesSql, emptyMap<String, Any>()) { rs, _ -> mapTemplateRow(rs) }.toList()
 
         val exercisesSql = """
             SELECT te.id, te.template_id, te.exercise_id, te.exercise_name, te.exercise_tracking_type,

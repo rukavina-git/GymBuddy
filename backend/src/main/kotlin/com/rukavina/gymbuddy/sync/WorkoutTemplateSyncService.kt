@@ -82,7 +82,7 @@ class WorkoutTemplateSyncService(
                         )
                 }
                 outcome to stored?.revision
-            }!!
+            }
 
             SyncAudit.log(log, traceId, uid, EntityType.WORKOUT_TEMPLATE, dto.id, result.status, revisionBefore, result.revision, result.reason)
             result

@@ -80,7 +80,7 @@ class WorkoutSessionSyncService(
                         )
                 }
                 outcome to stored?.revision
-            }!!
+            }
 
             SyncAudit.log(log, traceId, uid, EntityType.WORKOUT_SESSION, dto.id, result.status, revisionBefore, result.revision, result.reason)
             result

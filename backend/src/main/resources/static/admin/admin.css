@@ -42,7 +42,7 @@ body {
 
 main { max-width: 720px; margin: 0 auto; padding: 16px; }
 
-.status { min-height: 1.45em; margin: 0 0 12px; color: var(--muted); }
+.status { display: block; min-height: 1.45em; margin: 0 0 12px; color: var(--muted); }
 .status.error { color: var(--danger); }
 .muted { color: var(--muted); }
 

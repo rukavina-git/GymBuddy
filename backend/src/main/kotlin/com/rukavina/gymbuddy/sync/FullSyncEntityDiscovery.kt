@@ -59,7 +59,7 @@ class FullSyncEntityDiscovery(private val jdbcTemplate: NamedParameterJdbcTempla
         }
 
         val hasMore = rows.size > limit
-        val page = if (hasMore) rows.subList(0, limit) else rows
+        val page = rows.take(limit)
         return FullSyncPage(page, hasMore)
     }
 }

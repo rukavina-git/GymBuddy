@@ -165,7 +165,7 @@ review first, then 10.1a refinement + 10.4a, new version, then 10.3
       uses experience), ships in 0.2.2
 - [ ] 10.4 Fix tester findings (one step per batch). Report
       2026-11-24: no bugs; logout confirm done in 0.2.3
-- [ ] 10.4b In-app feedback: text box + Send, no email app (owner
+- [x] 10.4b In-app feedback: text box + Send, no email app (owner
       2026-11-25, v1, ships in 0.2.4)
 - [ ] 10.4a Real store screenshots (2026-11-17, owner): after the
       refinement pass, realistic data, signed in, no AI exercise images

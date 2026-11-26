@@ -55,7 +55,7 @@ class ChangeLogReader(private val jdbcTemplate: NamedParameterJdbcTemplate) {
         if (rows.isEmpty()) return DeltaPage(emptyList(), afterSeq, hasMore = false)
 
         val hasMore = rows.size > limit
-        val page = if (hasMore) rows.subList(0, limit) else rows
+        val page = rows.take(limit)
         val nextCursorSeq = page.last().first
         val entities = page
             .map { (_, entityType, entityId) -> EntityRef(EntityType.valueOf(entityType), entityId) }

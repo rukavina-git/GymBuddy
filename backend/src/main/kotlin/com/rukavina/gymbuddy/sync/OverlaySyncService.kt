@@ -68,7 +68,7 @@ class OverlaySyncService(
                         )
                 }
                 outcome to stored?.revision
-            }!!
+            }
 
             SyncAudit.log(log, traceId, uid, EntityType.USER_EXERCISE_STATE, dto.exerciseId, result.status, revisionBefore, result.revision, result.reason)
             result
@@ -114,7 +114,7 @@ class OverlaySyncService(
                         )
                 }
                 outcome to stored?.revision
-            }!!
+            }
 
             SyncAudit.log(log, traceId, uid, EntityType.USER_TEMPLATE_STATE, dto.templateId, result.status, revisionBefore, result.revision, result.reason)
             result

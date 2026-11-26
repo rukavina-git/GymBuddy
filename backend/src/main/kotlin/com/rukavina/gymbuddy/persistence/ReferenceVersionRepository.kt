@@ -19,6 +19,6 @@ class ReferenceVersionRepository(private val jdbcTemplate: NamedParameterJdbcTem
                 exerciseLibraryVersion = rs.getInt("exercise_library_version"),
                 templateLibraryVersion = rs.getInt("template_library_version"),
             )
-        } ?: error("reference_version row (id = 1) is missing - Flyway migration V2 should have seeded it")
+        }
     }
 }

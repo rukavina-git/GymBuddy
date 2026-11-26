@@ -371,3 +371,20 @@
   change). Backend 176/176.
 - Next: ship 0.2.4 (bump, changelog, closed-test log, PR, tag); check
   /admin/ on prod after.
+- [x] 0.2.4 ship prep (2026-11-26): pre-flight Dependabot 0, Sonar
+  android 0, backend 22 (clean-before-release rule). Fixed 21: useless
+  `!!` / `?:` after transactionTemplate.execute / queryForObject
+  (Spring 7 nullness), `.toList()` on jdbcTemplate.query results,
+  `rows.take(limit)` for subList pages, admin.js `void load(...)`,
+  index.html `<output>` for the status line. appVersion 0.2.4 (2004),
+  update priority 0 (owner), changelogs/2004.txt, closed-test-updates
+  entry. Backend build green, android build + unit tests + lint green.
+  - Reviewer: no blockers. NIT: ReferenceVersionRepository lost the
+    "V2 should have seeded it" hint (queryForObject throws anyway).
+  - (me) SonarCloud: mark V10__feedback_status.sql UPDATE-without-WHERE
+    (plsql BLOCKER) as Accepted; the backfill is meant to hit every row
+    and V10 can't change (Flyway checksum on the servers).
+  - Deviations: Sonar cleanup not in step 06; done under the
+    clean-before-release rule.
+  - Gotchas: Sonar's develop analysis showed new-rule hits (S6619,
+    S6524) in old sync code, not only new code.

@@ -68,7 +68,7 @@ function start(firebaseConfig) {
     if (user) {
       show("feedback");
       say("");
-      load(true);
+      void load(true);
     } else {
       show("signedOut");
       el("list").replaceChildren();
@@ -130,7 +130,7 @@ function start(firebaseConfig) {
       b.setAttribute("aria-selected", String(s.key === state.filter));
       b.textContent = `${s.label} ${s.key === "all" ? total : counts[s.key] ?? 0}`;
       b.addEventListener("click", () => {
-        if (state.filter !== s.key) load(true, s.key);
+        if (state.filter !== s.key) void load(true, s.key);
       });
       return b;
     });

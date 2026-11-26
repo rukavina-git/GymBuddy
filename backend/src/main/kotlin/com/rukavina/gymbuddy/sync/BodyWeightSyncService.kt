@@ -78,7 +78,7 @@ class BodyWeightSyncService(
                         )
                 }
                 outcome to stored?.revision
-            }!!
+            }
 
             SyncAudit.log(log, traceId, uid, type, dto.id, result.status, revisionBefore, result.revision, result.reason)
             result

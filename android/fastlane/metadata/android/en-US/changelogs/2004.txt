@@ -1,0 +1,4 @@
+Gym Tracker 0.2.4
+- Send feedback from You > Help, right inside the app
+- Feedback written offline sends by itself once you're back online
+- Smoother start when an update is ready

@@ -25,7 +25,7 @@ class WorkoutTemplatePullRepository(private val jdbcTemplate: NamedParameterJdbc
             FROM workout_templates
             WHERE owner_id = :userId AND id::text IN (:ids)
         """.trimIndent()
-        val templates = jdbcTemplate.query(templatesSql, mapOf("userId" to userId, "ids" to ids)) { rs, _ -> mapTemplateRow(rs) }
+        val templates = jdbcTemplate.query(templatesSql, mapOf("userId" to userId, "ids" to ids)) { rs, _ -> mapTemplateRow(rs) }.toList()
         if (templates.isEmpty()) return emptyList()
 
         val templateIds = templates.map { it.id }

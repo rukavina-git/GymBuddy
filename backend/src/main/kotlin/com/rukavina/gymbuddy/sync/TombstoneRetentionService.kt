@@ -95,7 +95,7 @@ class TombstoneRetentionService(
                 SELECT ${table.idColumn} FROM ${table.tableName}
                 WHERE owner_id = :uid AND deleted_at IS NOT NULL AND deleted_at < :cutoff
             """.trimIndent()
-            val ids = jdbcTemplate.query(idsSql, mapOf("uid" to uid, "cutoff" to cutoff)) { rs, _ -> rs.getString(1) }
+            val ids = jdbcTemplate.query(idsSql, mapOf("uid" to uid, "cutoff" to cutoff)) { rs, _ -> rs.getString(1) }.toList()
             if (ids.isEmpty()) continue
 
             // Captured before the change_log rows themselves are deleted below.

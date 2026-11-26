@@ -81,7 +81,7 @@ class ExerciseSyncService(
                         )
                 }
                 outcome to stored?.revision
-            }!!
+            }
 
             SyncAudit.log(log, traceId, uid, EntityType.EXERCISE, dto.id, result.status, revisionBefore, result.revision, result.reason)
             result
