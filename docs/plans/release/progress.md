@@ -248,7 +248,7 @@
     sent right now and will be sent automatically as soon as
     possible" (not "offline": 429/5xx/slow also queue). 8448fbf.
   - Owner: no guest device test needed (same request without a token).
-- [ ] 06c legal + Play (2026-11-25), repo part done
+- [x] 06c legal + Play (2026-11-25); Play Data safety row 9 done by owner 2026-11-26
   - privacy.md: Feedback section (what, why 6(1)(f), ntfy gets no
     content, don't send health details, 2 years or with the account,
     guests ask by email), retention line, date 2026-11-25. ntfy.sh not
