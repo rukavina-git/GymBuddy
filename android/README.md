@@ -36,7 +36,9 @@ develop reaches Play or the prod backend.
 | closed | "Run workflow" on that tag | `android-release.yml` (promote) | internal → closed (`alpha`) |
 
 Tag right after each merge to main, so main always equals prod. A tag
-not on main fails the release run.
+not on main fails the release run. After tagging, merge main back
+into develop (`git merge origin/main`) so develop never shows "behind
+main" (owner prefers one merge commit to that counter).
 
 The tag run builds a signed, minified prod AAB with the Crashlytics
 mapping uploaded, kept as a 30-day artifact, then fastlane uploads it
