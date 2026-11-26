@@ -414,7 +414,7 @@
   - Gotcha: bumping robolectric needs robolectricAndroidAll bumped too
     (libs.versions.toml comment); a mismatch fails tests with "Unable
     to find ... android-all-instrumented".
-- [x] 05a library 10 -> 11 (2026-11-26), HASH
+- [x] 05a library 10 -> 11 (2026-11-26), f8ed940
   - default_exercises.json v11: 69 rows, 64 live. Deprecated Tricep
     Dip, Upright Row, Concentration Curl, Dumbbell Front Raise, Bicycle
     Crunch. Added Treadmill (DISTANCE_DURATION: supported), Stationary
