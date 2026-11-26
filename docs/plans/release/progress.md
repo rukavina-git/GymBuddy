@@ -351,6 +351,16 @@
   - Check (me, phone): sign in on test, see curl + device messages,
     mark one solved, filter shows it; second Google account gets
     "not an admin"; ntfy ping opens the page. Then prod.
-- Next: fix the two reviewer SHOULDs before prod use (small), owner
-  deploy + phone check, then ship 0.2.4 (bump, changelog, closed-test
-  log, PR, tag, Play Data safety row 9).
+- 06d2 server setup (2026-11-26, owner): 5 ADMIN_* values in both
+  stacks' env files (Firebase web app "admin" in each project, owner's
+  Google uid per project), compose files + nginx template copied,
+  nginx -t passed, nginx recreated, both backends restarted. Test
+  /admin/ sign-in works, feedback list shows. Prod page goes live with
+  the v0.2.4 tag (prod runs the 0.2.3 image until then).
+  - Gotchas: a Google user appears in Firebase Users only after its
+    first sign-in (console can't add one). Web apiKey and uids are not
+    secrets: no Bitwarden entry.
+  - Still to check on test: mark solved + filter, second Google account
+    gets "not an admin", ntfy ping opens the page.
+- Next: fix the two reviewer SHOULDs (small), then ship 0.2.4 (bump,
+  changelog, closed-test log, PR, tag); check /admin/ on prod after.
