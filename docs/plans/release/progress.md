@@ -453,3 +453,38 @@
     05b must deprecate + re-add templates that touch Chest Dip and
     Mountain Climber. Exercise images: the 9 prompts are already in
     local-prompts.json.
+- [x] 05b plans refresh (2026-11-27), HASH
+  - Exercise library 12: Chest Dip -> "Dip" (chest + tricep text,
+    Tricep Dip merged), Assisted Pull-Up -> REPS_ONLY (owner: assistance
+    weight would read as a "best").
+  - Template library 7: 8 templates deprecated + re-added with new ids
+    (Full Body A/B/C, Upper A/B, Lower B, Pull, Legs); Lower A and Push
+    unchanged. Plan ids kept, so active_plan_id stays valid. Full Body:
+    dumbbell/machine lifts, chest 6 / back 9 / quad 8 sets a week, no
+    ADVANCED. Pull-Up and Hanging Leg Raise out of all plans (Pull-Up
+    stays in the picker; there is no swap feature).
+  - V12__plans_refresh.sql from backend/tools/generate_plans_refresh_seed.py.
+    No openapi change, no Room schema change.
+  - Tests: ReferenceControllerTest now compares the seeded library with
+    the bundled JSON (exercises, templates, plans); backend-build.yml
+    push paths include the asset JSONs. StarterPlanContentTest (new),
+    StarterPlanRepositoryTest 21 deprecated. Backend build, Android
+    unit tests, lint green.
+  - Deviations: Mountain Climber stays REPS_ONLY (reviewer: changing a
+    live exercise's tracking type breaks old sessions; see gotcha).
+    Step's Chest Dip/Mountain Climber items came here from 05a.
+  - Open (reviewer, not fixed): SHOULD: nextInPlan (StarterPlans.kt:44)
+    ignores sessions on the old template ids, so a user mid-plan gets
+    the wrong next workout once (Full Body restarts at A); Home shows
+    fewer rows for users who trained on retired templates (Home only
+    lists visible templates). Fix: map old id -> new by title, or say
+    it in the changelog. NITs: parity test skips reps/rest/order of
+    template rows; StarterPlanContentTest doesn't check quad sets or
+    the Upper/Lower/PPL additions (checked by hand).
+  - Gotchas: ValidateWorkoutSessionSetsUseCase and the exercise page
+    use the exercise's current trackingType, not the session snapshot.
+    Never change a live exercise's tracking type unless the old and new
+    rules accept the same sets (REPS_ONLY -> WEIGHT_REPS is fine).
+    Assisted Pull-Up only ever existed on qa (library 11), so its
+    change is safe. design/exercise-images/local-prompts.html still says
+    "Chest Dip". Device check pending (no phone).

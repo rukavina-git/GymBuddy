@@ -5,6 +5,8 @@ on:
     branches: [ main, develop ]
     paths:
       - 'backend/**'
+      # ReferenceControllerTest checks the seeded library against these.
+      - 'android/app/src/main/assets/default_*.json'
       - '.github/workflows/backend-build.yml'
       - '.github/workflows/_gradle-test.yml'
       - '.github/workflows/_sonar.yml'

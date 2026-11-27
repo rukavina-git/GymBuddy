@@ -1,5 +1,5 @@
 {
-  "version": 11,
+  "version": 12,
   "exercises": [
     {
       "id": "019fe506-359a-7601-92f2-f441cf1dae33",
@@ -460,11 +460,11 @@
     {
       "id": "019fe506-35a8-7b6e-a450-a7d1d3c7d0ad",
       "deprecated": false,
-      "name": "Chest Dip",
-      "description": "A compound bodyweight exercise that targets the lower chest and triceps.",
+      "name": "Dip",
+      "description": "A compound bodyweight exercise on parallel bars for the chest and triceps. Lean forward for more chest, stay upright for more triceps.",
       "instructions": [
         "Grip parallel bars and lift yourself up",
-        "Lean forward slightly to emphasize chest",
+        "Lean forward for chest, or keep your torso upright for triceps",
         "Lower body by bending elbows",
         "Descend until upper arms are parallel to floor",
         "Push back up to starting position"
@@ -2059,7 +2059,7 @@
       ],
       "category": "STRENGTH",
       "exerciseType": "COMPOUND",
-      "trackingType": "WEIGHT_REPS",
+      "trackingType": "REPS_ONLY",
       "videoUrl": ""
     },
     {

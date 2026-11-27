@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "templates": [
     {
       "id": "019fe506-35d6-75b5-a3cf-3bd2184cad28",
@@ -190,7 +190,7 @@
     },
     {
       "id": "01a19f0f-dbd5-7883-9a37-4bdc84ffa45d",
-      "deprecated": false,
+      "deprecated": true,
       "title": "Full Body A",
       "exercises": [
         {"id": "01a19f0f-dbd6-78c9-9554-05c388346e9f", "exerciseId": "019fe506-359b-7a6f-82f9-90f196c28c0a", "exerciseName": "Barbell Back Squat", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 8, "orderIndex": 0, "restSeconds": 120},
@@ -202,7 +202,7 @@
     },
     {
       "id": "01a19f0f-dbdb-75e4-af5f-c71a7d1ca6cc",
-      "deprecated": false,
+      "deprecated": true,
       "title": "Full Body B",
       "exercises": [
         {"id": "01a19f0f-dbdc-71fc-a6f7-af1d95c12ffa", "exerciseId": "019fe506-35c2-7efc-a884-30f32d884431", "exerciseName": "Romanian Deadlift", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 8, "orderIndex": 0, "restSeconds": 120},
@@ -214,7 +214,7 @@
     },
     {
       "id": "01a19f0f-dbe1-748c-a07c-f93c3de55e27",
-      "deprecated": false,
+      "deprecated": true,
       "title": "Full Body C",
       "exercises": [
         {"id": "01a19f0f-dbe2-7690-8607-3c67443ae85c", "exerciseId": "019fe506-35a2-7c84-b00f-0c4f433180f8", "exerciseName": "Goblet Squat", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 0, "restSeconds": 90},
@@ -226,7 +226,7 @@
     },
     {
       "id": "01a19f0f-dbe7-76da-b86a-a049e6261577",
-      "deprecated": false,
+      "deprecated": true,
       "title": "Upper A",
       "exercises": [
         {"id": "01a19f0f-dbe8-76ca-b217-8ffef8ff6625", "exerciseId": "019fe506-359a-7601-92f2-f441cf1dae33", "exerciseName": "Barbell Bench Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 150},
@@ -251,7 +251,7 @@
     },
     {
       "id": "01a19f0f-dbf4-71f9-a6cd-315f514393b1",
-      "deprecated": false,
+      "deprecated": true,
       "title": "Upper B",
       "exercises": [
         {"id": "01a19f0f-dbf5-783a-8706-3df43fb08849", "exerciseId": "019fe506-35af-7246-b78e-aeaab3a49230", "exerciseName": "Barbell Overhead Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 150},
@@ -264,7 +264,7 @@
     },
     {
       "id": "01a19f0f-dbfb-7dbd-ac0b-a645b0db57c0",
-      "deprecated": false,
+      "deprecated": true,
       "title": "Lower B",
       "exercises": [
         {"id": "01a19f0f-dbfc-7cc9-89a0-73bdbb333cd2", "exerciseId": "019fe506-359c-7fb2-942a-65d8449bbd9a", "exerciseName": "Conventional Deadlift", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180},
@@ -289,7 +289,7 @@
     },
     {
       "id": "01a19f0f-dc08-7513-a4a9-90ccf56e23c0",
-      "deprecated": false,
+      "deprecated": true,
       "title": "Pull",
       "exercises": [
         {"id": "01a19f0f-dc09-7ec8-a7b3-2abfbaf3963e", "exerciseId": "019fe506-359d-71d4-a51e-49d6d3b0e760", "exerciseName": "Pull-Up", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 8, "orderIndex": 0, "restSeconds": 120},
@@ -302,7 +302,7 @@
     },
     {
       "id": "01a19f0f-dc0f-7bcc-b3ca-de1399c36a57",
-      "deprecated": false,
+      "deprecated": true,
       "title": "Legs",
       "exercises": [
         {"id": "01a19f0f-dc10-76f1-9c89-c09bca35525c", "exerciseId": "019fe506-359b-7a6f-82f9-90f196c28c0a", "exerciseName": "Barbell Back Squat", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 8, "orderIndex": 0, "restSeconds": 150},
@@ -312,11 +312,115 @@
         {"id": "01a19f0f-dc14-7f36-b583-01eb90cc9dcb", "exerciseId": "019fe506-35c3-7228-92d8-399f90509a74", "exerciseName": "Standing Calf Raise", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60},
         {"id": "01a19f0f-dc15-7ced-95a4-49c4a4a18c3e", "exerciseId": "019fe506-359f-79f1-96c5-ebfb531468f8", "exerciseName": "Plank", "exerciseTrackingType": "DURATION", "plannedSets": 3, "plannedDurationSeconds": 45, "orderIndex": 5, "restSeconds": 45}
       ]
+    },
+    {
+      "id": "01a21ced-3035-76af-b163-3b09b1c07256",
+      "deprecated": false,
+      "title": "Full Body A",
+      "exercises": [
+        {"id": "01a21ced-3036-7cac-ac50-a7d204935c3e", "exerciseId": "019fe506-35a2-7c84-b00f-0c4f433180f8", "exerciseName": "Goblet Squat", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 0, "restSeconds": 90},
+        {"id": "01a21ced-3037-7e1f-82b6-aff86035a088", "exerciseId": "019fe506-35ce-7bb2-ac34-1cf9758d9bfd", "exerciseName": "Dumbbell Bench Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90},
+        {"id": "01a21ced-3038-7e7e-a0ba-b841c78aa27f", "exerciseId": "019fe506-35ab-78cf-8ecd-1da7a4a527ac", "exerciseName": "Dumbbell Row", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90},
+        {"id": "01a21ced-3039-70e2-b86a-d2a6712071a6", "exerciseId": "019fe506-35a1-7b5a-9ff0-fe15be1e6e3e", "exerciseName": "Dumbbell Lateral Raise", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 2, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60},
+        {"id": "01a21ced-303a-7ea6-a1d7-cda7c5c0de20", "exerciseId": "019fe506-359f-79f1-96c5-ebfb531468f8", "exerciseName": "Plank", "exerciseTrackingType": "DURATION", "plannedSets": 3, "plannedDurationSeconds": 30, "orderIndex": 4, "restSeconds": 45}
+      ]
+    },
+    {
+      "id": "01a21ced-303b-7d45-bc13-dccb562a748b",
+      "deprecated": false,
+      "title": "Full Body B",
+      "exercises": [
+        {"id": "01a21ced-303c-7894-865d-189b13c66167", "exerciseId": "01a21950-32e9-7e5d-a320-cf446713ea86", "exerciseName": "Dumbbell Romanian Deadlift", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 0, "restSeconds": 90},
+        {"id": "01a21ced-303d-7405-aa3b-63b8477a1a1d", "exerciseId": "019fe506-35b0-7ed4-8772-3f0fe4f3aeba", "exerciseName": "Dumbbell Shoulder Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90},
+        {"id": "01a21ced-303e-7b07-8aa2-9422258ab5a8", "exerciseId": "019fe506-35a9-753d-8fe5-6977136a13d3", "exerciseName": "Lat Pulldown", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90},
+        {"id": "01a21ced-303f-7f09-a231-1a9d4ba363ae", "exerciseId": "019fe506-35d3-7f3d-9ab0-d1c26b59e962", "exerciseName": "Reverse Lunge", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 2, "plannedReps": 10, "orderIndex": 3, "restSeconds": 90},
+        {"id": "01a21ced-3040-7dcb-806d-993603f04eb3", "exerciseId": "019fe506-35a0-77c6-9434-2e771281c227", "exerciseName": "Dumbbell Bicep Curl", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 2, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60}
+      ]
+    },
+    {
+      "id": "01a21ced-3041-791f-ba13-bdd64d8da345",
+      "deprecated": false,
+      "title": "Full Body C",
+      "exercises": [
+        {"id": "01a21ced-3042-7214-a41a-03a94aceb659", "exerciseId": "019fe506-35bf-7429-9e35-0a0f1062be96", "exerciseName": "Leg Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 0, "restSeconds": 90},
+        {"id": "01a21ced-3043-76a5-b4f8-1a1550572bdd", "exerciseId": "019fe506-35a5-7a26-b6eb-3ff8b3a134c9", "exerciseName": "Incline Dumbbell Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90},
+        {"id": "01a21ced-3044-7488-9052-832e8defc5cd", "exerciseId": "019fe506-35ac-7721-81de-641623045b62", "exerciseName": "Seated Cable Row", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90},
+        {"id": "01a21ced-3045-74d3-a219-4f8b6164d870", "exerciseId": "01a21950-32ec-7341-91cf-ef31d3cdb1a6", "exerciseName": "Glute Bridge", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60},
+        {"id": "01a21ced-3046-720c-a684-b09957a9851e", "exerciseId": "019fe506-35b5-7334-bbaf-0cfabc29cfbd", "exerciseName": "Tricep Pushdown", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 2, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60}
+      ]
+    },
+    {
+      "id": "01a21ced-3047-792d-9718-aa02abb39a9c",
+      "deprecated": false,
+      "title": "Upper A",
+      "exercises": [
+        {"id": "01a21ced-3048-7a35-9709-4677e03a3402", "exerciseId": "019fe506-359a-7601-92f2-f441cf1dae33", "exerciseName": "Barbell Bench Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 150},
+        {"id": "01a21ced-3049-76cd-92db-a37f2b61e4e8", "exerciseId": "019fe506-35aa-7eed-8e2a-89f8ad56d156", "exerciseName": "Barbell Bent-Over Row", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 6, "orderIndex": 1, "restSeconds": 120},
+        {"id": "01a21ced-304a-7a97-bda8-f2365d643aaa", "exerciseId": "019fe506-35b0-7ed4-8772-3f0fe4f3aeba", "exerciseName": "Dumbbell Shoulder Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90},
+        {"id": "01a21ced-304b-7ee8-8f85-1e012f28c83a", "exerciseId": "019fe506-35a9-753d-8fe5-6977136a13d3", "exerciseName": "Lat Pulldown", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 3, "restSeconds": 90},
+        {"id": "01a21ced-304c-7269-b49a-c5afd0a9e5fa", "exerciseId": "019fe506-35a1-7b5a-9ff0-fe15be1e6e3e", "exerciseName": "Dumbbell Lateral Raise", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60},
+        {"id": "01a21ced-304d-703f-afcf-0ff2f396c625", "exerciseId": "019fe506-35ba-7707-8a53-7d0526921af6", "exerciseName": "Barbell Curl", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 2, "plannedReps": 10, "orderIndex": 5, "restSeconds": 60},
+        {"id": "01a21ced-304e-7dc1-b447-0f30f3d88e91", "exerciseId": "019fe506-35b5-7334-bbaf-0cfabc29cfbd", "exerciseName": "Tricep Pushdown", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 2, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60}
+      ]
+    },
+    {
+      "id": "01a21ced-304f-7acb-be33-9470a0116921",
+      "deprecated": false,
+      "title": "Upper B",
+      "exercises": [
+        {"id": "01a21ced-3050-785f-95e4-0fa6a5feb709", "exerciseId": "019fe506-35af-7246-b78e-aeaab3a49230", "exerciseName": "Barbell Overhead Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 6, "orderIndex": 0, "restSeconds": 150},
+        {"id": "01a21ced-3051-79b5-8e27-c8f80876a81b", "exerciseId": "019fe506-35a9-753d-8fe5-6977136a13d3", "exerciseName": "Lat Pulldown", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120},
+        {"id": "01a21ced-3052-79b0-86a8-92a122f8d9f9", "exerciseId": "019fe506-35a5-7a26-b6eb-3ff8b3a134c9", "exerciseName": "Incline Dumbbell Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90},
+        {"id": "01a21ced-3053-7f50-9b8d-16c10db819dd", "exerciseId": "019fe506-35ac-7721-81de-641623045b62", "exerciseName": "Seated Cable Row", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 3, "restSeconds": 90},
+        {"id": "01a21ced-3054-7908-bef6-72c15839df73", "exerciseId": "019fe506-35ad-748c-9746-93ff8da9ba63", "exerciseName": "Face Pull", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60},
+        {"id": "01a21ced-3055-724b-9480-cc036f800586", "exerciseId": "019fe506-35bb-7357-8c72-401003939cf2", "exerciseName": "Hammer Curl", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 2, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60},
+        {"id": "01a21ced-3056-7468-8d83-4d9061c63228", "exerciseId": "019fe506-35b6-73fa-804a-ed95dfa3c92d", "exerciseName": "Overhead Tricep Extension", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 2, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60}
+      ]
+    },
+    {
+      "id": "01a21ced-3057-7c45-b5d6-3b2935b8fe14",
+      "deprecated": false,
+      "title": "Lower B",
+      "exercises": [
+        {"id": "01a21ced-3058-7907-9be6-4e1a8f6a9544", "exerciseId": "019fe506-359c-7fb2-942a-65d8449bbd9a", "exerciseName": "Conventional Deadlift", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 5, "orderIndex": 0, "restSeconds": 180},
+        {"id": "01a21ced-3059-7008-93c2-c28b3592ad69", "exerciseId": "019fe506-35c6-7c41-a8f8-d8a708d074f0", "exerciseName": "Bulgarian Split Squat", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 90},
+        {"id": "01a21ced-305a-743b-a734-111eb2313d74", "exerciseId": "019fe506-35c0-78d9-961a-47d99bf06ff8", "exerciseName": "Leg Extension", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 12, "orderIndex": 2, "restSeconds": 60},
+        {"id": "01a21ced-305b-7198-9de7-72b45cc01ef4", "exerciseId": "019fe506-35c5-7e9d-9bff-db6cca316522", "exerciseName": "Hip Thrust", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 3, "restSeconds": 90},
+        {"id": "01a21ced-305c-7377-9bdc-28c6d8fae69c", "exerciseId": "019fe506-35c3-7228-92d8-399f90509a74", "exerciseName": "Standing Calf Raise", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60},
+        {"id": "01a21ced-305d-7531-b568-ae8d8d5225ca", "exerciseId": "019fe506-35cc-7cdd-915b-6bc9835ac9b1", "exerciseName": "Cable Crunch", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 12, "orderIndex": 5, "restSeconds": 60}
+      ]
+    },
+    {
+      "id": "01a21ced-305e-77f0-bad5-87e834c34ee6",
+      "deprecated": false,
+      "title": "Pull",
+      "exercises": [
+        {"id": "01a21ced-305f-7ec0-9a7c-e1543f8d617e", "exerciseId": "019fe506-35a9-753d-8fe5-6977136a13d3", "exerciseName": "Lat Pulldown", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 8, "orderIndex": 0, "restSeconds": 120},
+        {"id": "01a21ced-3060-7b93-9bfa-99e73cc57a7c", "exerciseId": "019fe506-35aa-7eed-8e2a-89f8ad56d156", "exerciseName": "Barbell Bent-Over Row", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 8, "orderIndex": 1, "restSeconds": 120},
+        {"id": "01a21ced-3061-7194-ab3e-1d757538ac8c", "exerciseId": "019fe506-35ac-7721-81de-641623045b62", "exerciseName": "Seated Cable Row", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90},
+        {"id": "01a21ced-3062-7976-bb0f-b7f261df4a37", "exerciseId": "019fe506-35ad-748c-9746-93ff8da9ba63", "exerciseName": "Face Pull", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 15, "orderIndex": 3, "restSeconds": 60},
+        {"id": "01a21ced-3063-7ea0-aa17-c2a1ccc5dabf", "exerciseId": "019fe506-35a1-7b5a-9ff0-fe15be1e6e3e", "exerciseName": "Dumbbell Lateral Raise", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 2, "plannedReps": 15, "orderIndex": 4, "restSeconds": 60},
+        {"id": "01a21ced-3064-7291-9e47-03b3bcfd6d1e", "exerciseId": "019fe506-35ba-7707-8a53-7d0526921af6", "exerciseName": "Barbell Curl", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 5, "restSeconds": 60},
+        {"id": "01a21ced-3065-769c-bacf-aa51d84612ce", "exerciseId": "019fe506-35bb-7357-8c72-401003939cf2", "exerciseName": "Hammer Curl", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 2, "plannedReps": 12, "orderIndex": 6, "restSeconds": 60}
+      ]
+    },
+    {
+      "id": "01a21ced-3066-764e-b99f-864ca9af495e",
+      "deprecated": false,
+      "title": "Legs",
+      "exercises": [
+        {"id": "01a21ced-3067-70e6-ae70-df733b948933", "exerciseId": "019fe506-359b-7a6f-82f9-90f196c28c0a", "exerciseName": "Barbell Back Squat", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 8, "orderIndex": 0, "restSeconds": 150},
+        {"id": "01a21ced-3068-7e30-9ace-111404fc3efb", "exerciseId": "019fe506-35c2-7efc-a884-30f32d884431", "exerciseName": "Romanian Deadlift", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 1, "restSeconds": 120},
+        {"id": "01a21ced-3069-7a0e-bfa1-3e4b84d94d01", "exerciseId": "019fe506-35bf-7429-9e35-0a0f1062be96", "exerciseName": "Leg Press", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 10, "orderIndex": 2, "restSeconds": 90},
+        {"id": "01a21ced-306a-7078-ae5e-270c0d1d33f9", "exerciseId": "019fe506-35c1-7e41-9bed-e192a9d6a12d", "exerciseName": "Lying Leg Curl", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 3, "plannedReps": 12, "orderIndex": 3, "restSeconds": 60},
+        {"id": "01a21ced-306b-79c4-a22f-1628bae5aa32", "exerciseId": "019fe506-35c3-7228-92d8-399f90509a74", "exerciseName": "Standing Calf Raise", "exerciseTrackingType": "WEIGHT_REPS", "plannedSets": 4, "plannedReps": 12, "orderIndex": 4, "restSeconds": 60},
+        {"id": "01a21ced-306c-7020-98e7-3196fc1ceaf1", "exerciseId": "019fe506-359f-79f1-96c5-ebfb531468f8", "exerciseName": "Plank", "exerciseTrackingType": "DURATION", "plannedSets": 3, "plannedDurationSeconds": 45, "orderIndex": 5, "restSeconds": 45}
+      ]
     }
   ],
   "plans": [
-    {"id": "01a19f0f-dc16-72ba-9473-2f57d3423c42", "deprecated": false, "title": "Full Body", "description": "Three full-body workouts. Good for 1–3 days a week and for starting out.", "templateIds": ["01a19f0f-dbd5-7883-9a37-4bdc84ffa45d", "01a19f0f-dbdb-75e4-af5f-c71a7d1ca6cc", "01a19f0f-dbe1-748c-a07c-f93c3de55e27"], "suggestedFor": "ONE_TO_THREE"},
-    {"id": "01a19f0f-dc17-7348-a3b4-e35257a25edc", "deprecated": false, "title": "Upper / Lower", "description": "Upper and lower body on alternating days. Good for 4 days a week.", "templateIds": ["01a19f0f-dbe7-76da-b86a-a049e6261577", "01a19f0f-dbee-7fcb-858d-3f07abf48847", "01a19f0f-dbf4-71f9-a6cd-315f514393b1", "01a19f0f-dbfb-7dbd-ac0b-a645b0db57c0"], "suggestedFor": "FOUR"},
-    {"id": "01a19f0f-dc18-7975-8b8f-61819042e23a", "deprecated": false, "title": "Push / Pull / Legs", "description": "Pushing, pulling and legs in turn. Good for 5–7 days a week.", "templateIds": ["01a19f0f-dc01-73c3-8649-2acd672f343f", "01a19f0f-dc08-7513-a4a9-90ccf56e23c0", "01a19f0f-dc0f-7bcc-b3ca-de1399c36a57"], "suggestedFor": "FIVE_TO_SEVEN"}
+    {"id": "01a19f0f-dc16-72ba-9473-2f57d3423c42", "deprecated": false, "title": "Full Body", "description": "Three full-body workouts. Good for 1–3 days a week and for starting out.", "templateIds": ["01a21ced-3035-76af-b163-3b09b1c07256", "01a21ced-303b-7d45-bc13-dccb562a748b", "01a21ced-3041-791f-ba13-bdd64d8da345"], "suggestedFor": "ONE_TO_THREE"},
+    {"id": "01a19f0f-dc17-7348-a3b4-e35257a25edc", "deprecated": false, "title": "Upper / Lower", "description": "Upper and lower body on alternating days. Good for 4 days a week.", "templateIds": ["01a21ced-3047-792d-9718-aa02abb39a9c", "01a19f0f-dbee-7fcb-858d-3f07abf48847", "01a21ced-304f-7acb-be33-9470a0116921", "01a21ced-3057-7c45-b5d6-3b2935b8fe14"], "suggestedFor": "FOUR"},
+    {"id": "01a19f0f-dc18-7975-8b8f-61819042e23a", "deprecated": false, "title": "Push / Pull / Legs", "description": "Pushing, pulling and legs in turn. Good for 5–7 days a week.", "templateIds": ["01a19f0f-dc01-73c3-8649-2acd672f343f", "01a21ced-305e-77f0-bad5-87e834c34ee6", "01a21ced-3066-764e-b99f-864ca9af495e"], "suggestedFor": "FIVE_TO_SEVEN"}
   ]
 }

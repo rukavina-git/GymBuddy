@@ -49,8 +49,8 @@ class FirebaseAuthenticationFilterTest : AbstractPostgresIntegrationTest() {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.profile.uid").value(uid))
             .andExpect(jsonPath("$.profile.email").value("someone@example.com"))
-            .andExpect(jsonPath("$.exerciseLibraryVersion").value(11))
-            .andExpect(jsonPath("$.templateLibraryVersion").value(6))
+            .andExpect(jsonPath("$.exerciseLibraryVersion").value(12))
+            .andExpect(jsonPath("$.templateLibraryVersion").value(7))
             .andExpect(jsonPath("$.serverTime").exists())
     }
 

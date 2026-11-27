@@ -70,7 +70,7 @@ class StarterPlanRepositoryTest {
         loaded.flatMap { it.templateIds }.forEach { assertFalse(dao.getTemplateById(it)!!.template.deprecated) }
         db.query("SELECT COUNT(*) FROM workout_templates WHERE deprecated = 1", null).use { c ->
             c.moveToFirst()
-            assertEquals(13, c.getInt(0))
+            assertEquals(21, c.getInt(0))
         }
         // The rule onboarding will use picks from what was seeded.
         assertEquals("Upper / Lower", com.rukavina.gymbuddy.domain.usecase.template.StarterPlans

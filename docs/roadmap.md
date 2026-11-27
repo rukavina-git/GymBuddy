@@ -160,7 +160,7 @@ review first, then 10.1a refinement + 10.4a, new version, then 10.3
     10.1a (owner order change)
   - [ ] 12+ opted in for 14 days (day 0 2026-11-18, day 14
     ~2026-12-02, service ends ~12-04), then apply for production
-- [ ] 10.1b Default library + plans refresh (Plan 10 step 05: 60->64, 05a done
+- [ ] 10.1b Default library + plans refresh (Plan 10 step 05: 60->64, 05a+05b done
       exercises with cardio, beginner-friendly Full Body, onboarding
       uses experience), ships in 0.2.2
 - [ ] 10.4 Fix tester findings (one step per batch). Report
