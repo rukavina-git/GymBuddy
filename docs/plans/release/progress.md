@@ -453,7 +453,7 @@
     05b must deprecate + re-add templates that touch Chest Dip and
     Mountain Climber. Exercise images: the 9 prompts are already in
     local-prompts.json.
-- [x] 05b plans refresh (2026-11-27), HASH
+- [x] 05b plans refresh (2026-11-27), fe838ea
   - Exercise library 12: Chest Dip -> "Dip" (chest + tricep text,
     Tricep Dip merged), Assisted Pull-Up -> REPS_ONLY (owner: assistance
     weight would read as a "best").
